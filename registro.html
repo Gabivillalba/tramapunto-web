@@ -320,6 +320,17 @@ const NICHES = ['Lifestyle','Fitness','Gastronomía','Tech','Moda','Fotografía'
 let regStep=0, selNiches=[], selDisp=[], avatarFile=null;
 const REG_STEPS=6;
 
+function safeInt(id){
+  const v = document.getElementById(id)?.value?.replace(/[.,\s]/g,'');
+  const n = parseInt(v);
+  return isNaN(n) ? null : n;
+}
+function safeFloat(id){
+  const v = document.getElementById(id)?.value?.replace(/,/g,'.');
+  const n = parseFloat(v);
+  return isNaN(n) ? null : Math.min(n, 9999.99);
+}
+
 async function sbPost(table, body){
   const r = await fetch(`${SB_URL}/rest/v1/${table}`,{
     method:'POST',

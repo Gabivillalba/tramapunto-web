@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRAMA — Registrate como marca</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --black:#080808;--green:#C8FF1A;--white:#F4F4EF;
+  --g1:#111;--g2:#1C1C1C;--g3:#2A2A2A;
+  --muted:#666;--muted2:#999;--green2:#c084fc;
+  --red:#ff4444;--amber:#f59e0b;--blue:#60a5fa;
+}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,.96);backdrop-filter:blur(12px);border-bottom:1px solid #1a1a1a}
+.logo{font-size:1.2rem;font-weight:900;letter-spacing:.18em;color:var(--green);text-decoration:none}
+.nav-back{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--white)}
+
+/* TIPO SELECTOR */
+.tipo-wrap{padding-top:56px;min-height:100vh;display:flex;flex-direction:column}
+.tipo-hero{padding:4rem 1.5rem 2.5rem;border-bottom:1px solid #161616}
+@media(min-width:768px){.tipo-hero{padding:5rem 4rem 3rem}}
+.t-tag{font-size:.62rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--green);display:flex;align-items:center;gap:.5rem;margin-bottom:.875rem}
+.t-tag::before{content:'';width:18px;height:1px;background:var(--green)}
+.t-h1{font-size:clamp(1.8rem,4vw,3rem);font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:1;margin-bottom:.75rem}
+.t-h1 em{color:var(--green);font-style:normal}
+.t-sub{font-size:.88rem;color:var(--muted2);line-height:1.65;max-width:520px}
+.tipo-grid{display:grid;grid-template-columns:1fr;gap:1px;background:#161616;flex:1}
+@media(min-width:700px){.tipo-grid{grid-template-columns:1fr 1fr}}
+.tipo-card{background:var(--black);padding:3rem 2rem;display:flex;flex-direction:column;cursor:pointer;transition:background .3s;position:relative;overflow:hidden}
+.tipo-card:hover{background:#0d0d0d}
+.tipo-card:hover .tipo-glow{opacity:.08}
+.tipo-glow{position:absolute;inset:0;pointer-events:none;opacity:.03;transition:opacity .3s}
+.fisica .tipo-glow{background:radial-gradient(ellipse at 60% 20%,var(--green),transparent 70%)}
+.corp .tipo-glow{background:radial-gradient(ellipse at 40% 20%,var(--blue),transparent 70%)}
+.tipo-badge{display:inline-flex;align-items:center;gap:.4rem;font-size:.6rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase;padding:.3rem .7rem;border-radius:20px;margin-bottom:1.5rem;width:fit-content}
+.fisica .tipo-badge{background:#0f1a00;color:var(--green);border:1px solid #2a4000}
+.corp .tipo-badge{background:#0a1020;color:var(--blue);border:1px solid #1a2a40}
+.tipo-icon{font-size:2.5rem;margin-bottom:1.25rem}
+.tipo-title{font-size:1.4rem;font-weight:900;text-transform:uppercase;letter-spacing:-.02em;margin-bottom:.75rem;line-height:1}
+.fisica .tipo-title em{color:var(--green);font-style:normal}
+.corp .tipo-title em{color:var(--blue);font-style:normal}
+.tipo-desc{font-size:.85rem;color:var(--muted2);line-height:1.7;margin-bottom:2rem;max-width:360px}
+.tipo-desc strong{color:var(--white)}
+.tipo-features{display:flex;flex-direction:column;gap:.625rem;margin-bottom:2.5rem}
+.tf{display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:var(--muted2)}
+.tf::before{content:'✓';font-weight:900;font-size:.75rem;flex-shrink:0}
+.fisica .tf::before{color:var(--green)}
+.corp .tf::before{color:var(--blue)}
+.tipo-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.875rem 1.75rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;border:none;cursor:pointer;transition:opacity .2s;align-self:flex-start}
+.fisica .tipo-btn{background:var(--green);color:var(--black)}
+.corp .tipo-btn{background:var(--blue);color:var(--black)}
+.tipo-btn:hover{opacity:.85}
+
+/* FORMULARIOS */
+.form-view{display:none;padding-top:56px}
+.form-view.active{display:block}
+.form-hero{padding:3rem 1.5rem 2rem;border-bottom:1px solid #161616}
+@media(min-width:768px){.form-hero{padding:4rem 4rem 2.5rem}}
+.fh-tag{font-size:.62rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;display:flex;align-items:center;gap:.5rem;margin-bottom:.875rem}
+.fh-tag::before{content:'';width:18px;height:1px;background:currentColor}
+.fh-h1{font-size:clamp(1.6rem,3.5vw,2.8rem);font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:1;margin-bottom:.75rem}
+.fh-sub{font-size:.86rem;color:var(--muted2);line-height:1.65;max-width:520px}
+
+.progress{height:2px;background:#161616}
+.progress-bar{height:100%;transition:width .4s ease}
+.stepper{display:flex;align-items:center;padding:1.25rem 1.5rem;border-bottom:1px solid #161616;overflow-x:auto;gap:0;-webkit-overflow-scrolling:touch}
+@media(min-width:768px){.stepper{padding:1.25rem 4rem}}
+.step{display:flex;align-items:center;gap:.4rem;flex-shrink:0}
+.step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;border:1.5px solid #2a2a2a;color:var(--muted);transition:all .3s}
+.step-label{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;transition:color .3s}
+.step.done .step-label,.step.active .step-label{color:var(--white)}
+.step-line{width:2rem;height:1px;background:#222;flex-shrink:0;margin:0 .2rem}
+
+.form-body{padding:2rem 1.5rem;max-width:700px;margin:0 auto}
+@media(min-width:768px){.form-body{padding:2.5rem 4rem}}
+.form-sec{display:none}
+.form-sec.active{display:block}
+.fs-title{font-size:1rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.35rem}
+.fs-sub{font-size:.8rem;color:var(--muted2);margin-bottom:1.75rem;line-height:1.5}
+
+.fg{display:flex;flex-direction:column;gap:.3rem;margin-bottom:1rem}
+.fg label{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.fg label .req{color:var(--red);margin-left:2px}
+.fg input,.fg select,.fg textarea{background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.65rem .875rem;font-size:.86rem;font-family:inherit;outline:none;border-radius:2px;transition:border-color .2s;width:100%}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--green)}
+.fg input.err{border-color:var(--red)!important}
+.fg textarea{resize:vertical;min-height:85px}
+.fg select option{background:#1a1a1a}
+.fg input::placeholder,.fg textarea::placeholder{color:#444}
+.fg-row{display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:520px){.fg-row{grid-template-columns:1fr 1fr;gap:1rem}}
+.hint{font-size:.66rem;color:var(--muted);margin-top:.2rem}
+.err-msg{font-size:.66rem;color:var(--red);margin-top:.2rem;display:none}
+.fg.has-err .err-msg{display:block}
+.fg.has-err label{color:var(--red)}
+
+/* PRESUPUESTO PILLS */
+.budget-pills{display:flex;flex-wrap:wrap;gap:.4rem}
+.b-pill{background:transparent;border:1px solid #222;color:var(--muted);padding:.4rem .875rem;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s}
+.b-pill.on{border-color:var(--green);color:var(--black);background:var(--green)}
+.b-pill:hover:not(.on){border-color:var(--green);color:var(--green)}
+
+/* PLATAFORMAS */
+.plat-pills{display:flex;flex-wrap:wrap;gap:.4rem}
+.plat-pill{background:transparent;border:1px solid #222;color:var(--muted);padding:.38rem .8rem;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:all .2s}
+.plat-pill.on{border-color:var(--green);color:var(--black);background:var(--green)}
+
+/* OBJETIVOS */
+.obj-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+@media(min-width:520px){.obj-grid{grid-template-columns:repeat(3,1fr)}}
+.obj-card{background:#0d0d0d;border:1px solid #1a1a1a;padding:.875rem;cursor:pointer;border-radius:2px;transition:all .2s;text-align:center}
+.obj-card:hover{border-color:#2a2a2a}
+.obj-card.on{border-color:var(--green);background:#0f1a00}
+.obj-icon{font-size:1.25rem;margin-bottom:.4rem}
+.obj-label{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.obj-card.on .obj-label{color:var(--green)}
+
+/* RESUMEN */
+.resumen{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:3px;padding:1.1rem;margin-bottom:1.25rem}
+.res-row{display:flex;justify-content:space-between;align-items:flex-start;padding:.45rem 0;border-bottom:1px solid #161616;gap:1rem;font-size:.78rem}
+.res-row:last-child{border:none}
+.res-key{font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
+.res-val{color:var(--white);text-align:right;word-break:break-word}
+.terms{display:flex;align-items:flex-start;gap:.5rem;margin-bottom:1.25rem}
+.terms input{accent-color:var(--green);margin-top:3px;flex-shrink:0}
+.terms label{font-size:.76rem;color:var(--muted2);line-height:1.5}
+.terms label a{color:var(--green)}
+
+/* CALENDLY */
+.calendly-wrap{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:3px;overflow:hidden;margin-bottom:1rem}
+.calendly-header{padding:1.25rem 1.5rem;border-bottom:1px solid #1a1a1a}
+.cal-tag{font-size:.6rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--blue);margin-bottom:.35rem}
+.cal-title{font-size:.95rem;font-weight:900;text-transform:uppercase}
+.cal-sub{font-size:.78rem;color:var(--muted2);margin-top:.25rem;line-height:1.5}
+.calendly-iframe{width:100%;height:500px;border:none;display:block}
+.cal-fallback{padding:2rem;text-align:center}
+.cal-fallback p{font-size:.82rem;color:var(--muted2);margin-bottom:1.25rem;line-height:1.6}
+.btn-cal{display:inline-flex;align-items:center;gap:.5rem;background:var(--blue);color:var(--black);padding:.875rem 1.75rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none;transition:opacity .2s}
+.btn-cal:hover{opacity:.85}
+
+/* SEPARADOR CORP */
+.corp-info{background:#0a1020;border:1px solid #1a2a40;border-radius:3px;padding:1.25rem;margin-bottom:1.5rem}
+.ci-title{font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);margin-bottom:.5rem}
+.ci-text{font-size:.8rem;color:var(--muted2);line-height:1.65}
+.ci-text strong{color:var(--white)}
+
+/* NAV BOTONES */
+.form-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.75rem;padding-top:1.25rem;border-top:1px solid #161616;flex-wrap:wrap;gap:.875rem}
+.btn-prev{background:transparent;color:var(--white);border:1px solid #2a2a2a;padding:.7rem 1.4rem;font-weight:900;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s}
+.btn-prev:hover{border-color:var(--green);color:var(--green)}
+.btn-next-g{background:var(--green);color:var(--black);border:none;padding:.7rem 1.6rem;font-weight:900;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s}
+.btn-next-g:hover{opacity:.85}
+.btn-next-b{background:var(--blue);color:var(--black);border:none;padding:.7rem 1.6rem;font-weight:900;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s}
+.btn-next-b:hover{opacity:.85}
+.btn-submit{border:none;padding:.7rem 1.6rem;font-weight:900;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed}
+
+/* ÉXITO */
+.success-screen{display:none;padding:5rem 1.5rem;text-align:center;max-width:520px;margin:0 auto}
+.success-screen.show{display:block}
+.suc-ic{font-size:3rem;margin-bottom:1rem}
+.suc-title{font-size:1.4rem;font-weight:900;text-transform:uppercase;margin-bottom:.5rem}
+.suc-sub{font-size:.86rem;color:var(--muted2);line-height:1.7;margin-bottom:1.75rem}
+.suc-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:2px}
+.badge-g{background:#0f1a00;border:1px solid #2a3a00;color:var(--green)}
+.badge-b{background:#0a1020;border:1px solid #1a2a40;color:var(--blue)}
+.btn-home{display:inline-block;margin-top:1.5rem;padding:.8rem 1.75rem;font-weight:900;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;border-radius:2px}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:600;padding:.7rem 1rem;border-radius:3px;font-size:.73rem;font-weight:700;display:none;align-items:center;gap:.5rem;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:300px}
+.toast.show{display:flex}
+.toast.ok{background:#0f1a00;border:1px solid #2a4000;color:var(--green)}
+.toast.err{background:#1a0000;border:1px solid #2a0000;color:var(--red)}
+.toast.info{background:#0a1020;border:1px solid #1a2a40;color:var(--blue)}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="/">TRAMA</a>
+  <a class="nav-back" href="/">← Volver al inicio</a>
+</nav>
+
+<!-- ══ SELECTOR DE TIPO ══ -->
+<div class="tipo-wrap" id="viewTipo">
+  <div class="tipo-hero">
+    <div class="t-tag">Para marcas</div>
+    <h1 class="t-h1">¿Cómo querés<br>trabajar con <em>TRAMA?</em></h1>
+    <p class="t-sub">Tenemos dos modelos según el tamaño y las necesidades de tu marca. Elegí el que más te representa.</p>
+  </div>
+  <div class="tipo-grid">
+
+    <!-- PERSONA FÍSICA -->
+    <div class="tipo-card fisica" onclick="startForm('fisica')">
+      <div class="tipo-glow"></div>
+      <div class="tipo-badge">🟢 Acceso inmediato</div>
+      <div class="tipo-icon">👤</div>
+      <h2 class="tipo-title">Marca personal<br>o <em>emprendimiento</em></h2>
+      <p class="tipo-desc">Ideal para emprendedores, marcas personales y pymes que quieren conectar con creators de forma <strong>rápida y directa</strong>.</p>
+      <div class="tipo-features">
+        <div class="tf">Acceso a la bolsa de creators verificados</div>
+        <div class="tf">Pago por conexión única — desde $4.900 ARS</div>
+        <div class="tf">Contacto directo con el creator</div>
+        <div class="tf">Sin compromiso mínimo</div>
+      </div>
+      <button class="tipo-btn">Registrarme →</button>
+    </div>
+
+    <!-- CORPORATIVO -->
+    <div class="tipo-card corp" onclick="startForm('corp')">
+      <div class="tipo-glow"></div>
+      <div class="tipo-badge" style="background:#0a1020;color:var(--blue);border-color:#1a2a40">🔵 Trato personalizado</div>
+      <div class="tipo-icon">🏢</div>
+      <h2 class="tipo-title" style="color:var(--white)">Empresa<br>corporativa</h2>
+      <p class="tipo-desc">Para empresas medianas y grandes que necesitan <strong>estrategia, volumen y acompañamiento</strong> en sus campañas de creator marketing.</p>
+      <div class="tipo-features" style="--c:var(--blue)">
+        <div class="tf" style="--c:var(--blue)">Propuesta de campaña a medida</div>
+        <div class="tf">Equipo dedicado de TRAMA</div>
+        <div class="tf">Acceso a red completa + exclusivos</div>
+        <div class="tf">Facturación y condiciones corporativas</div>
+      </div>
+      <button class="tipo-btn" style="background:var(--blue)">Agendar reunión →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FORM PERSONA FÍSICA ══ -->
+<div class="form-view" id="viewFisica">
+  <div id="fWrapper">
+    <div class="form-hero">
+      <div class="fh-tag" style="color:var(--green)">Marca personal / emprendimiento</div>
+      <h1 class="fh-h1">Contanos sobre<br>tu marca</h1>
+      <p class="fh-sub">En minutos tenés acceso a nuestra bolsa de creators verificados.</p>
+    </div>
+    <div class="progress"><div class="progress-bar" id="fProgBar" style="width:25%;background:var(--green)"></div></div>
+    <div class="stepper" id="fStepper">
+      <div class="step active"><div class="step-num" style="border-color:var(--green);color:var(--green)">1</div><div class="step-label">Tu marca</div></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-num">2</div><div class="step-label">Objetivos</div></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-num">3</div><div class="step-label">Presupuesto</div></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-num">4</div><div class="step-label">Revisión</div></div>
+    </div>
+
+    <div class="form-body">
+      <!-- PASO F1 -->
+      <div class="form-sec active" id="f0">
+        <div class="fs-title">Tu marca</div>
+        <div class="fs-sub">La info básica para que el equipo TRAMA y los creators sepan quién sos.</div>
+        <div class="fg-row">
+          <div class="fg" id="ffg-nombre"><label>Nombre<span class="req">*</span></label><input type="text" id="ff-nombre" placeholder="Tu nombre"><div class="err-msg">Campo requerido</div></div>
+          <div class="fg" id="ffg-apellido"><label>Apellido<span class="req">*</span></label><input type="text" id="ff-apellido" placeholder="Apellido"><div class="err-msg">Campo requerido</div></div>
+        </div>
+        <div class="fg" id="ffg-email"><label>Email<span class="req">*</span></label><input type="email" id="ff-email" placeholder="tu@marca.com"><div class="err-msg">Email inválido</div></div>
+        <div class="fg"><label>WhatsApp</label><input type="tel" id="ff-tel" placeholder="+54 9 11 0000-0000"></div>
+        <div class="fg" id="ffg-marca"><label>Nombre de la marca<span class="req">*</span></label><input type="text" id="ff-marca" placeholder="¿Cómo se llama tu marca?"><div class="err-msg">Campo requerido</div></div>
+        <div class="fg-row">
+          <div class="fg" id="ffg-rubro"><label>Rubro<span class="req">*</span></label>
+            <select id="ff-rubro">
+              <option value="">Seleccioná</option>
+              <option>Moda & Indumentaria</option>
+              <option>Gastronomía & Bebidas</option>
+              <option>Belleza & Cosmética</option>
+              <option>Fitness & Salud</option>
+              <option>Tecnología</option>
+              <option>Hogar & Deco</option>
+              <option>Viajes & Turismo</option>
+              <option>Educación</option>
+              <option>Entretenimiento</option>
+              <option>Otro</option>
+            </select>
+            <div class="err-msg">Campo requerido</div>
+          </div>
+          <div class="fg"><label>País</label><select id="ff-pais"><option value="AR">Argentina</option><option value="UY">Uruguay</option><option value="CL">Chile</option><option value="MX">México</option><option value="otro">Otro</option></select></div>
+        </div>
+        <div class="fg"><label>Contanos de tu marca</label><textarea id="ff-desc" placeholder="¿Qué vendés, a quién le vendés y qué te diferencia?" maxlength="400"></textarea><div class="hint">Máx. 400 caracteres.</div></div>
+      </div>
+
+      <!-- PASO F2 -->
+      <div class="form-sec" id="f1">
+        <div class="fs-title">Objetivos de campaña</div>
+        <div class="fs-sub">¿Qué querés lograr con los creators? Podés elegir más de uno.</div>
+        <div class="fg">
+          <label>Objetivos principales<span class="req">*</span></label>
+          <div class="obj-grid" id="objGrid">
+            <div class="obj-card" onclick="toggleObj(this,'Awareness')"><div class="obj-icon">📣</div><div class="obj-label">Awareness</div></div>
+            <div class="obj-card" onclick="toggleObj(this,'Ventas')"><div class="obj-icon">💰</div><div class="obj-label">Ventas</div></div>
+            <div class="obj-card" onclick="toggleObj(this,'Contenido UGC')"><div class="obj-icon">📸</div><div class="obj-label">Contenido UGC</div></div>
+            <div class="obj-card" onclick="toggleObj(this,'Lanzamiento')"><div class="obj-icon">🚀</div><div class="obj-label">Lanzamiento</div></div>
+            <div class="obj-card" onclick="toggleObj(this,'Comunidad')"><div class="obj-icon">🤝</div><div class="obj-label">Comunidad</div></div>
+            <div class="obj-card" onclick="toggleObj(this,'Otro')"><div class="obj-icon">✨</div><div class="obj-label">Otro</div></div>
+          </div>
+          <div class="err-msg" id="objErr" style="display:none">Seleccioná al menos un objetivo</div>
+        </div>
+        <div class="fg" style="margin-top:1.25rem">
+          <label>Plataformas objetivo</label>
+          <div class="plat-pills" id="platPills">
+            <button type="button" class="plat-pill" onclick="togglePlat(this)">Instagram</button>
+            <button type="button" class="plat-pill" onclick="togglePlat(this)">TikTok</button>
+            <button type="button" class="plat-pill" onclick="togglePlat(this)">YouTube</button>
+            <button type="button" class="plat-pill" onclick="togglePlat(this)">X / Twitter</button>
+            <button type="button" class="plat-pill" onclick="togglePlat(this)">Todas</button>
+          </div>
+        </div>
+        <div class="fg" style="margin-top:1.25rem">
+          <label>Tipo de creator que buscás</label>
+          <select id="ff-tipo-creator">
+            <option value="">Seleccioná</option>
+            <option>Nano (1K-10K)</option>
+            <option>Micro (10K-100K)</option>
+            <option>Macro (100K-1M)</option>
+            <option>Top (1M+)</option>
+            <option>Cualquiera</option>
+          </select>
+        </div>
+        <div class="fg"><label>¿Tenés un brief o idea en mente?</label><textarea id="ff-brief" placeholder="Describí brevemente qué tipo de campaña imaginás..."></textarea></div>
+      </div>
+
+      <!-- PASO F3 -->
+      <div class="form-sec" id="f2">
+        <div class="fs-title">Presupuesto estimado</div>
+        <div class="fs-sub">Sin compromiso. Nos ayuda a recomendarte los creators más adecuados.</div>
+        <div class="fg">
+          <label>Presupuesto por campaña<span class="req">*</span></label>
+          <div class="budget-pills" id="budgetPills">
+            <button type="button" class="b-pill" onclick="selBudget(this)">Hasta $50K ARS</button>
+            <button type="button" class="b-pill" onclick="selBudget(this)">$50K - $150K ARS</button>
+            <button type="button" class="b-pill" onclick="selBudget(this)">$150K - $500K ARS</button>
+            <button type="button" class="b-pill" onclick="selBudget(this)">+$500K ARS</button>
+            <button type="button" class="b-pill" onclick="selBudget(this)">A definir</button>
+          </div>
+          <div class="err-msg" id="budgetErr" style="display:none">Seleccioná una opción</div>
+        </div>
+        <div class="fg" style="margin-top:1.25rem">
+          <label>¿Con qué frecuencia pensás trabajar con creators?</label>
+          <select id="ff-frecuencia">
+            <option value="">Seleccioná</option>
+            <option>Una vez (campaña puntual)</option>
+            <option>Mensual</option>
+            <option>Trimestral</option>
+            <option>Colaboración ongoing</option>
+          </select>
+        </div>
+        <div class="fg"><label>¿Cómo nos encontraste?</label>
+          <select id="ff-fuente">
+            <option value="">Seleccioná</option>
+            <option>Instagram</option>
+            <option>Recomendación</option>
+            <option>Google</option>
+            <option>LinkedIn</option>
+            <option>Otro</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- PASO F4: REVISIÓN -->
+      <div class="form-sec" id="f3">
+        <div class="fs-title">Revisá antes de enviar</div>
+        <div class="fs-sub">Chequeá que todo esté bien.</div>
+        <div class="resumen" id="fResumen"></div>
+        <div class="terms"><input type="checkbox" id="fChkTerms"><label for="fChkTerms">Acepto los <a href="#">Términos y condiciones</a> de TRAMA. Entiendo que recibiré propuestas de creators una vez verificada mi cuenta.</label></div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn-prev" id="fBtnPrev" onclick="fPrev()" style="visibility:hidden">← Atrás</button>
+        <button class="btn-next-g" id="fBtnNext" onclick="fNext()">Continuar →</button>
+        <button class="btn-submit" id="fBtnSubmit" onclick="fSubmit()" style="display:none;background:var(--green);color:var(--black)">Crear cuenta →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="success-screen" id="fSuccess">
+    <div class="suc-ic">🎉</div>
+    <div class="suc-title" style="color:var(--green)">¡Cuenta creada!</div>
+    <div class="suc-sub">Ya podés explorar nuestra bolsa de creators. En las próximas <strong>24 horas</strong> el equipo TRAMA te va a contactar para acompañarte en tu primera campaña.</div>
+    <div class="suc-badge badge-g">✓ Acceso a la bolsa habilitado</div>
+    <a class="btn-home" href="/" style="background:var(--green);color:var(--black);margin-top:1.5rem;display:inline-block">Ver creators →</a>
+  </div>
+</div>
+
+<!-- ══ FORM CORPORATIVO ══ -->
+<div class="form-view" id="viewCorp">
+  <div id="cWrapper">
+    <div class="form-hero">
+      <div class="fh-tag" style="color:var(--blue)">Empresa corporativa</div>
+      <h1 class="fh-h1">Hablemos de<br>tu próxima campaña</h1>
+      <p class="fh-sub">Completá tus datos y agendá una reunión con el equipo TRAMA. Te armamos una propuesta a medida.</p>
+    </div>
+    <div class="progress"><div class="progress-bar" id="cProgBar" style="width:33.3%;background:var(--blue)"></div></div>
+    <div class="stepper" id="cStepper">
+      <div class="step active"><div class="step-num" style="border-color:var(--blue);color:var(--blue)">1</div><div class="step-label">Tu empresa</div></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-num">2</div><div class="step-label">Campaña</div></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-num">3</div><div class="step-label">Reunión</div></div>
+    </div>
+
+    <div class="form-body">
+      <!-- PASO C1 -->
+      <div class="form-sec active" id="c0">
+        <div class="fs-title">Datos de la empresa</div>
+        <div class="fs-sub">Necesitamos los datos corporativos para preparar una propuesta adecuada.</div>
+        <div class="fg-row">
+          <div class="fg" id="cfg-nombre"><label>Nombre<span class="req">*</span></label><input type="text" id="cf-nombre" placeholder="Nombre"><div class="err-msg">Campo requerido</div></div>
+          <div class="fg" id="cfg-apellido"><label>Apellido<span class="req">*</span></label><input type="text" id="cf-apellido" placeholder="Apellido"><div class="err-msg">Campo requerido</div></div>
+        </div>
+        <div class="fg" id="cfg-email"><label>Email corporativo<span class="req">*</span></label><input type="email" id="cf-email" placeholder="nombre@empresa.com"><div class="err-msg">Email inválido</div></div>
+        <div class="fg"><label>Teléfono / WhatsApp</label><input type="tel" id="cf-tel" placeholder="+54 11 0000-0000"></div>
+        <div class="fg" id="cfg-razon"><label>Razón social<span class="req">*</span></label><input type="text" id="cf-razon" placeholder="Empresa S.A. / S.R.L."><div class="err-msg">Campo requerido</div></div>
+        <div class="fg-row">
+          <div class="fg"><label>CUIT</label><input type="text" id="cf-cuit" placeholder="30-00000000-0"></div>
+          <div class="fg" id="cfg-rubro"><label>Rubro<span class="req">*</span></label>
+            <select id="cf-rubro">
+              <option value="">Seleccioná</option>
+              <option>Consumo masivo</option>
+              <option>Moda & Retail</option>
+              <option>Tecnología</option>
+              <option>Banca & Finanzas</option>
+              <option>Salud & Pharma</option>
+              <option>Automotriz</option>
+              <option>Alimentos & Bebidas</option>
+              <option>Telecomunicaciones</option>
+              <option>Entretenimiento</option>
+              <option>Otro</option>
+            </select>
+            <div class="err-msg">Campo requerido</div>
+          </div>
+        </div>
+        <div class="fg" id="cfg-area"><label>Área de contacto<span class="req">*</span></label>
+          <select id="cf-area">
+            <option value="">Seleccioná</option>
+            <option>Marketing</option>
+            <option>Comunicaciones</option>
+            <option>Comercial</option>
+            <option>Dirección</option>
+            <option>Agencia (representando a cliente)</option>
+          </select>
+          <div class="err-msg">Campo requerido</div>
+        </div>
+      </div>
+
+      <!-- PASO C2 -->
+      <div class="form-sec" id="c1">
+        <div class="fs-title">Tu campaña</div>
+        <div class="fs-sub">Cuanto más nos contás, mejor podemos preparar la reunión.</div>
+        <div class="corp-info">
+          <div class="ci-title">¿Por qué esto es diferente?</div>
+          <div class="ci-text">Las empresas corporativas no pagan por conexión individual. TRAMA arma una <strong>propuesta integral</strong> con selección de creators, estrategia de contenido, cronograma y presupuesto negociado. Todo se define en la reunión.</div>
+        </div>
+        <div class="fg">
+          <label>Objetivos de la campaña</label>
+          <div class="obj-grid" id="cobjGrid">
+            <div class="obj-card" style="border-color:#1a2a40" onclick="toggleCObj(this,'Awareness')"><div class="obj-icon">📣</div><div class="obj-label">Awareness</div></div>
+            <div class="obj-card" style="border-color:#1a2a40" onclick="toggleCObj(this,'Ventas')"><div class="obj-icon">💰</div><div class="obj-label">Ventas</div></div>
+            <div class="obj-card" style="border-color:#1a2a40" onclick="toggleCObj(this,'Contenido UGC')"><div class="obj-icon">📸</div><div class="obj-label">UGC</div></div>
+            <div class="obj-card" style="border-color:#1a2a40" onclick="toggleCObj(this,'Lanzamiento')"><div class="obj-icon">🚀</div><div class="obj-label">Lanzamiento</div></div>
+            <div class="obj-card" style="border-color:#1a2a40" onclick="toggleCObj(this,'Posicionamiento')"><div class="obj-icon">📍</div><div class="obj-label">Posicionamiento</div></div>
+            <div class="obj-card" style="border-color:#1a2a40" onclick="toggleCObj(this,'Otro')"><div class="obj-icon">✨</div><div class="obj-label">Otro</div></div>
+          </div>
+        </div>
+        <div class="fg" style="margin-top:1.25rem">
+          <label>Presupuesto estimado</label>
+          <select id="cf-budget">
+            <option value="">Seleccioná</option>
+            <option>USD 5K - 15K</option>
+            <option>USD 15K - 50K</option>
+            <option>USD 50K - 150K</option>
+            <option>USD 150K+</option>
+            <option>A definir en reunión</option>
+          </select>
+        </div>
+        <div class="fg"><label>Descripción de la campaña</label><textarea id="cf-desc" placeholder="Contanos de qué se trata el proyecto, el producto, el timing estimado y cualquier detalle relevante..." style="min-height:110px"></textarea></div>
+        <div class="fg-row">
+          <div class="fg"><label>Cantidad estimada de creators</label>
+            <select id="cf-qty">
+              <option value="">Seleccioná</option>
+              <option>1-3</option>
+              <option>4-10</option>
+              <option>11-30</option>
+              <option>30+</option>
+              <option>A definir</option>
+            </select>
+          </div>
+          <div class="fg"><label>Timing de la campaña</label>
+            <select id="cf-timing">
+              <option value="">Seleccioná</option>
+              <option>Urgente (menos de 2 semanas)</option>
+              <option>1 mes</option>
+              <option>2-3 meses</option>
+              <option>Más de 3 meses</option>
+              <option>A definir</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO C3: CALENDLY -->
+      <div class="form-sec" id="c2">
+        <div class="fs-title">Agendá tu reunión</div>
+        <div class="fs-sub">Elegí el horario que mejor te venga. La reunión dura 30 minutos y es por Google Meet.</div>
+        <div class="calendly-wrap">
+          <div class="calendly-header">
+            <div class="cal-tag">Reunión con el equipo TRAMA</div>
+            <div class="cal-title">30 min · Google Meet · Sin costo</div>
+            <div class="cal-sub">Presentamos nuestra red, entendemos tu campaña y acordamos próximos pasos.</div>
+          </div>
+          <!-- CALENDLY EMBED — reemplazá la URL con tu link real de Calendly -->
+          <div class="cal-fallback" id="calFallback">
+            <p>Para agendar la reunión necesitás crear una cuenta gratuita en <strong>Calendly</strong> y reemplazar la URL en el código.<br><br>Mientras tanto podés contactarnos directamente:</p>
+            <a class="btn-cal" href="mailto:hola@trama.agency">📧 Escribinos a hola@trama.agency</a>
+            <div style="margin-top:1rem">
+              <a href="https://wa.me/5491100000000" class="btn-cal" style="background:#25d366;margin-top:.5rem">💬 WhatsApp</a>
+            </div>
+          </div>
+          <!-- Descomentar cuando tengas el link de Calendly:
+          <iframe
+            class="calendly-iframe"
+            src="https://calendly.com/trama-agency/reunion-corporativa"
+            frameborder="0">
+          </iframe>
+          -->
+        </div>
+        <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-radius:3px;padding:1rem;font-size:.78rem;color:var(--muted2);line-height:1.6">
+          📋 <strong style="color:var(--white)">Antes de la reunión</strong> nuestro equipo va a revisar los datos que cargaste y va a llegar preparado con una propuesta preliminar.
+        </div>
+        <div class="terms" style="margin-top:1.25rem"><input type="checkbox" id="cChkTerms"><label for="cChkTerms">Acepto los <a href="#" style="color:var(--blue)">Términos y condiciones</a> de TRAMA y autorizo el uso de mis datos para preparar la propuesta.</label></div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn-prev" id="cBtnPrev" onclick="cPrev()" style="visibility:hidden">← Atrás</button>
+        <button class="btn-next-b" id="cBtnNext" onclick="cNext()">Continuar →</button>
+        <button class="btn-submit" id="cBtnSubmit" onclick="cSubmit()" style="display:none;background:var(--blue);color:var(--black)">Confirmar →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="success-screen" id="cSuccess">
+    <div class="suc-ic">🤝</div>
+    <div class="suc-title" style="color:var(--blue)">¡Todo listo!</div>
+    <div class="suc-sub">Recibimos tu información. El equipo TRAMA va a revisar tu perfil corporativo y vas a recibir una confirmación de reunión en tu email en las próximas <strong>2 horas hábiles</strong>.</div>
+    <div class="suc-badge badge-b">📅 Reunión en camino</div>
+    <a class="btn-home" href="/" style="background:var(--blue);color:var(--black);">Volver al inicio →</a>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL  = 'https://mcpmabvxmdepastmpzbi.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
+
+// ── ESTADO ──
+let selObjetivos = [];
+let selCObjetivos = [];
+let selPlats = [];
+let selBudgetVal = '';
+let fStep = 0;
+let cStep = 0;
+const F_STEPS = 4;
+const C_STEPS = 3;
+
+// ── VISTAS ──
+function startForm(tipo){
+  document.getElementById('viewTipo').style.display='none';
+  if(tipo==='fisica'){
+    document.getElementById('viewFisica').style.display='block';
+    document.getElementById('viewFisica').classList.add('active');
+  } else {
+    document.getElementById('viewCorp').style.display='block';
+    document.getElementById('viewCorp').classList.add('active');
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── SUPABASE ──
+async function sbPost(table, body){
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`,{
+    method:'POST',
+    headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify(body)
+  });
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'Error '+r.status)}
+}
+
+// ── TOGGLES ──
+function toggleObj(el,val){
+  el.classList.toggle('on');
+  if(el.classList.contains('on'))selObjetivos.push(val);
+  else selObjetivos=selObjetivos.filter(x=>x!==val);
+}
+function toggleCObj(el,val){
+  el.classList.toggle('on');
+  if(el.classList.contains('on')){
+    el.style.borderColor='var(--blue)';
+    el.style.background='#0a1020';
+    el.querySelector('.obj-label').style.color='var(--blue)';
+    selCObjetivos.push(val);
+  } else {
+    el.style.borderColor='#1a2a40';
+    el.style.background='';
+    el.querySelector('.obj-label').style.color='';
+    selCObjetivos=selCObjetivos.filter(x=>x!==val);
+  }
+}
+function togglePlat(btn){
+  btn.classList.toggle('on');
+  const t=btn.textContent;
+  if(btn.classList.contains('on'))selPlats.push(t);
+  else selPlats=selPlats.filter(x=>x!==t);
+}
+function selBudget(btn){
+  document.querySelectorAll('.b-pill').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  selBudgetVal=btn.textContent;
+}
+
+// ── FORM FÍSICA ──
+function fUpdateStepper(){
+  document.querySelectorAll('#fStepper .step').forEach((el,i)=>{
+    el.classList.remove('active','done');
+    if(i<fStep){el.classList.add('done');el.querySelector('.step-num').style.cssText='background:var(--green);border-color:var(--green);color:var(--black)'}
+    else if(i===fStep){el.classList.add('active');el.querySelector('.step-num').style.cssText='border-color:var(--green);color:var(--green)'}
+    else{el.querySelector('.step-num').style.cssText=''}
+  });
+  document.getElementById('fProgBar').style.width=((fStep+1)/F_STEPS*100)+'%';
+  document.getElementById('fBtnPrev').style.visibility=fStep===0?'hidden':'visible';
+  const last=fStep===F_STEPS-1;
+  document.getElementById('fBtnNext').style.display=last?'none':'inline-block';
+  document.getElementById('fBtnSubmit').style.display=last?'inline-block':'none';
+}
+function fShowStep(n){
+  document.querySelectorAll('#viewFisica .form-sec').forEach((s,i)=>s.classList.toggle('active',i===n));
+  if(n===F_STEPS-1)fBuildResumen();
+  fUpdateStepper();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function fNext(){if(fValidate(fStep)){fStep++;fShowStep(fStep)}}
+function fPrev(){if(fStep>0){fStep--;fShowStep(fStep)}}
+
+function fValidate(s){
+  let ok=true;
+  if(s===0){
+    [['nombre','ff-nombre'],['apellido','ff-apellido'],['email','ff-email'],['marca','ff-marca'],['rubro','ff-rubro']].forEach(([fg,id])=>{
+      const el=document.getElementById(id);
+      const fgEl=document.getElementById('ffg-'+fg);
+      const v=el?el.value.trim():'';
+      const inv=!v||(fg==='email'&&!/\S+@\S+\.\S+/.test(v));
+      fgEl&&fgEl.classList.toggle('has-err',inv);
+      if(inv)ok=false;
+    });
+  }
+  if(s===1){
+    const no=selObjetivos.length===0;
+    document.getElementById('objErr').style.display=no?'block':'none';
+    if(no)ok=false;
+  }
+  if(s===2){
+    const no=!selBudgetVal;
+    document.getElementById('budgetErr').style.display=no?'block':'none';
+    if(no)ok=false;
+  }
+  return ok;
+}
+
+function fBuildResumen(){
+  const rows=[
+    ['Nombre',`${document.getElementById('ff-nombre').value} ${document.getElementById('ff-apellido').value}`],
+    ['Email',document.getElementById('ff-email').value],
+    ['Marca',document.getElementById('ff-marca').value],
+    ['Rubro',document.getElementById('ff-rubro').value],
+    ['Objetivos',selObjetivos.join(', ')||'—'],
+    ['Plataformas',selPlats.join(', ')||'Todas'],
+    ['Presupuesto',selBudgetVal||'—'],
+  ];
+  document.getElementById('fResumen').innerHTML=rows.map(([k,v])=>`<div class="res-row"><span class="res-key">${k}</span><span class="res-val">${v}</span></div>`).join('');
+}
+
+async function fSubmit(){
+  if(!document.getElementById('fChkTerms').checked){showToast('Aceptá los términos para continuar','err');return}
+  const btn=document.getElementById('fBtnSubmit');
+  btn.disabled=true;btn.textContent='Enviando...';
+  try{
+    await sbPost('marcas',{
+      tipo:'fisica',
+      nombre:document.getElementById('ff-nombre').value.trim(),
+      apellido:document.getElementById('ff-apellido').value.trim(),
+      email:document.getElementById('ff-email').value.trim(),
+      tel:document.getElementById('ff-tel').value.trim()||null,
+      nombre_marca:document.getElementById('ff-marca').value.trim(),
+      rubro:document.getElementById('ff-rubro').value,
+      pais:document.getElementById('ff-pais').value,
+      descripcion:document.getElementById('ff-desc').value.trim()||null,
+      objetivos:selObjetivos,
+      plataformas:selPlats,
+      tipo_creator:document.getElementById('ff-tipo-creator').value||null,
+      brief:document.getElementById('ff-brief').value.trim()||null,
+      presupuesto:selBudgetVal,
+      frecuencia:document.getElementById('ff-frecuencia').value||null,
+      fuente:document.getElementById('ff-fuente').value||null,
+      status:'activa',
+    });
+    document.getElementById('fWrapper').style.display='none';
+    document.getElementById('fSuccess').classList.add('show');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(e){
+    showToast(e.message.includes('unique')?'Este email ya está registrado':'Error: '+e.message,'err');
+    btn.disabled=false;btn.textContent='Crear cuenta →';
+  }
+}
+
+// ── FORM CORPORATIVO ──
+function cUpdateStepper(){
+  document.querySelectorAll('#cStepper .step').forEach((el,i)=>{
+    el.classList.remove('active','done');
+    if(i<cStep){el.classList.add('done');el.querySelector('.step-num').style.cssText='background:var(--blue);border-color:var(--blue);color:var(--black)'}
+    else if(i===cStep){el.classList.add('active');el.querySelector('.step-num').style.cssText='border-color:var(--blue);color:var(--blue)'}
+    else{el.querySelector('.step-num').style.cssText=''}
+  });
+  document.getElementById('cProgBar').style.width=((cStep+1)/C_STEPS*100)+'%';
+  document.getElementById('cBtnPrev').style.visibility=cStep===0?'hidden':'visible';
+  const last=cStep===C_STEPS-1;
+  document.getElementById('cBtnNext').style.display=last?'none':'inline-block';
+  document.getElementById('cBtnSubmit').style.display=last?'inline-block':'none';
+}
+function cShowStep(n){
+  document.querySelectorAll('#viewCorp .form-sec').forEach((s,i)=>s.classList.toggle('active',i===n));
+  cUpdateStepper();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function cNext(){if(cValidate(cStep)){cStep++;cShowStep(cStep)}}
+function cPrev(){if(cStep>0){cStep--;cShowStep(cStep)}}
+
+function cValidate(s){
+  let ok=true;
+  if(s===0){
+    [['nombre','cf-nombre'],['apellido','cf-apellido'],['email','cf-email'],['razon','cf-razon'],['rubro','cf-rubro'],['area','cf-area']].forEach(([fg,id])=>{
+      const el=document.getElementById(id);
+      const fgEl=document.getElementById('cfg-'+fg);
+      const v=el?el.value.trim():'';
+      const inv=!v||(fg==='email'&&!/\S+@\S+\.\S+/.test(v));
+      fgEl&&fgEl.classList.toggle('has-err',inv);
+      if(inv)ok=false;
+    });
+  }
+  return ok;
+}
+
+async function cSubmit(){
+  if(!document.getElementById('cChkTerms').checked){showToast('Aceptá los términos para continuar','err');return}
+  const btn=document.getElementById('cBtnSubmit');
+  btn.disabled=true;btn.textContent='Enviando...';
+  try{
+    await sbPost('marcas',{
+      tipo:'corporativa',
+      nombre:document.getElementById('cf-nombre').value.trim(),
+      apellido:document.getElementById('cf-apellido').value.trim(),
+      email:document.getElementById('cf-email').value.trim(),
+      tel:document.getElementById('cf-tel').value.trim()||null,
+      razon_social:document.getElementById('cf-razon').value.trim(),
+      cuit:document.getElementById('cf-cuit').value.trim()||null,
+      rubro:document.getElementById('cf-rubro').value,
+      area:document.getElementById('cf-area').value,
+      objetivos:selCObjetivos,
+      presupuesto:document.getElementById('cf-budget').value||null,
+      descripcion:document.getElementById('cf-desc').value.trim()||null,
+      cantidad_creators:document.getElementById('cf-qty').value||null,
+      timing:document.getElementById('cf-timing').value||null,
+      status:'reunion_pendiente',
+    });
+    document.getElementById('cWrapper').style.display='none';
+    document.getElementById('cSuccess').classList.add('show');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(e){
+    showToast(e.message.includes('unique')?'Este email ya está registrado':'Error: '+e.message,'err');
+    btn.disabled=false;btn.textContent='Confirmar →';
+  }
+}
+
+// ── TOAST ──
+let tt;
+function showToast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+type;
+  clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3200);
+}
+</script>
+</body>
+</html>

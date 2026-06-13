@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRAMA. — Pago exitoso</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--black:#080808;--green:#C8FF1A;--white:#F4F4EF;--g1:#111;--muted:#666;--muted2:#999;--purple:#c084fc;--red:#ff4444}
+body{background:var(--black);color:var(--white);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+nav{height:56px;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,.96);border-bottom:1px solid #1a1a1a}
+.logo{font-size:1.2rem;font-weight:900;letter-spacing:.18em;color:var(--green);text-decoration:none}
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem 1.5rem}
+.card{background:var(--g1);border:1px solid #222;border-radius:3px;padding:2.5rem;width:100%;max-width:520px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--green),var(--purple))}
+.ic{font-size:3rem;margin-bottom:1rem;text-align:center}
+.tag{font-size:.62rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--green);text-align:center;margin-bottom:.625rem}
+.title{font-size:1.4rem;font-weight:900;text-transform:uppercase;text-align:center;margin-bottom:.5rem}
+.sub{font-size:.85rem;color:var(--muted2);line-height:1.65;text-align:center;margin-bottom:2rem}
+.contact-box{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:3px;padding:1.25rem;margin-bottom:1.5rem}
+.contact-title{font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--green);margin-bottom:.875rem}
+.c-item{display:flex;align-items:center;gap:.75rem;padding:.5rem 0;border-bottom:1px solid #161616;font-size:.82rem}
+.c-item:last-child{border:none}
+.c-ic{font-size:.9rem;width:20px;text-align:center;color:var(--green)}
+.c-key{color:var(--muted);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;width:80px;flex-shrink:0}
+.c-val{color:var(--white);font-weight:600;word-break:break-all}
+.voucher-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid #161616;font-size:.8rem}
+.voucher-row:last-child{border:none}
+.v-k{color:var(--muted)}
+.v-v{font-weight:700;text-align:right}
+.loading{text-align:center;padding:2rem 0}
+.spin{width:36px;height:36px;border:2px solid #222;border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{font-size:.82rem;color:var(--muted2)}
+.btn-home{display:block;background:var(--green);color:var(--black);padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none;text-align:center;transition:opacity .2s;margin-bottom:.625rem}
+.btn-home:hover{opacity:.85}
+.btn-bolsa{display:block;background:transparent;color:var(--white);padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none;text-align:center;border:1px solid #2a2a2a;transition:all .2s}
+.btn-bolsa:hover{border-color:var(--green);color:var(--green)}
+.err-box{background:#1a0000;border:1px solid #2a0000;border-radius:3px;padding:1.1rem;margin-bottom:1.5rem;font-size:.8rem;color:var(--red);line-height:1.6;text-align:center}
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="/">TRAMA.</a>
+</nav>
+<div class="main">
+  <div class="card">
+    <div id="content">
+      <div class="loading">
+        <div class="spin"></div>
+        <div class="loading-txt">Verificando pago y desbloqueando contacto...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SB_URL  = 'https://mcpmabvxmdepastmpzbi.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
+
+(async function(){
+  const params = new URLSearchParams(location.search);
+  const creatorId  = params.get('creator_id');
+  const marcaEmail = params.get('marca_email');
+  const paymentId  = params.get('payment_id');
+  const status     = params.get('status');
+  const el = document.getElementById('content');
+
+  // Si MP redirigió con status != approved
+  if(status && status !== 'approved'){
+    showError('El pago no fue aprobado. Podés intentarlo nuevamente.');
+    return;
+  }
+
+  if(!creatorId || !marcaEmail){
+    showError('No se encontraron los datos de la transacción.');
+    return;
+  }
+
+  try {
+    // Buscar creator en Supabase
+    const r = await fetch(`${SB_URL}/rest/v1/creators?id=eq.${creatorId}&select=*`,{
+      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
+    });
+    const creators = await r.json();
+    const c = creators?.[0];
+    if(!c) throw new Error('Creator no encontrado');
+
+    // Registrar conexión si no existe (idempotente)
+    await fetch(`${SB_URL}/rest/v1/conexiones`,{
+      method:'POST',
+      headers:{
+        'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,
+        'Content-Type':'application/json','Prefer':'return=minimal,resolution=ignore-duplicates'
+      },
+      body: JSON.stringify({
+        creator_id: creatorId,
+        marca_email: marcaEmail,
+        monto: 4900,
+        metodo: 'mercadopago',
+        voucher_id: paymentId || 'mp-redirect',
+        estado: 'pagado',
+      })
+    });
+
+    // Mostrar datos de contacto
+    showSuccess(c, marcaEmail, paymentId);
+
+  } catch(e){
+    showError('Hubo un error al recuperar los datos. Escribinos a info.tramapunto@gmail.com con tu comprobante.');
+  }
+})();
+
+function showSuccess(c, marcaEmail, paymentId){
+  const fecha = new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('content').innerHTML=`
+    <div class="ic">✅</div>
+    <div class="tag">Conexión desbloqueada · TRAMA.</div>
+    <h1 class="title">¡Listo, ya podés contactar a ${c.nombre}!</h1>
+    <p class="sub">Te enviamos un comprobante a <strong>${marcaEmail}</strong>. Guardá estos datos.</p>
+
+    <div class="contact-box">
+      <div class="contact-title">Datos de contacto verificados</div>
+      ${c.email?`<div class="c-item"><span class="c-ic">✉</span><span class="c-key">Email</span><span class="c-val">${c.email}</span></div>`:''}
+      ${c.ig_user?`<div class="c-item"><span class="c-ic">📸</span><span class="c-key">Instagram</span><span class="c-val">${c.ig_user}</span></div>`:''}
+      ${c.tt_user?`<div class="c-item"><span class="c-ic">🎵</span><span class="c-key">TikTok</span><span class="c-val">${c.tt_user}</span></div>`:''}
+      ${c.yt_user?`<div class="c-item"><span class="c-ic">▶️</span><span class="c-key">YouTube</span><span class="c-val">${c.yt_user}</span></div>`:''}
+      ${c.tel?`<div class="c-item"><span class="c-ic">💬</span><span class="c-key">WhatsApp</span><span class="c-val">${c.tel}</span></div>`:''}
+    </div>
+
+    <div class="contact-box" style="margin-bottom:1.5rem">
+      <div class="contact-title">Comprobante</div>
+      <div class="voucher-row"><span class="v-k">Monto</span><span class="v-v" style="color:var(--green)">$4.900 ARS</span></div>
+      <div class="voucher-row"><span class="v-k">Fecha</span><span class="v-v">${fecha}</span></div>
+      ${paymentId?`<div class="voucher-row"><span class="v-k">ID de pago</span><span class="v-v" style="color:var(--muted2)">${paymentId}</span></div>`:''}
+      <div class="voucher-row"><span class="v-k">Estado</span><span class="v-v" style="color:var(--green)">✓ Aprobado</span></div>
+    </div>
+
+    <div style="background:#0f1a00;border:1px solid #1a3000;border-radius:3px;padding:1rem;font-size:.76rem;color:var(--muted2);line-height:1.6;margin-bottom:1.5rem">
+      📋 <strong style="color:var(--white)">Próximo paso:</strong> contactá a ${c.nombre} directamente y presentate como marca de TRAMA. para una mejor recepción.
+    </div>
+
+    <a class="btn-bolsa" href="/">← Volver a la bolsa</a>`;
+}
+
+function showError(msg){
+  document.getElementById('content').innerHTML=`
+    <div class="ic">⚠️</div>
+    <div class="tag">Algo salió mal · TRAMA.</div>
+    <h1 class="title">Error en el pago</h1>
+    <div class="err-box">${msg}</div>
+    <a class="btn-home" href="/">Volver al inicio</a>
+    <a class="btn-bolsa" href="mailto:info.tramapunto@gmail.com" style="margin-top:.5rem">Contactar soporte →</a>`;
+}
+</script>
+</body>
+</html>

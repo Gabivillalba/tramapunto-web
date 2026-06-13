@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRAMA. — Pago no procesado</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--black:#080808;--green:#C8FF1A;--white:#F4F4EF;--g1:#111;--muted:#666;--muted2:#999;--red:#ff4444;--amber:#f59e0b}
+body{background:var(--black);color:var(--white);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+nav{height:56px;padding:0 1.5rem;display:flex;align-items:center;background:rgba(8,8,8,.96);border-bottom:1px solid #1a1a1a}
+.logo{font-size:1.2rem;font-weight:900;letter-spacing:.18em;color:var(--green);text-decoration:none}
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem 1.5rem}
+.card{background:var(--g1);border:1px solid #222;border-radius:3px;padding:2.5rem;width:100%;max-width:460px;text-align:center}
+.ic{font-size:3rem;margin-bottom:1rem}
+.tag{font-size:.62rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;margin-bottom:.625rem}
+.title{font-size:1.3rem;font-weight:900;text-transform:uppercase;margin-bottom:.625rem}
+.sub{font-size:.84rem;color:var(--muted2);line-height:1.65;margin-bottom:2rem}
+.btn{display:block;padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none;text-align:center;transition:opacity .2s;margin-bottom:.625rem}
+.btn-green{background:var(--green);color:var(--black)}
+.btn-green:hover{opacity:.85}
+.btn-ghost{background:transparent;color:var(--white);border:1px solid #2a2a2a}
+.btn-ghost:hover{border-color:var(--green);color:var(--green)}
+.info-box{border-radius:3px;padding:1rem;font-size:.78rem;line-height:1.6;margin-bottom:1.5rem;text-align:left}
+</style>
+</head>
+<body>
+<nav><a class="logo" href="/">TRAMA.</a></nav>
+<div class="main">
+  <div class="card" id="content"></div>
+</div>
+<script>
+const path = location.pathname;
+const isPending = path.includes('pendiente');
+
+if(isPending){
+  document.title = 'TRAMA. — Pago pendiente';
+  document.getElementById('content').innerHTML=`
+    <div class="ic">⏳</div>
+    <div class="tag" style="color:var(--amber)">Pago pendiente · TRAMA.</div>
+    <h1 class="title">Tu pago está siendo procesado</h1>
+    <p class="sub">MercadoPago está verificando tu pago. Esto puede tardar unos minutos. Cuando se acredite, te llegará un email con los datos de contacto del creator.</p>
+    <div class="info-box" style="background:#1a1200;border:1px solid #2a2000;color:var(--amber)">
+      ⚠️ <strong>No cerrés esta pestaña todavía.</strong> Si el pago se acredita, serás redirigido automáticamente. Si no recibís el email en 30 minutos, escribinos a <a href="mailto:info.tramapunto@gmail.com" style="color:var(--amber)">info.tramapunto@gmail.com</a>.
+    </div>
+    <a class="btn btn-green" href="/">Volver al inicio</a>
+    <a class="btn btn-ghost" href="mailto:info.tramapunto@gmail.com">Contactar soporte →</a>`;
+} else {
+  document.getElementById('content').innerHTML=`
+    <div class="ic">❌</div>
+    <div class="tag" style="color:var(--red)">Pago no procesado · TRAMA.</div>
+    <h1 class="title">El pago no fue aprobado</h1>
+    <p class="sub">No se realizó ningún cobro. Podés intentarlo nuevamente con otro método de pago.</p>
+    <div class="info-box" style="background:#1a0000;border:1px solid #2a0000;color:#ff8888">
+      💳 Causas comunes: fondos insuficientes, datos incorrectos o límite de tarjeta. Probá con otra tarjeta o con MercadoPago dinero en cuenta.
+    </div>
+    <a class="btn btn-green" href="/">Volver a intentar</a>
+    <a class="btn btn-ghost" href="mailto:info.tramapunto@gmail.com">Contactar soporte →</a>`;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRAMA — Registrate como creator</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--black:#080808;--green:#C8FF1A;--white:#F4F4EF;--g1:#111;--g2:#1C1C1C;--g3:#2A2A2A;--muted:#666;--muted2:#999;--purple:#c084fc;--red:#ff4444;--amber:#f59e0b}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,.96);backdrop-filter:blur(12px);border-bottom:1px solid #1a1a1a}
+.logo{font-size:1.2rem;font-weight:900;letter-spacing:.18em;color:var(--green);text-decoration:none}
+.nav-back{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--white)}
+
+.reg-hero{padding:5rem 1.5rem 2rem;border-bottom:1px solid #161616}
+@media(min-width:768px){.reg-hero{padding:5.5rem 4rem 2.5rem}}
+.fh-tag{font-size:.62rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--purple);display:flex;align-items:center;gap:.5rem;margin-bottom:.875rem}
+.fh-tag::before{content:'';width:18px;height:1px;background:var(--purple)}
+.fh-h1{font-size:clamp(1.8rem,4vw,3rem);font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:1;margin-bottom:.75rem}
+.fh-h1 em{color:var(--purple);font-style:normal}
+.fh-sub{font-size:.88rem;color:var(--muted2);line-height:1.65;max-width:520px}
+
+.progress{height:2px;background:#161616}
+.progress-bar{height:100%;background:var(--purple);transition:width .4s ease}
+
+.stepper{display:flex;align-items:center;padding:1.25rem 1.5rem;border-bottom:1px solid #161616;overflow-x:auto;gap:0;-webkit-overflow-scrolling:touch}
+@media(min-width:768px){.stepper{padding:1.25rem 4rem}}
+.step{display:flex;align-items:center;gap:.4rem;flex-shrink:0}
+.step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;border:1.5px solid #2a2a2a;color:var(--muted);transition:all .3s}
+.step.done .step-num{background:var(--green);border-color:var(--green);color:var(--black)}
+.step.active .step-num{border-color:var(--purple);color:var(--purple)}
+.step-label{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;transition:color .3s}
+.step.done .step-label,.step.active .step-label{color:var(--white)}
+.step-line{width:2rem;height:1px;background:#222;flex-shrink:0;margin:0 .2rem}
+
+.form-body{padding:2rem 1.5rem;max-width:700px;margin:0 auto}
+@media(min-width:768px){.form-body{padding:2.5rem 4rem}}
+.form-section{display:none}
+.form-section.active{display:block}
+.fs-title{font-size:1rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.35rem}
+.fs-sub{font-size:.8rem;color:var(--muted2);margin-bottom:1.75rem;line-height:1.5}
+
+.fg{display:flex;flex-direction:column;gap:.3rem;margin-bottom:1rem}
+.fg label{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.fg label .req{color:var(--red);margin-left:2px}
+.fg input,.fg select,.fg textarea{background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.65rem .875rem;font-size:.86rem;font-family:inherit;outline:none;border-radius:2px;transition:border-color .2s;width:100%}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--purple)}
+.fg input.err{border-color:var(--red)!important}
+.fg textarea{resize:vertical;min-height:85px}
+.fg select option{background:#1a1a1a}
+.fg input::placeholder,.fg textarea::placeholder{color:#444}
+.fg-row{display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:520px){.fg-row{grid-template-columns:1fr 1fr;gap:1rem}}
+.hint{font-size:.66rem;color:var(--muted);margin-top:.2rem}
+.err-msg{font-size:.66rem;color:var(--red);margin-top:.2rem;display:none}
+.fg.has-err .err-msg{display:block}
+.fg.has-err label{color:var(--red)}
+
+.avatar-wrap{display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.avatar-circle{width:72px;height:72px;border-radius:50%;background:#1a1a1a;border:2px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;overflow:hidden;position:relative;transition:border-color .3s}
+.avatar-circle img{display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.avatar-upload-btn{display:inline-flex;align-items:center;gap:.5rem;background:#0d0d0d;border:1px solid #222;padding:.6rem 1rem;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:border-color .2s;color:var(--muted2)}
+.avatar-upload-btn:hover{border-color:var(--purple);color:var(--purple)}
+.avatar-status{font-size:.66rem;color:var(--muted);margin-top:.4rem}
+
+.red-block{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:3px;padding:1rem;margin-bottom:.875rem}
+.red-header{display:flex;align-items:center;gap:.5rem}
+.red-name{font-size:.82rem;font-weight:700}
+.red-active{display:flex;align-items:center;gap:.4rem;margin-left:auto;cursor:pointer}
+.red-active input[type=checkbox]{accent-color:var(--purple);width:14px;height:14px}
+.red-active label{font-size:.66rem;font-weight:700;color:var(--muted);cursor:pointer}
+.red-fields{display:none;border-top:1px solid #222;padding-top:.875rem;margin-top:.875rem}
+.red-fields.show{display:block}
+
+.niche-grid{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.4rem}
+.niche-pill{background:transparent;border:1px solid #222;color:var(--muted);padding:.4rem .8rem;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:all .2s}
+.niche-pill.on{border-color:var(--purple);color:var(--black);background:var(--purple)}
+.niche-pill:hover:not(.on){border-color:var(--purple);color:var(--purple)}
+
+.tarifa-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-bottom:.875rem}
+.dispon-pills{display:flex;flex-wrap:wrap;gap:.4rem}
+.dispon-pill{background:transparent;border:1px solid #222;color:var(--muted);padding:.38rem .8rem;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s}
+.dispon-pill.on{border-color:var(--green);color:var(--black);background:var(--green)}
+
+.link-inputs{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.5rem}
+.link-item{display:flex;gap:.4rem;align-items:center}
+.link-item input{flex:1}
+.link-rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.95rem;padding:.2rem;flex-shrink:0}
+.link-rm:hover{color:var(--red)}
+.link-add{background:none;border:1px dashed #2a2a2a;color:var(--muted);padding:.55rem;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s;width:100%}
+.link-add:hover{border-color:var(--purple);color:var(--purple)}
+
+.resumen{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:3px;padding:1.1rem;margin-bottom:1.25rem}
+.res-row{display:flex;justify-content:space-between;align-items:flex-start;padding:.45rem 0;border-bottom:1px solid #161616;gap:1rem;font-size:.78rem}
+.res-row:last-child{border:none}
+.res-key{font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
+.res-val{color:var(--white);text-align:right;word-break:break-word}
+
+.terms{display:flex;align-items:flex-start;gap:.5rem;margin-bottom:1.25rem}
+.terms input{accent-color:var(--purple);margin-top:3px;flex-shrink:0}
+.terms label{font-size:.76rem;color:var(--muted2);line-height:1.5}
+.terms label a{color:var(--purple)}
+
+.form-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.75rem;padding-top:1.25rem;border-top:1px solid #161616;flex-wrap:wrap;gap:.875rem}
+.btn-prev{background:transparent;color:var(--white);border:1px solid #2a2a2a;padding:.7rem 1.4rem;font-weight:900;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s}
+.btn-prev:hover{border-color:var(--green);color:var(--green)}
+.btn-next{background:var(--purple);color:var(--black);border:none;padding:.7rem 1.6rem;font-weight:900;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s}
+.btn-next:hover{opacity:.85}
+.btn-submit-form{background:var(--green);color:var(--black);border:none;padding:.7rem 1.6rem;font-weight:900;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s}
+.btn-submit-form:disabled{opacity:.5;cursor:not-allowed}
+
+.success-screen{display:none;padding:5rem 1.5rem;text-align:center;max-width:480px;margin:0 auto}
+.success-screen.show{display:block}
+.suc-ic{font-size:3rem;margin-bottom:1rem}
+.suc-title{font-size:1.4rem;font-weight:900;text-transform:uppercase;color:var(--green);margin-bottom:.5rem}
+.suc-sub{font-size:.86rem;color:var(--muted2);line-height:1.7;margin-bottom:1.75rem}
+.suc-badge{display:inline-flex;align-items:center;gap:.4rem;background:#0f1a00;border:1px solid #2a3a00;color:var(--green);padding:.55rem 1.1rem;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:2px}
+.btn-home{display:inline-block;margin-top:1.5rem;background:var(--green);color:var(--black);padding:.8rem 1.75rem;font-weight:900;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;border-radius:2px}
+
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:600;padding:.7rem 1rem;border-radius:3px;font-size:.73rem;font-weight:700;display:none;align-items:center;gap:.5rem;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:300px}
+.toast.show{display:flex}
+.toast.ok{background:#0f1a00;border:1px solid #2a4000;color:var(--green)}
+.toast.err{background:#1a0000;border:1px solid #2a0000;color:var(--red)}
+.toast.info{background:#0a1020;border:1px solid #1a2a40;color:#60a5fa}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="/">TRAMA</a>
+  <a class="nav-back" href="/">← Volver al inicio</a>
+</nav>
+
+<div id="regWrapper">
+  <div class="reg-hero">
+    <div class="fh-tag">Para creators</div>
+    <h1 class="fh-h1">Subí tu perfil.<br>Empezá a <em>cobrar.</em></h1>
+    <p class="fh-sub">Completá el formulario, esperá la aprobación del equipo TRAMA y empezá a recibir propuestas de marcas que hacen fit con vos.</p>
+  </div>
+
+  <div class="progress"><div class="progress-bar" id="progBar" style="width:16.6%"></div></div>
+
+  <div class="stepper" id="stepper">
+    <div class="step active"><div class="step-num">1</div><div class="step-label">Perfil</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">2</div><div class="step-label">Redes</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">3</div><div class="step-label">Nicho</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">4</div><div class="step-label">Tarifas</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">5</div><div class="step-label">Portfolio</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">6</div><div class="step-label">Revisión</div></div>
+  </div>
+
+  <div class="form-body">
+
+    <!-- PASO 1 -->
+    <div class="form-section active" id="s0">
+      <div class="fs-title">Datos personales</div>
+      <div class="fs-sub">La info básica para que el equipo TRAMA y las marcas sepan quién sos.</div>
+
+      <div class="fg">
+        <label>Foto de perfil</label>
+        <div class="avatar-wrap">
+          <div class="avatar-circle" id="avatarCircle">
+            <span id="avatarPlaceholder">👤</span>
+            <img id="avatarImg" alt="foto de perfil">
+          </div>
+          <div>
+            <label class="avatar-upload-btn">
+              <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="previewAvatar(this)">
+              📷 Subir foto
+            </label>
+            <div class="avatar-status" id="avatarStatus">PNG o JPG · Máx. 2MB</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fg-row">
+        <div class="fg" id="fg-nombre"><label>Nombre<span class="req">*</span></label><input type="text" id="f-nombre" placeholder="Tu nombre"><div class="err-msg">Campo requerido</div></div>
+        <div class="fg" id="fg-apellido"><label>Apellido<span class="req">*</span></label><input type="text" id="f-apellido" placeholder="Apellido"><div class="err-msg">Campo requerido</div></div>
+      </div>
+      <div class="fg" id="fg-email"><label>Email<span class="req">*</span></label><input type="email" id="f-email" placeholder="tu@email.com"><div class="err-msg">Email inválido</div></div>
+      <div class="fg-row">
+        <div class="fg"><label>WhatsApp</label><input type="tel" id="f-tel" placeholder="+54 9 11 0000-0000"></div>
+        <div class="fg"><label>País</label><select id="f-pais"><option value="AR">Argentina</option><option value="UY">Uruguay</option><option value="CL">Chile</option><option value="MX">México</option><option value="otro">Otro</option></select></div>
+      </div>
+      <div class="fg" id="fg-ciudad"><label>Ciudad<span class="req">*</span></label><input type="text" id="f-ciudad" placeholder="Buenos Aires..."><div class="err-msg">Campo requerido</div></div>
+      <div class="fg"><label>Bio corta<span class="req">*</span></label><textarea id="f-bio" placeholder="Contá en 2-3 oraciones quién sos y qué tipo de contenido hacés..." maxlength="300"></textarea><div class="hint">Máx. 300 caracteres. Esta bio aparece en tu perfil.</div></div>
+    </div>
+
+    <!-- PASO 2 -->
+    <div class="form-section" id="s1">
+      <div class="fs-title">Redes sociales & métricas</div>
+      <div class="fs-sub">Activá las plataformas donde tenés presencia. Al menos una.</div>
+      <div class="red-block">
+        <div class="red-header"><span>📸</span><span class="red-name">Instagram</span><div class="red-active"><input type="checkbox" id="chk-ig" onchange="toggleRed('ig')"><label for="chk-ig">Activo</label></div></div>
+        <div class="red-fields" id="rd-ig">
+          <div class="fg-row"><div class="fg"><label>Usuario</label><input type="text" id="ig-user" placeholder="@tuusuario"></div><div class="fg"><label>Seguidores</label><input type="number" id="ig-seg" placeholder="0"></div></div>
+          <div class="fg-row"><div class="fg"><label>Engagement %</label><input type="number" id="ig-er" placeholder="0.0" step="0.1"></div><div class="fg"><label>Alcance promedio</label><input type="number" id="ig-alc" placeholder="por post"></div></div>
+        </div>
+      </div>
+      <div class="red-block">
+        <div class="red-header"><span>🎵</span><span class="red-name">TikTok</span><div class="red-active"><input type="checkbox" id="chk-tt" onchange="toggleRed('tt')"><label for="chk-tt">Activo</label></div></div>
+        <div class="red-fields" id="rd-tt">
+          <div class="fg-row"><div class="fg"><label>Usuario</label><input type="text" id="tt-user" placeholder="@tuusuario"></div><div class="fg"><label>Seguidores</label><input type="number" id="tt-seg" placeholder="0"></div></div>
+          <div class="fg-row"><div class="fg"><label>Eng. Rate %</label><input type="number" id="tt-er" placeholder="0.0" step="0.1"></div><div class="fg"><label>Vistas promedio</label><input type="number" id="tt-vistas" placeholder="por video"></div></div>
+        </div>
+      </div>
+      <div class="red-block">
+        <div class="red-header"><span>▶️</span><span class="red-name">YouTube</span><div class="red-active"><input type="checkbox" id="chk-yt" onchange="toggleRed('yt')"><label for="chk-yt">Activo</label></div></div>
+        <div class="red-fields" id="rd-yt">
+          <div class="fg-row"><div class="fg"><label>Canal</label><input type="text" id="yt-user" placeholder="Nombre del canal"></div><div class="fg"><label>Suscriptores</label><input type="number" id="yt-seg" placeholder="0"></div></div>
+        </div>
+      </div>
+      <div class="red-block">
+        <div class="red-header"><span>🐦</span><span class="red-name">X / Twitter</span><div class="red-active"><input type="checkbox" id="chk-tw" onchange="toggleRed('tw')"><label for="chk-tw">Activo</label></div></div>
+        <div class="red-fields" id="rd-tw">
+          <div class="fg-row"><div class="fg"><label>Usuario</label><input type="text" id="tw-user" placeholder="@tuusuario"></div><div class="fg"><label>Seguidores</label><input type="number" id="tw-seg" placeholder="0"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 3 -->
+    <div class="form-section" id="s2">
+      <div class="fs-title">Nicho & categorías</div>
+      <div class="fs-sub">Elegí hasta 3 categorías. Esto determina qué marcas te van a encontrar.</div>
+      <div class="fg">
+        <label>Categorías<span class="req">*</span></label>
+        <div class="niche-grid" id="nicheGridReg"></div>
+        <div class="err-msg" id="nicheErr" style="display:none">Seleccioná al menos una</div>
+      </div>
+      <div class="fg"><label>Nicho específico</label><input type="text" id="f-nicho-esp" placeholder="Ej: running femenino, vegano sin TACC..."><div class="hint">Opcional pero suma.</div></div>
+      <div class="fg-row">
+        <div class="fg"><label>Audiencia principal</label><select id="f-audiencia"><option value="">Seleccioná</option><option>18-24 años</option><option>25-34 años</option><option>35-44 años</option><option>Mixta</option></select></div>
+        <div class="fg"><label>Idioma</label><select id="f-idioma"><option>Español</option><option>Inglés</option><option>Bilingüe</option></select></div>
+      </div>
+    </div>
+
+    <!-- PASO 4 -->
+    <div class="form-section" id="s3">
+      <div class="fs-title">Tarifas & disponibilidad</div>
+      <div class="fs-sub">Orientativos para las marcas. Siempre se puede negociar.</div>
+      <div class="fg"><label>Moneda</label><select id="f-moneda"><option value="ARS">ARS – Pesos argentinos</option><option value="USD">USD – Dólares</option></select></div>
+      <div class="fg">
+        <label>Precio base por formato</label>
+        <div class="tarifa-row">
+          <div class="fg" style="margin:0"><label style="font-size:.58rem">Story</label><input type="number" id="t-story" placeholder="0"></div>
+          <div class="fg" style="margin:0"><label style="font-size:.58rem">Reel / TikTok</label><input type="number" id="t-reel" placeholder="0"></div>
+          <div class="fg" style="margin:0"><label style="font-size:.58rem">Post feed</label><input type="number" id="t-post" placeholder="0"></div>
+        </div>
+      </div>
+      <div class="fg"><label>Canje</label><select id="f-canje"><option value="">Seleccioná</option><option>Sí, acepto canje</option><option>Solo canje + fee</option><option>No, solo pago</option></select></div>
+      <div class="fg">
+        <label>Disponibilidad<span class="req">*</span></label>
+        <div class="dispon-pills">
+          <button type="button" class="dispon-pill" onclick="toggleDisp(this)">Inmediata</button>
+          <button type="button" class="dispon-pill" onclick="toggleDisp(this)">En 2 semanas</button>
+          <button type="button" class="dispon-pill" onclick="toggleDisp(this)">En 1 mes</button>
+          <button type="button" class="dispon-pill" onclick="toggleDisp(this)">Solo proyectos largos</button>
+          <button type="button" class="dispon-pill" onclick="toggleDisp(this)">Consultar</button>
+        </div>
+      </div>
+      <div class="fg"><label>Notas</label><textarea id="f-dispon-nota" placeholder="Ej: Solo 2 colaboraciones por mes..." style="min-height:65px"></textarea></div>
+    </div>
+
+    <!-- PASO 5 -->
+    <div class="form-section" id="s4">
+      <div class="fs-title">Portfolio & ejemplos</div>
+      <div class="fs-sub">Mostrá lo mejor que hiciste. Pegá links a contenido publicado.</div>
+      <div class="fg">
+        <label>Links a contenido publicado</label>
+        <div class="link-inputs" id="linkInputs">
+          <div class="link-item"><input type="url" placeholder="https://www.instagram.com/p/..."><button type="button" class="link-rm" onclick="rmLink(this)">✕</button></div>
+        </div>
+        <button type="button" class="link-add" onclick="addLink()">+ Agregar link</button>
+      </div>
+      <div class="fg"><label>Colaboraciones anteriores</label><textarea id="f-colabs" placeholder="Marcas con las que ya trabajaste. Ej: Nike, Natura, Mercado Libre..."></textarea><div class="hint">Opcional, pero suma mucho para las marcas.</div></div>
+    </div>
+
+    <!-- PASO 6 -->
+    <div class="form-section" id="s5">
+      <div class="fs-title">Revisá antes de enviar</div>
+      <div class="fs-sub">Chequeá que todo esté bien. Podés volver atrás para editar.</div>
+      <div class="resumen" id="resumen"></div>
+      <div class="terms">
+        <input type="checkbox" id="chkTerms">
+        <label for="chkTerms">Acepto los <a href="#">Términos y condiciones</a> de TRAMA y autorizo el uso de mi información para matchmaking con marcas.</label>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn-prev" id="btnPrev" onclick="prevStep()" style="visibility:hidden">← Atrás</button>
+      <button class="btn-next" id="btnNext" onclick="nextStep()">Continuar →</button>
+      <button class="btn-submit-form" id="btnSubmitF" onclick="submitForm()" style="display:none">Enviar perfil →</button>
+    </div>
+  </div>
+</div>
+
+<div class="success-screen" id="successReg">
+  <div class="suc-ic">🎉</div>
+  <div class="suc-title">¡Perfil enviado!</div>
+  <div class="suc-sub">El equipo TRAMA va a revisar tu perfil en las próximas <strong>48-72 horas</strong>. Te avisamos por mail cuando esté aprobado y visible en la bolsa.</div>
+  <div class="suc-badge">⏳ Pendiente de aprobación</div>
+  <a class="btn-home" href="/">← Volver al inicio</a>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL  = 'https://mcpmabvxmdepastmpzbi.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
+
+const NICHES = ['Lifestyle','Fitness','Gastronomía','Tech','Moda','Fotografía','Viajes','Gaming','Música','Humor','Educación','Belleza'];
+let regStep=0, selNiches=[], selDisp=[], avatarFile=null;
+const REG_STEPS=6;
+
+async function sbPost(table, body){
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`,{
+    method:'POST',
+    headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify(body)
+  });
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'Error '+r.status)}
+}
+
+async function uploadAvatar(email){
+  if(!avatarFile)return null;
+  const ext=avatarFile.name.split('.').pop();
+  const path=`${email.replace(/[@.]/g,'_')}_${Date.now()}.${ext}`;
+  const r=await fetch(`${SB_URL}/storage/v1/object/avatars/${path}`,{
+    method:'POST',
+    headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':avatarFile.type,'x-upsert':'true'},
+    body:avatarFile
+  });
+  if(!r.ok)throw new Error('Error al subir la foto');
+  return `${SB_URL}/storage/v1/object/public/avatars/${path}`;
+}
+
+function previewAvatar(input){
+  const file=input.files[0];
+  if(!file)return;
+  if(file.size>2*1024*1024){showToast('La foto no puede superar 2MB','err');return}
+  avatarFile=file;
+  const url=URL.createObjectURL(file);
+  const img=document.getElementById('avatarImg');
+  img.src=url; img.style.display='block';
+  document.getElementById('avatarPlaceholder').style.display='none';
+  document.getElementById('avatarCircle').style.borderColor='var(--purple)';
+  document.getElementById('avatarStatus').textContent='✓ '+file.name;
+  document.getElementById('avatarStatus').style.color='var(--purple)';
+}
+
+(function buildNiches(){
+  const g=document.getElementById('nicheGridReg');
+  NICHES.forEach(n=>{
+    const b=document.createElement('button');
+    b.type='button';b.className='niche-pill';b.textContent=n;
+    b.onclick=()=>{
+      if(b.classList.contains('on')){b.classList.remove('on');selNiches=selNiches.filter(x=>x!==n)}
+      else if(selNiches.length<3){b.classList.add('on');selNiches.push(n)}
+      else showToast('Máximo 3 categorías','err');
+    };
+    g.appendChild(b);
+  });
+})();
+
+function toggleRed(r){document.getElementById('rd-'+r).classList.toggle('show',document.getElementById('chk-'+r).checked)}
+function toggleDisp(btn){
+  btn.classList.toggle('on');
+  const t=btn.textContent;
+  if(btn.classList.contains('on'))selDisp.push(t);
+  else selDisp=selDisp.filter(x=>x!==t);
+}
+function addLink(){
+  const c=document.getElementById('linkInputs');
+  const d=document.createElement('div');d.className='link-item';
+  d.innerHTML='<input type="url" placeholder="https://..."><button type="button" class="link-rm" onclick="rmLink(this)">✕</button>';
+  c.appendChild(d);
+}
+function rmLink(btn){if(document.querySelectorAll('.link-item').length>1)btn.parentElement.remove()}
+
+function updateStepper(){
+  document.querySelectorAll('#stepper .step').forEach((el,i)=>{
+    el.classList.remove('active','done');
+    if(i<regStep)el.classList.add('done');
+    else if(i===regStep)el.classList.add('active');
+  });
+  document.getElementById('progBar').style.width=((regStep+1)/REG_STEPS*100)+'%';
+  document.getElementById('btnPrev').style.visibility=regStep===0?'hidden':'visible';
+  const last=regStep===REG_STEPS-1;
+  document.getElementById('btnNext').style.display=last?'none':'inline-block';
+  document.getElementById('btnSubmitF').style.display=last?'inline-block':'none';
+}
+function showStep(n){
+  document.querySelectorAll('.form-section').forEach((s,i)=>s.classList.toggle('active',i===n));
+  if(n===REG_STEPS-1)buildResumen();
+  updateStepper();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function nextStep(){if(validate(regStep)){regStep++;showStep(regStep)}}
+function prevStep(){if(regStep>0){regStep--;showStep(regStep)}}
+
+function validate(s){
+  let ok=true;
+  if(s===0){
+    ['nombre','apellido','email','ciudad'].forEach(f=>{
+      const el=document.getElementById('f-'+f);
+      const fg=document.getElementById('fg-'+f);
+      const v=el?el.value.trim():'';
+      const inv=!v||(f==='email'&&!/\S+@\S+\.\S+/.test(v));
+      fg&&fg.classList.toggle('has-err',inv);
+      if(inv)ok=false;
+    });
+  }
+  if(s===1){
+    const any=['ig','tt','yt','tw'].some(r=>document.getElementById('chk-'+r)?.checked);
+    if(!any){showToast('Activá al menos una red social','err');ok=false}
+  }
+  if(s===2){
+    const no=selNiches.length===0;
+    document.getElementById('nicheErr').style.display=no?'block':'none';
+    if(no)ok=false;
+  }
+  return ok;
+}
+
+function buildResumen(){
+  const rows=[
+    ['Nombre',`${document.getElementById('f-nombre').value} ${document.getElementById('f-apellido').value}`],
+    ['Email',document.getElementById('f-email').value],
+    ['Ciudad',document.getElementById('f-ciudad').value],
+    ['Nicho',selNiches.join(', ')||'—'],
+    ['Redes',['ig','tt','yt','tw'].filter(r=>document.getElementById('chk-'+r)?.checked).map(r=>r.toUpperCase()).join(', ')||'—'],
+    ['Disponibilidad',selDisp.join(', ')||'—'],
+    ['Tarifa story',document.getElementById('t-story').value?`$${document.getElementById('t-story').value} ${document.getElementById('f-moneda').value}`:'—'],
+    ['Foto',avatarFile?'✓ '+avatarFile.name:'Sin foto'],
+  ];
+  document.getElementById('resumen').innerHTML=rows.map(([k,v])=>`<div class="res-row"><span class="res-key">${k}</span><span class="res-val">${v}</span></div>`).join('');
+}
+
+async function submitForm(){
+  if(!document.getElementById('chkTerms').checked){showToast('Aceptá los términos para continuar','err');return}
+  const btn=document.getElementById('btnSubmitF');
+  btn.disabled=true;btn.textContent='Enviando...';
+  const email=document.getElementById('f-email').value.trim();
+  const links=[...document.querySelectorAll('#linkInputs input')].map(i=>i.value.trim()).filter(Boolean);
+  const plats=['ig','tt','yt','tw'].filter(r=>document.getElementById('chk-'+r)?.checked).map(r=>r.toUpperCase());
+  try{
+    let avatar_url=null;
+    if(avatarFile){btn.textContent='Subiendo foto...';avatar_url=await uploadAvatar(email)}
+    btn.textContent='Guardando perfil...';
+    await sbPost('creators',{
+      nombre:document.getElementById('f-nombre').value.trim(),
+      apellido:document.getElementById('f-apellido').value.trim(),
+      email,
+      tel:document.getElementById('f-tel').value.trim()||null,
+      pais:document.getElementById('f-pais').value,
+      ciudad:document.getElementById('f-ciudad').value.trim(),
+      bio:document.getElementById('f-bio').value.trim()||null,
+      ig_user:document.getElementById('ig-user').value.trim()||null,
+      ig_seg:parseInt(document.getElementById('ig-seg').value)||null,
+      ig_er:parseFloat(document.getElementById('ig-er').value)||null,
+      ig_alc:parseInt(document.getElementById('ig-alc').value)||null,
+      tt_user:document.getElementById('tt-user').value.trim()||null,
+      tt_seg:parseInt(document.getElementById('tt-seg').value)||null,
+      tt_er:parseFloat(document.getElementById('tt-er').value)||null,
+      tt_vistas:parseInt(document.getElementById('tt-vistas').value)||null,
+      yt_user:document.getElementById('yt-user').value.trim()||null,
+      yt_seg:parseInt(document.getElementById('yt-seg').value)||null,
+      tw_user:document.getElementById('tw-user').value.trim()||null,
+      tw_seg:parseInt(document.getElementById('tw-seg').value)||null,
+      plats,
+      niches:selNiches,
+      nicho_esp:document.getElementById('f-nicho-esp').value.trim()||null,
+      audiencia:document.getElementById('f-audiencia').value||null,
+      idioma:document.getElementById('f-idioma').value,
+      moneda:document.getElementById('f-moneda').value,
+      t_story:parseInt(document.getElementById('t-story').value)||null,
+      t_reel:parseInt(document.getElementById('t-reel').value)||null,
+      t_post:parseInt(document.getElementById('t-post').value)||null,
+      canje:document.getElementById('f-canje').value||null,
+      disponibilidad:selDisp,
+      dispon_nota:document.getElementById('f-dispon-nota').value.trim()||null,
+      links,
+      colabs:document.getElementById('f-colabs').value.trim()||null,
+      avatar_url,
+      status:'pendiente',
+    });
+    document.getElementById('regWrapper').style.display='none';
+    document.getElementById('successReg').classList.add('show');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(e){
+    showToast(e.message.includes('unique')?'Este email ya está registrado':'Error: '+e.message,'err');
+    btn.disabled=false;btn.textContent='Enviar perfil →';
+  }
+}
+
+let tt;
+function showToast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+type;
+  clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+showStep(0);
+</script>
+</body>
+</html>

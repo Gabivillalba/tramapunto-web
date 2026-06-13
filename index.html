@@ -268,7 +268,7 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
   </ul>
   <div class="nav-right">
     <a class="nav-pill ghost" href="./registro.html" id="navCreatorBtn">Soy creator</a>
-    <a class="nav-pill" href="#" onclick="showPage('bolsa');return false" id="navMarcaBtn" style="background:#222;color:var(--white);border:1.5px solid #333">Soy marca</a>
+    <a class="nav-pill" href="./marcas.html" id="navMarcaBtn" style="background:#222;color:var(--white);border:1.5px solid #333">Soy marca</a>
     <a class="nav-pill" id="navPerfilBtn" href="#" style="background:#1a1a1a;color:var(--green);border:1px solid #2a3a00">Mi perfil</a>
     <button class="ham" id="hamBtn" onclick="toggleMenu()">
       <span></span><span></span><span></span>
@@ -282,18 +282,18 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
   <a href="#creators" onclick="showPage('landing');closeMenu()">Para creators</a>
   <a href="#" onclick="showPage('bolsa');closeMenu()">Bolsa de perfiles</a>
   <a class="mob-pill purple" href="./registro.html">Soy creator →</a>
-  <a class="mob-pill" href="#" onclick="showPage('bolsa');closeMenu()">Ver creators →</a>
+  <a class="mob-pill" href="./marcas.html">Soy marca →</a>
 </div>
 
 <!-- LANDING -->
 <div class="page active" id="page-landing">
   <div id="hero">
-    <div class="half marca" onclick="document.getElementById('marcas').scrollIntoView({behavior:'smooth'})">
+    <div class="half marca" onclick="window.location.href='./marcas.html'">
       <div class="half-glow"></div>
       <div class="h-tag">Para marcas</div>
       <h2 class="h-title">Encontrá el creator que tu marca <em>necesita.</em></h2>
       <p class="h-copy">Tenemos una red verificada con datos reales. <strong>Vos elegís, nosotros conectamos.</strong></p>
-      <a href="#" class="h-btn btn-g" onclick="event.stopPropagation();showPage('bolsa');return false">Ver creators →</a>
+      <a href="./marcas.html" class="h-btn btn-g" onclick="event.stopPropagation()">Soy marca →</a>
       <div class="h-proof">
         <div><div class="proof-n">+120</div><div class="proof-l">Creators verificados</div></div>
         <div><div class="proof-n">4M+</div><div class="proof-l">Alcance combinado</div></div>
@@ -345,7 +345,7 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
         <div class="cta-tag">Empezá ahora</div>
         <h3 class="cta-h">Contanos qué necesitás</h3>
         <p class="cta-p">Sin compromiso. Entendemos tu proyecto y te proponemos un camino.</p>
-        <a href="#" class="btn-solid" onclick="showPage('bolsa');return false">Explorar creators →</a>
+        <a href="./marcas.html" class="btn-solid">Registrarme como marca →</a>
         <button class="btn-out" style="margin-top:.5rem">Hablar con el equipo</button>
       </div>
     </div>

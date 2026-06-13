@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TRAMA — Mi perfil</title>
+<title>TRAMA. — Mi perfil</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -15,7 +15,6 @@
 html{scroll-behavior:smooth}
 body{background:var(--black);color:var(--white);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
 
-/* NAV */
 nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,.96);backdrop-filter:blur(12px);border-bottom:1px solid #1a1a1a}
 .logo{font-size:1.2rem;font-weight:900;letter-spacing:.18em;color:var(--green);text-decoration:none}
 .nav-r{display:flex;align-items:center;gap:.75rem}
@@ -24,37 +23,62 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .btn-logout{background:none;border:1px solid #2a2a2a;color:var(--muted);padding:.38rem .875rem;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s}
 .btn-logout:hover{border-color:var(--red);color:var(--red)}
 
-/* VISTAS */
 .view{display:none;padding-top:56px;min-height:100vh}
 .view.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.view.active{animation:fadeIn .3s ease}
 
-/* ══ LOGIN ══ */
-#vLogin{display:flex;align-items:center;justify-content:center;padding:5rem 1.5rem}
-.login-box{background:var(--g1);border:1px solid #222;padding:2.5rem;width:100%;max-width:400px;border-radius:3px;text-align:center}
-.login-logo{font-size:1.4rem;font-weight:900;letter-spacing:.18em;color:var(--green);margin-bottom:2rem}
-.login-h{font-size:1.3rem;font-weight:900;text-transform:uppercase;letter-spacing:-.02em;margin-bottom:.5rem}
-.login-sub{font-size:.82rem;color:var(--muted2);line-height:1.6;margin-bottom:2rem}
-.btn-google{display:flex;align-items:center;justify-content:center;gap:.75rem;width:100%;background:var(--white);color:#1a1a1a;border:none;padding:.9rem;font-weight:700;font-size:.88rem;cursor:pointer;border-radius:3px;transition:opacity .2s;margin-bottom:1rem}
-.btn-google:hover{opacity:.9}
-.btn-google svg{width:20px;height:20px;flex-shrink:0}
-.login-divider{display:flex;align-items:center;gap:.75rem;margin:1.25rem 0;color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
-.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:#222}
-.login-note{font-size:.72rem;color:var(--muted);line-height:1.5;margin-top:1.25rem}
-.login-note a{color:var(--green)}
-.login-loading{display:none;flex-direction:column;align-items:center;gap:1rem;padding:1rem 0}
-.spin{width:32px;height:32px;border:2px solid #222;border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+/* LOGIN */
+#vLogin{display:flex;align-items:center;justify-content:center;padding:2rem 1.5rem;min-height:100vh}
+.login-box{background:var(--g1);border:1px solid #222;padding:2.25rem;width:100%;max-width:400px;border-radius:3px}
+.login-logo{font-size:1.3rem;font-weight:900;letter-spacing:.18em;color:var(--green);margin-bottom:1.75rem;text-align:center}
+
+/* TABS LOGIN */
+.login-tabs{display:flex;border-bottom:1px solid #222;margin-bottom:1.75rem}
+.ltab{flex:1;padding:.7rem;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;text-align:center}
+.ltab.active{color:var(--green);border-bottom-color:var(--green)}
+
+.ltab-content{display:none}
+.ltab-content.active{display:block}
+
+/* REGISTRO TIPO */
+.tipo-opts{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.25rem}
+.tipo-opt{display:flex;align-items:center;gap:.75rem;padding:.875rem 1rem;border-radius:2px;cursor:pointer;transition:all .2s;border:1.5px solid #222}
+.tipo-opt.selected-creator{border-color:var(--purple);background:#1a0a2a}
+.tipo-opt.selected-marca{border-color:var(--green);background:#0f1a00}
+.tipo-opt:hover{border-color:#444}
+.tipo-icon{font-size:1.25rem;flex-shrink:0}
+.tipo-label{font-size:.8rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.tipo-desc{font-size:.68rem;color:var(--muted2);margin-top:.15rem}
+
+.fg{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.875rem}
+.fg label{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.fg input{background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.65rem .875rem;font-size:.86rem;font-family:inherit;outline:none;border-radius:2px;transition:border-color .2s;width:100%}
+.fg input:focus{border-color:var(--green)}
+.fg input.err{border-color:var(--red)!important}
+.fg input::placeholder{color:#444}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+
+.btn-primary{width:100%;border:none;padding:.85rem;font-weight:900;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s;margin-top:.5rem}
+.btn-primary:hover{opacity:.87}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed}
+.btn-green{background:var(--green);color:var(--black)}
+.btn-purple{background:var(--purple);color:var(--black)}
+
+.form-err{font-size:.72rem;color:var(--red);background:#1a0000;border:1px solid #2a0000;padding:.55rem .875rem;border-radius:2px;margin-bottom:.875rem;display:none}
+.form-err.show{display:block}
+
+.hint-link{font-size:.72rem;color:var(--muted);text-align:center;margin-top:1rem}
+.hint-link a{color:var(--green);cursor:pointer}
+
+/* SPINNER */
+.spin{width:28px;height:28px;border:2px solid #222;border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ══ DASHBOARD ══ */
+/* DASHBOARD */
 #vDash{padding-top:56px}
-
-/* HEADER PERFIL */
 .dash-header{background:var(--g1);border-bottom:1px solid #1a1a1a;padding:2rem 1.5rem}
 @media(min-width:768px){.dash-header{padding:2.5rem 4rem}}
 .dash-header-inner{display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap}
-.dash-av{width:56px;height:56px;min-width:56px;border-radius:50%;overflow:hidden;border:2px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;flex-shrink:0}
+.dash-av{width:56px;height:56px;min-width:56px;border-radius:50%;border:2px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;flex-shrink:0;overflow:hidden}
 .dash-av img{width:100%;height:100%;object-fit:cover}
 .dash-name{font-size:1.1rem;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
 .dash-email{font-size:.75rem;color:var(--muted);margin-top:.2rem}
@@ -62,102 +86,59 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .badge-creator{background:#1a0a2a;color:var(--purple);border:1px solid #3a1a5a}
 .badge-marca{background:#0f1a00;color:var(--green);border:1px solid #2a4000}
 .badge-corp{background:#0a1020;color:var(--blue);border:1px solid #1a2a40}
-.badge-status-pend{background:#1a1200;color:var(--amber);border:1px solid #2a2000;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
-.badge-status-apro{background:#0f1a00;color:var(--green);border:1px solid #1a3000;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
-.badge-status-rech{background:#1a0000;color:var(--red);border:1px solid #2a0000;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
-.dash-header-right{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:.5rem}
+.s-pend{background:#1a1200;color:var(--amber);border:1px solid #2a2000;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
+.s-apro{background:#0f1a00;color:var(--green);border:1px solid #1a3000;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
+.s-rech{background:#1a0000;color:var(--red);border:1px solid #2a0000;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
 
-/* TABS */
 .dash-tabs{display:flex;border-bottom:1px solid #161616;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .tab{padding:.875rem 1.5rem;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none}
 .tab:hover{color:var(--white)}
 .tab.active{color:var(--green);border-bottom-color:var(--green)}
 
-/* CONTENIDO TABS */
 .tab-content{display:none;padding:2rem 1.5rem}
 @media(min-width:768px){.tab-content{padding:2.5rem 4rem}}
 .tab-content.active{display:block}
 
-/* SECCIÓN */
 .sec-title{font-size:.62rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--green);margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem}
 .sec-title::before{content:'';width:16px;height:1px;background:var(--green)}
 
-/* CARDS INFO */
 .info-grid{display:grid;grid-template-columns:1fr;gap:1px;background:#161616;margin-bottom:2rem}
 @media(min-width:600px){.info-grid{grid-template-columns:1fr 1fr}}
 .info-card{background:var(--black);padding:1.25rem}
 .ic-label{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem}
-.ic-val{font-size:.9rem;font-weight:700;color:var(--white)}
+.ic-val{font-size:.9rem;font-weight:700}
 .ic-val.muted{color:var(--muted2);font-weight:400}
 
-/* STATS */
-.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:#161616;margin-bottom:2rem}
-@media(min-width:600px){.stats-row{grid-template-columns:repeat(4,1fr)}}
-.stat-box{background:var(--black);padding:1.25rem}
-.stat-n{font-size:1.6rem;font-weight:900;letter-spacing:-.02em}
-.stat-l{font-size:.62rem;color:var(--muted);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem}
-
-/* ESTADO PERFIL */
-.estado-box{background:var(--g1);border:1px solid #222;border-radius:3px;padding:1.5rem;margin-bottom:2rem;display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap}
-.estado-icon{font-size:1.75rem;flex-shrink:0}
-.estado-title{font-size:.88rem;font-weight:900;text-transform:uppercase;margin-bottom:.35rem}
-.estado-desc{font-size:.78rem;color:var(--muted2);line-height:1.6}
-
-/* REDES */
 .redes-grid{display:grid;grid-template-columns:1fr;gap:1px;background:#161616;margin-bottom:2rem}
 @media(min-width:600px){.redes-grid{grid-template-columns:1fr 1fr}}
 .red-card{background:var(--black);padding:1.25rem;display:flex;align-items:center;gap:.875rem}
 .red-icon{font-size:1.25rem}
-.red-info{flex:1}
 .red-name{font-size:.78rem;font-weight:700}
 .red-user{font-size:.72rem;color:var(--muted2);margin-top:.1rem}
 .red-stat{font-size:.72rem;color:var(--muted);margin-top:.1rem}
 .red-empty{color:var(--muted);font-style:italic;font-size:.75rem}
 
-/* ACTIVIDAD / CONEXIONES */
-.activity-list{display:flex;flex-direction:column;gap:1px;background:#161616;margin-bottom:2rem}
-.activity-item{background:var(--black);padding:1.1rem 1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
-.activity-item:hover{background:#0d0d0d}
-.act-icon{width:36px;height:36px;min-width:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
-.act-info{flex:1;min-width:0}
-.act-title{font-size:.82rem;font-weight:700}
-.act-sub{font-size:.7rem;color:var(--muted);margin-top:.1rem}
-.act-date{font-size:.68rem;color:var(--muted);white-space:nowrap}
-.empty-activity{padding:2.5rem;text-align:center;color:var(--muted);font-size:.82rem}
-.empty-activity div{font-size:1.75rem;margin-bottom:.75rem}
+.estado-box{background:var(--g1);border:1px solid #222;border-radius:3px;padding:1.5rem;margin-bottom:2rem;display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap}
+.estado-title{font-size:.88rem;font-weight:900;text-transform:uppercase;margin-bottom:.35rem}
+.estado-desc{font-size:.78rem;color:var(--muted2);line-height:1.6}
 
-/* EDITAR */
-.edit-form{display:grid;grid-template-columns:1fr;gap:1rem;margin-bottom:2rem}
-@media(min-width:600px){.edit-form{grid-template-columns:1fr 1fr}}
-.fg{display:flex;flex-direction:column;gap:.3rem}
-.fg label{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.fg input,.fg select,.fg textarea{background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.65rem .875rem;font-size:.86rem;font-family:inherit;outline:none;border-radius:2px;transition:border-color .2s;width:100%}
-.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--green)}
-.fg input::placeholder,.fg textarea::placeholder{color:#444}
-.fg textarea{resize:vertical;min-height:80px}
-.fg select option{background:#1a1a1a}
+.empty-state{padding:2.5rem;text-align:center;color:var(--muted);font-size:.82rem}
+.empty-state div{font-size:1.75rem;margin-bottom:.75rem}
+
+.edit-grid{display:grid;grid-template-columns:1fr;gap:.875rem;margin-bottom:1.5rem}
+@media(min-width:600px){.edit-grid{grid-template-columns:1fr 1fr}}
+.fg-edit{display:flex;flex-direction:column;gap:.3rem}
+.fg-edit label{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.fg-edit input,.fg-edit textarea,.fg-edit select{background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.65rem .875rem;font-size:.86rem;font-family:inherit;outline:none;border-radius:2px;transition:border-color .2s;width:100%}
+.fg-edit input:focus,.fg-edit textarea:focus,.fg-edit select:focus{border-color:var(--green)}
+.fg-edit textarea{resize:vertical;min-height:80px}
+.fg-edit select option{background:#1a1a1a}
+.fg-edit input::placeholder,.fg-edit textarea::placeholder{color:#444}
 .fg-full{grid-column:1/-1}
 .btn-save{background:var(--green);color:var(--black);border:none;padding:.75rem 1.75rem;font-weight:900;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s}
 .btn-save:hover{opacity:.85}
 .btn-save:disabled{opacity:.5;cursor:not-allowed}
 
-/* BOLSA PREVIEW (marcas) */
-.creator-cards{display:grid;grid-template-columns:1fr;gap:1px;background:#161616}
-@media(min-width:520px){.creator-cards{grid-template-columns:1fr 1fr}}
-@media(min-width:900px){.creator-cards{grid-template-columns:repeat(3,1fr)}}
-.c-card{background:var(--black);padding:1.25rem;transition:background .2s}
-.c-card:hover{background:#0d0d0d}
-.c-card-top{display:flex;align-items:center;gap:.75rem;margin-bottom:.875rem}
-.c-av{width:40px;height:40px;min-width:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem;overflow:hidden;position:relative}
-.c-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.c-name{font-size:.82rem;font-weight:900;text-transform:uppercase}
-.c-niche{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-top:.1rem}
-.c-stats{display:flex;gap:1rem;font-size:.7rem;color:var(--muted2);margin-bottom:.875rem}
-.c-stats strong{color:var(--white);font-weight:700;display:block;font-size:.78rem}
-.btn-contactar{width:100%;background:var(--green);color:var(--black);border:none;padding:.6rem;font-weight:900;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s}
-.btn-contactar:hover{opacity:.85}
-
-/* TOAST */
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:600;padding:.7rem 1rem;border-radius:3px;font-size:.73rem;font-weight:700;display:none;align-items:center;gap:.5rem;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:300px}
 .toast.show{display:flex}
 .toast.ok{background:#0f1a00;border:1px solid #2a4000;color:var(--green)}
@@ -168,7 +149,7 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 <body>
 
 <nav>
-  <a class="logo" href="/">TRAMA</a>
+  <a class="logo" href="/">TRAMA.</a>
   <div class="nav-r">
     <a class="nav-back" href="/">← Inicio</a>
     <button class="btn-logout" id="btnLogout" style="display:none" onclick="doLogout()">Cerrar sesión</button>
@@ -176,71 +157,74 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 </nav>
 
 <!-- ══ LOGIN ══ -->
-<div class="view active" id="vLogin" style="padding-top:56px;display:flex;align-items:center;justify-content:center;min-height:100vh">
+<div class="view active" id="vLogin">
   <div class="login-box">
     <div class="login-logo">TRAMA</div>
-    <h2 class="login-h">¿Quién sos?</h2>
-    <p class="login-sub">Elegí cómo querés usar TRAMA. Después iniciás sesión con Google.</p>
 
-    <div style="display:flex;flex-direction:column;gap:.625rem;margin-bottom:1.75rem">
-      <a href="./registro.html" style="display:flex;align-items:center;gap:.875rem;background:#1a0a2a;border:1.5px solid var(--purple);padding:1rem 1.25rem;border-radius:3px;text-decoration:none;transition:all .2s" onmouseover="this.style.borderColor='#d4a0ff'" onmouseout="this.style.borderColor='var(--purple)'">
-        <span style="font-size:1.5rem">🎥</span>
-        <div style="flex:1;text-align:left">
-          <div style="font-size:.82rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--purple)">Soy creator</div>
-          <div style="font-size:.72rem;color:var(--muted2);margin-top:.15rem">Subí tu perfil y recibí propuestas de marcas</div>
-        </div>
-        <span style="color:var(--purple);font-size:.85rem">→</span>
-      </a>
-      <a href="./marcas.html" style="display:flex;align-items:center;gap:.875rem;background:#0f1a00;border:1.5px solid var(--green);padding:1rem 1.25rem;border-radius:3px;text-decoration:none;transition:all .2s" onmouseover="this.style.borderColor='#e0ff80'" onmouseout="this.style.borderColor='var(--green)'">
-        <span style="font-size:1.5rem">🏢</span>
-        <div style="flex:1;text-align:left">
-          <div style="font-size:.82rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--green)">Soy marca</div>
-          <div style="font-size:.72rem;color:var(--muted2);margin-top:.15rem">Encontrá creators y gestioná tus campañas</div>
-        </div>
-        <span style="color:var(--green);font-size:.85rem">→</span>
-      </a>
+    <div class="login-tabs">
+      <button class="ltab active" onclick="switchLTab(0,this)">Ingresar</button>
+      <button class="ltab" onclick="switchLTab(1,this)">Registrarme</button>
     </div>
 
-    <div class="login-divider">ya tengo cuenta</div>
-
-    <button class="btn-google" onclick="loginGoogle()">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-      </svg>
-      Ingresar con Google
-    </button>
-    <div class="login-loading" id="loginLoading">
-      <div class="spin"></div>
-      <span style="font-size:.78rem;color:var(--muted)">Conectando...</span>
+    <!-- INGRESAR -->
+    <div class="ltab-content active" id="lt0">
+      <div class="form-err" id="loginErr"></div>
+      <div class="fg"><label>Email</label><input type="email" id="l-email" placeholder="tu@email.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="fg"><label>Contraseña</label><input type="password" id="l-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn-primary btn-green" id="btnLogin" onclick="doLogin()">Ingresar →</button>
+      <div class="hint-link"><a onclick="showForgot()">Olvidé mi contraseña</a></div>
     </div>
+
+    <!-- REGISTRARSE -->
+    <div class="ltab-content" id="lt1">
+      <div class="form-err" id="regErr"></div>
+      <p style="font-size:.78rem;color:var(--muted2);margin-bottom:1rem;line-height:1.5">Primero elegí qué sos, después completás tu perfil completo.</p>
+
+      <div class="tipo-opts">
+        <div class="tipo-opt" id="opt-creator" onclick="selTipo('creator')">
+          <span class="tipo-icon">🎥</span>
+          <div>
+            <div class="tipo-label" style="color:var(--purple)">Soy creator</div>
+            <div class="tipo-desc">Subí tu perfil y recibí propuestas de marcas</div>
+          </div>
+        </div>
+        <div class="tipo-opt" id="opt-marca" onclick="selTipo('marca')">
+          <span class="tipo-icon">🏢</span>
+          <div>
+            <div class="tipo-label" style="color:var(--green)">Soy marca</div>
+            <div class="tipo-desc">Encontrá creators y gestioná tus campañas</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fg-row">
+        <div class="fg"><label>Nombre</label><input type="text" id="r-nombre" placeholder="Tu nombre"></div>
+        <div class="fg"><label>Apellido</label><input type="text" id="r-apellido" placeholder="Apellido"></div>
+      </div>
+      <div class="fg"><label>Email</label><input type="email" id="r-email" placeholder="tu@email.com"></div>
+      <div class="fg"><label>Contraseña</label><input type="password" id="r-pass" placeholder="Mínimo 8 caracteres"></div>
+      <div class="fg"><label>Confirmar contraseña</label><input type="password" id="r-pass2" placeholder="Repetí la contraseña"></div>
+      <button class="btn-primary btn-green" id="btnReg" onclick="doRegister()">Crear cuenta →</button>
+      <div class="hint-link" style="margin-top:.75rem;font-size:.7rem;color:var(--muted)">Después de crear tu cuenta vas a completar tu perfil completo.</div>
+    </div>
+
   </div>
 </div>
 
 <!-- ══ DASHBOARD ══ -->
 <div class="view" id="vDash">
-
-  <!-- HEADER -->
   <div class="dash-header">
     <div class="dash-header-inner">
       <div class="dash-av" id="dashAv">?</div>
       <div>
         <div class="dash-name" id="dashName">—</div>
         <div class="dash-email" id="dashEmail">—</div>
-        <div id="dashBadge"></div>
+        <div id="dashBadge" style="margin-top:.4rem"></div>
       </div>
-      <div class="dash-header-right" id="dashHeaderRight"></div>
     </div>
   </div>
-
-  <!-- TABS -->
   <div class="dash-tabs" id="dashTabs"></div>
-
-  <!-- CONTENIDO -->
   <div id="dashContent"></div>
-
 </div>
 
 <div class="toast" id="toast"></div>
@@ -251,386 +235,383 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 
 let currentUser = null;
 let userProfile = null;
-let userType = null; // 'creator' | 'marca'
-let activeTab = 0;
+let userType    = null;
+let regTipo     = null;
 
-// ── SUPABASE AUTH ──
-async function sbAuth(path, method='GET', body=null, token=null){
-  const headers = {
-    'apikey': SB_ANON,
-    'Authorization': `Bearer ${token||SB_ANON}`,
-    'Content-Type': 'application/json',
-  };
+// ── HELPERS ──
+function getToken(){ return localStorage.getItem('sb_token') }
+function saveSession(access, refresh){
+  localStorage.setItem('sb_token', access);
+  if(refresh) localStorage.setItem('sb_refresh', refresh);
+}
+function clearSession(){
+  ['sb_token','sb_refresh','trama_creator','trama_marca'].forEach(k=>localStorage.removeItem(k));
+}
+
+async function sbFetch(path, method='GET', body=null, token=null){
+  const headers = {'apikey':SB_ANON,'Authorization':`Bearer ${token||SB_ANON}`,'Content-Type':'application/json'};
   const opts = {method, headers};
   if(body) opts.body = JSON.stringify(body);
   const r = await fetch(`${SB_URL}${path}`, opts);
-  return r.ok ? r.json() : null;
+  const data = await r.json().catch(()=>({}));
+  return {ok:r.ok, data, status:r.status};
 }
 
 async function sbGet(table, filter='', token=null){
-  const r = await fetch(`${SB_URL}/rest/v1/${table}?${filter}`, {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?${filter}`,{
     headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token||SB_ANON}`}
   });
   return r.ok ? r.json() : [];
 }
 
 async function sbPatch(table, filter, body, token){
-  const r = await fetch(`${SB_URL}/rest/v1/${table}?${filter}`, {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?${filter}`,{
     method:'PATCH',
-    headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token}`, 'Content-Type':'application/json','Prefer':'return=minimal'},
+    headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token}`,'Content-Type':'application/json','Prefer':'return=minimal'},
     body: JSON.stringify(body)
   });
   return r.ok;
 }
 
-// ── GOOGLE LOGIN ──
-async function loginGoogle(){
-  document.getElementById('loginLoading').style.display='flex';
-  const r = await fetch(`${SB_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(location.origin+'/perfil.html')}`, {
-    headers:{'apikey':SB_ANON}
-  });
-  const data = await r.json().catch(()=>({}));
-  if(data.url){
-    window.location.href = data.url;
-  } else {
-    // fallback directo
-    window.location.href = `${SB_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(location.origin+'/perfil.html')}`;
-  }
+// ── INIT ──
+(async function init(){
+  const token = getToken();
+  if(!token){ showLogin(); return; }
+  const {ok, data} = await sbFetch('/auth/v1/user','GET',null,token);
+  if(!ok){ clearSession(); showLogin(); return; }
+  currentUser = data;
+  await loadProfile(token);
+})();
+
+// ── LOGIN TABS ──
+function switchLTab(i, btn){
+  document.querySelectorAll('.ltab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.ltab-content').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('lt'+i).classList.add('active');
 }
 
+// ── TIPO SELECTOR ──
+function selTipo(t){
+  regTipo = t;
+  document.getElementById('opt-creator').className='tipo-opt'+(t==='creator'?' selected-creator':'');
+  document.getElementById('opt-marca').className='tipo-opt'+(t==='marca'?' selected-marca':'');
+  const btn = document.getElementById('btnReg');
+  btn.className = 'btn-primary '+(t==='creator'?'btn-purple':'btn-green');
+}
+
+// ── REGISTRO ──
+async function doRegister(){
+  const err = document.getElementById('regErr');
+  err.classList.remove('show');
+
+  if(!regTipo){ err.textContent='Elegí si sos creator o marca.'; err.classList.add('show'); return; }
+  const nombre   = document.getElementById('r-nombre').value.trim();
+  const apellido = document.getElementById('r-apellido').value.trim();
+  const email    = document.getElementById('r-email').value.trim();
+  const pass     = document.getElementById('r-pass').value;
+  const pass2    = document.getElementById('r-pass2').value;
+
+  if(!nombre||!apellido){ err.textContent='Completá nombre y apellido.'; err.classList.add('show'); return; }
+  if(!email||!/\S+@\S+\.\S+/.test(email)){ err.textContent='Email inválido.'; err.classList.add('show'); return; }
+  if(pass.length<8){ err.textContent='La contraseña debe tener al menos 8 caracteres.'; err.classList.add('show'); return; }
+  if(pass!==pass2){ err.textContent='Las contraseñas no coinciden.'; err.classList.add('show'); return; }
+
+  const btn = document.getElementById('btnReg');
+  btn.disabled=true; btn.textContent='Creando cuenta...';
+
+  // Crear usuario en Supabase Auth
+  const {ok, data} = await sbFetch('/auth/v1/signup','POST',{email, password:pass});
+  if(!ok){
+    err.textContent = data.msg||data.message||'Error al crear la cuenta. El email puede estar en uso.';
+    err.classList.add('show');
+    btn.disabled=false; btn.textContent='Crear cuenta →';
+    return;
+  }
+
+  const token   = data.access_token;
+  const refresh = data.refresh_token;
+  const authId  = data.user?.id;
+  saveSession(token, refresh);
+
+  // Insertar perfil en la tabla correspondiente
+  const perfil = {nombre, apellido, email, auth_id: authId, status: regTipo==='creator'?'pendiente':'activa'};
+  if(regTipo==='creator'){
+    await fetch(`${SB_URL}/rest/v1/creators`,{
+      method:'POST',
+      headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body: JSON.stringify(perfil)
+    });
+    localStorage.setItem('trama_creator', JSON.stringify({nombre, email}));
+  } else {
+    await fetch(`${SB_URL}/rest/v1/marcas`,{
+      method:'POST',
+      headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body: JSON.stringify({...perfil, tipo:'fisica'})
+    });
+    localStorage.setItem('trama_marca', JSON.stringify({nombre, email}));
+  }
+
+  currentUser = data.user;
+  await loadProfile(token);
+}
+
+// ── LOGIN ──
+async function doLogin(){
+  const err = document.getElementById('loginErr');
+  err.classList.remove('show');
+  const email = document.getElementById('l-email').value.trim();
+  const pass  = document.getElementById('l-pass').value;
+  if(!email||!pass){ err.textContent='Completá email y contraseña.'; err.classList.add('show'); return; }
+
+  const btn = document.getElementById('btnLogin');
+  btn.disabled=true; btn.textContent='Ingresando...';
+
+  const {ok, data} = await sbFetch('/auth/v1/token?grant_type=password','POST',{email, password:pass});
+  if(!ok){
+    err.textContent = 'Email o contraseña incorrectos.';
+    err.classList.add('show');
+    btn.disabled=false; btn.textContent='Ingresar →';
+    return;
+  }
+
+  saveSession(data.access_token, data.refresh_token);
+  currentUser = data.user;
+  await loadProfile(data.access_token);
+}
+
+// ── LOGOUT ──
 async function doLogout(){
   const token = getToken();
-  await fetch(`${SB_URL}/auth/v1/logout`, {
-    method:'POST',
-    headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token}`}
-  }).catch(()=>{});
+  await sbFetch('/auth/v1/logout','POST',null,token).catch(()=>{});
   clearSession();
   location.reload();
 }
 
-// ── SESIÓN ──
-function getToken(){ return localStorage.getItem('sb_token') }
-function getRefresh(){ return localStorage.getItem('sb_refresh') }
-function saveSession(access, refresh){
-  localStorage.setItem('sb_token', access);
-  if(refresh) localStorage.setItem('sb_refresh', refresh);
-}
-function clearSession(){
-  localStorage.removeItem('sb_token');
-  localStorage.removeItem('sb_refresh');
-  localStorage.removeItem('trama_creator');
-  localStorage.removeItem('trama_marca');
-}
-
-async function getUser(token){
-  const r = await fetch(`${SB_URL}/auth/v1/user`, {
-    headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token}`}
-  });
-  return r.ok ? r.json() : null;
-}
-
-async function refreshToken(){
-  const ref = getRefresh();
-  if(!ref) return null;
-  const r = await fetch(`${SB_URL}/auth/v1/token?grant_type=refresh_token`, {
-    method:'POST',
-    headers:{'apikey':SB_ANON,'Content-Type':'application/json'},
-    body: JSON.stringify({refresh_token: ref})
-  });
-  if(!r.ok) return null;
-  const data = await r.json();
-  if(data.access_token){ saveSession(data.access_token, data.refresh_token); return data.access_token; }
-  return null;
-}
-
-// ── INIT ──
-(async function init(){
-  // Capturar tokens del hash (callback de OAuth)
-  const hash = window.location.hash;
-  if(hash.includes('access_token')){
-    const params = new URLSearchParams(hash.substring(1));
-    const access = params.get('access_token');
-    const refresh = params.get('refresh_token');
-    if(access){ saveSession(access, refresh); history.replaceState(null,'',location.pathname); }
-  }
-
-  let token = getToken();
-  if(!token){ showLogin(); return; }
-
-  // Verificar token
-  let user = await getUser(token);
-  if(!user){
-    token = await refreshToken();
-    if(!token){ showLogin(); return; }
-    user = await getUser(token);
-    if(!user){ showLogin(); return; }
-  }
-
-  currentUser = user;
-  await loadProfile(token);
-})();
-
+// ── CARGAR PERFIL ──
 async function loadProfile(token){
   const email = currentUser.email;
-
-  // Buscar en creators
-  const creators = await sbGet('creators', `email=eq.${encodeURIComponent(email)}&select=*`, token);
-  if(creators && creators.length > 0){
-    userProfile = creators[0];
-    userType = 'creator';
+  const creators = await sbGet('creators',`email=eq.${encodeURIComponent(email)}&select=*`,token);
+  if(creators?.length){
+    userProfile = creators[0]; userType='creator';
     localStorage.setItem('trama_creator', JSON.stringify({nombre:userProfile.nombre, email}));
-    showDash();
-    return;
+    showDash(); return;
   }
-
-  // Buscar en marcas
-  const marcas = await sbGet('marcas', `email=eq.${encodeURIComponent(email)}&select=*`, token);
-  if(marcas && marcas.length > 0){
-    userProfile = marcas[0];
-    userType = 'marca';
+  const marcas = await sbGet('marcas',`email=eq.${encodeURIComponent(email)}&select=*`,token);
+  if(marcas?.length){
+    userProfile = marcas[0]; userType='marca';
     localStorage.setItem('trama_marca', JSON.stringify({nombre:userProfile.nombre, email}));
-    showDash();
-    return;
+    showDash(); return;
   }
-
-  // No encontrado — primera vez con Google, mostrar opción de registro
-  showNewUser();
+  // Sin perfil — pedir que complete registro
+  showNoPerfil();
 }
 
 function showLogin(){
   document.getElementById('vLogin').classList.add('active');
-  document.getElementById('vDash').classList.remove('active');
   document.getElementById('vLogin').style.display='flex';
   document.getElementById('vDash').style.display='none';
 }
 
-function showNewUser(){
-  document.getElementById('vLogin').innerHTML = `
-    <div class="login-box">
+function showNoPerfil(){
+  document.getElementById('vLogin').innerHTML=`
+    <div class="login-box" style="text-align:center">
       <div class="login-logo">TRAMA</div>
-      <div style="font-size:1.5rem;margin-bottom:1rem">👋</div>
-      <h2 class="login-h">Hola, ${currentUser.user_metadata?.full_name?.split(' ')[0] || 'bienvenido/a'}</h2>
-      <p class="login-sub" style="margin-bottom:1.75rem">Tu cuenta de Google está activa pero todavía no tenés un perfil en TRAMA. ¿Qué sos?</p>
+      <div style="font-size:2rem;margin-bottom:1rem">👋</div>
+      <h2 style="font-size:1.1rem;font-weight:900;text-transform:uppercase;margin-bottom:.5rem">Cuenta creada</h2>
+      <p style="font-size:.82rem;color:var(--muted2);line-height:1.6;margin-bottom:1.75rem">Tu cuenta está activa. Ahora completá tu perfil según tu rol.</p>
       <div style="display:flex;flex-direction:column;gap:.625rem">
-        <a href="./registro.html" style="display:block;background:var(--purple);color:var(--black);padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none;text-align:center">Registrarme como creator →</a>
-        <a href="./marcas.html" style="display:block;background:var(--green);color:var(--black);padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none;text-align:center">Registrarme como marca →</a>
+        <a href="./registro.html" style="display:block;background:var(--purple);color:var(--black);padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none">Completar perfil creator →</a>
+        <a href="./marcas.html" style="display:block;background:var(--green);color:var(--black);padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none">Completar perfil marca →</a>
         <button onclick="doLogout()" style="background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;margin-top:.5rem">Cerrar sesión</button>
       </div>
     </div>`;
 }
 
+function showForgot(){
+  const email = document.getElementById('l-email').value.trim();
+  if(!email){ showToast('Ingresá tu email primero','err'); return; }
+  sbFetch('/auth/v1/recover','POST',{email}).then(({ok})=>{
+    if(ok) showToast('✓ Revisá tu email para resetear la contraseña','ok');
+    else showToast('Error al enviar el email','err');
+  });
+}
+
+// ── DASHBOARD ──
 function showDash(){
   document.getElementById('vLogin').style.display='none';
   document.getElementById('vDash').style.display='block';
   document.getElementById('vDash').classList.add('active');
   document.getElementById('btnLogout').style.display='inline-block';
 
-  // Avatar
-  const avEl = document.getElementById('dashAv');
-  const photoUrl = currentUser.user_metadata?.avatar_url || userProfile?.avatar_url;
-  if(photoUrl){
-    avEl.innerHTML=`<img src="${photoUrl}" alt="avatar">`;
-  } else {
-    const init = ((userProfile?.nombre||'?')[0]+(userProfile?.apellido||'?')[0]).toUpperCase();
-    avEl.style.background = userType==='creator' ? '#1a0a2a' : '#0f1a00';
-    avEl.style.color = userType==='creator' ? 'var(--purple)' : 'var(--green)';
-    avEl.textContent = init;
+  const p = userProfile;
+  const av = document.getElementById('dashAv');
+  if(p.avatar_url){ av.innerHTML=`<img src="${p.avatar_url}" alt="avatar">`; }
+  else {
+    const init=((p.nombre||'?')[0]+(p.apellido||'?')[0]).toUpperCase();
+    av.style.background = userType==='creator'?'#1a0a2a':'#0f1a00';
+    av.style.color = userType==='creator'?'var(--purple)':'var(--green)';
+    av.textContent=init;
   }
 
-  document.getElementById('dashName').textContent = `${userProfile?.nombre||''} ${userProfile?.apellido||''}`.trim() || currentUser.user_metadata?.full_name || '—';
-  document.getElementById('dashEmail').textContent = currentUser.email;
+  document.getElementById('dashName').textContent=`${p.nombre||''} ${p.apellido||''}`.trim()||'—';
+  document.getElementById('dashEmail').textContent=currentUser.email;
 
-  // Badge tipo
   const badge = document.getElementById('dashBadge');
   if(userType==='creator'){
-    const st = userProfile?.status;
-    badge.innerHTML=`<span class="dash-badge badge-creator">Creator</span> <span class="${st==='aprobado'?'badge-status-apro':st==='rechazado'?'badge-status-rech':'badge-status-pend'}">${st||'pendiente'}</span>`;
+    const st=p.status;
+    badge.innerHTML=`<span class="dash-badge badge-creator">Creator</span> <span class="${st==='aprobado'?'s-apro':st==='rechazado'?'s-rech':'s-pend'}">${st||'pendiente'}</span>`;
   } else {
-    const tipo = userProfile?.tipo;
-    badge.innerHTML=`<span class="dash-badge ${tipo==='corporativa'?'badge-corp':'badge-marca'}">${tipo==='corporativa'?'Empresa corporativa':'Marca / Emprendimiento'}</span>`;
+    const tipo=p.tipo;
+    badge.innerHTML=`<span class="dash-badge ${tipo==='corporativa'?'badge-corp':'badge-marca'}">${tipo==='corporativa'?'Empresa corporativa':'Marca'}</span>`;
   }
 
   buildTabs();
 }
 
-// ── TABS ──
 function buildTabs(){
-  const tabs = userType === 'creator'
-    ? ['Mi perfil','Mis redes','Estado','Editar']
-    : ['Mi cuenta','Creators guardados','Mis conexiones','Editar'];
-
-  const tabsEl = document.getElementById('dashTabs');
-  tabsEl.innerHTML = tabs.map((t,i)=>`
-    <button class="tab${i===0?' active':''}" onclick="switchTab(${i},this)">${t}</button>
-  `).join('');
-
+  const tabs = userType==='creator'
+    ?['Mi perfil','Mis redes','Estado','Editar']
+    :['Mi cuenta','Creators guardados','Mis conexiones','Editar'];
+  document.getElementById('dashTabs').innerHTML = tabs.map((t,i)=>
+    `<button class="tab${i===0?' active':''}" onclick="switchTab(${i},this)">${t}</button>`
+  ).join('');
   renderTab(0);
 }
 
-function switchTab(i, btn){
-  activeTab = i;
+function switchTab(i,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
   renderTab(i);
 }
 
 function renderTab(i){
-  const el = document.getElementById('dashContent');
-  if(userType === 'creator') renderCreatorTab(i, el);
-  else renderMarcaTab(i, el);
+  const el=document.getElementById('dashContent');
+  userType==='creator'?renderCreatorTab(i,el):renderMarcaTab(i,el);
 }
 
-// ── TABS CREATOR ──
-function renderCreatorTab(i, el){
-  const p = userProfile;
-  const fmtSeg = n => n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':(n||'—');
+// ── CREATOR TABS ──
+function renderCreatorTab(i,el){
+  const p=userProfile;
+  const fmtSeg=n=>n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':(n||'—');
 
-  if(i===0){ // Mi perfil
+  if(i===0){
     el.innerHTML=`<div class="tab-content active">
       <div class="sec-title">Información general</div>
       <div class="info-grid">
-        <div class="info-card"><div class="ic-label">Nombre completo</div><div class="ic-val">${p.nombre} ${p.apellido}</div></div>
+        <div class="info-card"><div class="ic-label">Nombre</div><div class="ic-val">${p.nombre} ${p.apellido}</div></div>
         <div class="info-card"><div class="ic-label">Email</div><div class="ic-val">${p.email}</div></div>
         <div class="info-card"><div class="ic-label">Ciudad</div><div class="ic-val ${!p.ciudad?'muted':''}">${p.ciudad||'Sin completar'}</div></div>
         <div class="info-card"><div class="ic-label">WhatsApp</div><div class="ic-val ${!p.tel?'muted':''}">${p.tel||'Sin completar'}</div></div>
         <div class="info-card"><div class="ic-label">Nicho</div><div class="ic-val ${!(p.niches?.length)?'muted':''}">${p.niches?.join(', ')||'Sin completar'}</div></div>
-        <div class="info-card"><div class="ic-label">Idioma</div><div class="ic-val">${p.idioma||'Español'}</div></div>
+        <div class="info-card"><div class="ic-label">Disponibilidad</div><div class="ic-val ${!(p.disponibilidad?.length)?'muted':''}">${p.disponibilidad?.join(', ')||'—'}</div></div>
       </div>
       <div class="sec-title">Bio</div>
-      <div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1.25rem;font-size:.85rem;color:${p.bio?'var(--white)':'var(--muted)'};line-height:1.7;margin-bottom:2rem">${p.bio||'Sin bio cargada. Completá tu perfil para aparecer en la bolsa.'}</div>
+      <div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1.25rem;font-size:.85rem;color:${p.bio?'var(--white)':'var(--muted)'};line-height:1.7;margin-bottom:2rem">${p.bio||'Sin bio. Completá tu perfil para aparecer en la bolsa.'}</div>
       <div class="sec-title">Tarifas</div>
       <div class="info-grid">
-        <div class="info-card"><div class="ic-label">Story</div><div class="ic-val">${p.t_story?'$'+p.t_story.toLocaleString()+' '+p.moneda:'—'}</div></div>
-        <div class="info-card"><div class="ic-label">Reel / TikTok</div><div class="ic-val">${p.t_reel?'$'+p.t_reel.toLocaleString()+' '+p.moneda:'—'}</div></div>
-        <div class="info-card"><div class="ic-label">Post feed</div><div class="ic-val">${p.t_post?'$'+p.t_post.toLocaleString()+' '+p.moneda:'—'}</div></div>
-        <div class="info-card"><div class="ic-label">Disponibilidad</div><div class="ic-val ${!(p.disponibilidad?.length)?'muted':''}">${p.disponibilidad?.join(', ')||'—'}</div></div>
+        <div class="info-card"><div class="ic-label">Story</div><div class="ic-val">${p.t_story?'$'+p.t_story.toLocaleString()+' '+(p.moneda||'ARS'):'—'}</div></div>
+        <div class="info-card"><div class="ic-label">Reel</div><div class="ic-val">${p.t_reel?'$'+p.t_reel.toLocaleString()+' '+(p.moneda||'ARS'):'—'}</div></div>
+        <div class="info-card"><div class="ic-label">Post</div><div class="ic-val">${p.t_post?'$'+p.t_post.toLocaleString()+' '+(p.moneda||'ARS'):'—'}</div></div>
+        <div class="info-card"><div class="ic-label">Canje</div><div class="ic-val ${!p.canje?'muted':''}">${p.canje||'—'}</div></div>
       </div>
     </div>`;
   }
-
-  else if(i===1){ // Mis redes
-    const redes = [
+  else if(i===1){
+    const redes=[
       {icon:'📸',name:'Instagram',user:p.ig_user,seg:fmtSeg(p.ig_seg),er:p.ig_er},
       {icon:'🎵',name:'TikTok',user:p.tt_user,seg:fmtSeg(p.tt_seg),er:p.tt_er},
       {icon:'▶️',name:'YouTube',user:p.yt_user,seg:fmtSeg(p.yt_seg),er:null},
       {icon:'🐦',name:'X / Twitter',user:p.tw_user,seg:fmtSeg(p.tw_seg),er:null},
     ];
     el.innerHTML=`<div class="tab-content active">
-      <div class="sec-title">Plataformas activas</div>
-      <div class="redes-grid">
-        ${redes.map(r=>`<div class="red-card">
+      <div class="sec-title">Plataformas</div>
+      <div class="redes-grid">${redes.map(r=>`
+        <div class="red-card">
           <div class="red-icon">${r.icon}</div>
-          <div class="red-info">
+          <div>
             <div class="red-name">${r.name}</div>
-            ${r.user
-              ?`<div class="red-user">${r.user}</div><div class="red-stat">${r.seg} seguidores${r.er?' · '+r.er+'% ER':''}</div>`
-              :`<div class="red-empty">No conectado</div>`}
+            ${r.user?`<div class="red-user">${r.user}</div><div class="red-stat">${r.seg} seg${r.er?' · '+r.er+'% ER':''}</div>`
+            :`<div class="red-empty">No conectado</div>`}
           </div>
         </div>`).join('')}
       </div>
     </div>`;
   }
-
-  else if(i===2){ // Estado
-    const st = p.status;
-    const estados = {
-      pendiente:{icon:'⏳',color:'var(--amber)',title:'Perfil en revisión',desc:'El equipo TRAMA está revisando tu perfil. En 48-72 horas hábiles te confirmamos si quedás en la bolsa. Te avisamos por email.'},
-      aprobado:{icon:'✅',color:'var(--green)',title:'Perfil aprobado',desc:'Tu perfil está activo y visible en la bolsa de creators. Las marcas ya pueden encontrarte y conectarse con vos.'},
-      rechazado:{icon:'❌',color:'var(--red)',title:'Perfil no aprobado',desc:'Por el momento tu perfil no cumple con los requisitos de TRAMA. Podés escribirnos a info.tramapunto@gmail.com para saber más.'},
+  else if(i===2){
+    const st=p.status;
+    const map={
+      pendiente:{icon:'⏳',color:'var(--amber)',title:'Perfil en revisión',desc:'El equipo TRAMA. está revisando tu perfil. En 48-72hs te confirmamos si quedás en la bolsa.'},
+      aprobado:{icon:'✅',color:'var(--green)',title:'Perfil aprobado',desc:'Tu perfil está activo y visible en la bolsa de TRAMA. Las marcas ya pueden encontrarte.'},
+      rechazado:{icon:'❌',color:'var(--red)',title:'Perfil no aprobado',desc:'Por el momento tu perfil no cumple con los requisitos de TRAMA. Escribinos a info.tramapunto@gmail.com.'},
     };
-    const e = estados[st]||estados.pendiente;
+    const e=map[st]||map.pendiente;
     el.innerHTML=`<div class="tab-content active">
-      <div class="sec-title">Estado de tu perfil</div>
+      <div class="sec-title">Estado del perfil</div>
       <div class="estado-box" style="border-color:${e.color}33">
-        <div class="estado-icon">${e.icon}</div>
-        <div>
-          <div class="estado-title" style="color:${e.color}">${e.title}</div>
-          <div class="estado-desc">${e.desc}</div>
-        </div>
+        <div style="font-size:1.75rem">${e.icon}</div>
+        <div><div class="estado-title" style="color:${e.color}">${e.title}</div><div class="estado-desc">${e.desc}</div></div>
       </div>
-      ${st==='aprobado'?`
-      <div class="sec-title">Tu perfil en la bolsa</div>
-      <div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
-        <div style="font-size:.82rem;color:var(--muted2)">Tu perfil está visible para todas las marcas registradas en TRAMA.</div>
-        <a href="/" style="background:var(--green);color:var(--black);padding:.6rem 1.25rem;font-weight:900;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;border-radius:2px;text-decoration:none">Ver bolsa →</a>
-      </div>`:''}
-      <div class="sec-title" style="margin-top:2rem">Actividad reciente</div>
-      <div class="activity-list">
-        <div class="empty-activity"><div>📭</div>Todavía no hay actividad en tu perfil.</div>
-      </div>
+      ${st==='aprobado'?`<div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem"><div style="font-size:.82rem;color:var(--muted2)">Tu perfil está visible para todas las marcas registradas en TRAMA.</div><a href="/" style="background:var(--green);color:var(--black);padding:.6rem 1.25rem;font-weight:900;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;border-radius:2px;text-decoration:none">Ver bolsa →</a></div>`:''}
     </div>`;
   }
-
-  else if(i===3){ // Editar
+  else if(i===3){
     el.innerHTML=`<div class="tab-content active">
       <div class="sec-title">Editar perfil</div>
-      <div class="edit-form">
-        <div class="fg"><label>Nombre</label><input type="text" id="e-nombre" value="${p.nombre||''}"></div>
-        <div class="fg"><label>Apellido</label><input type="text" id="e-apellido" value="${p.apellido||''}"></div>
-        <div class="fg"><label>WhatsApp</label><input type="tel" id="e-tel" value="${p.tel||''}" placeholder="+54 9 11 0000-0000"></div>
-        <div class="fg"><label>Ciudad</label><input type="text" id="e-ciudad" value="${p.ciudad||''}"></div>
-        <div class="fg fg-full"><label>Bio</label><textarea id="e-bio" maxlength="300">${p.bio||''}</textarea></div>
-        <div class="fg"><label>Tarifa Story (${p.moneda||'ARS'})</label><input type="number" id="e-story" value="${p.t_story||''}"></div>
-        <div class="fg"><label>Tarifa Reel (${p.moneda||'ARS'})</label><input type="number" id="e-reel" value="${p.t_reel||''}"></div>
-        <div class="fg"><label>Usuario Instagram</label><input type="text" id="e-ig" value="${p.ig_user||''}"></div>
-        <div class="fg"><label>Seguidores IG</label><input type="number" id="e-ig-seg" value="${p.ig_seg||''}"></div>
+      <div class="edit-grid">
+        <div class="fg-edit"><label>Nombre</label><input type="text" id="e-nombre" value="${p.nombre||''}"></div>
+        <div class="fg-edit"><label>Apellido</label><input type="text" id="e-apellido" value="${p.apellido||''}"></div>
+        <div class="fg-edit"><label>WhatsApp</label><input type="tel" id="e-tel" value="${p.tel||''}" placeholder="+54 9 11 0000-0000"></div>
+        <div class="fg-edit"><label>Ciudad</label><input type="text" id="e-ciudad" value="${p.ciudad||''}"></div>
+        <div class="fg-edit fg-full"><label>Bio</label><textarea id="e-bio" maxlength="300">${p.bio||''}</textarea></div>
+        <div class="fg-edit"><label>Tarifa Story</label><input type="number" id="e-story" value="${p.t_story||''}"></div>
+        <div class="fg-edit"><label>Tarifa Reel</label><input type="number" id="e-reel" value="${p.t_reel||''}"></div>
+        <div class="fg-edit"><label>Usuario Instagram</label><input type="text" id="e-ig" value="${p.ig_user||''}"></div>
+        <div class="fg-edit"><label>Seguidores IG</label><input type="number" id="e-ig-seg" value="${p.ig_seg||''}"></div>
+        <div class="fg-edit"><label>Engagement Rate IG %</label><input type="number" id="e-ig-er" step="0.1" value="${p.ig_er||''}"></div>
+        <div class="fg-edit"><label>Usuario TikTok</label><input type="text" id="e-tt" value="${p.tt_user||''}"></div>
+        <div class="fg-edit"><label>Seguidores TikTok</label><input type="number" id="e-tt-seg" value="${p.tt_seg||''}"></div>
       </div>
       <button class="btn-save" onclick="saveCreator()">Guardar cambios</button>
     </div>`;
   }
 }
 
-// ── TABS MARCA ──
-function renderMarcaTab(i, el){
-  const p = userProfile;
-
-  if(i===0){ // Mi cuenta
+// ── MARCA TABS ──
+function renderMarcaTab(i,el){
+  const p=userProfile;
+  if(i===0){
     el.innerHTML=`<div class="tab-content active">
       <div class="sec-title">Datos de la cuenta</div>
       <div class="info-grid">
         <div class="info-card"><div class="ic-label">Nombre</div><div class="ic-val">${p.nombre} ${p.apellido}</div></div>
         <div class="info-card"><div class="ic-label">Email</div><div class="ic-val">${p.email}</div></div>
-        <div class="info-card"><div class="ic-label">${p.tipo==='corporativa'?'Razón social':'Marca'}</div><div class="ic-val">${p.razon_social||p.nombre_marca||'—'}</div></div>
-        <div class="info-card"><div class="ic-label">Rubro</div><div class="ic-val">${p.rubro||'—'}</div></div>
-        ${p.cuit?`<div class="info-card"><div class="ic-label">CUIT</div><div class="ic-val">${p.cuit}</div></div>`:''}
-        ${p.area?`<div class="info-card"><div class="ic-label">Área</div><div class="ic-val">${p.area}</div></div>`:''}
+        <div class="info-card"><div class="ic-label">${p.tipo==='corporativa'?'Razón social':'Marca'}</div><div class="ic-val ${!(p.razon_social||p.nombre_marca)?'muted':''}">${p.razon_social||p.nombre_marca||'Sin completar'}</div></div>
+        <div class="info-card"><div class="ic-label">Rubro</div><div class="ic-val ${!p.rubro?'muted':''}">${p.rubro||'Sin completar'}</div></div>
+        ${p.tel?`<div class="info-card"><div class="ic-label">Teléfono</div><div class="ic-val">${p.tel}</div></div>`:''}
       </div>
-      <div class="sec-title">Objetivos declarados</div>
-      <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:2rem">
-        ${(p.objetivos||[]).length
-          ?p.objetivos.map(o=>`<span style="background:#0f1a00;color:var(--green);border:1px solid #2a4000;padding:.3rem .75rem;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:2px">${o}</span>`).join('')
-          :`<span style="color:var(--muted);font-size:.8rem">Sin objetivos cargados</span>`}
-      </div>
-      ${p.presupuesto?`<div class="sec-title">Presupuesto</div><div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1rem;font-size:.85rem;margin-bottom:2rem">${p.presupuesto}</div>`:''}
-    </div>`;
-  }
-
-  else if(i===1){ // Creators guardados
-    el.innerHTML=`<div class="tab-content active">
-      <div class="sec-title">Creators guardados</div>
-      <div class="empty-activity"><div>🔖</div>Todavía no guardaste ningún creator.<br><a href="/" style="color:var(--green);font-size:.8rem;margin-top:.5rem;display:inline-block">Explorar bolsa →</a></div>
-    </div>`;
-  }
-
-  else if(i===2){ // Conexiones
-    el.innerHTML=`<div class="tab-content active">
-      <div class="sec-title">Historial de conexiones</div>
-      <div class="activity-list">
-        <div class="empty-activity"><div>📭</div>Todavía no realizaste ninguna conexión.<br><a href="/" style="color:var(--green);font-size:.8rem;margin-top:.5rem;display:inline-block">Ver creators disponibles →</a></div>
+      ${(p.objetivos?.length)?`<div class="sec-title">Objetivos</div><div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:2rem">${p.objetivos.map(o=>`<span style="background:#0f1a00;color:var(--green);border:1px solid #2a4000;padding:.3rem .75rem;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:2px">${o}</span>`).join('')}</div>`:''}
+      <div style="background:#0a1020;border:1px solid #1a2a40;border-radius:3px;padding:1.1rem;font-size:.78rem;color:var(--muted2);line-height:1.6">
+        💡 <strong style="color:var(--white)">¿Querés ver la bolsa de creators de TRAMA.?</strong> <a href="/" style="color:var(--green)">Ir al inicio →</a>
       </div>
     </div>`;
   }
-
-  else if(i===3){ // Editar
+  else if(i===1){
+    el.innerHTML=`<div class="tab-content active"><div class="sec-title">Creators guardados</div><div class="empty-state"><div>🔖</div>Todavía no guardaste ningún creator.<br><a href="/" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
+  }
+  else if(i===2){
+    el.innerHTML=`<div class="tab-content active"><div class="sec-title">Historial de conexiones</div><div class="empty-state"><div>📭</div>Todavía no realizaste ninguna conexión.<br><a href="/" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Ver creators →</a></div></div>`;
+  }
+  else if(i===3){
     el.innerHTML=`<div class="tab-content active">
       <div class="sec-title">Editar cuenta</div>
-      <div class="edit-form">
-        <div class="fg"><label>Nombre</label><input type="text" id="em-nombre" value="${p.nombre||''}"></div>
-        <div class="fg"><label>Apellido</label><input type="text" id="em-apellido" value="${p.apellido||''}"></div>
-        <div class="fg"><label>Teléfono</label><input type="tel" id="em-tel" value="${p.tel||''}" placeholder="+54 11 0000-0000"></div>
-        <div class="fg"><label>${p.tipo==='corporativa'?'Razón social':'Nombre de marca'}</label><input type="text" id="em-marca" value="${p.razon_social||p.nombre_marca||''}"></div>
-        ${p.tipo==='corporativa'?`<div class="fg"><label>CUIT</label><input type="text" id="em-cuit" value="${p.cuit||''}"></div>`:''}
-        <div class="fg fg-full"><label>Descripción</label><textarea id="em-desc">${p.descripcion||''}</textarea></div>
+      <div class="edit-grid">
+        <div class="fg-edit"><label>Nombre</label><input type="text" id="em-nombre" value="${p.nombre||''}"></div>
+        <div class="fg-edit"><label>Apellido</label><input type="text" id="em-apellido" value="${p.apellido||''}"></div>
+        <div class="fg-edit"><label>Teléfono</label><input type="tel" id="em-tel" value="${p.tel||''}" placeholder="+54 11 0000-0000"></div>
+        <div class="fg-edit"><label>${p.tipo==='corporativa'?'Razón social':'Nombre de marca'}</label><input type="text" id="em-marca" value="${p.razon_social||p.nombre_marca||''}"></div>
+        ${p.tipo==='corporativa'?`<div class="fg-edit"><label>CUIT</label><input type="text" id="em-cuit" value="${p.cuit||''}"></div>`:''}
+        <div class="fg-edit fg-full"><label>Descripción</label><textarea id="em-desc">${p.descripcion||''}</textarea></div>
       </div>
       <button class="btn-save" onclick="saveMarca()">Guardar cambios</button>
     </div>`;
@@ -639,52 +620,45 @@ function renderMarcaTab(i, el){
 
 // ── GUARDAR ──
 async function saveCreator(){
-  const btn = document.querySelector('.btn-save');
+  const btn=document.querySelector('.btn-save');
   btn.disabled=true; btn.textContent='Guardando...';
-  const token = getToken();
-  const body = {
-    nombre: document.getElementById('e-nombre')?.value.trim(),
-    apellido: document.getElementById('e-apellido')?.value.trim(),
-    tel: document.getElementById('e-tel')?.value.trim()||null,
-    ciudad: document.getElementById('e-ciudad')?.value.trim(),
-    bio: document.getElementById('e-bio')?.value.trim()||null,
-    t_story: parseInt(document.getElementById('e-story')?.value)||null,
-    t_reel: parseInt(document.getElementById('e-reel')?.value)||null,
-    ig_user: document.getElementById('e-ig')?.value.trim()||null,
-    ig_seg: parseInt(document.getElementById('e-ig-seg')?.value)||null,
+  const body={
+    nombre:document.getElementById('e-nombre')?.value.trim(),
+    apellido:document.getElementById('e-apellido')?.value.trim(),
+    tel:document.getElementById('e-tel')?.value.trim()||null,
+    ciudad:document.getElementById('e-ciudad')?.value.trim()||null,
+    bio:document.getElementById('e-bio')?.value.trim()||null,
+    t_story:parseInt(document.getElementById('e-story')?.value)||null,
+    t_reel:parseInt(document.getElementById('e-reel')?.value)||null,
+    ig_user:document.getElementById('e-ig')?.value.trim()||null,
+    ig_seg:parseInt(document.getElementById('e-ig-seg')?.value)||null,
+    ig_er:parseFloat(document.getElementById('e-ig-er')?.value)||null,
+    tt_user:document.getElementById('e-tt')?.value.trim()||null,
+    tt_seg:parseInt(document.getElementById('e-tt-seg')?.value)||null,
   };
-  const ok = await sbPatch('creators', `id=eq.${userProfile.id}`, body, token);
-  if(ok){
-    Object.assign(userProfile, body);
-    showToast('✓ Perfil actualizado','ok');
-  } else {
-    showToast('Error al guardar','err');
-  }
+  const ok=await sbPatch('creators',`id=eq.${userProfile.id}`,body,getToken());
+  if(ok){Object.assign(userProfile,body);showToast('✓ Perfil actualizado','ok')}
+  else showToast('Error al guardar','err');
   btn.disabled=false; btn.textContent='Guardar cambios';
 }
 
 async function saveMarca(){
-  const btn = document.querySelector('.btn-save');
+  const btn=document.querySelector('.btn-save');
   btn.disabled=true; btn.textContent='Guardando...';
-  const token = getToken();
-  const isCorp = userProfile.tipo==='corporativa';
-  const body = {
-    nombre: document.getElementById('em-nombre')?.value.trim(),
-    apellido: document.getElementById('em-apellido')?.value.trim(),
-    tel: document.getElementById('em-tel')?.value.trim()||null,
-    descripcion: document.getElementById('em-desc')?.value.trim()||null,
+  const isCorp=userProfile.tipo==='corporativa';
+  const body={
+    nombre:document.getElementById('em-nombre')?.value.trim(),
+    apellido:document.getElementById('em-apellido')?.value.trim(),
+    tel:document.getElementById('em-tel')?.value.trim()||null,
+    descripcion:document.getElementById('em-desc')?.value.trim()||null,
     ...(isCorp
-      ?{razon_social:document.getElementById('em-marca')?.value.trim(), cuit:document.getElementById('em-cuit')?.value.trim()||null}
+      ?{razon_social:document.getElementById('em-marca')?.value.trim(),cuit:document.getElementById('em-cuit')?.value.trim()||null}
       :{nombre_marca:document.getElementById('em-marca')?.value.trim()}
     ),
   };
-  const ok = await sbPatch('marcas', `id=eq.${userProfile.id}`, body, token);
-  if(ok){
-    Object.assign(userProfile, body);
-    showToast('✓ Cuenta actualizada','ok');
-  } else {
-    showToast('Error al guardar','err');
-  }
+  const ok=await sbPatch('marcas',`id=eq.${userProfile.id}`,body,getToken());
+  if(ok){Object.assign(userProfile,body);showToast('✓ Cuenta actualizada','ok')}
+  else showToast('Error al guardar','err');
   btn.disabled=false; btn.textContent='Guardar cambios';
 }
 

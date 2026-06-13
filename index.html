@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TRAMA — Conectamos marcas con creators</title>
+<title>TRAMA. — Conectamos marcas con creators</title>
+<meta name="description" content="TRAMA. es la agencia de creator marketing que conecta marcas con los creators que mueven. Buenos Aires, Argentina.">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -26,6 +27,8 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .nav-pill:hover{opacity:.85}
 .nav-pill.ghost{background:transparent;color:var(--purple);border:1.5px solid var(--purple)}
 .nav-pill.ghost:hover{background:var(--purple);color:var(--black)}
+.nav-pill.perfil{background:#1a1a1a;color:var(--green);border:1px solid #2a3a00}
+.nav-pill.perfil:hover{opacity:.85}
 .ham{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;background:none;border:none}
 .ham span{display:block;width:20px;height:2px;background:var(--white);transition:all .3s;transform-origin:center}
 .ham.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
@@ -41,16 +44,16 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 /* PÁGINAS */
 .page{display:none;min-height:100vh;padding-top:56px;animation:fadeIn .3s ease}
 .page.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 /* HERO */
-#hero{min-height:calc(100vh - 56px);display:grid;grid-template-columns:1fr 1fr;position:relative}
-.half{position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:3.5rem 2.5rem;min-height:calc(100vh - 56px);cursor:pointer;transition:background .3s}
-.half.marca{background:#0D0D0D;border-right:1px solid #1a1a1a}
+#hero{display:grid;grid-template-columns:1fr 1fr;position:relative}
+.half{position:relative;display:flex;flex-direction:column;justify-content:center;padding:4rem 2.5rem;cursor:pointer;transition:background .3s}
+.half.marca{border-right:1px solid #1a1a1a;background:#0D0D0D}
 .half.creator{background:#090909}
 .half-glow{position:absolute;inset:0;pointer-events:none;opacity:.05;transition:opacity .3s}
-.marca .half-glow{background:radial-gradient(ellipse at 70% 20%,var(--green),transparent 70%)}
-.creator .half-glow{background:radial-gradient(ellipse at 30% 20%,var(--purple),transparent 70%)}
+.marca .half-glow{background:radial-gradient(ellipse at 70% 30%,var(--green),transparent 65%)}
+.creator .half-glow{background:radial-gradient(ellipse at 30% 30%,var(--purple),transparent 65%)}
 .half:hover .half-glow{opacity:.1}
 .h-tag{font-size:.63rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;display:flex;align-items:center;gap:.5rem;margin-bottom:1.25rem}
 .marca .h-tag{color:var(--green)}
@@ -122,7 +125,7 @@ section{padding:5rem 1.5rem;border-top:1px solid #161616}
 .c-stat span{font-size:.62rem;color:var(--muted);letter-spacing:.05em}
 .c-new{font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--purple);border:1px solid #3a1a5a;padding:.18rem .45rem}
 
-/* TESTIMONIOS */
+/* TEST */
 .test-grid{display:grid;gap:1px;background:#161616;grid-template-columns:1fr}
 @media(min-width:640px){.test-grid{grid-template-columns:1fr 1fr}}
 @media(min-width:1024px){.test-grid{grid-template-columns:repeat(3,1fr)}}
@@ -210,9 +213,17 @@ section{padding:5rem 1.5rem;border-top:1px solid #161616}
 .contact-box{background:#0d0d0d;border:1px solid #222;padding:1rem;text-align:left;border-radius:2px}
 .c-item{display:flex;align-items:center;gap:.625rem;padding:.45rem 0;border-bottom:1px solid #1a1a1a;font-size:.8rem}
 .c-item:last-child{border:none}
-.c-ic{color:var(--green);width:18px;text-align:center;font-size:.85rem}
+.c-ic{color:var(--green);width:18px;text-align:center}
 .c-key{color:var(--muted);width:70px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 .c-val{color:var(--white);font-weight:600;font-size:.8rem;word-break:break-all}
+
+/* GATE MODAL */
+.gate-modal{background:var(--g1);border:1px solid #222;padding:2rem;width:100%;max-width:420px;position:relative;border-radius:3px;text-align:center}
+.gate-icon{font-size:2rem;margin-bottom:1rem}
+.gate-tag{font-size:.62rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--green);margin-bottom:.5rem}
+.gate-title{font-size:1.2rem;font-weight:900;text-transform:uppercase;margin-bottom:.625rem}
+.gate-sub{font-size:.82rem;color:var(--muted2);line-height:1.6;margin-bottom:1.75rem}
+.gate-opts{display:flex;flex-direction:column;gap:.625rem}
 
 /* FOOTER */
 footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-direction:column;gap:1.5rem}
@@ -241,17 +252,16 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
   .h-proof{gap:1rem;margin-top:1.5rem;padding-top:1.25rem}
   .proof-n{font-size:1.1rem}
 }
-/* Desktop: nav siempre visible, hamburguesa oculto */
-@media(min-width:769px){
-  .ham{display:none!important}
-  .mob-menu{display:none!important}
-  .nav-center{display:flex}
-}
-/* Mobile: ocultar nav links y pills, mostrar hamburguesa */
 @media(max-width:768px){
   .nav-center{display:none}
   .ham{display:flex}
   .nav-pill{display:none}
+  .nav-pill.perfil{display:inline-block}
+}
+@media(min-width:769px){
+  .ham{display:none!important}
+  .mob-menu{display:none!important}
+  .nav-center{display:flex}
 }
 </style>
 </head>
@@ -259,28 +269,30 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
 
 <!-- NAV -->
 <nav>
-  <a class="logo" href="#" onclick="showPage('landing')">TRAMA</a>
+  <a class="logo" href="#" onclick="showPage('landing')">TRAMA.</a>
   <ul class="nav-center">
     <li><a href="#como" onclick="showPage('landing')">Cómo funciona</a></li>
     <li><a href="#marcas" onclick="showPage('landing')">Marcas</a></li>
     <li><a href="#creators" onclick="showPage('landing')">Creators</a></li>
-    <li><a onclick="checkAndShowBolsa()">Encontrá tu creator</a></li>
+    <li><a href="#" onclick="checkAndShowBolsa()">Encontrá tu creator</a></li>
   </ul>
   <div class="nav-right">
-    <a class="nav-pill ghost" href="./registro.html" id="navCreatorBtn">Soy creator</a>
-    <a class="nav-pill" href="./marcas.html" id="navMarcaBtn" style="background:#222;color:var(--white);border:1.5px solid #333">Soy marca</a>
-    <a class="nav-pill" id="navPerfilBtn" href="./perfil.html" style="background:#1a1a1a;color:var(--green);border:1px solid #2a3a00">Mi perfil</a>
+    <a class="nav-pill ghost" href="./registro.html">Soy creator</a>
+    <a class="nav-pill" href="./marcas.html" style="background:#222;color:var(--white);border:1.5px solid #333">Soy marca</a>
+    <a class="nav-pill perfil" href="./perfil.html">Mi perfil</a>
     <button class="ham" id="hamBtn" onclick="toggleMenu()">
       <span></span><span></span><span></span>
     </button>
   </div>
 </nav>
 
+<!-- MOBILE MENU -->
 <div class="mob-menu" id="mobMenu">
   <a href="#como" onclick="showPage('landing');closeMenu()">Cómo funciona</a>
   <a href="#marcas" onclick="showPage('landing');closeMenu()">Para marcas</a>
   <a href="#creators" onclick="showPage('landing');closeMenu()">Para creators</a>
   <a href="#" onclick="checkAndShowBolsa();closeMenu()">Encontrá tu creator</a>
+  <a href="./perfil.html">Mi perfil</a>
   <a class="mob-pill purple" href="./registro.html">Soy creator →</a>
   <a class="mob-pill" href="./marcas.html">Soy marca →</a>
 </div>
@@ -301,12 +313,12 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
       </div>
     </div>
     <div class="vs-badge">VS</div>
-    <div class="half creator" onclick="window.location.href='/registro.html'">
+    <div class="half creator" onclick="window.location.href='./registro.html'">
       <div class="half-glow"></div>
       <div class="h-tag" style="color:var(--purple)">Para creators</div>
       <h2 class="h-title">Convertí tu audiencia en tu <em>trabajo.</em></h2>
       <p class="h-copy">Cargá tu perfil y accedé a marcas que <strong>buscan exactamente lo que vos tenés.</strong></p>
-      <a href="/registro.html" class="h-btn btn-p" onclick="event.stopPropagation()">Soy creator →</a>
+      <a href="./registro.html" class="h-btn btn-p" onclick="event.stopPropagation()">Soy creator →</a>
       <div class="h-proof">
         <div><div class="proof-n">$0</div><div class="proof-l">Para registrarse</div></div>
         <div><div class="proof-n">48hs</div><div class="proof-l">Primera propuesta</div></div>
@@ -323,7 +335,7 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
     <div class="como-grid">
       <div class="como-card"><div class="como-num">01</div><div class="como-icon">🎯</div><div class="como-title">Te escuchamos</div><div class="como-desc">Marcas nos cuentan qué necesitan. Creators nos muestran lo que hacen. Entendemos el contexto antes de proponer cualquier cosa.</div></div>
       <div class="como-card"><div class="como-num">02</div><div class="como-icon">🔍</div><div class="como-title">Armamos el match</div><div class="como-desc">No es un algoritmo frío. Hay personas revisando perfiles y afinidades para que la conexión tenga sentido de verdad.</div></div>
-      <div class="como-card"><div class="como-num">03</div><div class="como-icon">🤝</div><div class="como-title">Se conectan</div><div class="como-desc">Marca y creator hablan directo. TRAMA acompaña para que el brief sea claro y las expectativas estén alineadas desde el inicio.</div></div>
+      <div class="como-card"><div class="como-num">03</div><div class="como-icon">🤝</div><div class="como-title">Se conectan</div><div class="como-desc">Marca y creator hablan directo. TRAMA. acompaña para que el brief sea claro y las expectativas estén alineadas.</div></div>
       <div class="como-card"><div class="como-num">04</div><div class="como-icon">📈</div><div class="como-title">Medimos juntos</div><div class="como-desc">Resultados reales, ajustes en tiempo real. No desaparecemos cuando termina el brief.</div></div>
     </div>
   </section>
@@ -336,7 +348,7 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
         <h2 class="s-h2">Dejá de buscar.<br>Empezá a conectar.</h2>
         <p class="s-sub">En 48 horas tenés opciones reales sobre la mesa.</p>
         <div class="feats">
-          <div class="feat"><div class="feat-ic">⚡</div><div><h4>Red verificada</h4><p>Todos los creators pasaron por un proceso de validación. Métricas reales, audiencias reales.</p></div></div>
+          <div class="feat"><div class="feat-ic">⚡</div><div><h4>Red verificada</h4><p>Todos los creators pasaron por un proceso de validación de TRAMA. Métricas reales, audiencias reales.</p></div></div>
           <div class="feat"><div class="feat-ic">🎨</div><div><h4>Estrategia incluida</h4><p>Te acompañamos en el brief, la negociación y el seguimiento. No sos un ticket de soporte.</p></div></div>
           <div class="feat"><div class="feat-ic">📊</div><div><h4>Resultados medibles</h4><p>KPIs claros desde el inicio. Al final sabés exactamente qué funcionó y por qué.</p></div></div>
         </div>
@@ -346,7 +358,7 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
         <h3 class="cta-h">Contanos qué necesitás</h3>
         <p class="cta-p">Sin compromiso. Entendemos tu proyecto y te proponemos un camino.</p>
         <a href="./marcas.html" class="btn-solid">Registrarme como marca →</a>
-        <a href="https://wa.me/541157976633?text=Hola%20TRAMA%2C%20quiero%20saber%20m%C3%A1s%20sobre%20c%C3%B3mo%20trabajar%20con%20creators" class="btn-out" style="margin-top:.5rem" target="_blank">Hablar con el equipo →</a>
+        <a href="https://wa.me/541157976633?text=Hola%20TRAMA.%2C%20quiero%20saber%20m%C3%A1s%20sobre%20c%C3%B3mo%20trabajar%20con%20creators" class="btn-out" style="margin-top:.5rem" target="_blank">Hablar con el equipo →</a>
       </div>
     </div>
   </section>
@@ -354,22 +366,22 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
   <section id="creators" style="background:#09090e">
     <div class="two-col">
       <div class="c-vis">
-        <div class="c-row" onclick="showPage('bolsa')"><div class="c-left"><div class="c-av">MC</div><div><div class="c-name">Martina Cruzado</div><div class="c-niche">Lifestyle · IG · TT</div></div></div><div class="c-stat"><strong>280K</strong><span>SEGUIDORES</span></div></div>
-        <div class="c-row" onclick="showPage('bolsa')"><div class="c-left"><div class="c-av">FR</div><div><div class="c-name">Felipe Rodas</div><div class="c-niche">Fitness · YT · IG</div></div></div><div class="c-stat"><strong>510K</strong><span>SEGUIDORES</span></div></div>
-        <div class="c-row" onclick="showPage('bolsa')"><div class="c-left"><div class="c-av">LV</div><div><div class="c-name">Lucía Varela</div><div class="c-niche">Gastronomía · IG · TT</div></div></div><div class="c-stat"><strong>190K</strong><span>SEGUIDORES</span></div></div>
-        <div class="c-row" onclick="showPage('bolsa')" style="border-top:1px solid #1a1a2a"><div class="c-left"><div class="c-av">AG</div><div><div class="c-name">Agus Gómez</div><div class="c-niche">Fotografía · IG</div></div></div><div style="display:flex;align-items:center;gap:.625rem"><div class="c-new">Nuevo</div><div class="c-stat"><strong>155K</strong><span>SEGUIDORES</span></div></div></div>
+        <div class="c-row" onclick="checkAndShowBolsa()"><div class="c-left"><div class="c-av">MC</div><div><div class="c-name">Martina Cruzado</div><div class="c-niche">Lifestyle · IG · TT</div></div></div><div class="c-stat"><strong>280K</strong><span>SEGUIDORES</span></div></div>
+        <div class="c-row" onclick="checkAndShowBolsa()"><div class="c-left"><div class="c-av">FR</div><div><div class="c-name">Felipe Rodas</div><div class="c-niche">Fitness · YT · IG</div></div></div><div class="c-stat"><strong>510K</strong><span>SEGUIDORES</span></div></div>
+        <div class="c-row" onclick="checkAndShowBolsa()"><div class="c-left"><div class="c-av">LV</div><div><div class="c-name">Lucía Varela</div><div class="c-niche">Gastronomía · IG · TT</div></div></div><div class="c-stat"><strong>190K</strong><span>SEGUIDORES</span></div></div>
+        <div class="c-row" onclick="checkAndShowBolsa()" style="border-top:1px solid #1a1a2a"><div class="c-left"><div class="c-av">AG</div><div><div class="c-name">Agus Gómez</div><div class="c-niche">Fotografía · IG</div></div></div><div style="display:flex;align-items:center;gap:.625rem"><div class="c-new">Nuevo</div><div class="c-stat"><strong>155K</strong><span>SEGUIDORES</span></div></div></div>
       </div>
       <div>
         <div class="s-tag" style="color:var(--purple)">Para creators</div>
         <div class="s-line" style="background:var(--purple)"></div>
         <h2 class="s-h2">Tu contenido vale.<br>Que te paguen por eso.</h2>
-        <p class="s-sub">En TRAMA no sos un número. Sos un perfil que cuidan, presentan y acompañan.</p>
+        <p class="s-sub">En TRAMA. no sos un número. Sos un perfil que cuidan, presentan y acompañan.</p>
         <div class="feats">
           <div class="feat"><div class="feat-ic" style="background:#1a0a2a;border-color:#3a1a5a">✨</div><div><h4>Registrate gratis</h4><p>Cargás tu perfil y quedás visible para las marcas de la red.</p></div></div>
           <div class="feat"><div class="feat-ic" style="background:#1a0a2a;border-color:#3a1a5a">💬</div><div><h4>Propuestas reales</h4><p>Filtramos para que lo que te llegue tenga sentido con tu nicho.</p></div></div>
-          <div class="feat"><div class="feat-ic" style="background:#1a0a2a;border-color:#3a1a5a">🔒</div><div><h4>Pago garantizado</h4><p>TRAMA retiene el pago antes de que empieces. Vos entregás, vos cobrás.</p></div></div>
+          <div class="feat"><div class="feat-ic" style="background:#1a0a2a;border-color:#3a1a5a">🔒</div><div><h4>Pago garantizado</h4><p>TRAMA. retiene el pago antes de que empieces. Vos entregás, vos cobrás.</p></div></div>
         </div>
-        <a href="/registro.html" class="h-btn btn-p" style="margin-top:1.75rem;display:inline-flex">Subir mi perfil →</a>
+        <a href="./registro.html" class="h-btn btn-p" style="margin-top:1.75rem;display:inline-flex">Subir mi perfil →</a>
       </div>
     </div>
   </section>
@@ -380,7 +392,7 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
     <h2 class="s-h2">Lo dicen ellos,<br>no nosotros.</h2>
     <p class="s-sub">Personas con las que laburamos de verdad.</p>
     <div class="test-grid">
-      <div class="t-card"><p class="t-quote">"Llevábamos meses buscando. TRAMA nos presentó tres perfiles en dos días. <strong>La campaña superó todas las expectativas.</strong>"</p><div class="t-author"><div class="t-av" style="background:#1a2a0a;color:var(--green)">MG</div><div><div class="t-name">Marcela G.</div><div class="t-role">Brand Manager · Consumo masivo</div></div></div></div>
+      <div class="t-card"><p class="t-quote">"Llevábamos meses buscando. TRAMA. nos presentó tres perfiles en dos días. <strong>La campaña superó todas las expectativas.</strong>"</p><div class="t-author"><div class="t-av" style="background:#1a2a0a;color:var(--green)">MG</div><div><div class="t-name">Marcela G.</div><div class="t-role">Brand Manager · Consumo masivo</div></div></div></div>
       <div class="t-card"><p class="t-quote">"Antes las colaboraciones llegaban sueltas y a veces no cobraba bien. Ahora tengo <strong>propuestas que tienen sentido y el pago siempre en tiempo.</strong>"</p><div class="t-author"><div class="t-av" style="background:#1a0a2a;color:var(--purple)">RP</div><div><div class="t-name">Rodrigo P.</div><div class="t-role">Creator · Tech & Lifestyle · 380K</div></div></div></div>
       <div class="t-card"><p class="t-quote">"Lo que más valoro es que no son intermediarios pasivos. <strong>Estuvieron en todo el proceso</strong>, desde el brief hasta la revisión de resultados."</p><div class="t-author"><div class="t-av" style="background:#0a1a2a;color:var(--blue)">VC</div><div><div class="t-name">Valeria C.</div><div class="t-role">Directora Comercial · Indumentaria</div></div></div></div>
     </div>
@@ -388,15 +400,16 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
 
   <footer>
     <div>
-      <div class="f-logo" onclick="showPage('landing')">TRAMA</div>
+      <div class="f-logo" onclick="showPage('landing')">TRAMA.</div>
       <div class="f-tag">Conectamos marcas con creators que mueven.</div>
       <div class="f-copy">© 2025 TRAMA. Buenos Aires, Argentina.</div>
     </div>
     <div class="f-links">
       <a href="#como" onclick="showPage('landing')">Cómo funciona</a>
       <a href="#marcas" onclick="showPage('landing')">Marcas</a>
-      <a href="#" onclick="showPage('bolsa')">Bolsa</a>
-      <a href="/registro.html">Creators</a>
+      <a href="#" onclick="checkAndShowBolsa()">Encontrá tu creator</a>
+      <a href="./registro.html">Creators</a>
+      <a href="./perfil.html">Mi perfil</a>
     </div>
   </footer>
 </div>
@@ -404,10 +417,10 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
 <!-- BOLSA -->
 <div class="page" id="page-bolsa">
   <div class="bolsa-top">
-    <div class="s-tag">Bolsa de perfiles</div>
+    <div class="s-tag">Bolsa de perfiles · TRAMA.</div>
     <div class="s-line"></div>
     <h2 class="s-h2">Encontrá tu creator</h2>
-    <p class="s-sub" style="margin-bottom:1.5rem">Solo mostramos creators aprobados por el equipo TRAMA. Datos verificados.</p>
+    <p class="s-sub" style="margin-bottom:1.5rem">Solo mostramos creators aprobados por el equipo TRAMA. Datos verificados, sin humo.</p>
     <div class="search-bar">
       <input class="search-input" id="searchInp" type="text" placeholder="Buscar por nombre, nicho o palabra clave..." oninput="renderBolsa()">
       <button class="search-btn" onclick="renderBolsa()">Buscar</button>
@@ -428,28 +441,29 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
   </div>
   <footer>
     <div>
-      <div class="f-logo" onclick="showPage('landing')">TRAMA</div>
+      <div class="f-logo" onclick="showPage('landing')">TRAMA.</div>
       <div class="f-copy">© 2025 TRAMA. Buenos Aires, Argentina.</div>
     </div>
     <div class="f-links">
       <a href="#" onclick="showPage('landing')">Inicio</a>
-      <a href="/registro.html">Soy creator</a>
+      <a href="./registro.html">Soy creator</a>
+      <a href="./perfil.html">Mi perfil</a>
     </div>
   </footer>
 </div>
 
-<!-- MODAL GATE — registro requerido -->
+<!-- MODAL GATE -->
 <div class="modal-bg" id="gateModal">
-  <div class="modal" style="max-width:420px;text-align:center">
+  <div class="gate-modal">
     <button class="modal-x" onclick="closeGate()">✕</button>
-    <div style="font-size:2rem;margin-bottom:1rem">🔒</div>
-    <div style="font-size:.62rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--green);margin-bottom:.5rem">Acceso exclusivo</div>
-    <h3 style="font-size:1.2rem;font-weight:900;text-transform:uppercase;margin-bottom:.625rem">Registrate para ver los perfiles</h3>
-    <p style="font-size:.82rem;color:var(--muted2);line-height:1.6;margin-bottom:1.75rem">Nuestra bolsa de creators es exclusiva para marcas registradas. Es gratis y tarda menos de 2 minutos.</p>
-    <div style="display:flex;flex-direction:column;gap:.625rem">
+    <div class="gate-icon">🔒</div>
+    <div class="gate-tag">Acceso exclusivo · TRAMA.</div>
+    <h3 class="gate-title">Registrate para ver los perfiles</h3>
+    <p class="gate-sub">Nuestra bolsa de creators es exclusiva para marcas registradas. Es gratis y tarda menos de 2 minutos.</p>
+    <div class="gate-opts">
       <a href="./perfil.html" style="display:block;background:var(--green);color:var(--black);padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none;text-align:center">Registrarme como marca →</a>
-      <a href="./perfil.html" style="display:block;background:transparent;color:var(--purple);border:1.5px solid var(--purple);padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none;text-align:center">Soy creator, quiero subir mi perfil →</a>
-      <button onclick="closeGate()" style="background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;margin-top:.25rem">Seguir explorando el sitio</button>
+      <a href="./perfil.html" style="display:block;background:transparent;color:var(--purple);border:1.5px solid var(--purple);padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none;text-align:center">Soy creator →</a>
+      <button onclick="closeGate()" style="background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;margin-top:.25rem">Seguir explorando</button>
     </div>
   </div>
 </div>
@@ -459,7 +473,7 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
   <div class="modal">
     <button class="modal-x" onclick="closeModal()">✕</button>
     <div id="mForm">
-      <div class="m-tag">Conexión directa</div>
+      <div class="m-tag">Conexión directa · TRAMA.</div>
       <h3 class="m-title" id="mTitle">Conectá</h3>
       <p class="m-sub">Abonás una vez y accedés a los datos de contacto verificados por TRAMA.</p>
       <div class="m-preview" id="mPreview"></div>
@@ -481,25 +495,21 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
 const SB_URL  = 'https://mcpmabvxmdepastmpzbi.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
 
-const COLORS = ['#C8FF1A','#4ade80','#fb923c','#60a5fa','#f472b6','#c084fc','#f59e0b','#34d399'];
-const BGS    = ['#0f1a00','#0a2010','#1a0a00','#0a1020','#1a0a14','#1a0a2a','#1a1000','#0a1a14'];
+const COLORS=['#C8FF1A','#4ade80','#fb923c','#60a5fa','#f472b6','#c084fc','#f59e0b','#34d399'];
+const BGS=['#0f1a00','#0a2010','#1a0a00','#0a1020','#1a0a14','#1a0a2a','#1a1000','#0a1a14'];
 
-let allCreators = [];
-let bolsaNiche  = 'todos';
-let bolsaPlats  = [];
-let bolsaSort   = 'seg';
-let currentCreator = null;
-let filtersBuilt = false;
+let allCreators=[], bolsaNiche='todos', bolsaPlats=[], bolsaSort='seg';
+let currentCreator=null, filtersBuilt=false;
 
 // ── PÁGINAS ──
 function showPage(p){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
-  if(p==='bolsa' && allCreators.length===0) loadCreators();
+  if(p==='bolsa'&&allCreators.length===0)loadCreators();
 }
 
-// ── MENU MOBILE ──
+// ── MENÚ MOBILE ──
 function toggleMenu(){
   document.getElementById('mobMenu').classList.toggle('open');
   document.getElementById('hamBtn').classList.toggle('open');
@@ -514,14 +524,28 @@ document.addEventListener('click',e=>{
   if(m.classList.contains('open')&&!m.contains(e.target)&&!h.contains(e.target))closeMenu();
 });
 
+// ── GATE ──
+function checkAndShowBolsa(){
+  const session=localStorage.getItem('trama_marca')||localStorage.getItem('trama_creator');
+  if(session){ showPage('bolsa'); }
+  else{
+    document.getElementById('gateModal').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+}
+function closeGate(){
+  document.getElementById('gateModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
 // ── SUPABASE ──
 async function loadCreators(){
   try{
-    const r = await fetch(`${SB_URL}/rest/v1/creators?select=*&status=eq.aprobado&order=created_at.desc`,{
+    const r=await fetch(`${SB_URL}/rest/v1/creators?select=*&status=eq.aprobado&order=created_at.desc`,{
       headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
     });
     if(!r.ok)throw new Error('HTTP '+r.status);
-    allCreators = await r.json();
+    allCreators=await r.json();
     buildFilters();
     renderBolsa();
   }catch(e){
@@ -564,9 +588,9 @@ function setSort(s,btn){
   renderBolsa();
 }
 
-function fmtSeg(n){if(!n)return '—';return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':n}
-function getColor(c,i){return COLORS[i%COLORS.length]}
-function getBg(c,i){return BGS[i%BGS.length]}
+function fmtSeg(n){if(!n)return'—';return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':n}
+function getColor(i){return COLORS[i%COLORS.length]}
+function getBg(i){return BGS[i%BGS.length]}
 function getInit(c){return((c.nombre||'?')[0]+(c.apellido||'?')[0]).toUpperCase()}
 
 function renderBolsa(){
@@ -590,15 +614,13 @@ function renderBolsa(){
     return;
   }
   g.innerHTML=list.map((c,i)=>{
-    const col=getColor(c,i),bg=getBg(c,i),init=getInit(c);
+    const col=getColor(i),bg=getBg(i),init=getInit(c);
     const seg=fmtSeg(c.ig_seg||c.tt_seg||c.yt_seg);
-    const er=(c.ig_er||c.tt_er||0);
-    const plats=(c.plats||[]);
+    const er=c.ig_er||c.tt_er||0;
+    const plats=c.plats||[];
     const niches=(c.niches||[]).join(' · ')||'—';
-    const avHtml=c.avatar_url
-      ?`<img src="${c.avatar_url}" alt="${c.nombre}">`
-      :`<span>${init}</span>`;
-    return `<div class="c-card">
+    const avHtml=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre}">`:`<span>${init}</span>`;
+    return`<div class="c-card">
       <div class="card-top">
         <div class="card-av" style="background:${bg};border-color:${col}33;color:${col}">${avHtml}</div>
         <span></span>
@@ -617,12 +639,12 @@ function renderBolsa(){
   }).join('');
 }
 
-// ── MODAL ──
+// ── MODAL CONTACTO ──
 function openModal(id,i){
   const c=allCreators.find(x=>x.id===id);
   if(!c)return;
   currentCreator=c;
-  const col=getColor(c,i),bg=getBg(c,i),init=getInit(c);
+  const col=getColor(i),bg=getBg(i),init=getInit(c);
   document.getElementById('mTitle').textContent=`Conectá con ${c.nombre}`;
   const avHtml=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre}">`:`${init}`;
   document.getElementById('mPreview').innerHTML=`<div class="m-av" style="background:${bg};border-color:${col}44;color:${col}">${avHtml}</div><div><div class="m-name">${c.nombre} ${c.apellido}</div><div class="m-niche" style="color:${col}">${(c.niches||[]).join(' · ')} · ${fmtSeg(c.ig_seg||c.tt_seg)}</div></div>`;
@@ -651,42 +673,7 @@ function quickPay(){
   showToast('✓ Contacto desbloqueado','ok');
 }
 
-// ── GATE BOLSA ──
-function checkAndShowBolsa(){
-  const session = localStorage.getItem('trama_marca') || localStorage.getItem('trama_creator');
-  if(session){
-    showPage('bolsa');
-  } else {
-    document.getElementById('gateModal').classList.add('open');
-    document.body.style.overflow='hidden';
-  }
-}
-function closeGate(){
-  document.getElementById('gateModal').classList.remove('open');
-  document.body.style.overflow='';
-}
-
-// ── SESIÓN (creator logueado) ──
-const SESSION_KEY = 'trama_creator';
-
-function checkSession(){
-  const s = localStorage.getItem(SESSION_KEY);
-  if(s){
-    try{
-      const data = JSON.parse(s);
-      document.getElementById('navPerfilBtn').style.display='inline-block';
-      document.getElementById('navPerfilBtn').textContent=`👤 ${data.nombre}`;
-      document.getElementById('navCreatorBtn').style.display='none';
-    }catch(e){}
-  }
-}
-
-function logout(){
-  localStorage.removeItem(SESSION_KEY);
-  location.reload();
-}
-
-checkSession();
+// ── TOAST ──
 let tt;
 function showToast(msg,type='ok'){
   const t=document.getElementById('toast');

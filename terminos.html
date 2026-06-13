@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRAMA. — Términos, Condiciones y Privacidad</title>
+<meta name="description" content="Términos y condiciones, política de privacidad y condiciones específicas para creators y marcas de TRAMA.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --black:#080808;--green:#C8FF1A;--white:#F4F4EF;
+  --g1:#111;--g2:#1C1C1C;
+  --muted:#666;--muted2:#999;--purple:#c084fc;
+}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+
+nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,.96);backdrop-filter:blur(12px);border-bottom:1px solid #1a1a1a}
+.logo{font-size:1.2rem;font-weight:900;letter-spacing:.18em;color:var(--green);text-decoration:none}
+.nav-back{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--white)}
+
+/* LAYOUT */
+.page-wrap{padding-top:56px;display:grid;grid-template-columns:1fr;max-width:1100px;margin:0 auto}
+@media(min-width:900px){.page-wrap{grid-template-columns:240px 1fr;align-items:start}}
+
+/* SIDEBAR NAV */
+.side-nav{padding:2rem 1.5rem;position:sticky;top:72px}
+@media(max-width:899px){.side-nav{display:none}}
+.side-title{font-size:.6rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem}
+.side-links{display:flex;flex-direction:column;gap:.25rem}
+.side-link{font-size:.78rem;font-weight:600;color:var(--muted2);text-decoration:none;padding:.4rem .75rem;border-radius:2px;transition:all .2s;border-left:2px solid transparent}
+.side-link:hover{color:var(--white);border-left-color:#2a2a2a}
+.side-link.active{color:var(--green);border-left-color:var(--green);background:#0f1a0033}
+.side-sep{height:1px;background:#1a1a1a;margin:.75rem 0}
+.side-update{font-size:.65rem;color:var(--muted);margin-top:1.25rem;line-height:1.5}
+
+/* MOBILE NAV */
+.mob-nav{display:flex;gap:.4rem;flex-wrap:wrap;padding:1.25rem 1.5rem;border-bottom:1px solid #161616;overflow-x:auto}
+@media(min-width:900px){.mob-nav{display:none}}
+.mob-nav a{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:.35rem .75rem;border:1px solid #222;border-radius:2px;white-space:nowrap;transition:all .2s}
+.mob-nav a:hover{border-color:var(--green);color:var(--green)}
+
+/* CONTENIDO */
+.content{padding:2.5rem 1.5rem 5rem}
+@media(min-width:768px){.content{padding:3rem 3rem 6rem}}
+
+/* SECCIÓN */
+.doc-section{margin-bottom:4rem;padding-bottom:4rem;border-bottom:1px solid #161616}
+.doc-section:last-child{border:none}
+.doc-tag{font-size:.6rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--green);display:flex;align-items:center;gap:.5rem;margin-bottom:.875rem}
+.doc-tag::before{content:'';width:16px;height:1px;background:var(--green)}
+.doc-h1{font-size:clamp(1.6rem,3vw,2.4rem);font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:1;margin-bottom:.75rem}
+.doc-intro{font-size:.9rem;color:var(--muted2);line-height:1.75;margin-bottom:2rem;max-width:640px}
+.doc-intro strong{color:var(--white)}
+
+/* ARTÍCULOS */
+.art{margin-bottom:2rem}
+.art-title{font-size:.72rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:var(--green);margin-bottom:.625rem;display:flex;align-items:center;gap:.5rem}
+.art-title span{background:#0f1a00;border:1px solid #2a4000;color:var(--green);font-size:.58rem;padding:.15rem .45rem;border-radius:2px}
+.art-body{font-size:.85rem;color:var(--muted2);line-height:1.8}
+.art-body strong{color:var(--white);font-weight:700}
+.art-body a{color:var(--green);text-decoration:none}
+.art-body a:hover{text-decoration:underline}
+.art-body ul{padding-left:1.25rem;margin:.625rem 0}
+.art-body ul li{margin-bottom:.35rem}
+.art-body p{margin-bottom:.75rem}
+.art-body p:last-child{margin:0}
+
+/* HIGHLIGHT BOX */
+.highlight{background:var(--g1);border:1px solid #1a1a1a;border-left:3px solid var(--green);border-radius:0 3px 3px 0;padding:1.1rem 1.25rem;margin:1.25rem 0;font-size:.82rem;color:var(--muted2);line-height:1.65}
+.highlight strong{color:var(--white)}
+.highlight.purple{border-left-color:var(--purple)}
+.highlight.amber{border-left-color:#f59e0b}
+
+/* TABLA */
+.data-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.8rem}
+.data-table th{background:var(--g1);color:var(--muted);font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.625rem .875rem;text-align:left;border-bottom:1px solid #222}
+.data-table td{padding:.625rem .875rem;border-bottom:1px solid #161616;color:var(--muted2);vertical-align:top}
+.data-table td strong{color:var(--white)}
+.data-table tr:last-child td{border:none}
+
+/* FECHA */
+.update-badge{display:inline-flex;align-items:center;gap:.4rem;background:#0f1a00;border:1px solid #2a4000;color:var(--green);padding:.3rem .75rem;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:2px;margin-bottom:2rem}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="/">TRAMA.</a>
+  <a class="nav-back" href="/">← Volver al inicio</a>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="side-nav">
+    <div class="side-title">Documentos</div>
+    <div class="side-links">
+      <a class="side-link active" href="#generales">Términos generales</a>
+      <a class="side-link" href="#privacidad">Privacidad</a>
+      <div class="side-sep"></div>
+      <a class="side-link" href="#creators">Para creators</a>
+      <a class="side-link" href="#marcas">Para marcas</a>
+    </div>
+    <div class="side-update">
+      Última actualización<br>
+      <strong style="color:var(--white)">Junio 2025</strong><br><br>
+      Consultas:<br>
+      <a href="mailto:info.tramapunto@gmail.com" style="color:var(--green)">info.tramapunto@gmail.com</a>
+    </div>
+  </aside>
+
+  <!-- MOB NAV -->
+  <div class="mob-nav">
+    <a href="#generales">Términos generales</a>
+    <a href="#privacidad">Privacidad</a>
+    <a href="#creators">Para creators</a>
+    <a href="#marcas">Para marcas</a>
+  </div>
+
+  <!-- CONTENIDO -->
+  <main class="content">
+
+    <!-- ══ TÉRMINOS GENERALES ══ -->
+    <div class="doc-section" id="generales">
+      <div class="update-badge">📄 Vigente desde junio 2025</div>
+      <div class="doc-tag">Documento 01</div>
+      <h1 class="doc-h1">Términos y condiciones generales</h1>
+      <p class="doc-intro">
+        Estos Términos y Condiciones regulan el uso de la plataforma TRAMA. (<strong>tramapunto.com.ar</strong>), operada por el equipo de TRAMA. con sede en Buenos Aires, Argentina. Al acceder y utilizar esta plataforma, el usuario acepta íntegramente estos términos.
+      </p>
+
+      <div class="art">
+        <div class="art-title"><span>01</span> Definiciones</div>
+        <div class="art-body">
+          <p><strong>TRAMA.</strong> refiere a la plataforma, su equipo y los servicios ofrecidos a través de tramapunto.com.ar.</p>
+          <p><strong>Usuario</strong> es toda persona física o jurídica que acceda, navegue o se registre en la plataforma.</p>
+          <p><strong>Creator</strong> es el usuario que carga un perfil profesional para ser contactado por marcas.</p>
+          <p><strong>Marca</strong> es el usuario que busca y conecta con creators a través de TRAMA.</p>
+          <p><strong>Conexión</strong> es el acto por el cual una marca accede a los datos de contacto de un creator mediante un pago.</p>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>02</span> Aceptación de los términos</div>
+        <div class="art-body">
+          <p>El uso de la plataforma implica la aceptación plena y sin reservas de los presentes términos. TRAMA. se reserva el derecho de modificarlos en cualquier momento, notificando los cambios mediante el sitio web. El uso continuado de la plataforma después de la publicación de cambios constituye aceptación de los mismos.</p>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>03</span> Registro y cuenta de usuario</div>
+        <div class="art-body">
+          <p>Para acceder a determinadas funciones, el usuario debe crear una cuenta proporcionando información veraz, completa y actualizada. El usuario es responsable de:</p>
+          <ul>
+            <li>Mantener la confidencialidad de sus credenciales de acceso.</li>
+            <li>Todas las actividades realizadas desde su cuenta.</li>
+            <li>Notificar a TRAMA. ante cualquier uso no autorizado.</li>
+          </ul>
+          <p>TRAMA. se reserva el derecho de suspender o eliminar cuentas que incumplan estos términos.</p>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>04</span> Uso permitido de la plataforma</div>
+        <div class="art-body">
+          <p>El usuario se compromete a utilizar la plataforma de forma lícita y a no:</p>
+          <ul>
+            <li>Cargar información falsa, engañosa o que infrinja derechos de terceros.</li>
+            <li>Contactar a otros usuarios con fines distintos a los propósitos de TRAMA.</li>
+            <li>Intentar eludir los sistemas de pago o acceder a información sin autorización.</li>
+            <li>Reproducir, copiar o redistribuir contenido de la plataforma sin autorización expresa.</li>
+            <li>Utilizar la plataforma para actividades ilegales o contrarias a la moral.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>05</span> Modelo de negocio y pagos</div>
+        <div class="art-body">
+          <p>TRAMA. opera como intermediario entre marcas y creators. El modelo de monetización incluye:</p>
+          <ul>
+            <li><strong>Pago por conexión:</strong> las marcas abonan un fee para acceder a los datos de contacto de un creator específico.</li>
+            <li><strong>Comisión por campaña:</strong> en colaboraciones gestionadas por TRAMA., se aplica una comisión sobre el valor acordado entre marca y creator.</li>
+          </ul>
+          <p>Los pagos son procesados mediante pasarelas seguras. TRAMA. no almacena datos de tarjetas de crédito.</p>
+          <div class="highlight amber">
+            <strong>Importante:</strong> TRAMA. actúa como facilitador. Los contratos comerciales específicos entre marcas y creators son responsabilidad de las partes involucradas.
+          </div>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>06</span> Propiedad intelectual</div>
+        <div class="art-body">
+          <p>Todo el contenido de la plataforma — incluyendo diseño, textos, marca, logo y sistema — es propiedad de TRAMA. y está protegido por las leyes de propiedad intelectual aplicables en Argentina y los países de la región.</p>
+          <p>Los usuarios conservan la propiedad de su contenido pero otorgan a TRAMA. una licencia no exclusiva para mostrarlo en la plataforma.</p>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>07</span> Limitación de responsabilidad</div>
+        <div class="art-body">
+          <p>TRAMA. no garantiza resultados específicos de las campañas ni el éxito de las colaboraciones entre marcas y creators. La plataforma se ofrece "tal como está". TRAMA. no será responsable por:</p>
+          <ul>
+            <li>Daños indirectos derivados del uso o imposibilidad de uso de la plataforma.</li>
+            <li>Incumplimientos entre marcas y creators.</li>
+            <li>Inexactitudes en la información cargada por los usuarios.</li>
+            <li>Interrupciones temporales del servicio por mantenimiento o causas técnicas.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>08</span> Jurisdicción y ley aplicable</div>
+        <div class="art-body">
+          <p>Estos términos se rigen por las leyes de la República Argentina. Ante cualquier controversia, las partes se someten a la jurisdicción de los tribunales ordinarios de la Ciudad Autónoma de Buenos Aires, renunciando a cualquier otro fuero que pudiera corresponder.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PRIVACIDAD ══ -->
+    <div class="doc-section" id="privacidad">
+      <div class="doc-tag">Documento 02</div>
+      <h1 class="doc-h1">Política de privacidad</h1>
+      <p class="doc-intro">
+        En TRAMA. tomamos la privacidad en serio. Esta política describe qué datos recopilamos, cómo los usamos y qué derechos tenés sobre ellos, en cumplimiento de la <strong>Ley 25.326 de Protección de Datos Personales</strong> de Argentina y normativas equivalentes en Latinoamérica.
+      </p>
+
+      <div class="art">
+        <div class="art-title"><span>01</span> Datos que recopilamos</div>
+        <div class="art-body">
+          <table class="data-table">
+            <thead>
+              <tr><th>Tipo de dato</th><th>Qué incluye</th><th>Para qué se usa</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Identidad</strong></td><td>Nombre, apellido, email, teléfono</td><td>Registro, contacto y verificación</td></tr>
+              <tr><td><strong>Perfil profesional</strong></td><td>Métricas, nicho, tarifas, redes sociales</td><td>Mostrar perfil en la bolsa</td></tr>
+              <tr><td><strong>Comerciales</strong></td><td>Objetivos, presupuesto, rubro</td><td>Matchmaking marca-creator</td></tr>
+              <tr><td><strong>Técnicos</strong></td><td>IP, navegador, dispositivo</td><td>Seguridad y mejora del servicio</td></tr>
+              <tr><td><strong>Financieros</strong></td><td>Datos de pago (procesados por terceros)</td><td>Procesamiento de transacciones</td></tr>
+              <tr><td><strong>Fotografías</strong></td><td>Foto de perfil (opcional)</td><td>Mostrar identidad visual en el perfil</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>02</span> Base legal del tratamiento</div>
+        <div class="art-body">
+          <p>Tratamos tus datos sobre las siguientes bases legales:</p>
+          <ul>
+            <li><strong>Consentimiento:</strong> al registrarte y aceptar estos términos.</li>
+            <li><strong>Ejecución contractual:</strong> para prestarte los servicios solicitados.</li>
+            <li><strong>Interés legítimo:</strong> para mejorar la plataforma y prevenir fraudes.</li>
+            <li><strong>Obligación legal:</strong> cuando la ley lo requiera.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>03</span> Con quién compartimos tus datos</div>
+        <div class="art-body">
+          <p>TRAMA. no vende ni alquila datos personales. Compartimos información únicamente con:</p>
+          <ul>
+            <li><strong>Otras partes de la plataforma:</strong> cuando una marca paga por una conexión, accede a los datos de contacto del creator.</li>
+            <li><strong>Proveedores de servicio:</strong> Supabase (base de datos), Vercel (hosting), pasarelas de pago. Todos bajo contratos de confidencialidad.</li>
+            <li><strong>Autoridades:</strong> cuando sea requerido por ley.</li>
+          </ul>
+          <div class="highlight">
+            <strong>Tus datos de contacto solo son visibles para marcas que hayan pagado la conexión.</strong> No están disponibles públicamente en la bolsa de perfiles.
+          </div>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>04</span> Retención de datos</div>
+        <div class="art-body">
+          <p>Conservamos tus datos mientras tu cuenta esté activa. Si eliminás tu cuenta, tus datos serán eliminados dentro de los <strong>30 días hábiles</strong> siguientes, excepto cuando exista obligación legal de conservarlos.</p>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>05</span> Tus derechos</div>
+        <div class="art-body">
+          <p>Tenés derecho a:</p>
+          <ul>
+            <li><strong>Acceder</strong> a tus datos personales.</li>
+            <li><strong>Rectificar</strong> datos inexactos o incompletos.</li>
+            <li><strong>Eliminar</strong> tu cuenta y datos asociados.</li>
+            <li><strong>Portabilidad:</strong> recibir tus datos en formato estructurado.</li>
+            <li><strong>Oponerte</strong> al tratamiento en ciertos casos.</li>
+          </ul>
+          <p>Para ejercer cualquiera de estos derechos, escribinos a <a href="mailto:info.tramapunto@gmail.com">info.tramapunto@gmail.com</a>. Respondemos en un máximo de <strong>15 días hábiles</strong>.</p>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>06</span> Cookies y tecnologías de seguimiento</div>
+        <div class="art-body">
+          <p>La plataforma utiliza cookies esenciales para el funcionamiento del servicio (autenticación, preferencias). No utilizamos cookies de seguimiento publicitario de terceros.</p>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>07</span> Seguridad</div>
+        <div class="art-body">
+          <p>Implementamos medidas técnicas y organizativas para proteger tus datos, incluyendo cifrado SSL, autenticación segura y acceso restringido a la base de datos. Sin embargo, ningún sistema es 100% infalible. Ante cualquier incidente de seguridad que afecte tus datos, te notificaremos en el plazo previsto por la ley.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CREATORS ══ -->
+    <div class="doc-section" id="creators">
+      <div class="doc-tag">Documento 03</div>
+      <h1 class="doc-h1">Términos para creators</h1>
+      <p class="doc-intro">
+        Estas condiciones aplican específicamente a los creators que se registran en TRAMA. para ser encontrados por marcas. Al cargar tu perfil, aceptás estos términos adicionales.
+      </p>
+
+      <div class="art">
+        <div class="art-title"><span>01</span> Registro y aprobación</div>
+        <div class="art-body">
+          <p>El registro en TRAMA. es gratuito. Sin embargo, la <strong>publicación del perfil en la bolsa requiere aprobación</strong> del equipo de TRAMA. Nos reservamos el derecho de aprobar, rechazar o dar de baja perfiles sin necesidad de justificación, aunque intentaremos siempre comunicar los motivos.</p>
+          <p>Criterios generales de aprobación:</p>
+          <ul>
+            <li>Información veraz y verificable.</li>
+            <li>Métricas consistentes con la actividad declarada.</li>
+            <li>Contenido alineado con los valores de TRAMA.</li>
+            <li>Nicho definido y audiencia real (no inflada artificialmente).</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>02</span> Veracidad de la información</div>
+        <div class="art-body">
+          <p>El creator es el único responsable de la veracidad de los datos cargados en su perfil, incluyendo métricas, tarifas, plataformas activas y ejemplos de contenido. <strong>Cargar información falsa o engañosa es motivo de baja inmediata de la plataforma.</strong></p>
+          <div class="highlight amber">
+            <strong>Inflación artificial de métricas</strong> (compra de seguidores, bots, engagement falso) es causa de exclusión permanente de TRAMA.
+          </div>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>03</span> Visibilidad y contacto</div>
+        <div class="art-body">
+          <p>Una vez aprobado, tu perfil es visible para marcas registradas en la plataforma. Tus datos de contacto (email, usuario de redes, WhatsApp) son revelados únicamente a marcas que hayan abonado el fee de conexión.</p>
+          <p>TRAMA. no garantiza un número mínimo de conexiones ni contactos por parte de marcas.</p>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>04</span> Tarifas y negociación</div>
+        <div class="art-body">
+          <p>Las tarifas declaradas en el perfil son <strong>orientativas</strong>. La negociación final de condiciones, precios y alcance de cada colaboración es responsabilidad exclusiva del creator y la marca. TRAMA. puede acompañar ese proceso pero no es parte del contrato entre ambos.</p>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>05</span> Pago garantizado (campañas gestionadas por TRAMA.)</div>
+        <div class="art-body">
+          <p>En colaboraciones donde TRAMA. actúe como intermediario activo en el proceso de pago:</p>
+          <ul>
+            <li>El pago de la marca es retenido por TRAMA. antes del inicio del trabajo.</li>
+            <li>El creator recibe el pago una vez que la marca aprueba el contenido entregado.</li>
+            <li>En caso de disputas, TRAMA. mediará de buena fe entre las partes.</li>
+            <li>TRAMA. aplicará una comisión acordada previamente sobre el valor de la colaboración.</li>
+          </ul>
+          <div class="highlight">
+            Este mecanismo aplica solo a campañas gestionadas activamente por TRAMA. Las conexiones directas (pago por contacto) no incluyen este sistema de escrow.
+          </div>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>06</span> Obligaciones del creator</div>
+        <div class="art-body">
+          <ul>
+            <li>Mantener el perfil actualizado con información real.</li>
+            <li>Responder a las marcas que lo contacten de forma profesional.</li>
+            <li>Cumplir con los acuerdos comerciales pactados con las marcas.</li>
+            <li>No contactar a marcas de la plataforma por canales externos para eludir el sistema de TRAMA.</li>
+            <li>Notificar cambios relevantes en sus métricas o disponibilidad.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>07</span> Baja de la plataforma</div>
+        <div class="art-body">
+          <p>El creator puede solicitar la baja de su perfil en cualquier momento escribiendo a <a href="mailto:info.tramapunto@gmail.com">info.tramapunto@gmail.com</a>. La baja se procesa en un máximo de 5 días hábiles. Las conexiones ya realizadas por marcas no son reembolsables.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MARCAS ══ -->
+    <div class="doc-section" id="marcas">
+      <div class="doc-tag">Documento 04</div>
+      <h1 class="doc-h1">Términos para marcas</h1>
+      <p class="doc-intro">
+        Estas condiciones aplican a las marcas — personas físicas, emprendimientos y empresas — que utilizan TRAMA. para encontrar y conectar con creators. Al registrarte como marca, aceptás estos términos adicionales.
+      </p>
+
+      <div class="art">
+        <div class="art-title"><span>01</span> Acceso a la bolsa de creators</div>
+        <div class="art-body">
+          <p>La bolsa de perfiles de TRAMA. es exclusiva para marcas registradas. El registro es gratuito. Para acceder a los datos de contacto de un creator, la marca debe abonar el <strong>fee de conexión</strong> vigente al momento de la transacción.</p>
+          <p>TRAMA. se reserva el derecho de actualizar los precios de conexión con previo aviso.</p>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>02</span> Pago por conexión</div>
+        <div class="art-body">
+          <p>El pago por conexión es <strong>por creator y por acceso</strong>. Una vez procesado el pago, la marca accede a los datos de contacto del creator seleccionado. Este pago:</p>
+          <ul>
+            <li>No garantiza que el creator acepte la colaboración.</li>
+            <li>No incluye la gestión ni el resultado de la campaña.</li>
+            <li>No es reembolsable una vez revelados los datos de contacto.</li>
+          </ul>
+          <div class="highlight amber">
+            <strong>No reembolso:</strong> dado que el valor del servicio es el acceso a información, una vez revelados los datos de contacto no se realizan devoluciones. Ante problemas técnicos en el proceso de pago, contactar a <a href="mailto:info.tramapunto@gmail.com">info.tramapunto@gmail.com</a>.
+          </div>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>03</span> Uso de los datos de los creators</div>
+        <div class="art-body">
+          <p>Los datos de contacto de los creators son proporcionados exclusivamente para iniciar una relación comercial relacionada con creator marketing. La marca se compromete a:</p>
+          <ul>
+            <li>No compartir los datos con terceros sin autorización del creator.</li>
+            <li>No utilizar los datos para fines distintos a los declarados.</li>
+            <li>Tratar a los creators con respeto y profesionalismo.</li>
+            <li>No contactar a creators para propuestas no relacionadas con contenido o activaciones.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>04</span> Empresas corporativas</div>
+        <div class="art-body">
+          <p>Las marcas registradas como <strong>empresas corporativas</strong> tienen acceso a un modelo diferenciado que incluye:</p>
+          <ul>
+            <li>Propuesta de campaña a medida elaborada por el equipo de TRAMA.</li>
+            <li>Reunión de briefing sin costo previo a cualquier contratación.</li>
+            <li>Condiciones de facturación y pago acordadas en la reunión.</li>
+            <li>Acceso a la red completa de creators, incluyendo perfiles exclusivos.</li>
+          </ul>
+          <p>Las condiciones específicas de cada campaña corporativa se establecen en un acuerdo separado entre TRAMA. y la empresa.</p>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>05</span> Responsabilidad de la marca</div>
+        <div class="art-body">
+          <p>La marca es responsable de:</p>
+          <ul>
+            <li>Toda comunicación y acuerdo establecido directamente con creators.</li>
+            <li>El cumplimiento de las condiciones pactadas (pago al creator, tiempos, brief).</li>
+            <li>Proporcionar información veraz sobre su empresa, rubro y objetivos.</li>
+            <li>El uso del contenido generado por los creators dentro de los términos acordados con ellos.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>06</span> Conducta en la plataforma</div>
+        <div class="art-body">
+          <p>TRAMA. se reserva el derecho de suspender o eliminar cuentas de marcas que:</p>
+          <ul>
+            <li>Realicen propuestas abusivas, discriminatorias o ilegales a creators.</li>
+            <li>Intenten eludir el sistema de pago de la plataforma.</li>
+            <li>Proporcionen información falsa sobre su empresa o campaña.</li>
+            <li>Acumulen reportes negativos justificados por parte de creators.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="art">
+        <div class="art-title"><span>07</span> Facturación</div>
+        <div class="art-body">
+          <p>TRAMA. emite comprobante de pago por cada transacción procesada en la plataforma. Para requerir factura fiscal (en casos donde corresponda según la normativa vigente), la marca debe solicitarla a <a href="mailto:info.tramapunto@gmail.com">info.tramapunto@gmail.com</a> dentro de los <strong>5 días hábiles</strong> posteriores a la transacción.</p>
+        </div>
+      </div>
+
+      <!-- CONTACTO FINAL -->
+      <div class="highlight purple" style="margin-top:2rem">
+        <strong>¿Tenés dudas sobre estos términos?</strong><br>
+        Escribinos a <a href="mailto:info.tramapunto@gmail.com" style="color:var(--purple)">info.tramapunto@gmail.com</a> o por <a href="https://wa.me/541157976633" style="color:var(--purple)">WhatsApp</a>. Respondemos en menos de 24hs hábiles.
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// Highlight sidebar link activo según scroll
+const sections = document.querySelectorAll('.doc-section');
+const sideLinks = document.querySelectorAll('.side-link');
+window.addEventListener('scroll', ()=>{
+  let current = '';
+  sections.forEach(s=>{
+    if(window.scrollY >= s.offsetTop - 100) current = s.id;
+  });
+  sideLinks.forEach(l=>{
+    l.classList.remove('active');
+    if(l.getAttribute('href')==='#'+current) l.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

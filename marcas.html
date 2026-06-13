@@ -512,10 +512,10 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
           </div>
           <!-- CALENDLY EMBED — reemplazá la URL con tu link real de Calendly -->
           <div class="cal-fallback" id="calFallback">
-            <p>Para agendar la reunión necesitás crear una cuenta gratuita en <strong>Calendly</strong> y reemplazar la URL en el código.<br><br>Mientras tanto podés contactarnos directamente:</p>
-            <a class="btn-cal" href="mailto:hola@trama.agency">📧 Escribinos a hola@trama.agency</a>
-            <div style="margin-top:1rem">
-              <a href="https://wa.me/5491100000000" class="btn-cal" style="background:#25d366;margin-top:.5rem">💬 WhatsApp</a>
+            <p>Mientras agendamos el sistema de turnos, contactanos directamente y coordinamos la reunión:</p>
+            <a class="btn-cal" href="mailto:info.tramapunto@gmail.com">📧 info.tramapunto@gmail.com</a>
+            <div style="margin-top:.75rem">
+              <a href="https://wa.me/541157976633" class="btn-cal" style="background:#25d366">💬 +54 11 5797-6633</a>
             </div>
           </div>
           <!-- Descomentar cuando tengas el link de Calendly:
@@ -779,6 +779,17 @@ async function cSubmit(){
   }catch(e){
     showToast(e.message.includes('unique')?'Este email ya está registrado':'Error: '+e.message,'err');
     btn.disabled=false;btn.textContent='Confirmar →';
+  }
+}
+
+function initCalendly(){
+  if(window.Calendly){
+    Calendly.initInlineWidget({
+      url:'https://calendly.com/villalba-cgabriel/30min',
+      parentElement:document.getElementById('calendly-embed'),
+      prefill:{},
+      utm:{}
+    });
   }
 }
 

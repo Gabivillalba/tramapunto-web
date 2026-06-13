@@ -627,7 +627,7 @@ function renderBolsa(){
         <div class="card-av" style="background:${bg};border-color:${col}33;color:${col}">${avHtml}</div>
         <span></span>
       </div>
-      <div class="card-name">${c.nombre} ${c.apellido}</div>
+      <div class="card-name">${c.nombre}</div>
       <div class="card-niche" style="color:${col}">${niches}</div>
       <div class="card-stats">
         <div class="cs"><strong>${seg}</strong><span>Seguidores</span></div>
@@ -649,7 +649,7 @@ function openModal(id,i){
   const col=getColor(i),bg=getBg(i),init=getInit(c);
   document.getElementById('mTitle').textContent=`Conectá con ${c.nombre}`;
   const avHtml=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre}">`:`${init}`;
-  document.getElementById('mPreview').innerHTML=`<div class="m-av" style="background:${bg};border-color:${col}44;color:${col}">${avHtml}</div><div><div class="m-name">${c.nombre} ${c.apellido}</div><div class="m-niche" style="color:${col}">${(c.niches||[]).join(' · ')} · ${fmtSeg(c.ig_seg||c.tt_seg)}</div></div>`;
+  document.getElementById('mPreview').innerHTML=`<div class="m-av" style="background:${bg};border-color:${col}44;color:${col}">${avHtml}</div><div><div class="m-name">${c.nombre}</div><div class="m-niche" style="color:${col}">${(c.niches||[]).join(' · ')} · ${fmtSeg(c.ig_seg||c.tt_seg)}</div></div>`;
   document.getElementById('mForm').style.display='block';
   document.getElementById('mSuccess').style.display='none';
   document.getElementById('contactModal').classList.add('open');

@@ -558,21 +558,68 @@ function renderCreatorTab(i,el){
   else if(i===3){
     el.innerHTML=`<div class="tab-content active">
       <div class="sec-title">Editar perfil</div>
-      <div class="edit-grid">
+      <div style="background:#1a1200;border:1px solid #2a2000;border-radius:3px;padding:.875rem 1.1rem;margin-bottom:1.5rem;font-size:.76rem;color:#f59e0b;line-height:1.5">
+        ⚠️ <strong>Al guardar cambios, tu perfil vuelve a revisión.</strong> El equipo TRAMA. lo va a revisar antes de publicarlo nuevamente en la bolsa.
+      </div>
+
+      <div class="sec-title" style="margin-top:0">Datos personales</div>
+      <div class="edit-grid" style="margin-bottom:1.75rem">
         <div class="fg-edit"><label>Nombre</label><input type="text" id="e-nombre" value="${p.nombre||''}"></div>
         <div class="fg-edit"><label>Apellido</label><input type="text" id="e-apellido" value="${p.apellido||''}"></div>
         <div class="fg-edit"><label>WhatsApp</label><input type="tel" id="e-tel" value="${p.tel||''}" placeholder="+54 9 11 0000-0000"></div>
         <div class="fg-edit"><label>Ciudad</label><input type="text" id="e-ciudad" value="${p.ciudad||''}"></div>
-        <div class="fg-edit fg-full"><label>Bio</label><textarea id="e-bio" maxlength="300">${p.bio||''}</textarea></div>
-        <div class="fg-edit"><label>Tarifa Story</label><input type="number" id="e-story" value="${p.t_story||''}"></div>
-        <div class="fg-edit"><label>Tarifa Reel</label><input type="number" id="e-reel" value="${p.t_reel||''}"></div>
-        <div class="fg-edit"><label>Usuario Instagram</label><input type="text" id="e-ig" value="${p.ig_user||''}"></div>
-        <div class="fg-edit"><label>Seguidores IG</label><input type="number" id="e-ig-seg" value="${p.ig_seg||''}"></div>
-        <div class="fg-edit"><label>Engagement Rate IG %</label><input type="number" id="e-ig-er" step="0.1" value="${p.ig_er||''}"></div>
-        <div class="fg-edit"><label>Usuario TikTok</label><input type="text" id="e-tt" value="${p.tt_user||''}"></div>
-        <div class="fg-edit"><label>Seguidores TikTok</label><input type="number" id="e-tt-seg" value="${p.tt_seg||''}"></div>
+        <div class="fg-edit fg-full"><label>Bio</label><textarea id="e-bio" maxlength="300" placeholder="Contá en 2-3 oraciones quién sos y qué tipo de contenido hacés...">${p.bio||''}</textarea></div>
       </div>
-      <button class="btn-save" onclick="saveCreator()">Guardar cambios</button>
+
+      <div class="sec-title">Redes sociales</div>
+      <div class="edit-grid" style="margin-bottom:1.75rem">
+        <div class="fg-edit"><label>Usuario Instagram</label><input type="text" id="e-ig" value="${p.ig_user||''}" placeholder="@tuusuario"></div>
+        <div class="fg-edit"><label>Seguidores IG</label><input type="number" id="e-ig-seg" value="${p.ig_seg||''}" placeholder="0"></div>
+        <div class="fg-edit"><label>Engagement Rate IG %</label><input type="number" id="e-ig-er" step="0.1" value="${p.ig_er||''}" placeholder="0.0"></div>
+        <div class="fg-edit"><label>Alcance promedio IG</label><input type="number" id="e-ig-alc" value="${p.ig_alc||''}" placeholder="por post"></div>
+        <div class="fg-edit"><label>Usuario TikTok</label><input type="text" id="e-tt" value="${p.tt_user||''}" placeholder="@tuusuario"></div>
+        <div class="fg-edit"><label>Seguidores TikTok</label><input type="number" id="e-tt-seg" value="${p.tt_seg||''}" placeholder="0"></div>
+        <div class="fg-edit"><label>Canal YouTube</label><input type="text" id="e-yt" value="${p.yt_user||''}" placeholder="Nombre del canal"></div>
+        <div class="fg-edit"><label>Suscriptores YouTube</label><input type="number" id="e-yt-seg" value="${p.yt_seg||''}" placeholder="0"></div>
+      </div>
+
+      <div class="sec-title">Tarifas</div>
+      <div class="edit-grid" style="margin-bottom:1.75rem">
+        <div class="fg-edit"><label>Moneda</label>
+          <select id="e-moneda">
+            <option value="ARS" ${p.moneda==='ARS'?'selected':''}>ARS – Pesos argentinos</option>
+            <option value="USD" ${p.moneda==='USD'?'selected':''}>USD – Dólares</option>
+          </select>
+        </div>
+        <div class="fg-edit"><label>Tarifa Story</label><input type="number" id="e-story" value="${p.t_story||''}" placeholder="0"></div>
+        <div class="fg-edit"><label>Tarifa Reel / TikTok</label><input type="number" id="e-reel" value="${p.t_reel||''}" placeholder="0"></div>
+        <div class="fg-edit"><label>Tarifa Post feed</label><input type="number" id="e-post" value="${p.t_post||''}" placeholder="0"></div>
+        <div class="fg-edit"><label>Canje</label>
+          <select id="e-canje">
+            <option value="">Seleccioná</option>
+            <option ${p.canje==='Sí, acepto canje'?'selected':''}>Sí, acepto canje</option>
+            <option ${p.canje==='Solo canje + fee'?'selected':''}>Solo canje + fee</option>
+            <option ${p.canje==='No, solo pago'?'selected':''}>No, solo pago</option>
+          </select>
+        </div>
+        <div class="fg-edit"><label>Disponibilidad</label>
+          <select id="e-disp">
+            <option value="">Seleccioná</option>
+            <option ${(p.disponibilidad||[]).includes('Inmediata')?'selected':''}>Inmediata</option>
+            <option ${(p.disponibilidad||[]).includes('En 2 semanas')?'selected':''}>En 2 semanas</option>
+            <option ${(p.disponibilidad||[]).includes('En 1 mes')?'selected':''}>En 1 mes</option>
+            <option ${(p.disponibilidad||[]).includes('Consultar')?'selected':''}>Consultar</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sec-title">Portfolio</div>
+      <div class="edit-grid" style="margin-bottom:1.75rem">
+        <div class="fg-edit fg-full"><label>Colaboraciones anteriores</label><textarea id="e-colabs" placeholder="Marcas con las que ya trabajaste...">${p.colabs||''}</textarea></div>
+        <div class="fg-edit fg-full"><label>Link a contenido (portfolio)</label><input type="url" id="e-link" value="${(p.links||[])[0]||''}" placeholder="https://www.instagram.com/p/..."></div>
+      </div>
+
+      <button class="btn-save" onclick="saveCreator()">Guardar y enviar a revisión →</button>
     </div>`;
   }
 }
@@ -630,15 +677,38 @@ async function saveCreator(){
     bio:document.getElementById('e-bio')?.value.trim()||null,
     t_story:parseInt(document.getElementById('e-story')?.value)||null,
     t_reel:parseInt(document.getElementById('e-reel')?.value)||null,
+    t_post:parseInt(document.getElementById('e-post')?.value)||null,
+    moneda:document.getElementById('e-moneda')?.value||'ARS',
+    canje:document.getElementById('e-canje')?.value||null,
+    disponibilidad:document.getElementById('e-disp')?.value?[document.getElementById('e-disp').value]:null,
     ig_user:document.getElementById('e-ig')?.value.trim()||null,
     ig_seg:parseInt(document.getElementById('e-ig-seg')?.value)||null,
     ig_er:parseFloat(document.getElementById('e-ig-er')?.value)||null,
+    ig_alc:parseInt(document.getElementById('e-ig-alc')?.value)||null,
     tt_user:document.getElementById('e-tt')?.value.trim()||null,
     tt_seg:parseInt(document.getElementById('e-tt-seg')?.value)||null,
+    yt_user:document.getElementById('e-yt')?.value.trim()||null,
+    yt_seg:parseInt(document.getElementById('e-yt-seg')?.value)||null,
+    colabs:document.getElementById('e-colabs')?.value.trim()||null,
+    links:document.getElementById('e-link')?.value.trim()?[document.getElementById('e-link').value.trim()]:null,
+    // Vuelve a revisión al editar
+    status:'pendiente',
   };
   const ok=await sbPatch('creators',`id=eq.${userProfile.id}`,body,getToken());
-  if(ok){Object.assign(userProfile,body);showToast('✓ Perfil actualizado','ok')}
-  else showToast('Error al guardar','err');
+  if(ok){
+    Object.assign(userProfile,body);
+    // Actualizar badge de estado en el header
+    const badge=document.getElementById('dashBadge');
+    badge.innerHTML=`<span class="dash-badge badge-creator">Creator</span> <span class="s-pend">pendiente</span>`;
+    showToast('✓ Perfil actualizado — vuelve a revisión en 48hs','ok');
+    // Mostrar aviso en el tab
+    document.getElementById('dashContent').insertAdjacentHTML('afterbegin',`
+      <div style="background:#1a1200;border:1px solid #2a2000;border-radius:3px;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.78rem;color:#f59e0b;display:flex;align-items:center;gap:.625rem">
+        ⏳ <span><strong>Cambios guardados.</strong> Tu perfil volvió a revisión. El equipo TRAMA. lo va a revisar en las próximas 48-72hs.</span>
+      </div>`);
+  } else {
+    showToast('Error al guardar','err');
+  }
   btn.disabled=false; btn.textContent='Guardar cambios';
 }
 

@@ -675,6 +675,34 @@ function quickPay(){
   showToast('✓ Contacto desbloqueado','ok');
 }
 
+async function iniciarPago(){
+  const btn=document.querySelector('.m-pay-btn');
+  btn.disabled=true;btn.textContent='Conectando con MercadoPago...';
+  const session=localStorage.getItem('trama_marca');
+  const marcaData=session?JSON.parse(session):{};
+  const marcaEmail=marcaData.email||'anonimo@trama.com';
+  const marcaNombre=marcaData.nombre||'Marca TRAMA.';
+  try{
+    const res=await fetch('/api/crear-preferencia',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        creator_id:currentCreator.id,
+        creator_nombre:currentCreator.nombre,
+        marca_email:marcaEmail,
+        marca_nombre:marcaNombre,
+      })
+    });
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'Error al crear preferencia');
+    const url=data.sandbox_init_point||data.init_point;
+    window.location.href=url;
+  }catch(e){
+    showToast('Error: '+e.message,'err');
+    btn.disabled=false;btn.textContent='Pagar $4.900 ARS con MercadoPago →';
+  }
+}
+
 // ── TOAST ──
 let tt;
 function showToast(msg,type='ok'){

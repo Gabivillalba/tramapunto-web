@@ -151,8 +151,7 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
     <div class="login-tag">Acceso restringido</div>
     <div class="login-h">Panel Admin</div>
     <div class="login-sub">Solo para el equipo TRAMA. Esta URL no está publicada.</div>
-    <div class="login-err" id="loginErr">Usuario o contraseña incorrectos.</div>
-    <div class="fg"><label>Usuario</label><input type="text" id="adminUser" placeholder="admin" autocomplete="username"></div>
+    <div class="login-err" id="loginErr">Contraseña incorrecta.</div>
     <div class="fg"><label>Contraseña</label><input type="password" id="adminPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <button class="btn-login" onclick="doLogin()">Ingresar →</button>
   </div>
@@ -214,61 +213,74 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 <div class="toast" id="toast"></div>
 
 <script>
-const SB_URL = 'https://mcpmabvxmdepastmpzbi.supabase.co';
-const SB_SVC = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTM0NjAwNCwiZXhwIjoyMDk2OTIyMDA0fQ.UoMR5WgFPNPcWQsPkgbB7N8O24KZ1DaoGV4jbCkxuYw';
-const ADMIN_USER = 'trama';
-const ADMIN_PASS = 'Chipi2025*';
+// ── SIN KEYS EN EL CLIENTE ──
+// Toda operación pasa por /api/admin (backend con service_role).
+// La contraseña vive solo en memoria durante la sesión.
 const COLORS = ['#C8FF1A','#4ade80','#fb923c','#60a5fa','#f472b6','#c084fc','#f59e0b','#34d399'];
 const BGS    = ['#0f1a00','#0a2010','#1a0a00','#0a1020','#1a0a14','#1a0a2a','#1a1000','#0a1a14'];
 
 let allCreators = [];
 let adminFilter = 'todos';
 let currentCreator = null;
+let ADMIN_KEY = null;   // contraseña del panel, solo en memoria
 
-// ── SUPABASE ──
-async function sbFetch(path, method='GET', body=null){
-  const opts={method,headers:{'apikey':SB_SVC,'Authorization':'Bearer '+SB_SVC,'Content-Type':'application/json'}};
-  if(body)opts.body=JSON.stringify(body);
-  const r=await fetch(`${SB_URL}/rest/v1/${path}`,opts);
-  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'HTTP '+r.status)}
-  return method==='PATCH'||method==='DELETE'?null:r.json();
+// ── BACKEND ADMIN ──
+// Reemplaza a sbFetch: en vez de pegarle a Supabase con service_role,
+// llama a la función serverless que valida la pass y usa service_role
+// del lado del servidor.
+async function adminCall(action, payload={}){
+  const r = await fetch('/api/admin', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-admin-pass':ADMIN_KEY||''},
+    body:JSON.stringify({action, payload})
+  });
+  if(r.status===401){ doLogout(); throw new Error('No autorizado'); }
+  const j = await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(j.error||'HTTP '+r.status);
+  return j;
 }
 
 // ── AUTH ──
-function doLogin(){
-  const u=document.getElementById('adminUser').value.trim();
+async function doLogin(){
   const p=document.getElementById('adminPass').value;
-  if(u===ADMIN_USER&&p===ADMIN_PASS){
-    document.getElementById('loginErr').classList.remove('show');
+  const errEl=document.getElementById('loginErr');
+  const btn=document.querySelector('.btn-login');
+  if(btn){btn.disabled=true;btn.textContent='Verificando...';}
+  try{
+    ADMIN_KEY=p;
+    await adminCall('list_creators');            // valida la pass con una llamada real
+    errEl.classList.remove('show');
     document.getElementById('loginWrap').style.display='none';
     document.getElementById('panel').classList.add('show');
-    sessionStorage.setItem('trama_admin','1');
+    sessionStorage.setItem('trama_admin','1');   // marca de sesión, NO la contraseña
     loadAll();
-  } else {
-    document.getElementById('loginErr').classList.add('show');
+  }catch(e){
+    ADMIN_KEY=null;
+    errEl.classList.add('show');
     document.getElementById('adminPass').value='';
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='Ingresar →';}
   }
 }
 function doLogout(){
+  ADMIN_KEY=null;
   sessionStorage.removeItem('trama_admin');
   document.getElementById('panel').classList.remove('show');
   document.getElementById('loginWrap').style.display='flex';
-  document.getElementById('adminUser').value='';
+  const u=document.getElementById('adminUser'); if(u)u.value='';
   document.getElementById('adminPass').value='';
   allCreators=[];
 }
-// Auto-login si ya estaba logueado en esta sesión
-if(sessionStorage.getItem('trama_admin')){
-  document.getElementById('loginWrap').style.display='none';
-  document.getElementById('panel').classList.add('show');
-  loadAll();
-}
+// Nota: ya NO hay auto-login que salte el formulario. Como la
+// contraseña no se guarda nunca, al recargar hay que reingresarla.
+// Es lo correcto: un secreto no debe persistir en el navegador.
 
 // ── CARGAR ──
 async function loadAll(){
   document.getElementById('cardsList').innerHTML='<div class="loading"><div class="spin"></div><span>Cargando perfiles...</span></div>';
   try{
-    allCreators=await sbFetch('creators?select=*&order=created_at.desc');
+    const resp=await adminCall('list_creators');
+    allCreators=resp.data;
     updateStats();
     renderCards();
     const now=new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
@@ -354,7 +366,7 @@ async function setStatus(id,st){
   const card=document.getElementById('ac-'+id);
   card&&card.querySelectorAll('button').forEach(b=>b.disabled=true);
   try{
-    await sbFetch(`creators?id=eq.${id}`,'PATCH',{status:st});
+    await adminCall('set_creator_status',{id, status:st});
     const idx=allCreators.findIndex(c=>c.id===id);
     if(idx>-1)allCreators[idx].status=st;
     updateStats();
@@ -434,7 +446,7 @@ async function saveNota(){
   if(!currentCreator)return;
   const nota=document.getElementById('notaInput').value.trim();
   try{
-    await sbFetch(`creators?id=eq.${currentCreator.id}`,'PATCH',{admin_nota:nota});
+    await adminCall('set_creator_nota',{id:currentCreator.id, nota});
     const idx=allCreators.findIndex(c=>c.id===currentCreator.id);
     if(idx>-1)allCreators[idx].admin_nota=nota;
     showToast('Nota guardada','ok');

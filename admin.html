@@ -106,6 +106,49 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* MODAL */
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid #1a1a1a;padding:0 1.5rem;margin-bottom:1.25rem}
+@media(min-width:768px){.tabs{padding:0 2rem}}
+.tab{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);padding:.875rem 1.1rem;font-size:.75rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.45rem}
+.tab:hover{color:var(--white)}
+.tab.on{color:var(--green);border-bottom-color:var(--green)}
+.tab-badge{background:#2a2a2a;color:var(--white);font-size:.62rem;font-weight:900;padding:.1rem .4rem;border-radius:10px;min-width:18px;text-align:center}
+.tab.on .tab-badge{background:var(--green);color:var(--black)}
+.tab-badge.alert{background:var(--amber);color:var(--black)}
+.tab-view{display:none}
+.tab-view.on{display:block}
+
+/* CAMPAÑAS */
+.camp-card{background:var(--g1);border:1px solid #1e1e1e;border-radius:3px;padding:1.1rem;margin-bottom:.75rem;transition:border-color .2s}
+.camp-card:hover{border-color:#2a2a2a}
+.camp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:.6rem;flex-wrap:wrap}
+.camp-marca{font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem}
+.camp-title{font-size:1rem;font-weight:900;color:var(--white);line-height:1.25}
+.camp-badges{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center}
+.cb{font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px;white-space:nowrap}
+.cb-revision{background:#1a1200;border:1px solid #2a2000;color:var(--amber)}
+.cb-activa{background:#0f1a00;border:1px solid #2a4000;color:var(--green)}
+.cb-cerrada{background:#1a1a1a;border:1px solid #2a2a2a;color:var(--muted2)}
+.cb-rechazada{background:#1a0000;border:1px solid #2a0000;color:var(--red)}
+.cb-tipo{background:#0a1020;border:1px solid #1a2a40;color:var(--blue)}
+.cb-canje{background:#1a0a2a;border:1px solid #3a1a5a;color:var(--purple)}
+.camp-desc{font-size:.8rem;color:var(--muted2);line-height:1.55;margin-bottom:.75rem}
+.camp-meta{display:flex;flex-wrap:wrap;gap:.875rem;padding-top:.7rem;border-top:1px solid #1a1a1a;margin-bottom:.75rem}
+.cm{font-size:.7rem;color:var(--muted)}
+.cm strong{color:var(--white);font-weight:700}
+.camp-actions{display:flex;gap:.4rem;flex-wrap:wrap}
+.ca-btn{border:none;padding:.5rem 1rem;font-size:.68rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s}
+.ca-btn:hover{opacity:.85}
+.ca-aprobar{background:var(--green);color:var(--black)}
+.ca-rechazar{background:transparent;border:1px solid #2a0000;color:var(--red)}
+.ca-cerrar{background:transparent;border:1px solid #2a2a2a;color:var(--muted2)}
+.ca-ver{background:transparent;border:1px solid #2a2a2a;color:var(--white)}
+.postu-box{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:2px;padding:.75rem;margin-top:.6rem}
+.postu-row{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.45rem 0;border-bottom:1px solid #161616;font-size:.76rem}
+.postu-row:last-child{border:none}
+.postu-name{color:var(--white);font-weight:700}
+.postu-msg{color:var(--muted2);font-size:.72rem;margin-top:.15rem;line-height:1.4}
+
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;align-items:flex-start;justify-content:center;padding:4rem 1rem 2rem;overflow-y:auto}
 .modal-bg.open{display:flex}
 .modal{background:var(--g1);border:1px solid #222;padding:1.75rem;width:100%;max-width:540px;border-radius:3px;position:relative}
@@ -170,28 +213,66 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
     </div>
   </div>
 
-  <div class="stats">
-    <div class="stat"><div class="stat-n" id="st-total" style="color:var(--white)">—</div><div class="stat-l">Totales</div></div>
-    <div class="stat"><div class="stat-n" id="st-pend" style="color:var(--amber)">—</div><div class="stat-l">Pendientes</div></div>
-    <div class="stat"><div class="stat-n" id="st-apro" style="color:var(--green)">—</div><div class="stat-l">Aprobados</div></div>
-    <div class="stat"><div class="stat-n" id="st-rech" style="color:var(--red)">—</div><div class="stat-l">Rechazados</div></div>
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab on" id="tabCreators" onclick="switchTab('creators')">
+      Creators <span class="tab-badge" id="badgeCreators">—</span>
+    </button>
+    <button class="tab" id="tabCampanias" onclick="switchTab('campanias')">
+      Campañas <span class="tab-badge" id="badgeCampanias">—</span>
+    </button>
   </div>
 
-  <div class="search-wrap">
-    <input class="search-input" id="searchInp" type="text" placeholder="Buscar por nombre, email o nicho..." oninput="renderCards()">
+  <!-- ══ VISTA CREATORS ══ -->
+  <div class="tab-view on" id="viewCreators">
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="st-total" style="color:var(--white)">—</div><div class="stat-l">Totales</div></div>
+      <div class="stat"><div class="stat-n" id="st-pend" style="color:var(--amber)">—</div><div class="stat-l">Pendientes</div></div>
+      <div class="stat"><div class="stat-n" id="st-apro" style="color:var(--green)">—</div><div class="stat-l">Aprobados</div></div>
+      <div class="stat"><div class="stat-n" id="st-rech" style="color:var(--red)">—</div><div class="stat-l">Rechazados</div></div>
+    </div>
+
+    <div class="search-wrap">
+      <input class="search-input" id="searchInp" type="text" placeholder="Buscar por nombre, email o nicho..." oninput="renderCards()">
+    </div>
+
+    <div class="filters">
+      <span class="filters-label">Filtrar:</span>
+      <button class="f-btn on" onclick="setFilter('todos',this)">Todos</button>
+      <button class="f-btn" onclick="setFilter('pendiente',this)">Pendientes</button>
+      <button class="f-btn" onclick="setFilter('aprobado',this)">Aprobados</button>
+      <button class="f-btn" onclick="setFilter('rechazado',this)">Rechazados</button>
+    </div>
+
+    <div class="cards-wrap">
+      <div class="cards-list" id="cardsList">
+        <div class="loading"><div class="spin"></div><span>Cargando perfiles...</span></div>
+      </div>
+    </div>
   </div>
 
-  <div class="filters">
-    <span class="filters-label">Filtrar:</span>
-    <button class="f-btn on" onclick="setFilter('todos',this)">Todos</button>
-    <button class="f-btn" onclick="setFilter('pendiente',this)">Pendientes</button>
-    <button class="f-btn" onclick="setFilter('aprobado',this)">Aprobados</button>
-    <button class="f-btn" onclick="setFilter('rechazado',this)">Rechazados</button>
-  </div>
+  <!-- ══ VISTA CAMPAÑAS ══ -->
+  <div class="tab-view" id="viewCampanias">
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="cst-total" style="color:var(--white)">—</div><div class="stat-l">Totales</div></div>
+      <div class="stat"><div class="stat-n" id="cst-rev" style="color:var(--amber)">—</div><div class="stat-l">En revisión</div></div>
+      <div class="stat"><div class="stat-n" id="cst-act" style="color:var(--green)">—</div><div class="stat-l">Activas</div></div>
+      <div class="stat"><div class="stat-n" id="cst-postu" style="color:var(--purple)">—</div><div class="stat-l">Postulaciones</div></div>
+    </div>
 
-  <div class="cards-wrap">
-    <div class="cards-list" id="cardsList">
-      <div class="loading"><div class="spin"></div><span>Cargando perfiles...</span></div>
+    <div class="filters">
+      <span class="filters-label">Filtrar:</span>
+      <button class="f-btn on" onclick="setCampFilter('todas',this)">Todas</button>
+      <button class="f-btn" onclick="setCampFilter('en_revision',this)">En revisión</button>
+      <button class="f-btn" onclick="setCampFilter('activa',this)">Activas</button>
+      <button class="f-btn" onclick="setCampFilter('cerrada',this)">Cerradas</button>
+      <button class="f-btn" onclick="setCampFilter('rechazada',this)">Rechazadas</button>
+    </div>
+
+    <div class="cards-wrap">
+      <div id="campList">
+        <div class="loading"><div class="spin"></div><span>Cargando campañas...</span></div>
+      </div>
     </div>
   </div>
 </div>
@@ -276,6 +357,150 @@ function doLogout(){
 // Es lo correcto: un secreto no debe persistir en el navegador.
 
 // ── CARGAR ──
+// ══════════ CAMPAÑAS ══════════
+let allCampanias = [];
+let campFilter = 'todas';
+let currentTab = 'creators';
+
+function switchTab(t){
+  currentTab = t;
+  document.getElementById('tabCreators').classList.toggle('on', t==='creators');
+  document.getElementById('tabCampanias').classList.toggle('on', t==='campanias');
+  document.getElementById('viewCreators').classList.toggle('on', t==='creators');
+  document.getElementById('viewCampanias').classList.toggle('on', t==='campanias');
+  if(t==='campanias' && allCampanias.length===0) loadCampanias();
+}
+
+async function loadCampanias(){
+  document.getElementById('campList').innerHTML='<div class="loading"><div class="spin"></div><span>Cargando campañas...</span></div>';
+  try{
+    const resp = await adminCall('list_campanias');
+    allCampanias = resp.data || [];
+    updateCampStats();
+    renderCampanias();
+  }catch(e){
+    document.getElementById('campList').innerHTML=`<div class="empty">Error: ${e.message}</div>`;
+  }
+}
+
+function updateCampStats(){
+  const total = allCampanias.length;
+  const rev   = allCampanias.filter(c=>c.estado==='en_revision').length;
+  const act   = allCampanias.filter(c=>c.estado==='activa').length;
+  const postu = allCampanias.reduce((s,c)=>s+(c.total_postulaciones||0),0);
+  document.getElementById('cst-total').textContent=total;
+  document.getElementById('cst-rev').textContent=rev;
+  document.getElementById('cst-act').textContent=act;
+  document.getElementById('cst-postu').textContent=postu;
+  // Badge del tab: resalta si hay campañas esperando revisión
+  const b=document.getElementById('badgeCampanias');
+  b.textContent=total;
+  b.classList.toggle('alert', rev>0);
+}
+
+function setCampFilter(f, btn){
+  campFilter=f;
+  document.querySelectorAll('#viewCampanias .f-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderCampanias();
+}
+
+const TIPO_LBL={ugc:'UGC',influencer:'Influencer',combo:'Combo',activacion:'Activación'};
+const EST_LBL={en_revision:'En revisión',activa:'Activa',cerrada:'Cerrada',rechazada:'Rechazada',cancelada:'Cancelada'};
+
+function fmtMoney(n){ return n==null?null:'$'+Number(n).toLocaleString('es-AR'); }
+
+function presupuestoTxt(c){
+  const min=fmtMoney(c.presupuesto_min), max=fmtMoney(c.presupuesto_max);
+  if(min&&max) return `${min} – ${max}`;
+  if(min) return `Desde ${min}`;
+  if(max) return `Hasta ${max}`;
+  return 'A convenir';
+}
+
+function renderCampanias(){
+  const list = campFilter==='todas' ? allCampanias : allCampanias.filter(c=>c.estado===campFilter);
+  const el = document.getElementById('campList');
+  if(!list.length){ el.innerHTML='<div class="empty">No hay campañas en esta categoría.</div>'; return; }
+
+  el.innerHTML = list.map(c=>{
+    const fecha = c.fecha_limite ? new Date(c.fecha_limite+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}) : null;
+    const acciones = [];
+    if(c.estado==='en_revision'){
+      acciones.push(`<button class="ca-btn ca-aprobar" onclick="setCampStatus('${c.id}','activa')">✓ Aprobar y publicar</button>`);
+      acciones.push(`<button class="ca-btn ca-rechazar" onclick="setCampStatus('${c.id}','rechazada')">✕ Rechazar</button>`);
+    }
+    if(c.estado==='activa'){
+      acciones.push(`<button class="ca-btn ca-cerrar" onclick="setCampStatus('${c.id}','cerrada')">Cerrar campaña</button>`);
+    }
+    if((c.total_postulaciones||0)>0){
+      acciones.push(`<button class="ca-btn ca-ver" onclick="verPostulaciones('${c.id}')">Ver ${c.total_postulaciones} postulación${c.total_postulaciones>1?'es':''}</button>`);
+    }
+
+    return `<div class="camp-card">
+      <div class="camp-head">
+        <div>
+          <div class="camp-marca">${c.marca_nombre||'—'} · ${c.marca_email||''}</div>
+          <div class="camp-title">${c.titulo||'Sin título'}</div>
+        </div>
+        <div class="camp-badges">
+          <span class="cb cb-${c.estado}">${EST_LBL[c.estado]||c.estado}</span>
+          <span class="cb cb-tipo">${TIPO_LBL[c.tipo]||c.tipo}</span>
+          ${c.es_canje?'<span class="cb cb-canje">Canje</span>':''}
+        </div>
+      </div>
+      <div class="camp-desc">${(c.descripcion||'').slice(0,240)}${(c.descripcion||'').length>240?'…':''}</div>
+      <div class="camp-meta">
+        <span class="cm">💰 <strong>${presupuestoTxt(c)}</strong></span>
+        <span class="cm">👥 <strong>${c.cupos||1}</strong> cupo${(c.cupos||1)>1?'s':''}</span>
+        ${c.formatos&&c.formatos.length?`<span class="cm">🎬 <strong>${c.formatos.join(', ')}</strong></span>`:''}
+        ${c.es_presencial?`<span class="cm">📍 <strong>${c.ubicacion||'Presencial'}</strong></span>`:''}
+        ${fecha?`<span class="cm">📅 Cierra <strong>${fecha}</strong></span>`:''}
+        ${c.entregables?`<span class="cm">📦 <strong>${c.entregables}</strong></span>`:''}
+      </div>
+      <div class="camp-actions">${acciones.join('')}</div>
+      <div id="postu-${c.id}"></div>
+    </div>`;
+  }).join('');
+}
+
+async function setCampStatus(id, estado){
+  const labels={activa:'aprobada y publicada',rechazada:'rechazada',cerrada:'cerrada'};
+  try{
+    await adminCall('set_campania_status',{id, estado});
+    const idx=allCampanias.findIndex(c=>c.id===id);
+    if(idx>-1) allCampanias[idx].estado=estado;
+    updateCampStats();
+    renderCampanias();
+    showToast(`✓ Campaña ${labels[estado]||estado}`, estado==='rechazada'?'err':'ok');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+}
+
+async function verPostulaciones(id){
+  const box=document.getElementById('postu-'+id);
+  if(box.innerHTML.trim()){ box.innerHTML=''; return; }  // toggle
+  box.innerHTML='<div class="postu-box"><div class="loading"><div class="spin"></div><span>Cargando...</span></div></div>';
+  try{
+    const resp=await adminCall('list_postulaciones',{campania_id:id});
+    const list=resp.data||[];
+    if(!list.length){ box.innerHTML='<div class="postu-box">Sin postulaciones aún.</div>'; return; }
+    box.innerHTML='<div class="postu-box">'+list.map(p=>{
+      const c=p.creators||{};
+      const tarifa=p.tarifa_propuesta?fmtMoney(p.tarifa_propuesta):'—';
+      return `<div class="postu-row">
+        <div style="flex:1">
+          <div class="postu-name">${c.nombre||''} ${c.apellido||''} ${c.ig_user?`· @${c.ig_user}`:''}</div>
+          <div class="postu-msg">${(p.mensaje||'').slice(0,160)}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="color:var(--green);font-weight:900;font-size:.78rem">${tarifa}</div>
+          <div style="color:var(--muted);font-size:.65rem;text-transform:uppercase">${p.estado}</div>
+        </div>
+      </div>`;
+    }).join('')+'</div>';
+  }catch(e){ box.innerHTML=`<div class="postu-box" style="color:var(--red)">Error: ${e.message}</div>`; }
+}
+
 async function loadAll(){
   document.getElementById('cardsList').innerHTML='<div class="loading"><div class="spin"></div><span>Cargando perfiles...</span></div>';
   try{
@@ -283,8 +508,11 @@ async function loadAll(){
     allCreators=resp.data;
     updateStats();
     renderCards();
+    document.getElementById('badgeCreators').textContent=allCreators.length;
     const now=new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
     document.getElementById('panelMeta').textContent=`Última actualización: ${now}`;
+    // Cargar campañas en paralelo para que el badge muestre si hay pendientes
+    loadCampanias();
   }catch(e){
     document.getElementById('cardsList').innerHTML=`<div class="empty">Error al cargar: ${e.message}</div>`;
     showToast('Error al conectar con Supabase','err');

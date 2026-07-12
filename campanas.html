@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRAMA. — Publicá tu campaña</title>
+<meta name="description" content="Publicá tu campaña en TRAMA. y recibí postulaciones de creators verificados manualmente.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --black:#080808;--green:#C8FF1A;--white:#F4F4EF;
+  --g1:#111;--g2:#1C1C1C;--g3:#2A2A2A;
+  --muted:#666;--muted2:#999;--purple:#c084fc;
+  --red:#ff4444;--amber:#f59e0b;--blue:#60a5fa;
+}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,.96);backdrop-filter:blur(12px);border-bottom:1px solid #1a1a1a}
+.logo{font-size:1.2rem;font-weight:900;letter-spacing:.18em;color:var(--green);text-decoration:none}
+.nav-back{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--white)}
+
+.form-view{padding-top:56px}
+.form-hero{padding:3rem 1.5rem 2rem;border-bottom:1px solid #161616}
+@media(min-width:768px){.form-hero{padding:4rem 4rem 2.5rem}}
+.fh-tag{font-size:.62rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--blue);display:flex;align-items:center;gap:.5rem;margin-bottom:.875rem}
+.fh-tag::before{content:'';width:18px;height:1px;background:currentColor}
+.fh-h1{font-size:clamp(1.6rem,3.5vw,2.8rem);font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:1;margin-bottom:.75rem}
+.fh-h1 em{color:var(--blue);font-style:normal}
+.fh-sub{font-size:.86rem;color:var(--muted2);line-height:1.65;max-width:560px}
+.fh-sub strong{color:var(--white)}
+
+.progress{height:2px;background:#161616}
+.progress-bar{height:100%;background:var(--blue);transition:width .4s ease}
+.stepper{display:flex;align-items:center;padding:1.25rem 1.5rem;border-bottom:1px solid #161616;overflow-x:auto;gap:0;-webkit-overflow-scrolling:touch}
+@media(min-width:768px){.stepper{padding:1.25rem 4rem}}
+.step{display:flex;align-items:center;gap:.4rem;flex-shrink:0}
+.step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;border:1.5px solid #2a2a2a;color:var(--muted);transition:all .3s}
+.step-label{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;transition:color .3s}
+.step.done .step-label,.step.active .step-label{color:var(--white)}
+.step-line{width:2rem;height:1px;background:#222;flex-shrink:0;margin:0 .2rem}
+
+.form-body{padding:2rem 1.5rem;max-width:700px;margin:0 auto}
+@media(min-width:768px){.form-body{padding:2.5rem 4rem}}
+.form-sec{display:none}
+.form-sec.active{display:block}
+.fs-title{font-size:1rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.35rem}
+.fs-sub{font-size:.8rem;color:var(--muted2);margin-bottom:1.75rem;line-height:1.5}
+
+.fg{display:flex;flex-direction:column;gap:.3rem;margin-bottom:1rem}
+.fg label{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.fg label .req{color:var(--red);margin-left:2px}
+.fg input,.fg select,.fg textarea{background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.65rem .875rem;font-size:.86rem;font-family:inherit;outline:none;border-radius:2px;transition:border-color .2s;width:100%}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--blue)}
+.fg input.err{border-color:var(--red)!important}
+.fg textarea{resize:vertical;min-height:85px}
+.fg select option{background:#1a1a1a}
+.fg input::placeholder,.fg textarea::placeholder{color:#444}
+.fg-row{display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:520px){.fg-row{grid-template-columns:1fr 1fr;gap:1rem}}
+.hint{font-size:.66rem;color:var(--muted);margin-top:.2rem}
+.err-msg{font-size:.66rem;color:var(--red);margin-top:.2rem;display:none}
+.fg.has-err .err-msg{display:block}
+.fg.has-err label{color:var(--red)}
+
+/* TIPO DE CAMPAÑA (cards) */
+.tipo-camp-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem}
+@media(min-width:640px){.tipo-camp-grid{grid-template-columns:repeat(4,1fr)}}
+.tc-card{background:#0d0d0d;border:1px solid #1a1a1a;padding:1rem .75rem;cursor:pointer;border-radius:2px;transition:all .2s;text-align:center}
+.tc-card:hover{border-color:#2a2a2a}
+.tc-card.on{border-color:var(--blue);background:#0a1020}
+.tc-icon{font-size:1.35rem;margin-bottom:.45rem}
+.tc-label{font-size:.72rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--white);margin-bottom:.2rem}
+.tc-desc{font-size:.6rem;color:var(--muted);line-height:1.4}
+.tc-card.on .tc-label{color:var(--blue)}
+
+/* PILLS (formatos) */
+.plat-pills{display:flex;flex-wrap:wrap;gap:.4rem}
+.plat-pill{background:transparent;border:1px solid #222;color:var(--muted);padding:.38rem .8rem;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:all .2s}
+.plat-pill.on{border-color:var(--blue);color:var(--black);background:var(--blue)}
+.plat-pill:hover:not(.on){border-color:var(--blue);color:var(--blue)}
+
+/* CANJE toggle */
+.switch-row{display:flex;align-items:center;justify-content:space-between;background:#0d0d0d;border:1px solid #1a1a1a;border-radius:2px;padding:.75rem .875rem;margin-bottom:1rem}
+.switch-row .sr-label{font-size:.78rem;color:var(--white);font-weight:700}
+.switch-row .sr-hint{font-size:.66rem;color:var(--muted);margin-top:.15rem}
+.switch{position:relative;width:42px;height:24px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch .slider{position:absolute;inset:0;background:#2a2a2a;border-radius:24px;cursor:pointer;transition:.2s}
+.switch .slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.switch input:checked+.slider{background:var(--blue)}
+.switch input:checked+.slider::before{transform:translateX(18px)}
+
+/* RESUMEN */
+.resumen{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:3px;padding:1.1rem;margin-bottom:1.25rem}
+.res-row{display:flex;justify-content:space-between;align-items:flex-start;padding:.45rem 0;border-bottom:1px solid #161616;gap:1rem;font-size:.78rem}
+.res-row:last-child{border:none}
+.res-key{font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
+.res-val{color:var(--white);text-align:right;word-break:break-word}
+.terms{display:flex;align-items:flex-start;gap:.5rem;margin-bottom:1.25rem}
+.terms input{accent-color:var(--blue);margin-top:3px;flex-shrink:0}
+.terms label{font-size:.76rem;color:var(--muted2);line-height:1.5}
+.terms label a{color:var(--blue)}
+
+/* NAV BOTONES */
+.form-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.75rem;padding-top:1.25rem;border-top:1px solid #161616;flex-wrap:wrap;gap:.875rem}
+.btn-prev{background:transparent;color:var(--white);border:1px solid #2a2a2a;padding:.7rem 1.4rem;font-weight:900;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s}
+.btn-prev:hover{border-color:var(--blue);color:var(--blue)}
+.btn-next{background:var(--blue);color:var(--black);border:none;padding:.7rem 1.6rem;font-weight:900;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s}
+.btn-next:hover{opacity:.85}
+.btn-submit{background:var(--blue);color:var(--black);border:none;padding:.7rem 1.6rem;font-weight:900;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed}
+
+/* ÉXITO */
+#successScreen{display:none;padding:5rem 1.5rem;text-align:center;max-width:520px;margin:0 auto}
+#successScreen.show{display:block}
+.suc-ic{font-size:3rem;margin-bottom:1rem}
+.suc-title{font-size:1.4rem;font-weight:900;text-transform:uppercase;margin-bottom:.5rem}
+.suc-sub{font-size:.86rem;color:var(--muted2);line-height:1.7;margin-bottom:1.75rem}
+.suc-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:2px;background:#0a1020;border:1px solid #1a2a40;color:var(--blue)}
+.btn-home{display:inline-block;margin-top:1.5rem;padding:.8rem 1.75rem;font-weight:900;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;border-radius:2px;background:var(--blue);color:var(--black)}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:600;padding:.7rem 1rem;border-radius:3px;font-size:.73rem;font-weight:700;display:none;align-items:center;gap:.5rem;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:300px}
+.toast.show{display:flex}
+.toast.ok{background:#0f1a00;border:1px solid #2a4000;color:var(--green)}
+.toast.err{background:#1a0000;border:1px solid #2a0000;color:var(--red)}
+.toast.info{background:#0a1020;border:1px solid #1a2a40;color:var(--blue)}
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="/">TRAMA.</a>
+  <a class="nav-back" href="/marcas.html">← Volver</a>
+</nav>
+
+<div class="form-view" id="formWrapper">
+  <div class="form-hero">
+    <div class="fh-tag">Para marcas</div>
+    <h1 class="fh-h1">Publicá tu <em>campaña</em></h1>
+    <p class="fh-sub">Contanos qué necesitás y recibí postulaciones de <strong>creators verificados manualmente</strong>. Cada campaña la revisa el equipo de TRAMA. antes de publicarla.</p>
+  </div>
+
+  <div class="progress"><div class="progress-bar" id="progBar" style="width:25%"></div></div>
+  <div class="stepper" id="stepper">
+    <div class="step active"><div class="step-num" style="border-color:var(--blue);color:var(--blue)">1</div><div class="step-label">Tu marca</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">2</div><div class="step-label">La campaña</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">3</div><div class="step-label">Presupuesto</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">4</div><div class="step-label">Revisión</div></div>
+  </div>
+
+  <div class="form-body">
+
+    <!-- PASO 1: TU MARCA -->
+    <div class="form-sec active" id="s0">
+      <div class="fs-title">Tu marca</div>
+      <div class="fs-sub">Para que sepamos quién publica y podamos contactarte con las postulaciones.</div>
+      <div class="fg" id="fg-marca"><label>Nombre de la marca<span class="req">*</span></label><input type="text" id="c-marca" placeholder="¿Cómo se llama tu marca?"><div class="err-msg">Campo requerido</div></div>
+      <div class="fg" id="fg-email"><label>Email de contacto<span class="req">*</span></label><input type="email" id="c-email" placeholder="tu@marca.com"><div class="err-msg">Email inválido</div></div>
+      <div class="fg-row">
+        <div class="fg"><label>WhatsApp</label><input type="tel" id="c-tel" placeholder="+54 9 11 0000-0000"></div>
+        <div class="fg"><label>Instagram de la marca</label><input type="text" id="c-ig" placeholder="@tumarca"></div>
+      </div>
+    </div>
+
+    <!-- PASO 2: LA CAMPAÑA -->
+    <div class="form-sec" id="s1">
+      <div class="fs-title">La campaña</div>
+      <div class="fs-sub">El brief que van a ver los creators. Cuanto más claro, mejores postulaciones.</div>
+
+      <div class="fg"><label>Tipo de campaña<span class="req">*</span></label></div>
+      <div class="tipo-camp-grid" id="tipoGrid">
+        <div class="tc-card" data-tipo="ugc"><div class="tc-icon">🎬</div><div class="tc-label">UGC</div><div class="tc-desc">Vos publicás el contenido</div></div>
+        <div class="tc-card" data-tipo="influencer"><div class="tc-icon">📢</div><div class="tc-label">Influencer</div><div class="tc-desc">El creator lo publica</div></div>
+        <div class="tc-card" data-tipo="combo"><div class="tc-icon">⚡</div><div class="tc-label">Combo</div><div class="tc-desc">UGC + publicación</div></div>
+        <div class="tc-card" data-tipo="activacion"><div class="tc-icon">📍</div><div class="tc-label">Activación</div><div class="tc-desc">Presencial / evento</div></div>
+      </div>
+      <div class="err-msg" id="err-tipo" style="margin-bottom:1rem">Elegí un tipo de campaña</div>
+
+      <div class="fg" id="fg-titulo"><label>Título de la campaña<span class="req">*</span></label><input type="text" id="c-titulo" placeholder="Ej: Lanzamiento línea verano — buscamos 3 creators" maxlength="80"><div class="err-msg">Campo requerido</div></div>
+      <div class="fg" id="fg-desc"><label>¿Qué buscás?<span class="req">*</span></label><textarea id="c-desc" placeholder="Contá qué producto o servicio es, qué querés comunicar y qué perfil de creator buscás." maxlength="600"></textarea><div class="hint">Máx. 600 caracteres.</div><div class="err-msg">Campo requerido</div></div>
+
+      <div class="fg"><label>Formatos que necesitás</label></div>
+      <div class="plat-pills" id="formatosPills">
+        <button type="button" class="plat-pill" data-f="reel">Reel</button>
+        <button type="button" class="plat-pill" data-f="story">Story</button>
+        <button type="button" class="plat-pill" data-f="post">Post feed</button>
+        <button type="button" class="plat-pill" data-f="tiktok">TikTok</button>
+        <button type="button" class="plat-pill" data-f="video">Video largo</button>
+        <button type="button" class="plat-pill" data-f="foto">Fotos</button>
+      </div>
+
+      <div class="fg" style="margin-top:1rem"><label>Entregables concretos</label><input type="text" id="c-entregables" placeholder="Ej: 2 reels de 30s + 3 stories"></div>
+      <div class="fg"><label>Requisitos del creator</label><input type="text" id="c-requisitos" placeholder="Ej: rubro gastronómico, +5k seguidores, zona CABA"></div>
+    </div>
+
+    <!-- PASO 3: PRESUPUESTO Y LOGÍSTICA -->
+    <div class="form-sec" id="s2">
+      <div class="fs-title">Presupuesto y logística</div>
+      <div class="fs-sub">Definí el rango y las condiciones. Podés dejar el presupuesto abierto si preferís recibir propuestas.</div>
+
+      <div class="fg-row">
+        <div class="fg"><label>Presupuesto mínimo (ARS)</label><input type="number" id="c-presu-min" placeholder="Ej: 20000" min="0"></div>
+        <div class="fg"><label>Presupuesto máximo (ARS)</label><input type="number" id="c-presu-max" placeholder="Ej: 50000" min="0"></div>
+      </div>
+      <div class="hint" style="margin:-.5rem 0 1rem">Es por creator. Dejalo vacío si querés que propongan ellos.</div>
+
+      <div class="switch-row">
+        <div><div class="sr-label">Incluye canje de producto</div><div class="sr-hint">Además del pago, el creator recibe producto</div></div>
+        <label class="switch"><input type="checkbox" id="c-canje"><span class="slider"></span></label>
+      </div>
+
+      <div class="switch-row">
+        <div><div class="sr-label">Es presencial</div><div class="sr-hint">El creator tiene que asistir a un lugar</div></div>
+        <label class="switch"><input type="checkbox" id="c-presencial"><span class="slider"></span></label>
+      </div>
+      <div class="fg" id="fg-ubicacion" style="display:none"><label>Ubicación</label><input type="text" id="c-ubicacion" placeholder="Dirección o zona del evento/activación"></div>
+
+      <div class="fg-row">
+        <div class="fg"><label>Cupos (cuántos creators)</label><input type="number" id="c-cupos" value="1" min="1" max="50"></div>
+        <div class="fg"><label>Fecha límite de postulación</label><input type="date" id="c-fecha"></div>
+      </div>
+    </div>
+
+    <!-- PASO 4: REVISIÓN -->
+    <div class="form-sec" id="s3">
+      <div class="fs-title">Revisá antes de enviar</div>
+      <div class="fs-sub">Chequeá que esté todo bien. Podés volver atrás para editar.</div>
+      <div class="resumen" id="resumen"></div>
+      <div class="terms">
+        <input type="checkbox" id="chkTerms">
+        <label for="chkTerms">Acepto los <a href="/terminos.html" target="_blank" rel="noopener">Términos y condiciones</a> de TRAMA. y entiendo que mi campaña será revisada antes de publicarse.</label>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn-prev" id="btnPrev" onclick="prev()" style="visibility:hidden">← Atrás</button>
+      <button class="btn-next" id="btnNext" onclick="next()">Siguiente →</button>
+      <button class="btn-submit" id="btnSubmit" onclick="submitCampania()" style="display:none">Publicar campaña →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ÉXITO -->
+<div id="successScreen">
+  <div class="suc-ic">✓</div>
+  <h1 class="suc-title">¡Campaña enviada!</h1>
+  <p class="suc-sub">Tu campaña entró en revisión. El equipo de TRAMA. la va a revisar y, una vez aprobada, los creators verificados van a poder postularse. Te avisamos por email a cada paso.</p>
+  <div class="suc-badge">⏳ En revisión</div>
+  <br>
+  <a class="btn-home" href="/">Volver al inicio</a>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL  = 'https://mcpmabvxmdepastmpzbi.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
+
+async function sbPost(table, body){
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`,{
+    method:'POST',
+    headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify(body)
+  });
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'HTTP '+r.status)}
+}
+
+function showToast(msg,type='info'){
+  const t=document.getElementById('toast');
+  t.className='toast '+type+' show';t.textContent=msg;
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ── ESTADO ──
+const STEPS=4;
+let step=0;
+let selTipo=null;
+let selFormatos=[];
+
+// ── TIPO DE CAMPAÑA ──
+document.querySelectorAll('#tipoGrid .tc-card').forEach(card=>{
+  card.onclick=()=>{
+    document.querySelectorAll('#tipoGrid .tc-card').forEach(c=>c.classList.remove('on'));
+    card.classList.add('on');
+    selTipo=card.dataset.tipo;
+    document.getElementById('err-tipo').style.display='none';
+  };
+});
+
+// ── FORMATOS (multi) ──
+document.querySelectorAll('#formatosPills .plat-pill').forEach(p=>{
+  p.onclick=()=>{
+    p.classList.toggle('on');
+    const f=p.dataset.f;
+    if(selFormatos.includes(f)) selFormatos=selFormatos.filter(x=>x!==f);
+    else selFormatos.push(f);
+  };
+});
+
+// ── PRESENCIAL toggle → muestra ubicación ──
+document.getElementById('c-presencial').onchange=e=>{
+  document.getElementById('fg-ubicacion').style.display=e.target.checked?'flex':'none';
+};
+
+// ── STEPPER ──
+function updateStepper(){
+  document.querySelectorAll('#stepper .step').forEach((el,i)=>{
+    el.classList.remove('active','done');
+    const num=el.querySelector('.step-num');
+    if(i<step){el.classList.add('done');num.style.cssText='background:var(--blue);border-color:var(--blue);color:var(--black)'}
+    else if(i===step){el.classList.add('active');num.style.cssText='border-color:var(--blue);color:var(--blue)'}
+    else{num.style.cssText=''}
+  });
+  document.getElementById('progBar').style.width=((step+1)/STEPS*100)+'%';
+  document.getElementById('btnPrev').style.visibility=step===0?'hidden':'visible';
+  const last=step===STEPS-1;
+  document.getElementById('btnNext').style.display=last?'none':'inline-block';
+  document.getElementById('btnSubmit').style.display=last?'inline-block':'none';
+}
+function showStep(n){
+  document.querySelectorAll('.form-sec').forEach((s,i)=>s.classList.toggle('active',i===n));
+  updateStepper();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function next(){if(validate(step)){if(step===STEPS-2)buildResumen();step++;showStep(step)}}
+function prev(){if(step>0){step--;showStep(step)}}
+
+// ── VALIDACIÓN ──
+function markErr(fgId,cond){const el=document.getElementById(fgId);if(el)el.classList.toggle('has-err',cond);return cond}
+function validate(s){
+  let bad=false;
+  if(s===0){
+    bad = markErr('fg-marca', !document.getElementById('c-marca').value.trim()) || bad;
+    const email=document.getElementById('c-email').value.trim();
+    bad = markErr('fg-email', !/\S+@\S+\.\S+/.test(email)) || bad;
+  }
+  if(s===1){
+    if(!selTipo){document.getElementById('err-tipo').style.display='block';bad=true;}
+    bad = markErr('fg-titulo', !document.getElementById('c-titulo').value.trim()) || bad;
+    bad = markErr('fg-desc', !document.getElementById('c-desc').value.trim()) || bad;
+  }
+  if(bad)showToast('Completá los campos requeridos','err');
+  return !bad;
+}
+
+// ── RESUMEN ──
+const TIPO_LABEL={ugc:'UGC',influencer:'Influencer',combo:'Combo',activacion:'Activación'};
+function buildResumen(){
+  const g=id=>document.getElementById(id).value.trim();
+  const min=g('c-presu-min'), max=g('c-presu-max');
+  let presu='A convenir';
+  if(min&&max) presu=`$${(+min).toLocaleString('es-AR')} – $${(+max).toLocaleString('es-AR')} ARS`;
+  else if(min) presu=`Desde $${(+min).toLocaleString('es-AR')} ARS`;
+  else if(max) presu=`Hasta $${(+max).toLocaleString('es-AR')} ARS`;
+  const rows=[
+    ['Marca',g('c-marca')],
+    ['Tipo',TIPO_LABEL[selTipo]||'—'],
+    ['Título',g('c-titulo')],
+    ['Formatos',selFormatos.length?selFormatos.join(', '):'—'],
+    ['Presupuesto',presu],
+    ['Canje',document.getElementById('c-canje').checked?'Sí':'No'],
+    ['Presencial',document.getElementById('c-presencial').checked?(g('c-ubicacion')||'Sí'):'No'],
+    ['Cupos',g('c-cupos')||'1'],
+    ['Cierre',g('c-fecha')||'Sin fecha límite'],
+  ];
+  document.getElementById('resumen').innerHTML=rows.map(([k,v])=>
+    `<div class="res-row"><span class="res-key">${k}</span><span class="res-val">${v||'—'}</span></div>`
+  ).join('');
+}
+
+// ── SUBMIT ──
+async function submitCampania(){
+  if(!document.getElementById('chkTerms').checked){showToast('Aceptá los términos para continuar','err');return}
+  const btn=document.getElementById('btnSubmit');
+  btn.disabled=true;btn.textContent='Enviando...';
+  const g=id=>document.getElementById(id).value.trim();
+  try{
+    await sbPost('campanias',{
+      marca_nombre:g('c-marca'),
+      marca_email:g('c-email'),
+      marca_telefono:g('c-tel')||null,
+      marca_instagram:g('c-ig')||null,
+      titulo:g('c-titulo'),
+      descripcion:g('c-desc'),
+      tipo:selTipo,
+      formatos:selFormatos,
+      entregables:g('c-entregables')||null,
+      requisitos:g('c-requisitos')||null,
+      presupuesto_min:g('c-presu-min')?Number(g('c-presu-min')):null,
+      presupuesto_max:g('c-presu-max')?Number(g('c-presu-max')):null,
+      moneda:'ARS',
+      es_canje:document.getElementById('c-canje').checked,
+      es_presencial:document.getElementById('c-presencial').checked,
+      ubicacion:document.getElementById('c-presencial').checked?(g('c-ubicacion')||null):null,
+      fecha_limite:g('c-fecha')||null,
+      cupos:Number(g('c-cupos'))||1,
+      estado:'en_revision',
+    });
+
+    // Email de confirmación a la marca (best-effort, no bloquea)
+    fetch('/api/enviar-email',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({tipo:'campania_recibida',to:g('c-email'),data:{nombre:g('c-marca'),titulo:g('c-titulo')}})
+    }).catch(()=>{});
+
+    document.getElementById('formWrapper').style.display='none';
+    document.getElementById('successScreen').classList.add('show');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(e){
+    showToast('Error: '+e.message,'err');
+    btn.disabled=false;btn.textContent='Publicar campaña →';
+  }
+}
+</script>
+</body>
+</html>

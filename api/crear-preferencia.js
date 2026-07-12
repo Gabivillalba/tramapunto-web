@@ -9,14 +9,11 @@
 //   • Primer desbloqueo de campaña de cada marca: GRATIS. Se registra
 //     la conexión directamente, sin pasar por MercadoPago.
 //
-// Env vars: MP_ACCESS_TOKEN, SITE_URL, SUPABASE_URL, SUPABASE_SERVICE_KEY,
-//           PRECIO_BOLSA (opt), PRECIO_CAMPANIA (opt), PRIMER_GRATIS (opt)
+// Env vars: MP_ACCESS_TOKEN, SITE_URL, SUPABASE_URL, SUPABASE_SERVICE_KEY
+// Los precios se leen de la tabla `config` (editables desde el admin),
+// con fallback a env vars si la base no responde.
 
-const PRECIOS = {
-  bolsa:    Number(process.env.PRECIO_BOLSA)    || 4900,
-  campania: Number(process.env.PRECIO_CAMPANIA) || 25000,
-  primer_gratis: (process.env.PRIMER_GRATIS ?? 'true') === 'true',
-};
+import { getPrecios } from './precios.js';
 
 // ¿Esta marca ya desbloqueó algún contacto de campaña alguna vez?
 async function yaUsoElGratis(marcaEmail) {
@@ -82,6 +79,9 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Precios actuales (de la tabla config, editable desde el admin)
+    const PRECIOS = await getPrecios();
+
     // ── Primer desbloqueo de campaña: gratis ──
     if (origen === 'campania' && PRECIOS.primer_gratis) {
       const yaUso = await yaUsoElGratis(marca_email);
@@ -95,7 +95,7 @@ export default async function handler(req, res) {
     }
 
     // ── Flujo de pago normal ──
-    const precio = origen === 'campania' ? PRECIOS.campania : PRECIOS.bolsa;
+    const precio = origen === 'campania' ? PRECIOS.precio_campania : PRECIOS.precio_bolsa;
 
     // external_reference lleva el contexto para que el webhook lo registre bien
     const extRef = [creator_id, marca_email, origen, campania_id || '', postulacion_id || ''].join('|');

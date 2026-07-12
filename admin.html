@@ -149,6 +149,27 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .postu-name{color:var(--white);font-weight:700}
 .postu-msg{color:var(--muted2);font-size:.72rem;margin-top:.15rem;line-height:1.4}
 
+/* CONFIG */
+.cfg-card{background:var(--g1);border:1px solid #1e1e1e;border-radius:3px;overflow:hidden}
+.cfg-row{display:flex;align-items:center;justify-content:space-between;gap:1.25rem;padding:1.15rem;border-bottom:1px solid #1a1a1a;flex-wrap:wrap}
+.cfg-row:last-child{border:none}
+.cfg-info{flex:1;min-width:200px}
+.cfg-label{font-size:.85rem;font-weight:900;color:var(--white);margin-bottom:.25rem}
+.cfg-desc{font-size:.72rem;color:var(--muted);line-height:1.5}
+.cfg-input{display:flex;align-items:center;gap:.4rem;flex-shrink:0}
+.cfg-cur{color:var(--green);font-weight:900;font-size:.9rem}
+.cfg-input input[type=number]{background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.55rem .7rem;font-size:.9rem;font-weight:700;font-family:inherit;outline:none;border-radius:2px;width:110px;transition:border-color .2s}
+.cfg-input input[type=number]:focus{border-color:var(--green)}
+.cfg-save{background:var(--green);color:var(--black);border:none;padding:.55rem 1rem;font-size:.68rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s}
+.cfg-save:hover{opacity:.85}
+.cfg-note{margin-top:1.25rem;background:#1a1200;border:1px solid #2a2000;border-radius:3px;padding:.9rem 1rem;font-size:.74rem;color:var(--amber);line-height:1.55}
+.switch{position:relative;width:44px;height:25px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch .slider{position:absolute;inset:0;background:#2a2a2a;border-radius:25px;cursor:pointer;transition:.2s}
+.switch .slider::before{content:'';position:absolute;width:19px;height:19px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.switch input:checked+.slider{background:var(--green)}
+.switch input:checked+.slider::before{transform:translateX(19px)}
+
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;align-items:flex-start;justify-content:center;padding:4rem 1rem 2rem;overflow-y:auto}
 .modal-bg.open{display:flex}
 .modal{background:var(--g1);border:1px solid #222;padding:1.75rem;width:100%;max-width:540px;border-radius:3px;position:relative}
@@ -221,6 +242,9 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
     <button class="tab" id="tabCampanias" onclick="switchTab('campanias')">
       Campañas <span class="tab-badge" id="badgeCampanias">—</span>
     </button>
+    <button class="tab" id="tabConfig" onclick="switchTab('config')">
+      Precios
+    </button>
   </div>
 
   <!-- ══ VISTA CREATORS ══ -->
@@ -272,6 +296,59 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
     <div class="cards-wrap">
       <div id="campList">
         <div class="loading"><div class="spin"></div><span>Cargando campañas...</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ VISTA CONFIGURACIÓN ══ -->
+  <div class="tab-view" id="viewConfig">
+    <div style="padding:1.5rem;max-width:640px">
+      <div style="font-size:1rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.35rem">Precios de la plataforma</div>
+      <div style="font-size:.8rem;color:var(--muted2);margin-bottom:1.75rem;line-height:1.55">
+        Los cambios se aplican al instante en todo el sitio. No hace falta redeploy.
+      </div>
+
+      <div class="cfg-card">
+        <div class="cfg-row">
+          <div class="cfg-info">
+            <div class="cfg-label">Contacto desde la bolsa</div>
+            <div class="cfg-desc">Lo que paga una marca para desbloquear el contacto de un creator del marketplace.</div>
+          </div>
+          <div class="cfg-input">
+            <span class="cfg-cur">$</span>
+            <input type="number" id="cfg-precio_bolsa" min="0" step="100">
+            <button class="cfg-save" onclick="saveConfig('precio_bolsa')">Guardar</button>
+          </div>
+        </div>
+
+        <div class="cfg-row">
+          <div class="cfg-info">
+            <div class="cfg-label">Contacto de un postulante</div>
+            <div class="cfg-desc">Lo que paga una marca para ver los datos de un creator que se postuló a su campaña.</div>
+          </div>
+          <div class="cfg-input">
+            <span class="cfg-cur">$</span>
+            <input type="number" id="cfg-precio_campania" min="0" step="100">
+            <button class="cfg-save" onclick="saveConfig('precio_campania')">Guardar</button>
+          </div>
+        </div>
+
+        <div class="cfg-row">
+          <div class="cfg-info">
+            <div class="cfg-label">Primer desbloqueo bonificado</div>
+            <div class="cfg-desc">El primer contacto de campaña de cada marca es gratis (una única vez, como gancho de adopción).</div>
+          </div>
+          <div class="cfg-input">
+            <label class="switch">
+              <input type="checkbox" id="cfg-primer_gratis" onchange="saveConfig('primer_gratis')">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="cfg-note">
+        ⚠️ Cambiar un precio no afecta pagos ya realizados. Los nuevos checkouts usan el valor actualizado.
       </div>
     </div>
   </div>
@@ -364,11 +441,49 @@ let currentTab = 'creators';
 
 function switchTab(t){
   currentTab = t;
-  document.getElementById('tabCreators').classList.toggle('on', t==='creators');
-  document.getElementById('tabCampanias').classList.toggle('on', t==='campanias');
-  document.getElementById('viewCreators').classList.toggle('on', t==='creators');
-  document.getElementById('viewCampanias').classList.toggle('on', t==='campanias');
+  ['creators','campanias','config'].forEach(k=>{
+    const tabEl=document.getElementById('tab'+k.charAt(0).toUpperCase()+k.slice(1));
+    const viewEl=document.getElementById('view'+k.charAt(0).toUpperCase()+k.slice(1));
+    if(tabEl) tabEl.classList.toggle('on', t===k);
+    if(viewEl) viewEl.classList.toggle('on', t===k);
+  });
   if(t==='campanias' && allCampanias.length===0) loadCampanias();
+  if(t==='config') loadConfig();
+}
+
+// ══════════ CONFIGURACIÓN (PRECIOS) ══════════
+async function loadConfig(){
+  try{
+    const {data}=await adminCall('get_config');
+    (data||[]).forEach(c=>{
+      const el=document.getElementById('cfg-'+c.clave);
+      if(!el) return;
+      if(el.type==='checkbox') el.checked = c.valor==='true';
+      else el.value = c.valor;
+    });
+  }catch(e){ showToast('Error al cargar precios: '+e.message,'err'); }
+}
+
+async function saveConfig(clave){
+  const el=document.getElementById('cfg-'+clave);
+  if(!el) return;
+  const valor = el.type==='checkbox' ? String(el.checked) : el.value;
+
+  if(clave.startsWith('precio_')){
+    const n=Number(valor);
+    if(!Number.isFinite(n)||n<0){ showToast('Precio inválido','err'); return; }
+  }
+
+  try{
+    await adminCall('set_config',{clave, valor});
+    const label = clave==='precio_bolsa' ? 'Precio de bolsa'
+                : clave==='precio_campania' ? 'Precio de campaña'
+                : 'Bonificación';
+    const shown = el.type==='checkbox'
+      ? (el.checked?'activada':'desactivada')
+      : '$'+Number(valor).toLocaleString('es-AR');
+    showToast(`✓ ${label}: ${shown}`,'ok');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
 }
 
 async function loadCampanias(){

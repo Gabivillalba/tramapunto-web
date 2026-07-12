@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRAMA. — Oportunidades para creators</title>
+<meta name="description" content="Campañas abiertas de marcas reales. Postulate y cobrá por crear contenido.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --black:#080808;--green:#C8FF1A;--white:#F4F4EF;
+  --g1:#111;--g2:#1C1C1C;--g3:#2A2A2A;
+  --muted:#666;--muted2:#999;--purple:#c084fc;
+  --red:#ff4444;--amber:#f59e0b;--blue:#60a5fa;
+}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,.96);backdrop-filter:blur(12px);border-bottom:1px solid #1a1a1a}
+.logo{font-size:1.2rem;font-weight:900;letter-spacing:.18em;color:var(--green);text-decoration:none}
+.nav-r{display:flex;align-items:center;gap:1rem}
+.nav-link{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-link:hover{color:var(--white)}
+.nav-user{font-size:.7rem;color:var(--green);font-weight:700}
+
+/* HERO */
+.hero{padding:5rem 1.5rem 2rem;border-bottom:1px solid #161616}
+@media(min-width:768px){.hero{padding:6rem 4rem 2.5rem}}
+.h-tag{font-size:.62rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--green);display:flex;align-items:center;gap:.5rem;margin-bottom:.875rem}
+.h-tag::before{content:'';width:18px;height:1px;background:currentColor}
+.h1{font-size:clamp(1.8rem,4vw,3rem);font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:1;margin-bottom:.75rem}
+.h1 em{color:var(--green);font-style:normal}
+.h-sub{font-size:.9rem;color:var(--muted2);line-height:1.65;max-width:560px}
+.h-sub strong{color:var(--white)}
+
+/* BANNER estado usuario */
+.banner{margin:1.25rem 1.5rem 0;padding:.9rem 1.1rem;border-radius:3px;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-size:.8rem;line-height:1.5}
+@media(min-width:768px){.banner{margin:1.5rem 4rem 0}}
+.banner.info{background:#0a1020;border:1px solid #1a2a40;color:var(--muted2)}
+.banner.warn{background:#1a1200;border:1px solid #2a2000;color:var(--amber)}
+.banner.ok{background:#0f1a00;border:1px solid #2a4000;color:var(--green)}
+.banner strong{color:var(--white)}
+.banner-btn{background:var(--green);color:var(--black);padding:.55rem 1.1rem;font-size:.7rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;border-radius:2px;text-decoration:none;white-space:nowrap;flex-shrink:0;transition:opacity .2s}
+.banner-btn:hover{opacity:.85}
+
+/* FILTROS */
+.filters{display:flex;align-items:center;gap:.4rem;padding:1.5rem 1.5rem .5rem;flex-wrap:wrap}
+@media(min-width:768px){.filters{padding:2rem 4rem .5rem}}
+.f-label{font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-right:.35rem}
+.f-btn{background:transparent;border:1px solid #222;color:var(--muted);padding:.4rem .85rem;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s}
+.f-btn.on{border-color:var(--green);color:var(--black);background:var(--green)}
+.f-btn:hover:not(.on){border-color:var(--green);color:var(--green)}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:1fr;gap:1rem;padding:1.25rem 1.5rem 4rem}
+@media(min-width:768px){.grid{padding:1.5rem 4rem 5rem;grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}}
+
+.card{background:var(--g1);border:1px solid #1e1e1e;border-radius:3px;padding:1.25rem;display:flex;flex-direction:column;transition:border-color .25s,transform .25s;position:relative;overflow:hidden}
+.card:hover{border-color:#2f2f2f;transform:translateY(-2px)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--green);opacity:0;transition:opacity .25s}
+.card:hover::before{opacity:1}
+
+.c-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;margin-bottom:.75rem}
+.c-marca{font-size:.64rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
+.c-title{font-size:1.05rem;font-weight:900;line-height:1.25;color:var(--white)}
+.badges{display:flex;gap:.3rem;flex-wrap:wrap;flex-shrink:0}
+.b{font-size:.56rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px;white-space:nowrap}
+.b-tipo{background:#0a1020;border:1px solid #1a2a40;color:var(--blue)}
+.b-canje{background:#1a0a2a;border:1px solid #3a1a5a;color:var(--purple)}
+.b-pres{background:#1a1200;border:1px solid #2a2000;color:var(--amber)}
+
+.c-desc{font-size:.82rem;color:var(--muted2);line-height:1.6;margin-bottom:1rem;flex:1}
+
+.c-meta{display:flex;flex-direction:column;gap:.4rem;padding:.85rem 0;border-top:1px solid #1a1a1a;border-bottom:1px solid #1a1a1a;margin-bottom:1rem}
+.m-row{display:flex;justify-content:space-between;align-items:center;font-size:.75rem;gap:1rem}
+.m-k{color:var(--muted);font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;flex-shrink:0}
+.m-v{color:var(--white);font-weight:700;text-align:right}
+.m-v.money{color:var(--green)}
+
+.c-formats{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:1rem}
+.fmt{background:#0d0d0d;border:1px solid #222;color:var(--muted2);font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.25rem .55rem;border-radius:20px}
+
+.c-foot{display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+.c-cierre{font-size:.68rem;color:var(--muted)}
+.c-cierre.urgent{color:var(--amber);font-weight:700}
+.btn-post{background:var(--green);color:var(--black);border:none;padding:.6rem 1.2rem;font-size:.7rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s;white-space:nowrap}
+.btn-post:hover{opacity:.85}
+.btn-post:disabled{background:#1a1a1a;color:var(--muted);cursor:not-allowed;border:1px solid #2a2a2a}
+.btn-post.done{background:transparent;border:1px solid #2a4000;color:var(--green);cursor:default}
+
+.loading,.empty{grid-column:1/-1;padding:4rem 1rem;text-align:center;color:var(--muted);font-size:.85rem}
+.spin{width:32px;height:32px;border:2px solid #222;border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-ic{font-size:2.5rem;margin-bottom:.75rem;opacity:.4}
+
+/* MODAL POSTULACIÓN */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:1.5rem}
+.modal-bg.show{display:flex}
+.modal{background:var(--g1);border:1px solid #2a2a2a;border-radius:3px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;position:relative}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--green)}
+.m-head{padding:1.5rem 1.5rem 1rem;border-bottom:1px solid #1a1a1a}
+.m-tag{font-size:.6rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--green);margin-bottom:.4rem}
+.m-title{font-size:1.15rem;font-weight:900;line-height:1.25}
+.m-marca{font-size:.75rem;color:var(--muted);margin-top:.3rem}
+.m-body{padding:1.5rem}
+.fg{display:flex;flex-direction:column;gap:.3rem;margin-bottom:1.1rem}
+.fg label{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.fg textarea,.fg input{background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.7rem .875rem;font-size:.86rem;font-family:inherit;outline:none;border-radius:2px;transition:border-color .2s;width:100%}
+.fg textarea:focus,.fg input:focus{border-color:var(--green)}
+.fg textarea{resize:vertical;min-height:110px}
+.fg input::placeholder,.fg textarea::placeholder{color:#444}
+.hint{font-size:.66rem;color:var(--muted);margin-top:.2rem}
+.m-actions{display:flex;gap:.5rem;justify-content:flex-end;padding-top:.5rem}
+.btn-cancel{background:transparent;border:1px solid #2a2a2a;color:var(--white);padding:.7rem 1.3rem;font-size:.72rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px}
+.btn-cancel:hover{border-color:var(--muted)}
+.btn-send{background:var(--green);color:var(--black);border:none;padding:.7rem 1.5rem;font-size:.72rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s}
+.btn-send:hover{opacity:.85}
+.btn-send:disabled{opacity:.5;cursor:not-allowed}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:600;padding:.7rem 1rem;border-radius:3px;font-size:.73rem;font-weight:700;display:none;align-items:center;gap:.5rem;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:320px}
+.toast.show{display:flex}
+.toast.ok{background:#0f1a00;border:1px solid #2a4000;color:var(--green)}
+.toast.err{background:#1a0000;border:1px solid #2a0000;color:var(--red)}
+.toast.info{background:#0a1020;border:1px solid #1a2a40;color:var(--blue)}
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="/">TRAMA.</a>
+  <div class="nav-r">
+    <span class="nav-user" id="navUser"></span>
+    <a class="nav-link" href="/perfil.html" id="navPerfil">Mi perfil</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="h-tag">Oportunidades</div>
+  <h1 class="h1">Marcas buscando <em>creators</em></h1>
+  <p class="h-sub">Campañas abiertas de <strong>marcas reales</strong>, revisadas una por una por el equipo de TRAMA. Postulate, proponé tu tarifa y cobrá por crear.</p>
+</div>
+
+<div id="banner"></div>
+
+<div class="filters">
+  <span class="f-label">Filtrar:</span>
+  <button class="f-btn on" onclick="setFilter('todas',this)">Todas</button>
+  <button class="f-btn" onclick="setFilter('ugc',this)">UGC</button>
+  <button class="f-btn" onclick="setFilter('influencer',this)">Influencer</button>
+  <button class="f-btn" onclick="setFilter('combo',this)">Combo</button>
+  <button class="f-btn" onclick="setFilter('activacion',this)">Activación</button>
+</div>
+
+<div class="grid" id="grid">
+  <div class="loading"><div class="spin"></div>Cargando oportunidades...</div>
+</div>
+
+<!-- MODAL POSTULACIÓN -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="m-head">
+      <div class="m-tag">Postularte a</div>
+      <div class="m-title" id="mTitle">—</div>
+      <div class="m-marca" id="mMarca">—</div>
+    </div>
+    <div class="m-body">
+      <div class="fg">
+        <label>¿Por qué sos el creator ideal? <span style="color:var(--red)">*</span></label>
+        <textarea id="pMensaje" placeholder="Contale a la marca por qué encajás con la campaña: tu estilo, experiencia previa, ideas concretas..." maxlength="600"></textarea>
+        <div class="hint">Este mensaje lo ve la marca. Sé concreto: es tu pitch.<br><span style="color:var(--amber)">⚠ No incluyas email, teléfono ni @usuario</span> — TRAMA. le entrega tus datos a la marca cuando avanza con vos.</div>
+      </div>
+      <div class="fg">
+        <label>Tu tarifa propuesta (ARS)</label>
+        <input type="number" id="pTarifa" placeholder="Ej: 35000" min="0">
+        <div class="hint" id="pTarifaHint">Dejalo vacío si aceptás el presupuesto publicado.</div>
+      </div>
+      <div class="m-actions">
+        <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+        <button class="btn-send" id="btnSend" onclick="enviarPostulacion()">Enviar postulación →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL  = 'https://mcpmabvxmdepastmpzbi.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
+
+// ── Sesión (mismo patrón que perfil.html) ──
+function getToken(){ return localStorage.getItem('sb_token') }
+
+async function sbFetch(path, method='GET', body=null, token=null){
+  const headers={'apikey':SB_ANON,'Authorization':`Bearer ${token||SB_ANON}`,'Content-Type':'application/json'};
+  const opts={method,headers};
+  if(body) opts.body=JSON.stringify(body);
+  const r=await fetch(`${SB_URL}${path}`,opts);
+  const data=await r.json().catch(()=>({}));
+  return {ok:r.ok,data,status:r.status};
+}
+async function sbGet(table, filter='', token=null){
+  const r=await fetch(`${SB_URL}/rest/v1/${table}?${filter}`,{
+    headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token||SB_ANON}`}
+  });
+  return r.ok ? r.json() : [];
+}
+async function sbPost(table, body, token){
+  const r=await fetch(`${SB_URL}/rest/v1/${table}`,{
+    method:'POST',
+    headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token||SB_ANON}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify(body)
+  });
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||e.hint||'HTTP '+r.status)}
+}
+
+function showToast(msg,type='info'){
+  const t=document.getElementById('toast');
+  t.className='toast '+type+' show';t.textContent=msg;
+  setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+// ── ESTADO ──
+let campanias=[];
+let filtro='todas';
+let creator=null;          // perfil del creator logueado (si hay)
+let misPostulaciones=[];   // ids de campañas a las que ya se postuló
+let campActual=null;
+
+const TIPO_LBL={ugc:'UGC',influencer:'Influencer',combo:'Combo',activacion:'Activación'};
+
+// ── INIT ──
+(async function init(){
+  await cargarSesion();
+  await cargarCampanias();
+})();
+
+async function cargarSesion(){
+  const token=getToken();
+  if(!token){ renderBanner('anon'); return; }
+
+  const {ok,data}=await sbFetch('/auth/v1/user','GET',null,token);
+  if(!ok){ renderBanner('anon'); return; }
+
+  const email=data.email;
+  document.getElementById('navUser').textContent=email;
+
+  const rows=await sbGet('creators',`email=eq.${encodeURIComponent(email)}&select=id,nombre,status,t_reel,t_story,t_post`,token);
+  if(!rows.length){ renderBanner('no_creator'); return; }
+
+  creator=rows[0];
+  if(creator.status!=='aprobado'){ renderBanner(creator.status); return; }
+
+  renderBanner('ok');
+  // Traer postulaciones previas para no duplicar
+  const p=await sbGet('postulaciones',`creador_id=eq.${creator.id}&select=campania_id,estado`,token);
+  misPostulaciones=p.map(x=>x.campania_id);
+}
+
+function renderBanner(estado){
+  const b=document.getElementById('banner');
+  const map={
+    anon:{c:'info',html:`Estás viendo las oportunidades como visitante. <strong>Registrate como creator</strong> y postulate a estas campañas.`,btn:{txt:'Registrarme',href:'/registro.html'}},
+    no_creator:{c:'info',html:`Tu cuenta no tiene perfil de creator. <strong>Completá tu registro</strong> para poder postularte.`,btn:{txt:'Completar registro',href:'/registro.html'}},
+    pendiente:{c:'warn',html:`Tu perfil está <strong>en revisión</strong>. Cuando el equipo lo apruebe vas a poder postularte a las campañas.`,btn:null},
+    rechazado:{c:'warn',html:`Tu perfil no fue aprobado. Escribinos si querés que lo revisemos de nuevo.`,btn:{txt:'Contactar',href:'mailto:info.tramapunto@gmail.com'}},
+    ok:{c:'ok',html:`✓ Perfil verificado. Ya podés postularte a cualquier campaña abierta.`,btn:null},
+  };
+  const m=map[estado]||map.anon;
+  b.innerHTML=`<div class="banner ${m.c}"><div>${m.html}</div>${m.btn?`<a class="banner-btn" href="${m.btn.href}">${m.btn.txt} →</a>`:''}</div>`;
+}
+
+// ── CAMPAÑAS ──
+async function cargarCampanias(){
+  // Policy pública: solo devuelve estado='activa'
+  campanias=await sbGet('campanias','estado=eq.activa&select=*&order=created_at.desc');
+  render();
+}
+
+function setFilter(f,btn){
+  filtro=f;
+  document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  render();
+}
+
+function fmtMoney(n){ return n==null?null:'$'+Number(n).toLocaleString('es-AR') }
+function presupuesto(c){
+  const min=fmtMoney(c.presupuesto_min),max=fmtMoney(c.presupuesto_max);
+  if(min&&max) return `${min} – ${max}`;
+  if(min) return `Desde ${min}`;
+  if(max) return `Hasta ${max}`;
+  return 'A convenir';
+}
+function diasRestantes(f){
+  if(!f) return null;
+  const d=Math.ceil((new Date(f+'T23:59:59')-new Date())/(1000*60*60*24));
+  return d;
+}
+
+function render(){
+  const list=filtro==='todas'?campanias:campanias.filter(c=>c.tipo===filtro);
+  const g=document.getElementById('grid');
+
+  if(!list.length){
+    g.innerHTML=`<div class="empty"><div class="empty-ic">🔍</div>
+      ${campanias.length?'No hay campañas de este tipo por ahora.':'Todavía no hay campañas abiertas. Volvé pronto — se publican seguido.'}
+    </div>`;
+    return;
+  }
+
+  g.innerHTML=list.map(c=>{
+    const dias=diasRestantes(c.fecha_limite);
+    const yaPostulado=misPostulaciones.includes(c.id);
+    const puedePostular = creator && creator.status==='aprobado';
+
+    let btn;
+    if(yaPostulado) btn=`<button class="btn-post done" disabled>✓ Postulado</button>`;
+    else if(puedePostular) btn=`<button class="btn-post" onclick="abrirModal('${c.id}')">Postularme →</button>`;
+    else if(!creator) btn=`<a class="btn-post" href="/registro.html" style="text-decoration:none;display:inline-block">Registrate para postularte</a>`;
+    else btn=`<button class="btn-post" disabled>Perfil en revisión</button>`;
+
+    return `<div class="card">
+      <div class="c-top">
+        <div style="min-width:0">
+          <div class="c-marca">${c.marca_nombre||'Marca'}</div>
+          <div class="c-title">${c.titulo||''}</div>
+        </div>
+        <div class="badges">
+          <span class="b b-tipo">${TIPO_LBL[c.tipo]||c.tipo}</span>
+          ${c.es_canje?'<span class="b b-canje">+ Canje</span>':''}
+          ${c.es_presencial?'<span class="b b-pres">Presencial</span>':''}
+        </div>
+      </div>
+
+      <div class="c-desc">${c.descripcion||''}</div>
+
+      ${c.formatos&&c.formatos.length?`<div class="c-formats">${c.formatos.map(f=>`<span class="fmt">${f}</span>`).join('')}</div>`:''}
+
+      <div class="c-meta">
+        <div class="m-row"><span class="m-k">Presupuesto</span><span class="m-v money">${presupuesto(c)}</span></div>
+        ${c.entregables?`<div class="m-row"><span class="m-k">Entregables</span><span class="m-v">${c.entregables}</span></div>`:''}
+        ${c.requisitos?`<div class="m-row"><span class="m-k">Requisitos</span><span class="m-v">${c.requisitos}</span></div>`:''}
+        ${c.es_presencial&&c.ubicacion?`<div class="m-row"><span class="m-k">Dónde</span><span class="m-v">${c.ubicacion}</span></div>`:''}
+        <div class="m-row"><span class="m-k">Cupos</span><span class="m-v">${c.cupos||1}</span></div>
+      </div>
+
+      <div class="c-foot">
+        <span class="c-cierre ${dias!==null&&dias<=3?'urgent':''}">
+          ${dias===null?'Sin fecha límite':dias<0?'Cerrada':dias===0?'⚠ Cierra hoy':dias===1?'⚠ Cierra mañana':`Cierra en ${dias} días`}
+        </span>
+        ${btn}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── MODAL ──
+function abrirModal(id){
+  campActual=campanias.find(c=>c.id===id);
+  if(!campActual) return;
+  document.getElementById('mTitle').textContent=campActual.titulo;
+  document.getElementById('mMarca').textContent=campActual.marca_nombre+' · '+presupuesto(campActual);
+  document.getElementById('pMensaje').value='';
+
+  // Sugerir tarifa según los formatos de la campaña y las tarifas del creator
+  let sug=null;
+  const f=campActual.formatos||[];
+  if(creator){
+    if(f.includes('reel')&&creator.t_reel) sug=creator.t_reel;
+    else if(f.includes('story')&&creator.t_story) sug=creator.t_story;
+    else if(f.includes('post')&&creator.t_post) sug=creator.t_post;
+  }
+  const inp=document.getElementById('pTarifa');
+  inp.value = sug||'';
+  document.getElementById('pTarifaHint').textContent = sug
+    ? 'Precargamos tu tarifa de perfil. Podés ajustarla para esta campaña.'
+    : 'Dejalo vacío si aceptás el presupuesto publicado.';
+
+  document.getElementById('modalBg').classList.add('show');
+}
+function closeModal(){ document.getElementById('modalBg').classList.remove('show') }
+
+// ── ANTI-FUGA DE CONTACTO ──
+// El modelo de TRAMA. es que la marca paga para desbloquear el contacto.
+// Si un creator pone su email/teléfono/@usuario en el mensaje, la marca
+// lo tendría gratis. Lo detectamos y lo bloqueamos antes de enviar.
+const RX_EMAIL  = /[a-z0-9._%+-]+\s*(@|\(at\)|\[at\]|\sarroba\s)\s*[a-z0-9.-]+\s*\.\s*[a-z]{2,}/i;
+const RX_TEL    = /(\+?\d[\d\s().-]{7,}\d)/;              // 9+ dígitos con separadores
+const RX_HANDLE = /(^|\s)@[a-z0-9._]{3,}/i;               // @usuario
+const RX_URL    = /(https?:\/\/|www\.|wa\.me|t\.me|instagram\.com|ig\.me)/i;
+
+function detectarContacto(txt){
+  const t = txt.toLowerCase();
+  if(RX_EMAIL.test(t))  return 'un email';
+  if(RX_TEL.test(t))    return 'un número de teléfono';
+  if(RX_HANDLE.test(t)) return 'un usuario de red social';
+  if(RX_URL.test(t))    return 'un link';
+  return null;
+}
+
+async function enviarPostulacion(){
+  const msg=document.getElementById('pMensaje').value.trim();
+  if(!msg){ showToast('Escribí un mensaje para la marca','err'); return }
+
+  // Bloquear datos de contacto en el pitch
+  const hallado = detectarContacto(msg);
+  if(hallado){
+    showToast(`No incluyas ${hallado} en el mensaje. La marca accede a tus datos a través de TRAMA.`,'err');
+    document.getElementById('pMensaje').style.borderColor='var(--red)';
+    setTimeout(()=>{document.getElementById('pMensaje').style.borderColor=''},3000);
+    return;
+  }
+
+  if(!creator||creator.status!=='aprobado'){ showToast('Tu perfil tiene que estar aprobado','err'); return }
+
+  const btn=document.getElementById('btnSend');
+  btn.disabled=true; btn.textContent='Enviando...';
+  const tarifa=document.getElementById('pTarifa').value;
+
+  try{
+    await sbPost('postulaciones',{
+      campania_id:campActual.id,
+      creador_id:creator.id,
+      mensaje:msg,
+      tarifa_propuesta:tarifa?Number(tarifa):null,
+      estado:'pendiente',
+    }, getToken());
+
+    // Aviso a la marca (best-effort)
+    fetch('/api/enviar-email',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        tipo:'nueva_postulacion',
+        to:campActual.marca_email,
+        data:{marca:campActual.marca_nombre,titulo:campActual.titulo,creator:creator.nombre}
+      })
+    }).catch(()=>{});
+
+    misPostulaciones.push(campActual.id);
+    closeModal();
+    render();
+    showToast('✓ Postulación enviada. La marca va a revisarla.','ok');
+  }catch(e){
+    showToast('Error: '+e.message,'err');
+  }finally{
+    btn.disabled=false; btn.textContent='Enviar postulación →';
+  }
+}
+</script>
+</body>
+</html>

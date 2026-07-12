@@ -6,26 +6,29 @@
 //   ADMIN_PASS          → contraseña del panel (elegí una fuerte y larga)
 //   SUPABASE_URL        → https://mcpmabvxmdepastmpzbi.supabase.co
 //   SUPABASE_SERVICE_KEY→ service_role key (Settings → API → service_role)
-//   SITE_URL            → https://tramapunto-web.vercel.app (para los emails)
+//   SITE_URL            → https://www.tramapunto.com (para los emails)
 //
 // El front manda la contraseña en el header 'x-admin-pass'. Se compara
-// en el servidor con comparación de tiempo constante para no filtrar
-// información por timing.
-
-import crypto from 'crypto';
+// en el servidor con una comparación de tiempo constante propia (sin
+// depender del módulo 'crypto', para que funcione en cualquier runtime).
 
 const SB_URL      = process.env.SUPABASE_URL;
 const SB_SERVICE  = process.env.SUPABASE_SERVICE_KEY;
 const ADMIN_PASS  = process.env.ADMIN_PASS;
-const SITE_URL    = process.env.SITE_URL || 'https://tramapunto-web.vercel.app';
+const SITE_URL    = process.env.SITE_URL || 'https://www.tramapunto.com';
 
-// Comparación de contraseñas resistente a timing attacks
+// Comparación de contraseñas resistente a timing attacks, sin 'crypto'.
+// Recorre siempre TODOS los caracteres del valor esperado, acumulando
+// diferencias con XOR, para no filtrar información por el tiempo.
 function passOk(input) {
   if (!input || !ADMIN_PASS) return false;
-  const a = Buffer.from(String(input));
-  const b = Buffer.from(String(ADMIN_PASS));
-  if (a.length !== b.length) return false;
-  return crypto.timingSafeEqual(a, b);
+  const a = String(input);
+  const b = String(ADMIN_PASS);
+  let diff = a.length ^ b.length;
+  for (let i = 0; i < b.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
 }
 
 // Helper para pegarle a Supabase con service_role (bypassea RLS)
@@ -138,6 +141,29 @@ export default async function handler(req, res) {
         const { id, nota } = payload;
         if (!id) return res.status(400).json({ error: 'Falta id' });
         await sb(`creators?id=eq.${id}`, 'PATCH', { admin_nota: nota || null });
+        return res.status(200).json({ ok: true });
+      }
+
+      // — Leer la configuración (precios) —
+      case 'get_config': {
+        const data = await sb('config?select=*&order=clave');
+        return res.status(200).json({ ok: true, data });
+      }
+
+      // — Guardar un valor de configuración —
+      case 'set_config': {
+        const { clave, valor } = payload;
+        if (!clave || valor === undefined) {
+          return res.status(400).json({ error: 'Faltan clave/valor' });
+        }
+        // Validación: los precios deben ser números positivos razonables
+        if (clave.startsWith('precio_')) {
+          const n = Number(valor);
+          if (!Number.isFinite(n) || n < 0 || n > 10000000) {
+            return res.status(400).json({ error: 'Precio inválido' });
+          }
+        }
+        await sb(`config?clave=eq.${encodeURIComponent(clave)}`, 'PATCH', { valor: String(valor) });
         return res.status(200).json({ ok: true });
       }
 

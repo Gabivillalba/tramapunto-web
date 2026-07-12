@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemap.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+                            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- HOME — intención: marcas buscando creators -->
+  <url>
+    <loc>https://www.tramapunto.com/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- OPORTUNIDADES — intención: creators buscando campañas pagas -->
+  <url>
+    <loc>https://www.tramapunto.com/oportunidades.html</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- REGISTRO CREATORS — intención: "cómo ser creador de contenido UGC" -->
+  <url>
+    <loc>https://www.tramapunto.com/registro.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- MARCAS — intención: "agencia UGC", "contratar creadores" -->
+  <url>
+    <loc>https://www.tramapunto.com/marcas.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- PUBLICAR CAMPAÑA -->
+  <url>
+    <loc>https://www.tramapunto.com/campanas.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- TÉRMINOS -->
+  <url>
+    <loc>https://www.tramapunto.com/terminos.html</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+
+</urlset>

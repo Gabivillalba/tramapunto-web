@@ -3,8 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TRAMA. — Conectamos marcas con creators</title>
-<meta name="description" content="TRAMA. es la agencia de creator marketing que conecta marcas con los creators que mueven. Buenos Aires, Argentina.">
+
+<!-- ═══ SEO ═══ -->
+<title>TRAMA. — Creadores de contenido UGC verificados en Argentina</title>
+<meta name="description" content="Conectá tu marca con creadores de contenido UGC e influencers verificados uno por uno. Marketplace argentino de creator marketing. Publicá tu campaña gratis.">
+<link rel="canonical" href="https://www.tramapunto.com/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="TRAMA.">
+<meta name="geo.region" content="AR-C">
+<meta name="geo.placename" content="Buenos Aires">
+<meta property="og:locale" content="es_AR">
+
+<!-- ═══ Open Graph (WhatsApp, Instagram, Facebook, LinkedIn) ═══ -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TRAMA.">
+<meta property="og:url" content="https://www.tramapunto.com/">
+<meta property="og:title" content="TRAMA. — Creadores de contenido UGC verificados">
+<meta property="og:description" content="Marcas y creadores reales. Cada perfil verificado a mano por nuestro equipo. Sin perfiles falsos.">
+<meta property="og:image" content="https://www.tramapunto.com/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- ═══ Twitter/X ═══ -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="TRAMA. — Creadores de contenido UGC verificados">
+<meta name="twitter:description" content="Marcas y creadores reales. Cada perfil verificado a mano.">
+<meta name="twitter:image" content="https://www.tramapunto.com/og-image.jpg">
+
+<!-- ═══ Schema.org — le dice a Google QUÉ es TRAMA. ═══ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "TRAMA.",
+  "url": "https://www.tramapunto.com",
+  "logo": "https://www.tramapunto.com/og-image.jpg",
+  "description": "Marketplace argentino que conecta marcas con creadores de contenido UGC e influencers verificados manualmente.",
+  "email": "info.tramapunto@gmail.com",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Buenos Aires",
+    "addressCountry": "AR"
+  },
+  "areaServed": { "@type": "Country", "name": "Argentina" },
+  "sameAs": ["https://www.instagram.com/tramapunto"]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "TRAMA.",
+  "url": "https://www.tramapunto.com",
+  "inLanguage": "es-AR"
+}
+</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -479,8 +532,8 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
       <h3 class="m-title" id="mTitle">Conectá</h3>
       <p class="m-sub">Abonás una vez y accedés a los datos de contacto verificados por TRAMA.</p>
       <div class="m-preview" id="mPreview"></div>
-      <div class="m-price"><span class="m-price-label">Acceso al contacto</span><span class="m-price-val">$4.900 ARS</span></div>
-      <button class="m-pay-btn" onclick="iniciarPago()">Pagar $4.900 ARS con MercadoPago →</button>
+      <div class="m-price"><span class="m-price-label">Acceso al contacto</span><span class="m-price-val">—</span></div>
+      <button class="m-pay-btn" onclick="iniciarPago()">Pagar con MercadoPago →</button>
     </div>
     <div class="success-m" id="mSuccess">
       <div class="sm-ic">✓</div>
@@ -501,6 +554,36 @@ const COLORS=['#C8FF1A','#4ade80','#fb923c','#60a5fa','#f472b6','#c084fc','#f59e
 const BGS=['#0f1a00','#0a2010','#1a0a00','#0a1020','#1a0a14','#1a0a2a','#1a1000','#0a1a14'];
 
 let allCreators=[], bolsaNiche='todos', bolsaPlats=[], bolsaSort='seg';
+
+// ── PRECIOS DINÁMICOS ──
+// Se leen de /api/precios (que a su vez lee de la tabla config,
+// editable desde el admin). Nunca más hardcodeados en el HTML.
+let PRECIO = { monto: 4900, label: '$4.900 ARS' };   // fallback si la API falla
+
+async function cargarPrecios(){
+  try{
+    const r = await fetch('/api/precios');
+    if(!r.ok) return;
+    const p = await r.json();
+    if(p?.bolsa?.label) PRECIO = p.bolsa;
+    pintarPrecios();
+  }catch(_){ /* se queda con el fallback */ }
+}
+
+// Escribe el precio en todos los lugares donde aparece
+function pintarPrecios(){
+  const val = document.querySelector('.m-price-val');
+  if(val) val.textContent = PRECIO.label;
+
+  const payBtn = document.querySelector('.m-pay-btn');
+  if(payBtn && !payBtn.disabled) payBtn.textContent = `Pagar ${PRECIO.label} con MercadoPago →`;
+
+  document.querySelectorAll('.card-btn').forEach(b=>{
+    b.textContent = `Conectar · ${PRECIO.label} →`;
+  });
+}
+
+cargarPrecios();
 let currentCreator=null, filtersBuilt=false;
 
 // ── PÁGINAS ──
@@ -543,7 +626,13 @@ function closeGate(){
 // ── SUPABASE ──
 async function loadCreators(){
   try{
-    const r=await fetch(`${SB_URL}/rest/v1/creators?select=*&status=eq.aprobado&order=created_at.desc`,{
+    // Solo columnas públicas: NUNCA traer email ni tel al navegador.
+    // Antes usaba select=* y los contactos (que son lo que se vende)
+    // viajaban al cliente, visibles en DevTools sin pagar.
+    const COLS = 'id,nombre,pais,ciudad,bio,niches,nicho_esp,plats,audiencia,'
+               + 'ig_seg,ig_er,ig_alc,tt_seg,tt_er,tt_vistas,yt_seg,yt_vistas,'
+               + 't_story,t_reel,t_post,canje,disponibilidad,avatar_url,created_at';
+    const r=await fetch(`${SB_URL}/rest/v1/creators?select=${COLS}&status=eq.aprobado&order=created_at.desc`,{
       headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
     });
     if(!r.ok)throw new Error('HTTP '+r.status);
@@ -593,14 +682,14 @@ function setSort(s,btn){
 function fmtSeg(n){if(!n)return'—';return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':n}
 function getColor(i){return COLORS[i%COLORS.length]}
 function getBg(i){return BGS[i%BGS.length]}
-function getInit(c){return((c.nombre||'?')[0]+(c.apellido||'?')[0]).toUpperCase()}
+function getInit(c){const n=(c.nombre||'?').trim();return (n[0]||'?').toUpperCase()}
 
 function renderBolsa(){
   const q=(document.getElementById('searchInp')?.value||'').toLowerCase().trim();
   let list=allCreators.filter(c=>{
     const mN=bolsaNiche==='todos'||(c.niches||[]).includes(bolsaNiche);
     const mP=bolsaPlats.length===0||bolsaPlats.every(p=>(c.plats||[]).includes(p));
-    const mQ=!q||(c.nombre+' '+c.apellido).toLowerCase().includes(q)||(c.niches||[]).join(' ').toLowerCase().includes(q);
+    const mQ=!q||(c.nombre||'').toLowerCase().includes(q)||(c.niches||[]).join(' ').toLowerCase().includes(q);
     return mN&&mP&&mQ;
   });
   const segN=c=>Math.max(c.ig_seg||0,c.tt_seg||0,c.yt_seg||0);
@@ -636,7 +725,7 @@ function renderBolsa(){
       </div>
       <div class="card-tags">${(c.niches||[]).map(n=>`<span class="c-tag">${n}</span>`).join('')}</div>
       <div class="card-plats">${plats.map(p=>`<span class="plat">${p}</span>`).join('')}</div>
-      <button class="card-btn" onclick="openModal('${c.id}',${i})">Conectar · $4.900 ARS →</button>
+      <button class="card-btn" onclick="openModal('${c.id}',${i})">Conectar · ${PRECIO.label} →</button>
     </div>`;
   }).join('');
 }
@@ -654,6 +743,7 @@ function openModal(id,i){
   document.getElementById('mSuccess').style.display='none';
   document.getElementById('contactModal').classList.add('open');
   document.body.style.overflow='hidden';
+  pintarPrecios();   // asegura que el precio mostrado sea el vigente
 }
 function closeModal(){
   document.getElementById('contactModal').classList.remove('open');
@@ -661,19 +751,12 @@ function closeModal(){
 }
 document.getElementById('contactModal').addEventListener('click',e=>{if(e.target===document.getElementById('contactModal'))closeModal()});
 
-function quickPay(){
-  if(!currentCreator)return;
-  document.getElementById('mForm').style.display='none';
-  document.getElementById('mSuccess').style.display='block';
-  document.getElementById('sName').textContent=`${currentCreator.nombre} ${currentCreator.apellido}`;
-  const c=currentCreator;
-  document.getElementById('cBox').innerHTML=`
-    <div class="c-item"><span class="c-ic">✉</span><span class="c-key">Email</span><span class="c-val">${c.email}</span></div>
-    ${c.ig_user?`<div class="c-item"><span class="c-ic">📸</span><span class="c-key">Instagram</span><span class="c-val">${c.ig_user}</span></div>`:''}
-    ${c.tt_user?`<div class="c-item"><span class="c-ic">🎵</span><span class="c-key">TikTok</span><span class="c-val">${c.tt_user}</span></div>`:''}
-    ${c.tel?`<div class="c-item"><span class="c-ic">💬</span><span class="c-key">WhatsApp</span><span class="c-val">${c.tel}</span></div>`:''}`;
-  showToast('✓ Contacto desbloqueado','ok');
-}
+// ── quickPay ELIMINADA ──
+// Antes esta función revelaba email, teléfono e Instagram del creator
+// SIN cobrar. Cualquiera podía llamarla desde la consola del navegador
+// y llevarse el contacto gratis, salteando el modelo de negocio.
+// El contacto ahora SOLO se revela en pago-exitoso.html, después de
+// que MercadoPago confirma el pago.
 
 async function iniciarPago(){
   const btn=document.querySelector('.m-pay-btn');
@@ -699,10 +782,10 @@ async function iniciarPago(){
     window.location.href=url;
   }catch(e){
     showToast('Error: '+e.message,'err');
-    btn.disabled=false;btn.textContent='Pagar $4.900 ARS con MercadoPago →';
+    btn.disabled=false;btn.textContent=`Pagar ${PRECIO.label} con MercadoPago →`;
   }
 }
-iniciarPago
+
 // ── TOAST ──
 let tt;
 function showToast(msg,type='ok'){

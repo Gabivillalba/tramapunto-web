@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# El panel admin no debe indexarse nunca
+Disallow: /admin.html
+Disallow: /api/
+
+# Páginas de resultado de pago: no aportan valor en búsquedas
+Disallow: /pago-exitoso.html
+Disallow: /pago-fallido.html
+Disallow: /pago-pendiente.html
+
+Sitemap: https://www.tramapunto.com/sitemap.xml

@@ -6,29 +6,26 @@
 //   ADMIN_PASS          → contraseña del panel (elegí una fuerte y larga)
 //   SUPABASE_URL        → https://mcpmabvxmdepastmpzbi.supabase.co
 //   SUPABASE_SERVICE_KEY→ service_role key (Settings → API → service_role)
-//   SITE_URL            → https://www.tramapunto.com (para los emails)
+//   SITE_URL            → https://tramapunto-web.vercel.app (para los emails)
 //
 // El front manda la contraseña en el header 'x-admin-pass'. Se compara
-// en el servidor con una comparación de tiempo constante propia (sin
-// depender del módulo 'crypto', para que funcione en cualquier runtime).
+// en el servidor con comparación de tiempo constante para no filtrar
+// información por timing.
+
+import crypto from 'crypto';
 
 const SB_URL      = process.env.SUPABASE_URL;
 const SB_SERVICE  = process.env.SUPABASE_SERVICE_KEY;
 const ADMIN_PASS  = process.env.ADMIN_PASS;
-const SITE_URL    = process.env.SITE_URL || 'https://www.tramapunto.com';
+const SITE_URL    = process.env.SITE_URL || 'https://tramapunto-web.vercel.app';
 
-// Comparación de contraseñas resistente a timing attacks, sin 'crypto'.
-// Recorre siempre TODOS los caracteres del valor esperado, acumulando
-// diferencias con XOR, para no filtrar información por el tiempo.
+// Comparación de contraseñas resistente a timing attacks
 function passOk(input) {
   if (!input || !ADMIN_PASS) return false;
-  const a = String(input);
-  const b = String(ADMIN_PASS);
-  let diff = a.length ^ b.length;
-  for (let i = 0; i < b.length; i++) {
-    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
-  return diff === 0;
+  const a = Buffer.from(String(input));
+  const b = Buffer.from(String(ADMIN_PASS));
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
 }
 
 // Helper para pegarle a Supabase con service_role (bypassea RLS)
@@ -144,26 +141,42 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
-      // — Leer la configuración (precios) —
-      case 'get_config': {
-        const data = await sb('config?select=*&order=clave');
-        return res.status(200).json({ ok: true, data });
-      }
+      // — Eliminar un creator DEFINITIVAMENTE —
+      // Borra la fila de creators. Si existen postulaciones del creator y la FK
+      // tiene ON DELETE CASCADE (migración de campañas), se borran también.
+      // Las conexiones (pagos) NO se tocan: se conservan como registro histórico.
+      case 'delete_creator': {
+        const { id } = payload;
+        if (!id) return res.status(400).json({ error: 'Falta id' });
 
-      // — Guardar un valor de configuración —
-      case 'set_config': {
-        const { clave, valor } = payload;
-        if (!clave || valor === undefined) {
-          return res.status(400).json({ error: 'Faltan clave/valor' });
+        // Traemos el email para, si existe, borrar también la cuenta de Auth
+        let email = null;
+        try {
+          const rows = await sb(`creators?id=eq.${id}&select=email`);
+          email = rows?.[0]?.email || null;
+        } catch (_) { /* si no se puede leer, seguimos igual */ }
+
+        // Borrado de la fila en la tabla
+        await sb(`creators?id=eq.${id}`, 'DELETE');
+
+        // Si el creator tenía cuenta de login, la eliminamos también de Auth
+        // para no dejar usuarios huérfanos. Best-effort: no rompe el borrado.
+        if (email) {
+          try {
+            const u = await fetch(
+              `${SB_URL}/auth/v1/admin/users?email=${encodeURIComponent(email)}`,
+              { headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}` } }
+            ).then(r => r.ok ? r.json() : null);
+            const authId = u?.users?.[0]?.id || u?.[0]?.id || null;
+            if (authId) {
+              await fetch(`${SB_URL}/auth/v1/admin/users/${authId}`, {
+                method: 'DELETE',
+                headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}` },
+              });
+            }
+          } catch (_) { /* best-effort */ }
         }
-        // Validación: los precios deben ser números positivos razonables
-        if (clave.startsWith('precio_')) {
-          const n = Number(valor);
-          if (!Number.isFinite(n) || n < 0 || n > 10000000) {
-            return res.status(400).json({ error: 'Precio inválido' });
-          }
-        }
-        await sb(`config?clave=eq.${encodeURIComponent(clave)}`, 'PATCH', { valor: String(valor) });
+
         return res.status(200).json({ ok: true });
       }
 

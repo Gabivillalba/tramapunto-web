@@ -37,6 +37,11 @@ nav{height:56px;padding:0 1.5rem;display:flex;align-items:center;justify-content
 .btn-bolsa{display:block;background:transparent;color:var(--white);padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none;text-align:center;border:1px solid #2a2a2a;transition:all .2s}
 .btn-bolsa:hover{border-color:var(--green);color:var(--green)}
 .err-box{background:#1a0000;border:1px solid #2a0000;border-radius:3px;padding:1.1rem;margin-bottom:1.5rem;font-size:.8rem;color:var(--red);line-height:1.6;text-align:center}
+.mat-item{display:flex;align-items:center;gap:.6rem;padding:.55rem 0;border-bottom:1px solid #161616;text-decoration:none}
+.mat-item:last-child{border:none}
+.mat-tipo{font-size:.54rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--green);background:#0f1a00;border:1px solid #2a4000;padding:.18rem .4rem;border-radius:20px;flex-shrink:0}
+.mat-cons{font-size:.76rem;color:var(--muted2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mat-go{font-size:.68rem;color:var(--green);font-weight:700;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -78,6 +83,13 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
   }
 
   try {
+    // Precio vigente (el que editás desde el admin → Precios)
+    let PRECIO = { monto: 4900, label: '$4.900 ARS' };
+    try {
+      const pr = await fetch('/api/precios');
+      if(pr.ok){ const pj = await pr.json(); if(pj?.bolsa?.label) PRECIO = pj.bolsa; }
+    } catch(_){ /* se queda con el fallback */ }
+
     // Buscar creator en Supabase
     const r = await fetch(`${SB_URL}/rest/v1/creators?id=eq.${creatorId}&select=*`,{
       headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
@@ -85,6 +97,15 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
     const creators = await r.json();
     const c = creators?.[0];
     if(!c) throw new Error('Creator no encontrado');
+
+    // Material entregado por el creador (sus retos cumplidos)
+    let entregas = [];
+    try {
+      const er = await fetch(`${SB_URL}/rest/v1/entregas?creator_id=eq.${creatorId}&select=tipo,consigna,link,fecha&order=created_at.desc&limit=12`,{
+        headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
+      });
+      if(er.ok) entregas = await er.json();
+    } catch(_){ /* sin material aún */ }
 
     // Registrar conexión si no existe (idempotente)
     await fetch(`${SB_URL}/rest/v1/conexiones`,{
@@ -96,7 +117,7 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
       body: JSON.stringify({
         creator_id: creatorId,
         marca_email: marcaEmail,
-        monto: 4900,
+        monto: PRECIO.monto,
         metodo: 'mercadopago',
         voucher_id: paymentId || 'mp-redirect',
         estado: 'pagado',
@@ -104,15 +125,22 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
     });
 
     // Mostrar datos de contacto
-    showSuccess(c, marcaEmail, paymentId);
+    showSuccess(c, marcaEmail, paymentId, PRECIO, entregas);
 
   } catch(e){
     showError('Hubo un error al recuperar los datos. Escribinos a info.tramapunto@gmail.com con tu comprobante.');
   }
 })();
 
-function showSuccess(c, marcaEmail, paymentId){
+function showSuccess(c, marcaEmail, paymentId, PRECIO, entregas){
+  PRECIO = PRECIO || { label: '$4.900 ARS' };
+  entregas = entregas || [];
   const fecha = new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const materialHtml = entregas.length ? `
+    <div class="contact-box">
+      <div class="contact-title">Material del creador (${entregas.length})</div>
+      ${entregas.map(e=>`<a class="mat-item" href="${e.link}" target="_blank" rel="noopener"><span class="mat-tipo">${e.tipo||'reto'}</span><span class="mat-cons">${e.consigna||''}</span><span class="mat-go">ver ↗</span></a>`).join('')}
+    </div>` : '';
   document.getElementById('content').innerHTML=`
     <div class="ic">✅</div>
     <div class="tag">Conexión desbloqueada · TRAMA.</div>
@@ -128,9 +156,11 @@ function showSuccess(c, marcaEmail, paymentId){
       ${c.tel?`<div class="c-item"><span class="c-ic">💬</span><span class="c-key">WhatsApp</span><span class="c-val">${c.tel}</span></div>`:''}
     </div>
 
+    ${materialHtml}
+
     <div class="contact-box" style="margin-bottom:1.5rem">
       <div class="contact-title">Comprobante</div>
-      <div class="voucher-row"><span class="v-k">Monto</span><span class="v-v" style="color:var(--green)">$4.900 ARS</span></div>
+      <div class="voucher-row"><span class="v-k">Monto</span><span class="v-v" style="color:var(--green)">${PRECIO.label}</span></div>
       <div class="voucher-row"><span class="v-k">Fecha</span><span class="v-v">${fecha}</span></div>
       ${paymentId?`<div class="voucher-row"><span class="v-k">ID de pago</span><span class="v-v" style="color:var(--muted2)">${paymentId}</span></div>`:''}
       <div class="voucher-row"><span class="v-k">Estado</span><span class="v-v" style="color:var(--green)">✓ Aprobado</span></div>

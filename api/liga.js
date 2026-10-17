@@ -121,6 +121,46 @@ async function misionDeHoy(wd, iso) {
   return { tipo, contenido, extra, requiere_material, base: PUNTOS[tipo] || 10 };
 }
 
+// Las 7 fechas (Lun→Dom) de la semana que contiene a 'iso'
+function fechasDeLaSemana(iso) {
+  const base = new Date(iso + 'T12:00:00Z');
+  const jsDay = base.getUTCDay();                       // 0=Dom..6=Sáb
+  const offMon = (jsDay === 0) ? -6 : (1 - jsDay);
+  const mon = new Date(base); mon.setUTCDate(base.getUTCDate() + offMon);
+  const wd = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const out = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(mon); d.setUTCDate(mon.getUTCDate() + i);
+    out.push({ wd: wd[i], fecha: d.toISOString().slice(0, 10) });
+  }
+  return out;
+}
+
+// Agenda completa de la semana (misma que se manda por mail 1 vez por semana)
+async function semanaDeMisiones(iso, hoyIso) {
+  const dias = fechasDeLaSemana(iso);
+  const pools = {};
+  for (const tp of ['reto', 'trivia', 'tendencia']) {
+    try { pools[tp] = await sb(`misiones_pool?tipo=eq.${tp}&activo=eq.true&select=contenido,requiere_material&order=id`); }
+    catch (_) { pools[tp] = []; }
+  }
+  const idx = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
+  return dias.map(({ wd, fecha }) => {
+    const tipo = AGENDA[wd] || 'tendencia';
+    if (tipo === 'libre') return { wd, fecha, tipo: 'libre', contenido: null, requiere_material: false, es_hoy: fecha === hoyIso };
+    const pool = pools[tipo] || [];
+    let contenido = FALLBACK[tipo], requiere_material = (tipo === 'reto');
+    if (pool.length) {
+      const dayNum = Math.floor(Date.parse(fecha) / 86400000);
+      const week = Math.floor((dayNum + 4) / 7);
+      const pick = pool[(week * 7 + idx[wd]) % pool.length];
+      contenido = pick.contenido;
+      requiere_material = !!pick.requiere_material;
+    }
+    return { wd, fecha, tipo, contenido, requiere_material, es_hoy: fecha === hoyIso };
+  });
+}
+
 // Posición del creador entre los aprobados (#X de Y)
 async function posicion(indiceDelCreador) {
   const total = await sb('creators?status=eq.aprobado&select=id');
@@ -161,6 +201,7 @@ export default async function handler(req, res) {
       try {
         entregas = await sb(`entregas?creator_id=eq.${encodeURIComponent(String(creator.id))}&select=fecha,tipo,consigna,link&order=created_at.desc&limit=8`);
       } catch (_) { /* sin entregas aún */ }
+      const semana = await semanaDeMisiones(iso, iso);
       return res.status(200).json({
         ok: true,
         data: {
@@ -170,6 +211,7 @@ export default async function handler(req, res) {
             requiere_material: !!mision.requiere_material,
             opciones: (mision.extra && mision.extra.opciones) || null,
           },
+          semana,
           entregas,
           es_libre: mision.tipo === 'libre',
           ya_cumplida: creator.ultima_mision === iso,
@@ -249,3 +291,6 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: err.message });
   }
 }
+
+// Exportadas para que el cron (liga-cron.js) use la MISMA agenda semanal
+export { hoyART, semanaDeMisiones };

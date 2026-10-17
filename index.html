@@ -6,7 +6,7 @@
 <!-- RECUPERACIÓN DE CONTRASEÑA (permanente): si el link de Supabase cae acá
      con el token de recovery, rebota a reset.html conservando el hash.
      NO BORRAR este bloque. -->
-<script>(function(){try{var h=location.hash||'';if(h.indexOf('type=recovery')>-1&&location.pathname.indexOf('reset.html')===-1){location.replace('/reset.html'+h);}}catch(e){}})();</script>
+<script>(function(){try{var h=location.hash||'',q=location.search||'';if((h.indexOf('type=recovery')>-1||q.indexOf('type=recovery')>-1||h.indexOf('access_token=')>-1)&&location.pathname.indexOf('reset.html')===-1){location.replace('/reset.html'+h+q);}}catch(e){}})();</script>
 
 <!-- ═══ SEO ═══ -->
 <title>TRAMA. — Creadores de contenido UGC verificados en Argentina</title>

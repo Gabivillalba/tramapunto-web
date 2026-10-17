@@ -524,7 +524,7 @@ function showDash(){
 
 function buildTabs(){
   const tabs = userType==='creator'
-    ?['Mi perfil','🔥 Liga','Mis redes','Estado','Editar','📊 Contactos']
+    ?['Mi perfil','🔥 Liga','Mis redes','Estado','Editar','📊 Contactos','🛒 Comprados']
     :['Mi cuenta','Creators guardados','Mis conexiones','Editar'];
   document.getElementById('dashTabs').innerHTML = tabs.map((t,i)=>
     `<button class="tab${i===0?' active':''}" onclick="switchTab(${i},this)">${t}</button>`
@@ -684,6 +684,10 @@ function renderCreatorTab(i,el){
     el.innerHTML=`<div class="tab-content active" id="contactosWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
     loadContactosCreator();
   }
+  else if(i===6){
+    el.innerHTML=`<div class="tab-content active" id="compradosWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadComprados('compradosWrap');
+  }
 }
 
 // ── MARCA TABS ──
@@ -710,7 +714,7 @@ function renderMarcaTab(i,el){
   }
   else if(i===2){
     el.innerHTML=`<div class="tab-content active" id="cxMarcaWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
-    loadConexionesMarca();
+    loadComprados('cxMarcaWrap');
   }
   else if(i===3){
     el.innerHTML=`<div class="tab-content active">
@@ -936,31 +940,31 @@ async function enviarCumplir(extra){
   }
 }
 
-// ── CONEXIONES (contactos comprados) ──
-// Vista del CREADOR: qué marcas compraron su contacto (+ recuento)
+// ── CONEXIONES (contactos comprados / vendidos) ──
+// Vista del VENDIDO (creador): quién compró su contacto, sea marca o creador (+ recuento)
 async function loadContactosCreator(){
   const wrap=document.getElementById('contactosWrap'); if(!wrap)return;
   const rows=await sbGet('conexiones',`creator_id=eq.${encodeURIComponent(userProfile.id)}&estado=eq.pagado&select=marca_email,marca_nombre,origen,created_at&order=created_at.desc`,getToken());
   const n=rows.length;
   const items = n ? rows.map(r=>{
     const f=r.created_at?new Date(r.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
-    const quien=r.marca_nombre||r.marca_email||'Marca';
-    return `<div class="cx-item"><div class="cx-ic">🏢</div><div class="cx-body"><div class="cx-name">${quien}</div><div class="cx-meta">${f}${r.origen==='campania'?' · campaña':''}</div></div></div>`;
-  }).join('') : `<div class="empty-state"><div>📭</div>Todavía ninguna marca compró tu contacto.<br>Completá tu perfil y entrá a la Liga para ganar visibilidad.</div>`;
+    const quien=r.marca_nombre||r.marca_email||'Comprador';
+    return `<div class="cx-item"><div class="cx-ic">👤</div><div class="cx-body"><div class="cx-name">${quien}</div><div class="cx-meta">${f}${r.origen==='campania'?' · campaña':''}</div></div></div>`;
+  }).join('') : `<div class="empty-state"><div>📭</div>Todavía nadie compró tu contacto.<br>Completá tu perfil y entrá a la Liga para ganar visibilidad.</div>`;
   wrap.innerHTML=`<div class="tab-content active">
-    <div class="sec-title">Marcas que compraron tu contacto</div>
-    <div class="cx-count"><span class="cx-count-n">${n}</span><span class="cx-count-l">${n===1?'marca te contactó':'marcas te contactaron'}</span></div>
+    <div class="sec-title">Quién compró tu contacto</div>
+    <div class="cx-count"><span class="cx-count-n">${n}</span><span class="cx-count-l">${n===1?'compra de tu contacto':'compras de tu contacto'}</span></div>
     <div class="cx-list">${items}</div>
   </div>`;
 }
 
-// Vista de la MARCA: creadores cuyo contacto ya desbloqueó (con el contacto a mano)
-async function loadConexionesMarca(){
-  const wrap=document.getElementById('cxMarcaWrap'); if(!wrap)return;
+// Vista del COMPRADOR (marca o creador): contactos que YA compró, con los datos a mano
+async function loadComprados(wrapId){
+  const wrap=document.getElementById(wrapId); if(!wrap)return;
   const email=currentUser.email;
   const cxs=await sbGet('conexiones',`marca_email=eq.${encodeURIComponent(email)}&estado=eq.pagado&select=creator_id,origen,created_at&order=created_at.desc`,getToken());
   if(!cxs.length){
-    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Mis conexiones</div><div class="empty-state"><div>📭</div>Todavía no desbloqueaste ningún contacto.<br><a href="/" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
+    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Creadores comprados</div><div class="empty-state"><div>📭</div>Todavía no desbloqueaste ningún contacto.<br><a href="/" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
     return;
   }
   const ids=[...new Set(cxs.map(c=>c.creator_id).filter(Boolean))];
@@ -976,7 +980,7 @@ async function loadConexionesMarca(){
     return `<div class="cx-item"><div class="cx-ic">${av}</div><div class="cx-body"><div class="cx-name">${nom}</div><div class="cx-meta">${f}${cx.origen==='campania'?' · campaña':''}</div><div class="cx-contact">${contacto||'Sin datos de contacto'}</div></div></div>`;
   }).join('');
   wrap.innerHTML=`<div class="tab-content active">
-    <div class="sec-title">Mis conexiones (${cxs.length})</div>
+    <div class="sec-title">Creadores comprados (${cxs.length})</div>
     <div class="cx-list">${items}</div>
   </div>`;
 }

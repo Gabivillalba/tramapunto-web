@@ -144,6 +144,28 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .toast.ok{background:#0f1a00;border:1px solid #2a4000;color:var(--green)}
 .toast.err{background:#1a0000;border:1px solid #2a0000;color:var(--red)}
 .toast.info{background:#0a1020;border:1px solid #1a2a40;color:var(--blue)}
+
+/* ── LIGA TRAMA. ── */
+.liga-hero{background:linear-gradient(135deg,#0f1a00,#0d0d0d);border:1px solid #2a4000;border-radius:4px;padding:1.5rem;margin-bottom:1.25rem}
+.liga-pos{font-size:2.1rem;font-weight:900;color:var(--green);line-height:1;letter-spacing:-.02em}
+.liga-pos small{font-size:.85rem;color:var(--muted2);font-weight:700}
+.liga-streak{font-size:.95rem;font-weight:900;color:var(--amber);margin-top:.5rem}
+.liga-stats{display:flex;gap:2rem;margin-top:1.1rem}
+.liga-stat .n{font-size:1.3rem;font-weight:900}
+.liga-stat .l{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:.15rem}
+.mission-card{background:var(--g1);border:1px solid #222;border-radius:4px;padding:1.5rem;margin-bottom:1.25rem}
+.mission-badge{display:inline-block;font-size:.6rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;padding:.3rem .7rem;border-radius:20px;margin-bottom:.9rem}
+.mission-text{font-size:1rem;line-height:1.65;margin-bottom:1.25rem;color:var(--white)}
+.btn-mission{background:var(--green);color:var(--black);border:none;padding:.9rem 1.5rem;font-weight:900;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;cursor:pointer;width:100%;transition:opacity .2s}
+.btn-mission:hover{opacity:.87}
+.btn-mission:disabled{opacity:.5;cursor:not-allowed}
+.agenda{display:flex;gap:.4rem;margin-bottom:1.25rem}
+.agenda-day{flex:1;text-align:center;background:#0d0d0d;border:1px solid #1a1a1a;border-radius:3px;padding:.5rem .15rem}
+.agenda-day.today{border-color:var(--green);background:#0f1a00}
+.agenda-day .d{font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.agenda-day.today .d{color:var(--green)}
+.agenda-day .i{font-size:1.05rem;margin-top:.25rem}
+.champ{background:#1a1200;border:1px solid #2a2000;border-radius:3px;padding:.75rem 1rem;font-size:.8rem;color:var(--amber);display:flex;align-items:center;gap:.5rem;margin-bottom:1.25rem}
 </style>
 </head>
 <body>
@@ -237,6 +259,7 @@ let currentUser = null;
 let userProfile = null;
 let userType    = null;
 let regTipo     = null;
+let ligaData    = null;
 
 // ── HELPERS ──
 function getToken(){ return localStorage.getItem('sb_token') }
@@ -471,7 +494,7 @@ function showDash(){
 
 function buildTabs(){
   const tabs = userType==='creator'
-    ?['Mi perfil','Mis redes','Estado','Editar']
+    ?['Mi perfil','🔥 Liga','Mis redes','Estado','Editar']
     :['Mi cuenta','Creators guardados','Mis conexiones','Editar'];
   document.getElementById('dashTabs').innerHTML = tabs.map((t,i)=>
     `<button class="tab${i===0?' active':''}" onclick="switchTab(${i},this)">${t}</button>`
@@ -518,6 +541,11 @@ function renderCreatorTab(i,el){
     </div>`;
   }
   else if(i===1){
+    // ── LIGA TRAMA. (gamificación diaria) ──
+    el.innerHTML=`<div class="tab-content active" id="ligaWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadLiga();
+  }
+  else if(i===2){
     const redes=[
       {icon:'📸',name:'Instagram',user:p.ig_user,seg:fmtSeg(p.ig_seg),er:p.ig_er},
       {icon:'🎵',name:'TikTok',user:p.tt_user,seg:fmtSeg(p.tt_seg),er:p.tt_er},
@@ -538,7 +566,7 @@ function renderCreatorTab(i,el){
       </div>
     </div>`;
   }
-  else if(i===2){
+  else if(i===3){
     const st=p.status;
     const map={
       pendiente:{icon:'⏳',color:'var(--amber)',title:'Perfil en revisión',desc:'El equipo TRAMA. está revisando tu perfil. En 48-72hs te confirmamos si quedás en la bolsa.'},
@@ -555,7 +583,7 @@ function renderCreatorTab(i,el){
       ${st==='aprobado'?`<div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem"><div style="font-size:.82rem;color:var(--muted2)">Tu perfil está visible para todas las marcas registradas en TRAMA.</div><a href="/" style="background:var(--green);color:var(--black);padding:.6rem 1.25rem;font-weight:900;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;border-radius:2px;text-decoration:none">Ver bolsa →</a></div>`:''}
     </div>`;
   }
-  else if(i===3){
+  else if(i===4){
     el.innerHTML=`<div class="tab-content active">
       <div class="sec-title">Editar perfil</div>
       <div style="background:#1a1200;border:1px solid #2a2000;border-radius:3px;padding:.875rem 1.1rem;margin-bottom:1.5rem;font-size:.76rem;color:#f59e0b;line-height:1.5">
@@ -730,6 +758,106 @@ async function saveMarca(){
   if(ok){Object.assign(userProfile,body);showToast('✓ Cuenta actualizada','ok')}
   else showToast('Error al guardar','err');
   btn.disabled=false; btn.textContent='Guardar cambios';
+}
+
+// ── LIGA TRAMA. ──
+const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const AGENDA_UI=[
+  {d:'Lun',i:'🧠'},{d:'Mar',i:'📈'},{d:'Mié',i:'🧠'},
+  {d:'Jue',i:'📈'},{d:'Vie',i:'🎬'},{d:'Sáb',i:'📈'},{d:'Dom',i:'🌙'}
+];
+const TIPO_UI={
+  reto:{label:'Reto creativo',icon:'🎬',color:'var(--green)',bg:'#0f1a00',bd:'#2a4000'},
+  trivia:{label:'Trivia',icon:'🧠',color:'var(--purple)',bg:'#1a0a2a',bd:'#3a1a5a'},
+  tendencia:{label:'Tendencia',icon:'📈',color:'var(--amber)',bg:'#1a1200',bd:'#2a2000'},
+  libre:{label:'Día libre',icon:'🌙',color:'var(--muted2)',bg:'#0d0d0d',bd:'#222'}
+};
+
+async function ligaCall(action){
+  const r=await fetch('/api/liga',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action,token:getToken()})
+  });
+  return r.json().catch(()=>({ok:false,error:'Respuesta inválida del servidor'}));
+}
+
+async function loadLiga(){
+  const wrap=document.getElementById('ligaWrap'); if(!wrap)return;
+  const res=await ligaCall('estado');
+  if(!res.ok){
+    wrap.innerHTML=`<div class="tab-content active"><div class="empty-state"><div>⚠️</div>${res.error||'No se pudo cargar la Liga.'}</div></div>`;
+    return;
+  }
+  ligaData=res.data; renderLiga();
+}
+
+function agendaStrip(){
+  const js=new Date().getDay();        // 0=Dom..6=Sáb
+  const todayIdx=(js===0)?6:js-1;      // → 0=Lun..6=Dom
+  return `<div class="agenda">${AGENDA_UI.map((a,ix)=>
+    `<div class="agenda-day${ix===todayIdx?' today':''}"><div class="d">${a.d}</div><div class="i">${a.i}</div></div>`
+  ).join('')}</div>`;
+}
+
+function renderLiga(){
+  const wrap=document.getElementById('ligaWrap'); if(!wrap||!ligaData)return;
+  const d=ligaData;
+  const t=TIPO_UI[d.mision&&d.mision.tipo]||TIPO_UI.tendencia;
+  const mes=MESES[new Date().getMonth()];
+
+  const champ=d.campeon
+    ? `<div class="champ">👑 <span>Campeón del mes: <strong>${d.campeon.handle||d.campeon.nombre}</strong></span></div>`
+    : '';
+
+  let btn;
+  if(d.es_libre){
+    btn=`<button class="btn-mission" disabled>Hoy es día libre 🌙</button>`;
+  } else if(d.ya_cumplida){
+    btn=`<button class="btn-mission" disabled>✓ Ya cumpliste la misión de hoy</button>`;
+  } else {
+    btn=`<button class="btn-mission" id="ligaBtn" onclick="cumplirMision()">Cumplir misión (+${d.base_hoy}) 🔥</button>`;
+  }
+
+  const misionCard = d.es_libre
+    ? `<div class="mission-card"><div class="mission-badge" style="color:${t.color};background:${t.bg};border:1px solid ${t.bd}">${t.icon} ${t.label}</div><div class="mission-text">Hoy no hay misión. Aprovechá para descansar o preparar contenido para mañana. 🌙</div>${btn}</div>`
+    : `<div class="mission-card"><div class="mission-badge" style="color:${t.color};background:${t.bg};border:1px solid ${t.bd}">${t.icon} Misión de hoy · ${t.label}</div><div class="mission-text">${(d.mision&&d.mision.contenido)||''}</div>${btn}</div>`;
+
+  wrap.innerHTML=`<div class="tab-content active">
+    <div class="sec-title">Liga TRAMA. · Temporada de ${mes}</div>
+    ${d.es_campeon?`<div class="champ" style="color:var(--green);background:#0f1a00;border-color:#2a4000">👑 <span>¡Sos el campeón vigente! Tenés <strong>×2 puntos</strong> este mes.</span></div>`:''}
+    <div class="liga-hero">
+      <div class="liga-pos">#${d.posicion} <small>de ${d.total}</small></div>
+      <div class="liga-streak">🔥 Racha de ${d.racha} día${d.racha===1?'':'s'}</div>
+      <div class="liga-stats">
+        <div class="liga-stat"><div class="n">${d.puntos_mes}</div><div class="l">Puntos del mes</div></div>
+        <div class="liga-stat"><div class="n">${d.indice}</div><div class="l">Índice</div></div>
+      </div>
+    </div>
+    ${agendaStrip()}
+    ${champ}
+    ${misionCard}
+    <p style="font-size:.72rem;color:var(--muted);line-height:1.6">Entrá todos los días y cumplí la misión para subir en la bolsa. Si cortás la racha, bajás. A fin de mes se corona al #1 y arranca una liga nueva.</p>
+  </div>`;
+}
+
+async function cumplirMision(){
+  const b=document.getElementById('ligaBtn');
+  if(b){ b.disabled=true; b.textContent='Sumando...'; }
+  const res=await ligaCall('cumplir');
+  if(res.ok){
+    if(res.libre){ showToast(res.msg||'Hoy es día libre 🌙','info'); return; }
+    if(res.ya){ showToast('Ya cumpliste hoy 😉','info'); }
+    else if(res.data){ showToast('+'+res.data.sumado+' puntos 🔥','ok'); }
+    if(res.data){
+      userProfile.indice=res.data.indice;
+      userProfile.racha=res.data.racha;
+      userProfile.puntos_mes=res.data.puntos_mes;
+    }
+    await loadLiga();
+  } else {
+    showToast(res.error||'No se pudo registrar la misión','err');
+    if(b){ b.disabled=false; b.textContent='Reintentar'; }
+  }
 }
 
 // ── TOAST ──

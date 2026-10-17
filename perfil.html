@@ -80,6 +80,8 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .dash-header-inner{display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap}
 .dash-av{width:56px;height:56px;min-width:56px;border-radius:50%;border:2px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;flex-shrink:0;overflow:hidden}
 .dash-av img{width:100%;height:100%;object-fit:cover}
+.av-cam{position:absolute;right:-3px;bottom:-3px;width:22px;height:22px;border-radius:50%;background:var(--green);color:#080808;display:flex;align-items:center;justify-content:center;font-size:.62rem;cursor:pointer;border:2px solid var(--g1);line-height:1}
+.av-cam:hover{filter:brightness(1.1)}
 .dash-name{font-size:1.1rem;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
 .dash-email{font-size:.75rem;color:var(--muted);margin-top:.2rem}
 .dash-badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.6rem;font-weight:900;letter-spacing:.15em;text-transform:uppercase;padding:.25rem .625rem;border-radius:20px;margin-top:.4rem}
@@ -553,6 +555,8 @@ function showDash(){
     av.style.color = userType==='creator'?'var(--purple)':'var(--green)';
     av.textContent=init;
   }
+  // Los creadores pueden subir/cambiar su foto de perfil desde el avatar
+  if(userType==='creator') montarCamaraAvatar();
 
   document.getElementById('dashName').textContent=`${p.nombre||''} ${p.apellido||''}`.trim()||'—';
   document.getElementById('dashEmail').textContent=currentUser.email;
@@ -1185,6 +1189,42 @@ async function quitarGuardado(id){
     const list=document.querySelector('#guardadosWrap .cx-list');
     if(list && !list.children.length) loadGuardados('guardadosWrap');
   }catch(_){ if(el) el.style.opacity='1'; showToast('No se pudo quitar','err'); }
+}
+
+// ── FOTO DE PERFIL / AVATAR ──
+function montarCamaraAvatar(){
+  const av=document.getElementById('dashAv');
+  if(!av)return;
+  av.style.position='relative';
+  if(document.getElementById('avCam'))return;   // ya está
+  const lbl=document.createElement('label');
+  lbl.id='avCam'; lbl.className='av-cam'; lbl.title='Cambiar foto de perfil';
+  lbl.innerHTML='📷<input type="file" accept="image/*" style="display:none" onchange="subirAvatar(this)">';
+  av.appendChild(lbl);
+}
+async function subirAvatar(input){
+  const f=input.files&&input.files[0]; input.value='';
+  if(!f)return;
+  if(!f.type.startsWith('image/')){ showToast('Elegí una imagen','err'); return; }
+  showToast('Subiendo foto...','info');
+  const token=getToken();
+  const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'');
+  const path=`avatars/${userProfile.id}/${Date.now()}_${safe}`;
+  try{
+    const r=await fetch(`${SB_URL}/storage/v1/object/creator-fotos/${path}`,{
+      method:'POST',
+      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+token},
+      body:f
+    });
+    if(!r.ok) throw new Error('upload');
+    const url=`${SB_URL}/storage/v1/object/public/creator-fotos/${path}`;
+    const ok=await sbPatch('creators',`id=eq.${userProfile.id}`,{avatar_url:url},token);
+    if(!ok) throw new Error('save');
+    userProfile.avatar_url=url;
+    const av=document.getElementById('dashAv');
+    if(av){ av.innerHTML=`<img src="${url}" alt="avatar">`; montarCamaraAvatar(); }
+    showToast('✓ Foto de perfil actualizada. Ya se ve en la bolsa.','ok');
+  }catch(e){ showToast('No se pudo subir la foto','err'); }
 }
 
 // ── FOTOS (muestras del creador, se guardan en Supabase Storage) ──

@@ -72,16 +72,17 @@ body{background:var(--black);color:var(--white);font-family:-apple-system,BlinkM
 /* NAV */
 nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,.96);backdrop-filter:blur(12px);border-bottom:1px solid #1a1a1a}
 .logo{font-size:1.2rem;font-weight:900;letter-spacing:.18em;color:var(--green);text-decoration:none;cursor:pointer;flex-shrink:0}
-.nav-center{display:flex;gap:1.5rem;list-style:none}
-.nav-center a{color:var(--muted);text-decoration:none;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;transition:color .2s;cursor:pointer;white-space:nowrap}
+.nav-center{display:flex;gap:2rem;list-style:none;align-items:center;position:absolute;left:50%;transform:translateX(-50%)}
+.nav-center a{position:relative;color:var(--muted2);text-decoration:none;font-size:.76rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;transition:color .2s;cursor:pointer;white-space:nowrap;padding:4px 0}
+.nav-center a::after{content:'';position:absolute;left:0;bottom:-3px;height:2px;width:0;background:var(--green);transition:width .25s ease}
 .nav-center a:hover{color:var(--white)}
-.nav-right{display:flex;align-items:center;gap:.75rem;flex-shrink:0}
-.nav-pill{background:var(--green);color:var(--black);padding:.4rem 1rem;font-weight:900;font-size:.73rem;letter-spacing:.1em;text-transform:uppercase;border:none;cursor:pointer;border-radius:2px;text-decoration:none;white-space:nowrap;transition:opacity .2s}
-.nav-pill:hover{opacity:.85}
-.nav-pill.ghost{background:transparent;color:var(--purple);border:1.5px solid var(--purple)}
-.nav-pill.ghost:hover{background:var(--purple);color:var(--black)}
-.nav-pill.perfil{background:#1a1a1a;color:var(--green);border:1px solid #2a3a00}
-.nav-pill.perfil:hover{opacity:.85}
+.nav-center a:hover::after{width:100%}
+.nav-right{display:flex;align-items:center;gap:.6rem;flex-shrink:0}
+.nav-cta{display:inline-flex;align-items:center;gap:.4rem;background:var(--green);color:var(--black);padding:.5rem 1.1rem;font-weight:900;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;border:none;cursor:pointer;border-radius:2px;text-decoration:none;white-space:nowrap;transition:transform .2s,box-shadow .2s}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,255,26,.2)}
+.nav-account{display:inline-flex;align-items:center;gap:.45rem;background:#141414;color:var(--green);border:1px solid #2a3a00;padding:.5rem .9rem;font-weight:800;font-size:.71rem;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;text-decoration:none;white-space:nowrap;transition:background .2s,border-color .2s}
+.nav-account:hover{background:#1a2200;border-color:var(--green)}
+.nav-account .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
 .ham{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;background:none;border:none}
 .ham span{display:block;width:20px;height:2px;background:var(--white);transition:all .3s;transform-origin:center}
 .ham.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
@@ -93,6 +94,7 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .mob-menu a:last-child{border:none}
 .mob-pill{background:var(--green);color:var(--black);padding:.65rem 1rem;font-weight:900;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;text-align:center;border-radius:2px;margin-top:.5rem;border:none;cursor:pointer;text-decoration:none;display:block}
 .mob-pill.purple{background:var(--purple);color:var(--black)}
+.mob-group-label{font-size:.58rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);padding:.4rem 0 .1rem}
 
 /* PÁGINAS */
 .page{display:none;min-height:100vh;padding-top:56px;animation:fadeIn .3s ease}
@@ -318,8 +320,8 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
 @media(max-width:768px){
   .nav-center{display:none}
   .ham{display:flex}
-  .nav-pill{display:none}
-  .nav-pill.perfil{display:inline-block}
+  .nav-cta{display:none}
+  .nav-account{display:none}
 }
 @media(min-width:769px){
   .ham{display:none!important}
@@ -337,13 +339,11 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
     <li><a href="#como" onclick="showPage('landing')">Cómo funciona</a></li>
     <li><a href="#marcas" onclick="showPage('landing')">Marcas</a></li>
     <li><a href="#creators" onclick="showPage('landing')">Creators</a></li>
-    <li><a href="#" onclick="checkAndShowBolsa()">Encontrá tu creator</a></li>
     <li><a href="#liga" onclick="showPage('landing')">Liga 🔥</a></li>
   </ul>
   <div class="nav-right">
-    <a class="nav-pill ghost" href="./registro.html">Soy creator</a>
-    <a class="nav-pill" href="./marcas.html" style="background:#222;color:var(--white);border:1.5px solid #333">Soy marca</a>
-    <a class="nav-pill perfil" href="./perfil.html">Mi perfil</a>
+    <a class="nav-cta" href="#" onclick="checkAndShowBolsa()">🔍 Encontrá tu creator</a>
+    <a class="nav-account" href="./perfil.html"><span class="dot"></span>Mi perfil</a>
     <button class="ham" id="hamBtn" onclick="toggleMenu()">
       <span></span><span></span><span></span>
     </button>
@@ -352,14 +352,16 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
 
 <!-- MOBILE MENU -->
 <div class="mob-menu" id="mobMenu">
+  <div class="mob-group-label">Explorar</div>
   <a href="#como" onclick="showPage('landing');closeMenu()">Cómo funciona</a>
   <a href="#marcas" onclick="showPage('landing');closeMenu()">Para marcas</a>
   <a href="#creators" onclick="showPage('landing');closeMenu()">Para creators</a>
-  <a href="#" onclick="checkAndShowBolsa();closeMenu()">Encontrá tu creator</a>
   <a href="#liga" onclick="showPage('landing');closeMenu()">Liga 🔥</a>
-  <a href="./perfil.html">Mi perfil</a>
+  <a href="#" onclick="checkAndShowBolsa();closeMenu()">Encontrá tu creator</a>
+  <div class="mob-group-label">Tu cuenta</div>
+  <a class="mob-pill" href="./perfil.html">Mi perfil →</a>
   <a class="mob-pill purple" href="./registro.html">Soy creator →</a>
-  <a class="mob-pill" href="./marcas.html">Soy marca →</a>
+  <a class="mob-pill" href="./marcas.html" style="background:#222;color:#fff">Soy marca →</a>
 </div>
 
 <!-- LANDING -->

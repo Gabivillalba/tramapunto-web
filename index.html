@@ -214,6 +214,17 @@ section{padding:5rem 1.5rem;border-top:1px solid #161616}
 .sort-label{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .sort-btn{background:transparent;border:1px solid #1a1a1a;color:var(--muted);padding:.35rem .75rem;font-size:.68rem;font-weight:700;cursor:pointer;border-radius:2px;transition:all .2s}
 .sort-btn.on,.sort-btn:hover{border-color:var(--green);color:var(--green)}
+.adv-toggle{margin-top:1rem;background:transparent;border:1px solid #1a1a1a;color:var(--muted);padding:.45rem .9rem;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s}
+.adv-toggle:hover{border-color:var(--green);color:var(--green)}
+.adv-panel{display:none;flex-wrap:wrap;gap:.9rem;margin-top:1rem;padding:1.1rem;background:#0a0a0a;border:1px solid #1a1a1a;border-radius:3px;align-items:flex-end}
+.adv-panel.open{display:flex}
+.adv-field{display:flex;flex-direction:column;gap:.35rem}
+.adv-field label{font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.adv-field select{background:#0d0d0d;border:1px solid #222;color:var(--white,#f4f4ef);padding:.5rem .7rem;font-size:.78rem;border-radius:2px;cursor:pointer;min-width:130px;font-family:inherit}
+.adv-field select:focus{outline:none;border-color:var(--green)}
+.adv-clear{background:transparent;border:1px solid #2a2a2a;color:var(--muted);padding:.5rem .9rem;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:2px;height:fit-content}
+.adv-clear:hover{border-color:#f87171;color:#f87171}
+.bolsa-count{margin-top:1rem;font-size:.72rem;color:var(--muted);font-weight:600}
 .bolsa-inner{padding:0 1.5rem 3rem}
 @media(min-width:768px){.bolsa-inner{padding:0 4rem 4rem}}
 .c-grid{display:grid;gap:1px;background:#161616;grid-template-columns:1fr}
@@ -565,8 +576,54 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
       <button class="sort-btn on" onclick="setSort('liga',this)">🔥 Liga</button>
       <button class="sort-btn" onclick="setSort('seg',this)">Mayor audiencia</button>
       <button class="sort-btn" onclick="setSort('er',this)">Mejor engagement</button>
+      <button class="sort-btn" onclick="setSort('rating',this)">Mejor valorados</button>
       <button class="sort-btn" onclick="setSort('nombre',this)">A-Z</button>
     </div>
+    <button class="adv-toggle" id="advToggle" onclick="toggleAdv()">⚙ Filtros avanzados <span id="advChevron">⌄</span></button>
+    <div class="adv-panel" id="advPanel">
+      <div class="adv-field">
+        <label>Ciudad</label>
+        <select id="fCity" onchange="renderBolsa()"><option value="todas">Todas</option></select>
+      </div>
+      <div class="adv-field">
+        <label>Seguidores</label>
+        <select id="fSeg" onchange="renderBolsa()">
+          <option value="0">Cualquiera</option>
+          <option value="1000">1K+</option>
+          <option value="10000">10K+</option>
+          <option value="50000">50K+</option>
+          <option value="100000">100K+</option>
+        </select>
+      </div>
+      <div class="adv-field">
+        <label>Engagement</label>
+        <select id="fEr" onchange="renderBolsa()">
+          <option value="0">Cualquiera</option>
+          <option value="2">2%+</option>
+          <option value="4">4%+</option>
+          <option value="6">6%+</option>
+        </select>
+      </div>
+      <div class="adv-field">
+        <label>Tarifa reel máx.</label>
+        <select id="fTarifa" onchange="renderBolsa()">
+          <option value="0">Cualquiera</option>
+          <option value="5000">Hasta $5.000</option>
+          <option value="15000">Hasta $15.000</option>
+          <option value="30000">Hasta $30.000</option>
+        </select>
+      </div>
+      <div class="adv-field">
+        <label>Valoración</label>
+        <select id="fRating" onchange="renderBolsa()">
+          <option value="0">Cualquiera</option>
+          <option value="1">Con reseñas</option>
+          <option value="4">4★ o más</option>
+        </select>
+      </div>
+      <button class="adv-clear" onclick="limpiarFiltros()">Limpiar filtros</button>
+    </div>
+    <div class="bolsa-count" id="bolsaCount"></div>
   </div>
   <div class="bolsa-inner">
     <div class="c-grid" id="cGrid">
@@ -871,6 +928,28 @@ function buildFilters(){
     };
     pf.appendChild(b);
   });
+  // Ciudades (para el filtro avanzado)
+  const fc=document.getElementById('fCity');
+  if(fc){
+    const cities=[...new Set(allCreators.map(c=>(c.ciudad||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+    cities.forEach(ci=>{ const o=document.createElement('option'); o.value=ci; o.textContent=ci; fc.appendChild(o); });
+  }
+}
+
+function toggleAdv(){
+  const p=document.getElementById('advPanel');
+  const ch=document.getElementById('advChevron');
+  const open=p.classList.toggle('open');
+  if(ch) ch.textContent=open?'⌃':'⌄';
+}
+
+function limpiarFiltros(){
+  bolsaNiche='todos'; bolsaPlats=[];
+  const si=document.getElementById('searchInp'); if(si) si.value='';
+  ['fCity','fSeg','fEr','fTarifa','fRating'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=el.id==='fCity'?'todas':'0'; });
+  document.querySelectorAll('#nicheFilters .f-btn').forEach((x,ix)=>x.classList.toggle('on',ix===0));
+  document.querySelectorAll('#platFilters .p-btn').forEach(x=>x.classList.remove('on'));
+  renderBolsa();
 }
 
 function setSort(s,btn){
@@ -894,23 +973,38 @@ function badgesDe(c){
 
 function renderBolsa(){
   const q=(document.getElementById('searchInp')?.value||'').toLowerCase().trim();
+  const city=document.getElementById('fCity')?.value||'todas';
+  const minSeg=+(document.getElementById('fSeg')?.value||0);
+  const minEr=+(document.getElementById('fEr')?.value||0);
+  const maxTar=+(document.getElementById('fTarifa')?.value||0);
+  const minRat=+(document.getElementById('fRating')?.value||0);
+  const segN=c=>Math.max(c.ig_seg||0,c.tt_seg||0,c.yt_seg||0);
+  const erN=c=>Math.max(c.ig_er||0,c.tt_er||0);
   let list=allCreators.filter(c=>{
     const mN=bolsaNiche==='todos'||(c.niches||[]).includes(bolsaNiche);
     const mP=bolsaPlats.length===0||bolsaPlats.every(p=>(c.plats||[]).includes(p));
     const mQ=!q||(c.nombre||'').toLowerCase().includes(q)||(c.niches||[]).join(' ').toLowerCase().includes(q);
-    return mN&&mP&&mQ;
+    const mCity=city==='todas'||((c.ciudad||'').trim().toLowerCase()===city.toLowerCase());
+    const mSeg=!minSeg||segN(c)>=minSeg;
+    const mEr=!minEr||erN(c)>=minEr;
+    const mTar=!maxTar||(c.t_reel&&c.t_reel<=maxTar);
+    const mRat=!minRat||(minRat===1?((c.rating_count||0)>0):(Number(c.rating_prom||0)>=minRat));
+    return mN&&mP&&mQ&&mCity&&mSeg&&mEr&&mTar&&mRat;
   });
-  const segN=c=>Math.max(c.ig_seg||0,c.tt_seg||0,c.yt_seg||0);
   if(bolsaSort==='liga')list.sort((a,b)=>((b.indice||0)-(a.indice||0))||(segN(b)-segN(a)));
   else if(bolsaSort==='seg')list.sort((a,b)=>segN(b)-segN(a));
   else if(bolsaSort==='er')list.sort((a,b)=>(b.ig_er||0)-(a.ig_er||0));
+  else if(bolsaSort==='rating')list.sort((a,b)=>(Number(b.rating_prom||0)-Number(a.rating_prom||0))||((b.rating_count||0)-(a.rating_count||0)));
   else list.sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''));
+
+  const cnt=document.getElementById('bolsaCount');
+  if(cnt) cnt.textContent = allCreators.length ? `${list.length} ${list.length===1?'creator':'creators'}` : '';
 
   const g=document.getElementById('cGrid');
   if(!list.length){
     g.innerHTML=allCreators.length===0
       ?'<div class="loading-bolsa"><div class="spin"></div><span>Cargando creators...</span></div>'
-      :'<div class="empty-state"><div>🔍</div><p>No hay creators con esos filtros.</p></div>';
+      :'<div class="empty-state"><div>🔍</div><p>No hay creators con esos filtros.<br><button class="adv-clear" style="margin-top:.75rem" onclick="limpiarFiltros()">Limpiar filtros</button></p></div>';
     return;
   }
   g.innerHTML=list.map((c,i)=>{

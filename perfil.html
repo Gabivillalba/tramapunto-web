@@ -135,6 +135,9 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .fg-edit select option{background:#1a1a1a}
 .fg-edit input::placeholder,.fg-edit textarea::placeholder{color:#444}
 .fg-full{grid-column:1/-1}
+.porto-callout{background:#0f1a00;border:1px solid #2a4000;border-radius:3px;padding:.9rem 1.1rem;margin-bottom:1.1rem}
+.porto-callout-t{font-size:.8rem;font-weight:900;color:var(--green);margin-bottom:.3rem}
+.porto-callout-d{font-size:.74rem;color:var(--muted2);line-height:1.5}
 .btn-save{background:var(--green);color:var(--black);border:none;padding:.75rem 1.75rem;font-weight:900;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s}
 .btn-save:hover{opacity:.85}
 .btn-save:disabled{opacity:.5;cursor:not-allowed}
@@ -561,6 +564,11 @@ function renderCreatorTab(i,el){
       </div>
       <div class="sec-title">Bio</div>
       <div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1.25rem;font-size:.85rem;color:${p.bio?'var(--white)':'var(--muted)'};line-height:1.7;margin-bottom:2rem">${p.bio||'Sin bio. Completá tu perfil para aparecer en la bolsa.'}</div>
+      <div class="sec-title">Portfolio</div>
+      <div style="margin-bottom:2rem">${(p.links&&p.links[0])
+        ? `<a href="${p.links[0]}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:.6rem;background:#0f1a00;border:1px solid #2a4000;border-radius:3px;padding:1rem 1.25rem;color:var(--green);font-weight:700;font-size:.82rem;text-decoration:none">🔗 Ver mi portfolio<span style="margin-left:auto;color:var(--muted)">↗</span></a>`
+        : `<div style="background:#1a1200;border:1px solid #2a2000;border-radius:3px;padding:1rem 1.25rem;font-size:.8rem;color:var(--amber);line-height:1.5">📎 Todavía no cargaste tu portfolio. Las marcas lo ven antes de contactarte — <strong>cargalo en la pestaña Editar</strong> para destacarte.</div>`
+      }</div>
       <div class="sec-title">Tarifas</div>
       <div class="info-grid">
         <div class="info-card"><div class="ic-label">Story</div><div class="ic-val">${p.t_story?'$'+p.t_story.toLocaleString()+' '+(p.moneda||'ARS'):'—'}</div></div>
@@ -672,9 +680,13 @@ function renderCreatorTab(i,el){
       </div>
 
       <div class="sec-title">Portfolio</div>
+      <div class="porto-callout">
+        <div class="porto-callout-t">📎 Tu portfolio lo ven las marcas antes de contactarte</div>
+        <div class="porto-callout-d">Pegá el link a tu mejor contenido — un reel, un carrusel, una carpeta de Drive, tu Behance. Es tu carta de presentación.</div>
+      </div>
       <div class="edit-grid" style="margin-bottom:1.75rem">
+        <div class="fg-edit fg-full"><label>🔗 Link de portfolio</label><input type="url" id="e-link" value="${(p.links||[])[0]||''}" placeholder="https://instagram.com/p/...  ·  o link de Drive / Behance"></div>
         <div class="fg-edit fg-full"><label>Colaboraciones anteriores</label><textarea id="e-colabs" placeholder="Marcas con las que ya trabajaste...">${p.colabs||''}</textarea></div>
-        <div class="fg-edit fg-full"><label>Link a contenido (portfolio)</label><input type="url" id="e-link" value="${(p.links||[])[0]||''}" placeholder="https://www.instagram.com/p/..."></div>
       </div>
 
       <button class="btn-save" onclick="saveCreator()">Guardar y enviar a revisión →</button>

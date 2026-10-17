@@ -233,6 +233,7 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
     <div class="top-actions">
       <button class="btn-sm" onclick="loadAll()">↻ Actualizar</button>
       <button class="btn-sm" onclick="backfillCuentas()">🔑 Recuperar accesos</button>
+      <button class="btn-sm" onclick="recordarPortfolio()">📎 Recordar portfolio</button>
       <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
     </div>
   </div>
@@ -433,6 +434,16 @@ function doLogout(){
 let allCampanias = [];
 let campFilter = 'todas';
 let currentTab = 'creators';
+
+// Manda el mail "cargá tu portfolio" a los creadores que todavía no lo cargaron
+async function recordarPortfolio(){
+  if(!confirm('¿Enviar el mail "cargá tu portfolio" a los creadores que todavía no lo cargaron?')) return;
+  try{
+    const r = await adminCall('recordar_portfolio');
+    if((r.total||0)===0) showToast(r.msg||'Todos ya tienen portfolio cargado 🎉','ok');
+    else showToast(`✓ Recordatorio enviado a ${r.enviados}/${r.total} creadores`,'ok');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+}
 
 function switchTab(t){
   currentTab = t;

@@ -214,6 +214,20 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .rep-badge{font-size:.6rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:.3rem .55rem;border-radius:2px}
 .rep-badge.camp{background:#2a2200;color:#f5d312;border:1px solid #4a3c00}
 .rep-badge.top{background:#2a1a00;color:#f5a301;border:1px solid #4a2e00}
+/* Checklist de perfil */
+.checklist{background:var(--g1);border:1px solid #1a1a1a;border-radius:4px;padding:1.1rem 1.25rem;margin-bottom:2rem}
+.checklist.done{display:flex;align-items:center;gap:.6rem;font-size:.82rem;color:var(--green);font-weight:700;border-color:#2a4000;background:#0f1a00}
+.cl-check{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--green);color:#080808;font-size:.7rem;font-weight:900}
+.cl-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.75rem}
+.cl-title{font-size:.95rem;font-weight:900}
+.cl-sub{font-size:.74rem;color:var(--muted);margin-top:.15rem}
+.cl-pct{font-size:1.3rem;font-weight:900;color:var(--green);white-space:nowrap}
+.cl-bar{height:7px;background:#0d0d0d;border:1px solid #1a1a1a;border-radius:10px;overflow:hidden;margin-bottom:.9rem}
+.cl-bar-fill{height:100%;background:linear-gradient(90deg,#4ade80,var(--green));border-radius:10px;transition:width .5s ease}
+.cl-items{display:flex;flex-wrap:wrap;gap:.5rem}
+.cl-item{background:#0d0d0d;border:1px solid #2a2a2a;color:var(--muted2,#aaa);font-size:.72rem;font-weight:700;padding:.45rem .7rem;border-radius:2px;cursor:pointer;transition:border-color .15s,color .15s}
+.cl-item:hover{border-color:var(--green);color:var(--green)}
+.cl-item span{color:var(--muted);margin-left:.2rem}
 /* Modal reseña */
 .rsna-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:999;align-items:center;justify-content:center;padding:1.25rem}
 .rsna-ov.open{display:flex}
@@ -594,6 +608,7 @@ function switchTab(i,btn){
   btn.classList.add('active');
   renderTab(i);
 }
+function irATab(i){ const t=document.querySelectorAll('#dashTabs .tab')[i]; if(t){ t.click(); t.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}); } }
 
 function renderTab(i){
   const el=document.getElementById('dashContent');
@@ -606,7 +621,31 @@ function renderCreatorTab(i,el){
   const fmtSeg=n=>n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':(n||'—');
 
   if(i===0){
+    // ── Checklist de completitud del perfil ──
+    const items=[
+      {ok:!!p.avatar_url, txt:'Foto de perfil', cta:'foto'},
+      {ok:!!(p.bio&&p.bio.trim()), txt:'Bio', cta:4},
+      {ok:!!(p.niches&&p.niches.length), txt:'Nicho', cta:4},
+      {ok:!!(p.ig_user||p.tt_user||p.yt_user), txt:'Redes sociales', cta:2},
+      {ok:!!(p.t_story||p.t_reel||p.t_post), txt:'Tarifas', cta:4},
+      {ok:!!(p.links&&p.links[0]), txt:'Portfolio', cta:4},
+      {ok:!!(p.disponibilidad&&p.disponibilidad.length), txt:'Disponibilidad', cta:4},
+    ];
+    const done=items.filter(x=>x.ok).length;
+    const pct=Math.round(done/items.length*100);
+    const pend=items.filter(x=>!x.ok);
+    const checklistHTML = done===items.length
+      ? `<div class="checklist done"><span class="cl-check">✓</span> Perfil completo (100%) — aparecés mejor posicionado en la bolsa.</div>`
+      : `<div class="checklist">
+          <div class="cl-head">
+            <div><div class="cl-title">Completá tu perfil</div><div class="cl-sub">Un perfil completo recibe más contactos de marcas.</div></div>
+            <div class="cl-pct">${pct}%</div>
+          </div>
+          <div class="cl-bar"><div class="cl-bar-fill" style="width:${pct}%"></div></div>
+          <div class="cl-items">${pend.map(x=>`<button class="cl-item" onclick="${x.cta==='foto'?`showToast('Tocá el 📷 sobre tu foto de perfil, arriba','info')`:`irATab(${x.cta})`}">○ ${x.txt} <span>→</span></button>`).join('')}</div>
+        </div>`;
     el.innerHTML=`<div class="tab-content active">
+      ${checklistHTML}
       <div class="sec-title">Información general</div>
       <div class="info-grid">
         <div class="info-card"><div class="ic-label">Nombre</div><div class="ic-val">${p.nombre} ${p.apellido}</div></div>

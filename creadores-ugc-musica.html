@@ -38,10 +38,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1.1rem
 h1{font-size:2rem;font-weight:900;letter-spacing:-.02em;line-height:1.1;margin-bottom:1rem}
 @media(min-width:768px){h1{font-size:2.8rem}}
 .intro{font-size:1.05rem;color:var(--muted2);max-width:640px;margin-bottom:1.75rem}
-.mosaic{display:flex;align-items:center;margin-top:1.75rem;min-height:46px}
-.mosaic .mi{width:46px;height:46px;border-radius:50%;border:2px solid var(--black);margin-left:-12px;object-fit:cover;background:#0f1a00;display:flex;align-items:center;justify-content:center;color:var(--green);font-weight:900;font-size:.9rem;overflow:hidden}
-.mosaic .mi:first-child{margin-left:0}
-.mosaic .more{margin-left:.9rem;font-size:.82rem;color:var(--muted2)}
+.hero-visual{position:relative;margin-top:1.75rem;height:220px;border-radius:8px;overflow:hidden;border:1px solid #1a1a1a;background-color:#0d0d0d;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center}
+.hero-visual::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(200,255,26,.08),transparent 60%),linear-gradient(135deg,#0f1a00 0%,#0d0d0d 70%)}
+.hero-visual .hv-em{position:relative;z-index:1;font-size:4rem;opacity:.9;filter:drop-shadow(0 4px 12px rgba(0,0,0,.6))}
+@media(min-width:768px){.hero-visual{height:300px}}
 .cta-row{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.75rem}
 .btn{padding:.75rem 1.3rem;border-radius:2px;font-weight:800;font-size:.8rem;letter-spacing:.03em}
 .btn-g{background:var(--green);color:#080808}
@@ -78,7 +78,7 @@ footer a:hover{color:var(--green)}
   <div class="n-badge"><span class="em">🎵</span> Creadores de Música</div>
   <h1>Creadores UGC de Música en Argentina</h1>
   <p class="intro">Creadores del mundo musical: músicos, productores y perfiles que crean contenido sonoro y de tendencias. Para marcas que buscan ritmo y cultura.</p>
-  <div class="mosaic" id="mosaic"></div>
+  <div class="hero-visual" style="background-image:url('/img/nicho-musica.webp')"><span class="hv-em">🎵</span></div>
   <div class="cta-row">
     <a class="btn btn-g" href="/">Ver la bolsa completa →</a>
     <a class="btn btn-o" href="/marcas.html">Soy una marca</a>
@@ -115,14 +115,6 @@ const fmt=n=>!n?'':n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/10
     const all=await r.json();
     const todos=(all||[]).filter(c=>(c.niches||[]).includes(NICHO));
     const list=todos.slice(0,30);
-    // Mosaico de caras reales en el hero
-    const mos=document.getElementById('mosaic');
-    const conFoto=todos.filter(c=>c.avatar_url);
-    if(mos && conFoto.length>=3){
-      const caras=conFoto.slice(0,9).map(c=>`<img class="mi" src="${c.avatar_url}" alt="Creador de ${NICHO}" loading="lazy">`).join('');
-      const extra=todos.length>9?`<span class="more">+${todos.length-9} creadores</span>`:`<span class="more">${todos.length} ${todos.length===1?'creador':'creadores'}</span>`;
-      mos.innerHTML=caras+extra;
-    }
     if(!list.length){ g.innerHTML='<div class="empty">Pronto vas a ver creadores de '+NICHO+' acá. <a href="/" style="color:var(--green)">Ver la bolsa →</a></div>'; return; }
     g.innerHTML=list.map(c=>{
       const seg=fmt(c.ig_seg||c.tt_seg||c.yt_seg);

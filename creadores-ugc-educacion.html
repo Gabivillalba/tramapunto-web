@@ -38,9 +38,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1.1rem
 h1{font-size:2rem;font-weight:900;letter-spacing:-.02em;line-height:1.1;margin-bottom:1rem}
 @media(min-width:768px){h1{font-size:2.8rem}}
 .intro{font-size:1.05rem;color:var(--muted2);max-width:640px;margin-bottom:1.75rem}
-.hero-visual{position:relative;margin-top:1.75rem;height:220px;border-radius:8px;overflow:hidden;border:1px solid #1a1a1a;background-color:#0d0d0d;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center}
-.hero-visual::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(200,255,26,.08),transparent 60%),linear-gradient(135deg,#0f1a00 0%,#0d0d0d 70%)}
-.hero-visual .hv-em{position:relative;z-index:1;font-size:4rem;opacity:.9;filter:drop-shadow(0 4px 12px rgba(0,0,0,.6))}
+.hero-visual{margin-top:1.75rem;height:200px;border-radius:8px;overflow:hidden;border:1px solid #1a1a1a;background:#0d0d0d center/cover no-repeat}
 @media(min-width:768px){.hero-visual{height:300px}}
 .cta-row{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.75rem}
 .btn{padding:.75rem 1.3rem;border-radius:2px;font-weight:800;font-size:.8rem;letter-spacing:.03em}
@@ -78,7 +76,7 @@ footer a:hover{color:var(--green)}
   <div class="n-badge"><span class="em">📚</span> Creadores de Educación</div>
   <h1>Creadores UGC de Educación en Argentina</h1>
   <p class="intro">Creadores educativos y divulgadores que explican, enseñan y generan contenido de valor. Ideales para marcas edtech, cursos y servicios profesionales.</p>
-  <div class="hero-visual" style="background-image:url('/img/nicho-educacion.webp')"><span class="hv-em">📚</span></div>
+  <div class="hero-visual" style="background-image:url('/img/nicho-educacion.webp')" role="img" aria-label="Creadores de contenido UGC de Educación en Argentina — TRAMA."></div>
   <div class="cta-row">
     <a class="btn btn-g" href="/">Ver la bolsa completa →</a>
     <a class="btn btn-o" href="/marcas.html">Soy una marca</a>

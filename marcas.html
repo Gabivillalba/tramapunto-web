@@ -276,12 +276,19 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
       <!-- PASO F1 -->
       <div class="form-sec active" id="f0">
         <div class="fs-title">Tu marca</div>
-        <div class="fs-sub">La info básica para que el equipo TRAMA y los creators sepan quién sos.</div>
+        <div class="fs-sub">La info básica para que el equipo TRAMA y los creators sepan quién sos. Con el email y la contraseña vas a poder entrar a tu cuenta.</div>
         <div class="fg-row">
           <div class="fg" id="ffg-nombre"><label>Nombre<span class="req">*</span></label><input type="text" id="ff-nombre" placeholder="Tu nombre"><div class="err-msg">Campo requerido</div></div>
           <div class="fg" id="ffg-apellido"><label>Apellido<span class="req">*</span></label><input type="text" id="ff-apellido" placeholder="Apellido"><div class="err-msg">Campo requerido</div></div>
         </div>
-        <div class="fg" id="ffg-email"><label>Email<span class="req">*</span></label><input type="email" id="ff-email" placeholder="tu@marca.com"><div class="err-msg">Email inválido</div></div>
+        <div class="fg" id="ffg-email"><label>Email<span class="req">*</span></label><input type="email" id="ff-email" placeholder="tu@marca.com" autocomplete="email"><div class="err-msg">Email inválido</div></div>
+
+        <!-- NUEVO: contraseña de acceso -->
+        <div class="fg-row">
+          <div class="fg" id="ffg-pass"><label>Contraseña<span class="req">*</span></label><input type="password" id="ff-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password"><div class="err-msg">Mínimo 8 caracteres</div></div>
+          <div class="fg" id="ffg-pass2"><label>Repetir contraseña<span class="req">*</span></label><input type="password" id="ff-pass2" placeholder="Repetí la contraseña" autocomplete="new-password"><div class="err-msg">No coinciden</div></div>
+        </div>
+
         <div class="fg"><label>WhatsApp</label><input type="tel" id="ff-tel" placeholder="+54 9 11 0000-0000"></div>
         <div class="fg" id="ffg-marca"><label>Nombre de la marca<span class="req">*</span></label><input type="text" id="ff-marca" placeholder="¿Cómo se llama tu marca?"><div class="err-msg">Campo requerido</div></div>
         <div class="fg-row">
@@ -402,7 +409,7 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
   <div class="success-screen" id="fSuccess">
     <div class="suc-ic">🎉</div>
     <div class="suc-title" style="color:var(--green)">¡Cuenta creada!</div>
-    <div class="suc-sub">Ya podés explorar nuestra bolsa de creators. En las próximas <strong>24 horas</strong> el equipo TRAMA te va a contactar para acompañarte en tu primera campaña.</div>
+    <div class="suc-sub">Ya podés explorar nuestra bolsa de creators e iniciar sesión en "Mi perfil" con tu email y contraseña. En las próximas <strong>24 horas</strong> el equipo TRAMA te va a contactar para acompañarte en tu primera campaña.</div>
     <div class="suc-badge badge-g">✓ Acceso a la bolsa habilitado</div>
     <a class="btn-home" href="/" style="background:var(--green);color:var(--black);margin-top:1.5rem;display:inline-block">Ver creators →</a>
   </div>
@@ -429,12 +436,19 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
       <!-- PASO C1 -->
       <div class="form-sec active" id="c0">
         <div class="fs-title">Datos de la empresa</div>
-        <div class="fs-sub">Necesitamos los datos corporativos para preparar una propuesta adecuada.</div>
+        <div class="fs-sub">Necesitamos los datos corporativos para preparar una propuesta adecuada. Con el email y la contraseña vas a poder entrar a tu cuenta.</div>
         <div class="fg-row">
           <div class="fg" id="cfg-nombre"><label>Nombre<span class="req">*</span></label><input type="text" id="cf-nombre" placeholder="Nombre"><div class="err-msg">Campo requerido</div></div>
           <div class="fg" id="cfg-apellido"><label>Apellido<span class="req">*</span></label><input type="text" id="cf-apellido" placeholder="Apellido"><div class="err-msg">Campo requerido</div></div>
         </div>
-        <div class="fg" id="cfg-email"><label>Email corporativo<span class="req">*</span></label><input type="email" id="cf-email" placeholder="nombre@empresa.com"><div class="err-msg">Email inválido</div></div>
+        <div class="fg" id="cfg-email"><label>Email corporativo<span class="req">*</span></label><input type="email" id="cf-email" placeholder="nombre@empresa.com" autocomplete="email"><div class="err-msg">Email inválido</div></div>
+
+        <!-- NUEVO: contraseña de acceso -->
+        <div class="fg-row">
+          <div class="fg" id="cfg-pass"><label>Contraseña<span class="req">*</span></label><input type="password" id="cf-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password"><div class="err-msg">Mínimo 8 caracteres</div></div>
+          <div class="fg" id="cfg-pass2"><label>Repetir contraseña<span class="req">*</span></label><input type="password" id="cf-pass2" placeholder="Repetí la contraseña" autocomplete="new-password"><div class="err-msg">No coinciden</div></div>
+        </div>
+
         <div class="fg"><label>Teléfono / WhatsApp</label><input type="tel" id="cf-tel" placeholder="+54 11 0000-0000"></div>
         <div class="fg" id="cfg-razon"><label>Razón social<span class="req">*</span></label><input type="text" id="cf-razon" placeholder="Empresa S.A. / S.R.L."><div class="err-msg">Campo requerido</div></div>
         <div class="fg-row">
@@ -567,7 +581,7 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
   <div class="success-screen" id="cSuccess">
     <div class="suc-ic">🤝</div>
     <div class="suc-title" style="color:var(--blue)">¡Todo listo!</div>
-          <div class="suc-sub">Recibimos tu información. El equipo TRAMA. va a revisar tu perfil corporativo y vas a recibir una confirmación de reunión en tu email en las próximas <strong>2 horas hábiles</strong>.</div>
+          <div class="suc-sub">Recibimos tu información. Ya podés iniciar sesión en "Mi perfil" con tu email y contraseña. El equipo TRAMA. va a revisar tu perfil corporativo y vas a recibir una confirmación de reunión en tu email en las próximas <strong>2 horas hábiles</strong>.</div>
     <div class="suc-badge badge-b">📅 Reunión en camino</div>
     <a class="btn-home" href="/" style="background:var(--blue);color:var(--black);">Volver al inicio →</a>
   </div>
@@ -603,13 +617,36 @@ function startForm(tipo){
 }
 
 // ── SUPABASE ──
-async function sbPost(table, body){
+// sbPost acepta token opcional: si la marca acaba de crear su cuenta,
+// el insert del perfil se hace autenticado.
+async function sbPost(table, body, token=null){
   const r = await fetch(`${SB_URL}/rest/v1/${table}`,{
     method:'POST',
-    headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+    headers:{'apikey':SB_ANON,'Authorization':'Bearer '+(token||SB_ANON),'Content-Type':'application/json','Prefer':'return=minimal'},
     body:JSON.stringify(body)
   });
   if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'Error '+r.status)}
+}
+
+// Crea la cuenta de acceso en Supabase Auth. Devuelve {ok, token, yaExiste, msg}.
+async function crearCuenta(email, pass){
+  const r = await fetch(`${SB_URL}/auth/v1/signup`,{
+    method:'POST',
+    headers:{'apikey':SB_ANON,'Content-Type':'application/json'},
+    body:JSON.stringify({email, password:pass})
+  });
+  const d = await r.json().catch(()=>({}));
+  if(!r.ok){
+    const msg=(d.msg||d.error_description||d.error||'').toLowerCase();
+    const yaExiste = msg.includes('already')||msg.includes('registered')||msg.includes('exist');
+    return {ok:false, yaExiste, msg:d.msg||d.error_description||'error'};
+  }
+  const token=d.access_token||null;
+  if(token){
+    localStorage.setItem('sb_token',token);
+    if(d.refresh_token)localStorage.setItem('sb_refresh',d.refresh_token);
+  }
+  return {ok:true, token};
 }
 
 // ── TOGGLES ──
@@ -642,6 +679,22 @@ function selBudget(btn){
   document.querySelectorAll('.b-pill').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   selBudgetVal=btn.textContent;
+}
+
+// Valida un par de campos de contraseña. Devuelve true si están OK.
+function validarPass(passId, pass2Id){
+  const pass=document.getElementById(passId).value;
+  const pass2=document.getElementById(pass2Id).value;
+  let ok=true;
+  const passBad=pass.length<8;
+  const fgPass=document.getElementById(passId==='ff-pass'?'ffg-pass':'cfg-pass');
+  const fgPass2=document.getElementById(pass2Id==='ff-pass2'?'ffg-pass2':'cfg-pass2');
+  fgPass&&fgPass.classList.toggle('has-err',passBad);
+  if(passBad)ok=false;
+  const matchBad=!passBad && pass!==pass2;
+  fgPass2&&fgPass2.classList.toggle('has-err',matchBad);
+  if(matchBad)ok=false;
+  return ok;
 }
 
 // ── FORM FÍSICA ──
@@ -678,6 +731,8 @@ function fValidate(s){
       fgEl&&fgEl.classList.toggle('has-err',inv);
       if(inv)ok=false;
     });
+    if(!validarPass('ff-pass','ff-pass2'))ok=false;
+    if(!ok)showToast('Revisá los campos marcados','err');
   }
   if(s===1){
     const no=selObjetivos.length===0;
@@ -708,13 +763,24 @@ function fBuildResumen(){
 async function fSubmit(){
   if(!document.getElementById('fChkTerms').checked){showToast('Aceptá los términos para continuar','err');return}
   const btn=document.getElementById('fBtnSubmit');
-  btn.disabled=true;btn.textContent='Enviando...';
+  btn.disabled=true;btn.textContent='Creando cuenta...';
+  const email=document.getElementById('ff-email').value.trim();
+  const pass=document.getElementById('ff-pass').value;
   try{
+    // 1) Cuenta de acceso
+    const cuenta=await crearCuenta(email, pass);
+    if(!cuenta.ok){
+      showToast(cuenta.yaExiste?'Ese email ya tiene una cuenta. Iniciá sesión desde "Mi perfil".':'No se pudo crear la cuenta: '+cuenta.msg,'err');
+      btn.disabled=false;btn.textContent='Crear cuenta →';
+      return;
+    }
+    // 2) Perfil de marca
+    btn.textContent='Guardando...';
     await sbPost('marcas',{
       tipo:'fisica',
       nombre:document.getElementById('ff-nombre').value.trim(),
       apellido:document.getElementById('ff-apellido').value.trim(),
-      email:document.getElementById('ff-email').value.trim(),
+      email,
       tel:document.getElementById('ff-tel').value.trim()||null,
       nombre_marca:document.getElementById('ff-marca').value.trim(),
       rubro:document.getElementById('ff-rubro').value,
@@ -728,7 +794,15 @@ async function fSubmit(){
       frecuencia:document.getElementById('ff-frecuencia').value||null,
       fuente:document.getElementById('ff-fuente').value||null,
       status:'activa',
-    });
+    }, cuenta.token);
+    localStorage.setItem('trama_marca', JSON.stringify({nombre:document.getElementById('ff-nombre').value.trim(), email}));
+
+    // Email de bienvenida (best-effort)
+    fetch('/api/enviar-email',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({tipo:'bienvenida_marca',to:email,data:{nombre:document.getElementById('ff-nombre').value.trim(),tipo:'fisica'}})
+    }).catch(()=>{});
+
     document.getElementById('fWrapper').style.display='none';
     document.getElementById('fSuccess').classList.add('show');
     window.scrollTo({top:0,behavior:'smooth'});
@@ -771,6 +845,8 @@ function cValidate(s){
       fgEl&&fgEl.classList.toggle('has-err',inv);
       if(inv)ok=false;
     });
+    if(!validarPass('cf-pass','cf-pass2'))ok=false;
+    if(!ok)showToast('Revisá los campos marcados','err');
   }
   return ok;
 }
@@ -778,13 +854,24 @@ function cValidate(s){
 async function cSubmit(){
   if(!document.getElementById('cChkTerms').checked){showToast('Aceptá los términos para continuar','err');return}
   const btn=document.getElementById('cBtnSubmit');
-  btn.disabled=true;btn.textContent='Enviando...';
+  btn.disabled=true;btn.textContent='Creando cuenta...';
+  const email=document.getElementById('cf-email').value.trim();
+  const pass=document.getElementById('cf-pass').value;
   try{
+    // 1) Cuenta de acceso
+    const cuenta=await crearCuenta(email, pass);
+    if(!cuenta.ok){
+      showToast(cuenta.yaExiste?'Ese email ya tiene una cuenta. Iniciá sesión desde "Mi perfil".':'No se pudo crear la cuenta: '+cuenta.msg,'err');
+      btn.disabled=false;btn.textContent='Confirmar →';
+      return;
+    }
+    // 2) Perfil corporativo
+    btn.textContent='Guardando...';
     await sbPost('marcas',{
       tipo:'corporativa',
       nombre:document.getElementById('cf-nombre').value.trim(),
       apellido:document.getElementById('cf-apellido').value.trim(),
-      email:document.getElementById('cf-email').value.trim(),
+      email,
       tel:document.getElementById('cf-tel').value.trim()||null,
       razon_social:document.getElementById('cf-razon').value.trim(),
       cuit:document.getElementById('cf-cuit').value.trim()||null,
@@ -796,7 +883,15 @@ async function cSubmit(){
       cantidad_creators:document.getElementById('cf-qty').value||null,
       timing:document.getElementById('cf-timing').value||null,
       status:'reunion_pendiente',
-    });
+    }, cuenta.token);
+    localStorage.setItem('trama_marca', JSON.stringify({nombre:document.getElementById('cf-nombre').value.trim(), email}));
+
+    // Email de bienvenida (best-effort)
+    fetch('/api/enviar-email',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({tipo:'bienvenida_marca',to:email,data:{nombre:document.getElementById('cf-nombre').value.trim(),tipo:'corporativa'}})
+    }).catch(()=>{});
+
     document.getElementById('cWrapper').style.display='none';
     document.getElementById('cSuccess').classList.add('show');
     window.scrollTo({top:0,behavior:'smooth'});

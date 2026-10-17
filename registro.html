@@ -3,7 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TRAMA. — Registrate como creator</title>
+
+<!-- ═══ SEO ═══ -->
+<title>Registrate como creador de contenido UGC | TRAMA. Argentina</title>
+<meta name="description" content="Sumate a la bolsa de creadores de contenido de TRAMA. Perfil verificado, marcas reales y campañas pagas. Registro gratis para creadores UGC en Argentina.">
+<link rel="canonical" href="https://www.tramapunto.com/registro.html">
+<meta name="robots" content="index, follow">
+<meta property="og:locale" content="es_AR">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TRAMA.">
+<meta property="og:url" content="https://www.tramapunto.com/registro.html">
+<meta property="og:title" content="Convertite en creador de contenido con TRAMA.">
+<meta property="og:description" content="Registro gratis. Perfil verificado. Marcas reales buscándote.">
+<meta property="og:image" content="https://www.tramapunto.com/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--black:#080808;--green:#C8FF1A;--white:#F4F4EF;--g1:#111;--g2:#1C1C1C;--g3:#2A2A2A;--muted:#666;--muted2:#999;--purple:#c084fc;--red:#ff4444;--amber:#f59e0b}
@@ -162,7 +175,7 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
     <!-- PASO 1 -->
     <div class="form-section active" id="s0">
       <div class="fs-title">Datos personales</div>
-      <div class="fs-sub">La info básica para que el equipo TRAMA y las marcas sepan quién sos.</div>
+      <div class="fs-sub">La info básica para que el equipo TRAMA y las marcas sepan quién sos. Con el email y la contraseña vas a poder entrar a tu perfil.</div>
 
       <div class="fg">
         <label>Foto de perfil</label>
@@ -185,7 +198,15 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
         <div class="fg" id="fg-nombre"><label>Nombre<span class="req">*</span></label><input type="text" id="f-nombre" placeholder="Tu nombre"><div class="err-msg">Campo requerido</div></div>
         <div class="fg" id="fg-apellido"><label>Apellido<span class="req">*</span></label><input type="text" id="f-apellido" placeholder="Apellido"><div class="err-msg">Campo requerido</div></div>
       </div>
-      <div class="fg" id="fg-email"><label>Email<span class="req">*</span></label><input type="email" id="f-email" placeholder="tu@email.com"><div class="err-msg">Email inválido</div></div>
+      <div class="fg" id="fg-email"><label>Email<span class="req">*</span></label><input type="email" id="f-email" placeholder="tu@email.com" autocomplete="email"><div class="err-msg">Email inválido</div></div>
+
+      <!-- NUEVO: contraseña de acceso -->
+      <div class="fg-row">
+        <div class="fg" id="fg-pass"><label>Contraseña<span class="req">*</span></label><input type="password" id="f-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password"><div class="err-msg">Mínimo 8 caracteres</div></div>
+        <div class="fg" id="fg-pass2"><label>Repetir contraseña<span class="req">*</span></label><input type="password" id="f-pass2" placeholder="Repetí la contraseña" autocomplete="new-password"><div class="err-msg">Las contraseñas no coinciden</div></div>
+      </div>
+      <div class="hint" style="margin:-.5rem 0 1rem">Con estos datos vas a poder iniciar sesión en "Mi perfil" para editar tu ficha y postularte a campañas.</div>
+
       <div class="fg-row">
         <div class="fg"><label>WhatsApp</label><input type="tel" id="f-tel" placeholder="+54 9 11 0000-0000"></div>
         <div class="fg"><label>País</label><select id="f-pais"><option value="AR">Argentina</option><option value="UY">Uruguay</option><option value="CL">Chile</option><option value="MX">México</option><option value="otro">Otro</option></select></div>
@@ -305,9 +326,9 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 <div class="success-screen" id="successReg">
   <div class="suc-ic">🎉</div>
   <div class="suc-title">¡Perfil enviado!</div>
-  <div class="suc-sub">El equipo TRAMA va a revisar tu perfil en las próximas <strong>48-72 horas</strong>. Te avisamos por mail cuando esté aprobado y visible en la bolsa.</div>
+  <div class="suc-sub">El equipo TRAMA va a revisar tu perfil en las próximas <strong>48-72 horas</strong>. Te avisamos por mail cuando esté aprobado y visible en la bolsa. Ya podés iniciar sesión en "Mi perfil" con tu email y contraseña.</div>
   <div class="suc-badge">⏳ Pendiente de aprobación</div>
-  <a class="btn-home" href="/">← Volver al inicio</a>
+  <a class="btn-home" href="/perfil.html">Ir a mi perfil →</a>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -331,22 +352,24 @@ function safeFloat(id){
   return isNaN(n) ? null : Math.min(n, 9999.99);
 }
 
-async function sbPost(table, body){
+// sbPost ahora acepta un token de sesión opcional: si el usuario acaba de
+// crear su cuenta, el insert del perfil se hace autenticado.
+async function sbPost(table, body, token=null){
   const r = await fetch(`${SB_URL}/rest/v1/${table}`,{
     method:'POST',
-    headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+    headers:{'apikey':SB_ANON,'Authorization':'Bearer '+(token||SB_ANON),'Content-Type':'application/json','Prefer':'return=minimal'},
     body:JSON.stringify(body)
   });
   if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'Error '+r.status)}
 }
 
-async function uploadAvatar(email){
+async function uploadAvatar(email, token){
   if(!avatarFile)return null;
   const ext=avatarFile.name.split('.').pop();
   const path=`${email.replace(/[@.]/g,'_')}_${Date.now()}.${ext}`;
   const r=await fetch(`${SB_URL}/storage/v1/object/avatars/${path}`,{
     method:'POST',
-    headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':avatarFile.type,'x-upsert':'true'},
+    headers:{'apikey':SB_ANON,'Authorization':'Bearer '+(token||SB_ANON),'Content-Type':avatarFile.type,'x-upsert':'true'},
     body:avatarFile
   });
   if(!r.ok)throw new Error('Error al subir la foto');
@@ -428,6 +451,16 @@ function validate(s){
       fg&&fg.classList.toggle('has-err',inv);
       if(inv)ok=false;
     });
+    // Validación de contraseña
+    const pass=document.getElementById('f-pass').value;
+    const pass2=document.getElementById('f-pass2').value;
+    const passBad=pass.length<8;
+    document.getElementById('fg-pass').classList.toggle('has-err',passBad);
+    if(passBad)ok=false;
+    const matchBad=!passBad && pass!==pass2;
+    document.getElementById('fg-pass2').classList.toggle('has-err',matchBad);
+    if(matchBad)ok=false;
+    if(!ok)showToast('Revisá los campos marcados','err');
   }
   if(s===1){
     const any=['ig','tt','yt','tw'].some(r=>document.getElementById('chk-'+r)?.checked);
@@ -458,13 +491,42 @@ function buildResumen(){
 async function submitForm(){
   if(!document.getElementById('chkTerms').checked){showToast('Aceptá los términos para continuar','err');return}
   const btn=document.getElementById('btnSubmitF');
-  btn.disabled=true;btn.textContent='Enviando...';
+  btn.disabled=true;btn.textContent='Creando cuenta...';
   const email=document.getElementById('f-email').value.trim();
+  const pass=document.getElementById('f-pass').value;
   const links=[...document.querySelectorAll('#linkInputs input')].map(i=>i.value.trim()).filter(Boolean);
   const plats=['ig','tt','yt','tw'].filter(r=>document.getElementById('chk-'+r)?.checked).map(r=>r.toUpperCase());
   try{
+    // ── 1) Crear la cuenta de acceso en Supabase Auth ──
+    // Sin esto, el perfil quedaba en la tabla pero el creator no podía loguearse.
+    let token=null;
+    const sres=await fetch(`${SB_URL}/auth/v1/signup`,{
+      method:'POST',
+      headers:{'apikey':SB_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({email,password:pass})
+    });
+    const sdata=await sres.json().catch(()=>({}));
+    if(!sres.ok){
+      const msg=(sdata.msg||sdata.error_description||sdata.error||'').toLowerCase();
+      if(msg.includes('already')||msg.includes('registered')||msg.includes('exist')){
+        showToast('Ese email ya tiene una cuenta. Iniciá sesión desde "Mi perfil".','err');
+      }else{
+        showToast('No se pudo crear la cuenta: '+(sdata.msg||sdata.error_description||'error'),'err');
+      }
+      btn.disabled=false;btn.textContent='Enviar perfil →';
+      return;
+    }
+    token=sdata.access_token||null;
+    if(token){
+      localStorage.setItem('sb_token',token);
+      if(sdata.refresh_token)localStorage.setItem('sb_refresh',sdata.refresh_token);
+    }
+
+    // ── 2) Foto (opcional) ──
     let avatar_url=null;
-    if(avatarFile){btn.textContent='Subiendo foto...';avatar_url=await uploadAvatar(email)}
+    if(avatarFile){btn.textContent='Subiendo foto...';avatar_url=await uploadAvatar(email, token)}
+
+    // ── 3) Guardar el perfil (vinculado por email a la cuenta) ──
     btn.textContent='Guardando perfil...';
     await sbPost('creators',{
       nombre:document.getElementById('f-nombre').value.trim(),
@@ -502,7 +564,16 @@ async function submitForm(){
       colabs:document.getElementById('f-colabs').value.trim()||null,
       avatar_url,
       status:'pendiente',
-    });
+    }, token);
+
+    localStorage.setItem('trama_creator', JSON.stringify({nombre:document.getElementById('f-nombre').value.trim(), email}));
+
+    // Email de bienvenida (best-effort, no bloquea)
+    fetch('/api/enviar-email',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({tipo:'bienvenida_creator',to:email,data:{nombre:document.getElementById('f-nombre').value.trim()}})
+    }).catch(()=>{});
+
     document.getElementById('regWrapper').style.display='none';
     document.getElementById('successReg').classList.add('show');
     window.scrollTo({top:0,behavior:'smooth'});

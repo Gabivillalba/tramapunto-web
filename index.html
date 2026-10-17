@@ -783,7 +783,7 @@ async function iniciarPago(){
     });
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||'Error al crear preferencia');
-    const url=data.sandbox_init_point||data.init_point;
+    const url=data.init_point;
     window.location.href=url;
   }catch(e){
     showToast('Error: '+e.message,'err');

@@ -544,7 +544,8 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
     <div class="plat-filters" id="platFilters"></div>
     <div class="sort-row">
       <span class="sort-label">Ordenar:</span>
-      <button class="sort-btn on" onclick="setSort('seg',this)">Mayor audiencia</button>
+      <button class="sort-btn on" onclick="setSort('liga',this)">🔥 Liga</button>
+      <button class="sort-btn" onclick="setSort('seg',this)">Mayor audiencia</button>
       <button class="sort-btn" onclick="setSort('er',this)">Mejor engagement</button>
       <button class="sort-btn" onclick="setSort('nombre',this)">A-Z</button>
     </div>
@@ -624,7 +625,7 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 const COLORS=['#C8FF1A','#4ade80','#fb923c','#60a5fa','#f472b6','#c084fc','#f59e0b','#34d399'];
 const BGS=['#0f1a00','#0a2010','#1a0a00','#0a1020','#1a0a14','#1a0a2a','#1a1000','#0a1a14'];
 
-let allCreators=[], bolsaNiche='todos', bolsaPlats=[], bolsaSort='seg';
+let allCreators=[], bolsaNiche='todos', bolsaPlats=[], bolsaSort='liga';
 
 // ── PRECIOS DINÁMICOS ──
 // Se leen de /api/precios (que a su vez lee de la tabla config,
@@ -734,7 +735,7 @@ async function loadCreators(){
     // viajaban al cliente, visibles en DevTools sin pagar.
     const COLS = 'id,nombre,pais,ciudad,bio,niches,nicho_esp,plats,audiencia,'
                + 'ig_seg,ig_er,ig_alc,tt_seg,tt_er,tt_vistas,yt_seg,yt_vistas,'
-               + 't_story,t_reel,t_post,canje,disponibilidad,avatar_url,fotos,created_at';
+               + 't_story,t_reel,t_post,canje,disponibilidad,avatar_url,fotos,indice,racha,created_at';
     const r=await fetch(`${SB_URL}/rest/v1/creators?select=${COLS}&status=eq.aprobado&order=created_at.desc`,{
       headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
     });
@@ -796,7 +797,8 @@ function renderBolsa(){
     return mN&&mP&&mQ;
   });
   const segN=c=>Math.max(c.ig_seg||0,c.tt_seg||0,c.yt_seg||0);
-  if(bolsaSort==='seg')list.sort((a,b)=>segN(b)-segN(a));
+  if(bolsaSort==='liga')list.sort((a,b)=>((b.indice||0)-(a.indice||0))||(segN(b)-segN(a)));
+  else if(bolsaSort==='seg')list.sort((a,b)=>segN(b)-segN(a));
   else if(bolsaSort==='er')list.sort((a,b)=>(b.ig_er||0)-(a.ig_er||0));
   else list.sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''));
 
@@ -817,7 +819,7 @@ function renderBolsa(){
     return`<div class="c-card">
       <div class="card-top">
         <div class="card-av" style="background:${bg};border-color:${col}33;color:${col}">${avHtml}</div>
-        <span></span>
+        ${c.racha>0?`<span class="card-badge badge-top">🔥 ${c.racha}</span>`:'<span></span>'}
       </div>
       <div class="card-name">${c.nombre}</div>
       <div class="card-niche" style="color:${col}">${niches}</div>

@@ -66,10 +66,20 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 (async function(){
   const params = new URLSearchParams(location.search);
   const creatorId  = params.get('creator_id');
-  const marcaEmail = params.get('marca_email');
   const paymentId  = params.get('payment_id');
   const status     = params.get('status');
   const el = document.getElementById('content');
+
+  // Comprador = quien está logueado (marca o creador). Es la fuente de verdad:
+  // si la preferencia se creó como anónima, igual atribuimos la compra a la
+  // sesión real, así aparece en su espacio de "Comprados".
+  let marcaEmail = params.get('marca_email');
+  try {
+    const s = localStorage.getItem('trama_marca') || localStorage.getItem('trama_creator');
+    const b = s ? JSON.parse(s) : null;
+    if (b && b.email) marcaEmail = b.email;
+  } catch(_){}
+  if (!marcaEmail) marcaEmail = 'anonimo@trama.com';
 
   // Si MP redirigió con status != approved
   if(status && status !== 'approved'){

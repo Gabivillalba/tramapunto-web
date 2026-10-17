@@ -4,7 +4,11 @@
 <meta name="google-site-verification" content="utPzLJVT4JVR4dEpPBghptamBLN1DzAqcl2Yoqb4yQw" />
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<!-- Reenvía los links de recuperación de contraseña que caen en el home -->
+<script>
+(function(){try{var h=location.hash||'';if(h.indexOf('type=recovery')>-1&&location.pathname!=='/reset.html'){location.replace('/reset.html'+h);}}catch(e){}})();
+</script>
+  
 <!-- ═══ SEO ═══ -->
 <title>TRAMA. — Creadores de contenido UGC verificados en Argentina</title>
 <meta name="description" content="Conectá tu marca con creadores de contenido UGC e influencers verificados uno por uno. Marketplace argentino de creator marketing. Publicá tu campaña gratis.">

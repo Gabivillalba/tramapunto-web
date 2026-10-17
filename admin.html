@@ -454,6 +454,19 @@ function openModal(id){
     ${c.colabs?`<div class="det-section"><div class="det-stitle">Colaboraciones anteriores</div><p style="font-size:.78rem;color:var(--muted2);line-height:1.65">${c.colabs}</p></div>`:''}
     ${(c.links||[]).length?`<div class="det-section"><div class="det-stitle">Portfolio links</div>${c.links.map(l=>`<div class="det-row"><a href="${l}" target="_blank" style="color:var(--purple);font-size:.75rem;word-break:break-all">${l}</a></div>`).join('')}</div>`:''}`;
 
+  // Sección de acceso: no se puede VER la contraseña (está hasheada),
+  // pero el admin puede definir una nueva o mandar el email de reseteo.
+  document.getElementById('modalContent').insertAdjacentHTML('beforeend', `
+    <div class="det-section">
+      <div class="det-stitle">Acceso / Contraseña</div>
+      <p style="font-size:.72rem;color:var(--muted);line-height:1.5;margin-bottom:.6rem">La contraseña no se puede ver (está encriptada por seguridad). Definile una nueva o mandale el email de reseteo.</p>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem">
+        <input type="text" id="admPassInput" placeholder="Nueva contraseña (mín. 6)" style="flex:1;min-width:150px;background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.5rem .7rem;font-size:.82rem;border-radius:2px;outline:none;font-family:inherit">
+        <button class="btn-sm" onclick="updateCreatorPass('${c.email}')">Actualizar</button>
+      </div>
+      <button class="btn-sm" onclick="sendResetCreator('${c.email}')">✉ Enviar email de reseteo</button>
+    </div>`);
+
   document.getElementById('notaInput').value=c.admin_nota||'';
   document.getElementById('modalActions').innerHTML=`
     ${c.status!=='aprobado'?`<button class="btn-apro" onclick="setStatus('${c.id}','aprobado')">✓ Aprobar</button>`:''}
@@ -494,6 +507,24 @@ async function backfillCuentas(){
   }catch(e){
     showToast('Error en el proceso: '+e.message,'err');
   }
+}
+
+// ── CONTRASEÑA DE UN CREATOR ──
+async function updateCreatorPass(email){
+  const el=document.getElementById('admPassInput');
+  const pass=(el?.value||'').trim();
+  if(pass.length<6){ showToast('La contraseña debe tener al menos 6 caracteres','err'); return; }
+  try{
+    await adminCall('set_creator_password',{email, password:pass});
+    if(el) el.value='';
+    showToast('✓ Contraseña actualizada','ok');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+}
+async function sendResetCreator(email){
+  try{
+    await adminCall('send_reset',{email});
+    showToast('✓ Email de reseteo enviado a '+email,'ok');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
 }
 
 // ── NOTA INTERNA ──

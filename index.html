@@ -263,8 +263,19 @@ section{padding:5rem 1.5rem;border-top:1px solid #161616}
 .m-pay-btn:hover{opacity:.85}
 .m-bio{font-size:.8rem;color:var(--muted2);line-height:1.6;margin-bottom:1rem;padding:.875rem;background:#0d0d0d;border:1px solid #1a1a1a;border-radius:2px}
 .m-fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-bottom:1rem}
-.m-foto{display:block;aspect-ratio:1;border-radius:2px;overflow:hidden;border:1px solid #1a1a1a}
+.m-foto{display:block;aspect-ratio:1;border-radius:2px;overflow:hidden;border:1px solid #1a1a1a;cursor:pointer;transition:border-color .2s}
+.m-foto:hover{border-color:var(--green)}
 .m-foto img{width:100%;height:100%;object-fit:cover;display:block}
+/* LIGHTBOX */
+.lightbox{display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.94);align-items:center;justify-content:center;padding:2rem}
+.lightbox.open{display:flex}
+.lightbox img{max-width:92vw;max-height:84vh;object-fit:contain;border-radius:3px;box-shadow:0 10px 60px rgba(0,0,0,.6)}
+.lb-x{position:absolute;top:1.1rem;right:1.25rem;background:none;border:none;color:#fff;font-size:1.7rem;cursor:pointer;line-height:1;z-index:2}
+.lb-count{position:absolute;top:1.3rem;left:1.25rem;color:#999;font-size:.8rem;font-weight:700;letter-spacing:.08em}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;width:46px;height:46px;border-radius:50%;font-size:1.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;padding-bottom:3px}
+.lb-nav:hover{background:rgba(255,255,255,.18)}
+.lb-prev{left:1rem}.lb-next{right:1rem}
+@media(max-width:600px){.lb-nav{width:40px;height:40px;font-size:1.4rem}}
 .success-m{display:none;text-align:center;padding:.5rem 0}
 .sm-ic{font-size:2.5rem;margin-bottom:.875rem}
 .sm-title{font-size:1.1rem;font-weight:900;text-transform:uppercase;color:var(--green);margin-bottom:.4rem}
@@ -591,6 +602,15 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
   </div>
 </div>
 
+<!-- LIGHTBOX (visor de fotos) -->
+<div class="lightbox" id="lightbox" onclick="cerrarFoto(event)">
+  <span class="lb-count" id="lbCount"></span>
+  <button class="lb-x" onclick="cerrarFoto()" aria-label="Cerrar">✕</button>
+  <button class="lb-nav lb-prev" onclick="navFoto(-1,event)" aria-label="Anterior">‹</button>
+  <img id="lbImg" src="" alt="">
+  <button class="lb-nav lb-next" onclick="navFoto(1,event)" aria-label="Siguiente">›</button>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -822,7 +842,7 @@ function openModal(id,i){
   let extra='';
   if(c.bio) extra+=`<p class="m-bio">${c.bio}</p>`;
   const fotos=Array.isArray(c.fotos)?c.fotos:[];
-  if(fotos.length) extra+=`<div class="m-fotos">${fotos.slice(0,6).map(u=>`<a class="m-foto" href="${u}" target="_blank" rel="noopener"><img src="${u}" alt="" loading="lazy"></a>`).join('')}</div>`;
+  if(fotos.length) extra+=`<div class="m-fotos">${fotos.slice(0,6).map((u,ix)=>`<div class="m-foto" onclick="verFoto(${ix})"><img src="${u}" alt="" loading="lazy"></div>`).join('')}</div>`;
   document.getElementById('mExtra').innerHTML=extra;
   document.getElementById('mForm').style.display='block';
   document.getElementById('mSuccess').style.display='none';
@@ -871,6 +891,40 @@ async function iniciarPago(){
     btn.disabled=false;btn.textContent=`Pagar ${PRECIO.label} con MercadoPago →`;
   }
 }
+
+// ── LIGHTBOX de fotos (ver, pasar, volver, salir) ──
+let lbFotos=[], lbIdx=0;
+function verFoto(i){
+  lbFotos=(currentCreator&&Array.isArray(currentCreator.fotos))?currentCreator.fotos:[];
+  if(!lbFotos.length)return;
+  lbIdx=i;
+  pintarFoto();
+  document.getElementById('lightbox').classList.add('open');
+}
+function pintarFoto(){
+  document.getElementById('lbImg').src=lbFotos[lbIdx]||'';
+  const cnt=document.getElementById('lbCount');
+  if(cnt) cnt.textContent=lbFotos.length>1?`${lbIdx+1} / ${lbFotos.length}`:'';
+  const show=lbFotos.length>1?'flex':'none';
+  document.querySelectorAll('.lb-nav').forEach(b=>b.style.display=show);
+}
+function navFoto(d,e){
+  if(e)e.stopPropagation();
+  if(!lbFotos.length)return;
+  lbIdx=(lbIdx+d+lbFotos.length)%lbFotos.length;
+  pintarFoto();
+}
+function cerrarFoto(e){
+  if(e&&e.target&&e.target.tagName==='IMG')return;   // click en la imagen no cierra
+  document.getElementById('lightbox').classList.remove('open');
+}
+document.addEventListener('keydown',e=>{
+  const lb=document.getElementById('lightbox');
+  if(!lb||!lb.classList.contains('open'))return;
+  if(e.key==='Escape')cerrarFoto();
+  else if(e.key==='ArrowRight')navFoto(1);
+  else if(e.key==='ArrowLeft')navFoto(-1);
+});
 
 // ── TOAST ──
 let tt;

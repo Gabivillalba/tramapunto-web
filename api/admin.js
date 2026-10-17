@@ -60,6 +60,60 @@ async function enviarEmail(tipo, to, data) {
   } catch (_) { /* el email es best-effort, no bloquea la operación */ }
 }
 
+// Envoltura de email con el estilo de TRAMA. (para los envíos del panel)
+function emailWrap({ kicker, titulo, cuerpoHtml, ctaText, ctaHref }) {
+  const cta = ctaText && ctaHref ? `<a href="${ctaHref}" style="display:inline-block;background:#C8FF1A;color:#080808;padding:12px 24px;font-weight:900;font-size:13px;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none;margin-top:8px">${ctaText}</a>` : '';
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>TRAMA.</title></head>
+<body style="margin:0;padding:0;background:#080808;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#080808;padding:40px 20px"><tr><td align="center">
+    <table width="100%" style="max-width:560px;background:#111;border:1px solid #1a1a1a;border-radius:4px;overflow:hidden">
+      <tr><td style="background:#080808;padding:24px 32px;border-bottom:1px solid #1a1a1a">
+        <span style="font-size:20px;font-weight:900;letter-spacing:.18em;color:#C8FF1A">TRAMA.</span>
+      </td></tr>
+      <tr><td style="padding:32px">
+        ${kicker ? `<p style="margin:0 0 8px;font-size:13px;color:#C8FF1A;font-weight:700;letter-spacing:.1em;text-transform:uppercase">${kicker}</p>` : ''}
+        ${titulo ? `<h1 style="margin:0 0 16px;font-size:24px;font-weight:900;text-transform:uppercase;letter-spacing:-.02em;color:#F4F4EF">${titulo}</h1>` : ''}
+        <div style="font-size:15px;color:#bbb;line-height:1.7">${cuerpoHtml}</div>
+        ${cta}
+      </td></tr>
+      <tr><td style="padding:20px 32px;border-top:1px solid #1a1a1a;background:#0d0d0d">
+        <p style="margin:0;font-size:11px;color:#555;line-height:1.6">© TRAMA. — Buenos Aires, Argentina<br>
+          <a href="${SITE_URL}" style="color:#C8FF1A;text-decoration:none">tramapunto.com</a> ·
+          <a href="mailto:info.tramapunto@gmail.com" style="color:#555;text-decoration:none">info.tramapunto@gmail.com</a>
+        </p>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`;
+}
+
+// Envío por lotes vía Resend. htmlFn(nombre) → cuerpo del mail por destinatario.
+async function enviarBatch(dests, asunto, htmlFn) {
+  const RESEND = process.env.RESEND_API_KEY;
+  if (!RESEND) throw new Error('Falta RESEND_API_KEY');
+  let enviados = 0;
+  for (let i = 0; i < dests.length; i += 100) {
+    const grupo = dests.slice(i, i + 100).map(d => ({
+      from: 'TRAMA. <info@tramapunto.com>',
+      reply_to: 'info.tramapunto@gmail.com',
+      to: [String(d.email).trim()],
+      subject: asunto,
+      html: htmlFn(d.nombre),
+    }));
+    const r = await fetch('https://api.resend.com/emails/batch', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${RESEND}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(grupo),
+    });
+    if (r.ok) { const j = await r.json().catch(() => ({})); enviados += (j.data && j.data.length) || grupo.length; }
+  }
+  return enviados;
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
@@ -415,16 +469,80 @@ export default async function handler(req, res) {
         const champ = cr.find(c => c.es_campeon);
         const cp = campanias || [];
 
+        // Fuentes de registro (fetch aparte: si la columna no existe aún, no rompe el resto)
+        let fuentes = null;
+        try {
+          const [cf, mf] = await Promise.all([
+            sb('creators?select=fuente'),
+            sb('marcas?select=fuente').catch(() => []),
+          ]);
+          const map = {};
+          [...(cf || []), ...(mf || [])].forEach(x => {
+            const k = (x.fuente && String(x.fuente).trim()) || 'directo';
+            map[k] = (map[k] || 0) + 1;
+          });
+          fuentes = Object.entries(map).map(([fuente, n]) => ({ fuente, n })).sort((a, b) => b.n - a.n).slice(0, 10);
+        } catch (_) { fuentes = null; }  // columna 'fuente' aún no creada
+
         return res.status(200).json({
           ok: true,
           data: {
             ingresos, ventas: pagadas.length,
             ventasMes: delMes.length, ingresosMes: delMes.reduce((a, c) => a + num(c.monto), 0),
-            origen, creadores, top, ultimas,
+            origen, creadores, top, ultimas, fuentes,
             campeon: champ ? (champ.ig_user || champ.nombre) : null,
             campanias: { total: cp.length, activas: cp.filter(c => c.estado === 'activa').length, en_revision: cp.filter(c => c.estado === 'en_revision').length },
           },
         });
+      }
+
+      // — Exportar conexiones/ventas (filas crudas para armar el CSV en el panel) —
+      case 'export_conexiones': {
+        const cx = await sb('conexiones?select=*&order=created_at.desc');
+        return res.status(200).json({ ok: true, data: cx || [] });
+      }
+
+      // — Envío masivo de emails a un segmento —
+      case 'envio_masivo': {
+        const { asunto, cuerpo, segmento } = payload;
+        if (!asunto || !cuerpo) return res.status(400).json({ error: 'Falta asunto o cuerpo' });
+        if (!process.env.RESEND_API_KEY) return res.status(500).json({ error: 'Falta RESEND_API_KEY' });
+
+        let dests = [];
+        const quiereCreators = segmento === 'creators_aprobados' || segmento === 'creators_todos' || segmento === 'todos';
+        const quiereMarcas = segmento === 'marcas' || segmento === 'todos';
+
+        if (quiereCreators) {
+          const c = await sb('creators?select=nombre,email,status');
+          let list = (c || []).filter(x => x.status !== 'rechazado');
+          if (segmento === 'creators_aprobados') list = list.filter(x => x.status === 'aprobado');
+          dests = dests.concat(list.map(x => ({ nombre: x.nombre, email: x.email })));
+        }
+        if (quiereMarcas) {
+          const m = await sb('marcas?select=nombre,email');
+          dests = dests.concat((m || []).map(x => ({ nombre: x.nombre, email: x.email })));
+        }
+
+        // Limpiar + deduplicar por email
+        const seen = new Set();
+        dests = dests.filter(d => {
+          if (!d.email || !/@/.test(d.email)) return false;
+          const e = d.email.trim().toLowerCase();
+          if (seen.has(e)) return false;
+          seen.add(e); return true;
+        });
+        if (!dests.length) return res.status(200).json({ ok: true, enviados: 0, total: 0, msg: 'Sin destinatarios' });
+
+        const cuerpoBase = escapeHtml(cuerpo).replace(/\n/g, '<br>');
+        const htmlFn = (nombre) => emailWrap({
+          titulo: '',
+          cuerpoHtml: `<p style="margin:0 0 16px">Hola <strong style="color:#F4F4EF">${escapeHtml(nombre) || 'crack'}</strong>,</p>` +
+                      cuerpoBase.replace(/\{nombre\}/g, escapeHtml(nombre) || 'crack'),
+          ctaText: 'Ir a TRAMA.', ctaHref: SITE_URL,
+        });
+
+        const enviados = await enviarBatch(dests, asunto, htmlFn);
+        return res.status(200).json({ ok: true, enviados, total: dests.length });
       }
 
       default:

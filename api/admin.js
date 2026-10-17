@@ -345,6 +345,29 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, enviados, total: faltan.length });
       }
 
+      // — Eliminar una foto de muestra de un creador (moderación) —
+      case 'remove_creator_foto': {
+        const { id, url } = payload;
+        if (!id || !url) return res.status(400).json({ error: 'Faltan id/url' });
+        const rows = await sb(`creators?id=eq.${id}&select=fotos`);
+        const actuales = Array.isArray(rows?.[0]?.fotos) ? rows[0].fotos : [];
+        const fotos = actuales.filter(f => f !== url);
+        await sb(`creators?id=eq.${id}`, 'PATCH', { fotos });
+        // Borrar el archivo del Storage (best-effort)
+        try {
+          const marker = '/storage/v1/object/public/creator-fotos/';
+          const i = url.indexOf(marker);
+          if (i >= 0) {
+            const path = url.slice(i + marker.length);
+            await fetch(`${SB_URL}/storage/v1/object/creator-fotos/${path}`, {
+              method: 'DELETE',
+              headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}` },
+            });
+          }
+        } catch (_) { /* no bloquea */ }
+        return res.status(200).json({ ok: true, fotos });
+      }
+
       default:
         return res.status(400).json({ error: `Acción desconocida: ${action}` });
     }

@@ -205,6 +205,24 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .cx-name{font-size:.88rem;font-weight:700}
 .cx-meta{font-size:.68rem;color:var(--muted);margin-top:.1rem}
 .cx-contact{font-size:.74rem;color:var(--green);margin-top:.35rem;word-break:break-word}
+.resena-btn{margin-top:.6rem;background:none;border:1px solid #2a2a2a;color:var(--muted2,#aaa);font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.4rem .7rem;border-radius:2px;cursor:pointer;transition:border-color .15s,color .15s}
+.resena-btn:hover{border-color:var(--green);color:var(--green)}
+.resena-btn.done{color:#f5b301;border-color:#3a2e00}
+/* Modal reseña */
+.rsna-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:999;align-items:center;justify-content:center;padding:1.25rem}
+.rsna-ov.open{display:flex}
+.rsna-box{background:#0d0d0d;border:1px solid #222;border-radius:4px;max-width:420px;width:100%;padding:1.75rem}
+.rsna-box h3{margin:0 0 .35rem;font-size:1.05rem;font-weight:900}
+.rsna-box .sub{font-size:.76rem;color:var(--muted);margin:0 0 1.25rem}
+.rsna-stars{display:flex;gap:.3rem;margin-bottom:1.1rem;font-size:2rem;cursor:pointer}
+.rsna-star{color:#333;transition:color .1s;line-height:1}
+.rsna-star.on{color:#f5b301}
+.rsna-box textarea{width:100%;background:#080808;border:1px solid #222;border-radius:2px;color:var(--white);padding:.7rem;font-size:.82rem;font-family:inherit;resize:vertical;min-height:80px;box-sizing:border-box}
+.rsna-acts{display:flex;gap:.6rem;margin-top:1.1rem}
+.rsna-acts button{flex:1;padding:.7rem;border-radius:2px;font-weight:800;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.rsna-save{background:var(--green);color:#080808;border:none}
+.rsna-save:disabled{opacity:.5;cursor:not-allowed}
+.rsna-cancel{background:none;border:1px solid #2a2a2a;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -286,6 +304,26 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
   </div>
   <div class="dash-tabs" id="dashTabs"></div>
   <div id="dashContent"></div>
+</div>
+
+<!-- Modal reseña -->
+<div class="rsna-ov" id="rsnaOv">
+  <div class="rsna-box">
+    <h3 id="rsnaTitle">Reseñar</h3>
+    <p class="sub">¿Cómo fue tu experiencia trabajando con este creador?</p>
+    <div class="rsna-stars" id="rsnaStars">
+      <span class="rsna-star" data-v="1" onclick="setStars(1)">★</span>
+      <span class="rsna-star" data-v="2" onclick="setStars(2)">★</span>
+      <span class="rsna-star" data-v="3" onclick="setStars(3)">★</span>
+      <span class="rsna-star" data-v="4" onclick="setStars(4)">★</span>
+      <span class="rsna-star" data-v="5" onclick="setStars(5)">★</span>
+    </div>
+    <textarea id="rsnaText" placeholder="Contá algo sobre la colaboración (opcional)..." maxlength="500"></textarea>
+    <div class="rsna-acts">
+      <button class="rsna-cancel" onclick="closeResena()">Cancelar</button>
+      <button class="rsna-save" id="rsnaSave" onclick="submitResena()">Publicar</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -568,6 +606,14 @@ function renderCreatorTab(i,el){
         <div class="info-card"><div class="ic-label">Nicho</div><div class="ic-val ${!(p.niches?.length)?'muted':''}">${p.niches?.join(', ')||'Sin completar'}</div></div>
         <div class="info-card"><div class="ic-label">Disponibilidad</div><div class="ic-val ${!(p.disponibilidad?.length)?'muted':''}">${p.disponibilidad?.join(', ')||'—'}</div></div>
       </div>
+      <div class="sec-title">Reputación</div>
+      <div style="margin-bottom:2rem">
+        <div style="display:flex;align-items:center;gap:.6rem;background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1rem 1.25rem;margin-bottom:.75rem">
+          <span style="font-size:1.4rem;font-weight:900;color:#f5b301">${(p.rating_count||0)?('★ '+Number(p.rating_prom||0).toFixed(1)):'—'}</span>
+          <span style="font-size:.78rem;color:var(--muted)">${(p.rating_count||0)?`${p.rating_count} ${p.rating_count==1?'reseña':'reseñas'} de marcas`:'Todavía no recibiste reseñas. Se habilitan cuando una marca compra tu contacto.'}</span>
+        </div>
+        <div id="repWrap"></div>
+      </div>
       <div class="sec-title">Bio</div>
       <div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1.25rem;font-size:.85rem;color:${p.bio?'var(--white)':'var(--muted)'};line-height:1.7;margin-bottom:2rem">${p.bio||'Sin bio. Completá tu perfil para aparecer en la bolsa.'}</div>
       <div class="sec-title">Portfolio</div>
@@ -583,6 +629,7 @@ function renderCreatorTab(i,el){
         <div class="info-card"><div class="ic-label">Canje</div><div class="ic-val ${!p.canje?'muted':''}">${p.canje||'—'}</div></div>
       </div>
     </div>`;
+    if(p.rating_count) loadResenasRecibidas(p.id);
   }
   else if(i===1){
     // ── LIGA TRAMA. (gamificación diaria) ──
@@ -996,18 +1043,93 @@ async function loadComprados(wrapId){
   const inList='('+ids.map(encodeURIComponent).join(',')+')';
   const creators=await sbGet('creators',`id=in.${inList}&select=id,nombre,apellido,email,ig_user,tt_user,yt_user,tel,avatar_url`,getToken());
   const byId=Object.fromEntries((creators||[]).map(c=>[String(c.id),c]));
+  // Reseñas que esta cuenta ya dejó (para mostrar estado / permitir editar)
+  const misResenas=await sbGet('resenas',`marca_email=eq.${encodeURIComponent(email)}&select=creator_id,rating`,getToken());
+  const ratingByCreator=Object.fromEntries((misResenas||[]).map(x=>[String(x.creator_id),x.rating]));
+  const vistos=new Set();
   const items=cxs.map(cx=>{
     const c=byId[String(cx.creator_id)]; if(!c)return '';
+    if(vistos.has(String(cx.creator_id)))return ''; vistos.add(String(cx.creator_id));
     const f=cx.created_at?new Date(cx.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
     const contacto=[c.email?`✉ ${c.email}`:'',c.ig_user?`📸 ${c.ig_user}`:'',c.tel?`💬 ${c.tel}`:''].filter(Boolean).join(' · ');
     const nom=`${c.nombre||''} ${c.apellido||''}`.trim()||'Creador';
     const av=c.avatar_url?`<img src="${c.avatar_url}" style="width:100%;height:100%;object-fit:cover">`:'🎥';
-    return `<div class="cx-item"><div class="cx-ic">${av}</div><div class="cx-body"><div class="cx-name">${nom}</div><div class="cx-meta">${f}${cx.origen==='campania'?' · campaña':''}</div><div class="cx-contact">${contacto||'Sin datos de contacto'}</div></div></div>`;
+    const miRating=ratingByCreator[String(c.id)];
+    const btnResena=miRating
+      ? `<button class="resena-btn done" onclick="openResena('${c.id}',${JSON.stringify(nom).replace(/"/g,'&quot;')},${miRating})">${'★'.repeat(miRating)} · Editar</button>`
+      : `<button class="resena-btn" onclick="openResena('${c.id}',${JSON.stringify(nom).replace(/"/g,'&quot;')},0)">⭐ Dejar reseña</button>`;
+    return `<div class="cx-item"><div class="cx-ic">${av}</div><div class="cx-body"><div class="cx-name">${nom}</div><div class="cx-meta">${f}${cx.origen==='campania'?' · campaña':''}</div><div class="cx-contact">${contacto||'Sin datos de contacto'}</div>${btnResena}</div></div>`;
   }).join('');
   wrap.innerHTML=`<div class="tab-content active">
     <div class="sec-title">Creadores comprados (${cxs.length})</div>
     <div class="cx-list">${items}</div>
   </div>`;
+}
+
+// Reseñas recibidas por el creador (se muestran en su propio perfil)
+async function loadResenasRecibidas(creatorId){
+  const box=document.getElementById('repWrap'); if(!box)return;
+  const rows=await sbGet('resenas',`creator_id=eq.${creatorId}&select=rating,comentario,marca_nombre,created_at&order=created_at.desc&limit=10`,getToken());
+  const conTexto=(rows||[]).filter(x=>x.comentario&&x.comentario.trim());
+  if(!conTexto.length)return;
+  box.innerHTML=conTexto.map(x=>{
+    const estrellas='★'.repeat(x.rating)+'☆'.repeat(5-x.rating);
+    const quien=x.marca_nombre||'Marca';
+    const f=x.created_at?new Date(x.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
+    return `<div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:.8rem 1rem;margin-bottom:.5rem">
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem"><span style="color:#f5b301;font-size:.85rem">${estrellas}</span><span style="font-size:.72rem;font-weight:700;color:var(--muted2,#aaa)">${quien}</span><span style="font-size:.66rem;color:var(--muted);margin-left:auto">${f}</span></div>
+      <p style="margin:0;font-size:.8rem;color:var(--muted2,#aaa);line-height:1.5">${x.comentario}</p>
+    </div>`;
+  }).join('');
+}
+
+// ── RESEÑAS (la marca/comprador reseña al creador que compró) ──
+let rsnaCreatorId=null, rsnaVal=0;
+function openResena(id,nombre,current){
+  rsnaCreatorId=id; rsnaVal=current||0;
+  document.getElementById('rsnaTitle').textContent='Reseñar a '+(nombre||'creador');
+  document.getElementById('rsnaText').value='';
+  paintStars();
+  if(current) fetchMiResena(id);
+  document.getElementById('rsnaOv').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function paintStars(){
+  document.querySelectorAll('#rsnaStars .rsna-star').forEach(s=>{
+    s.classList.toggle('on', Number(s.dataset.v)<=rsnaVal);
+  });
+  const sv=document.getElementById('rsnaSave'); if(sv) sv.disabled = rsnaVal<1;
+}
+function setStars(v){ rsnaVal=v; paintStars(); }
+function closeResena(){ document.getElementById('rsnaOv').classList.remove('open'); document.body.style.overflow=''; }
+async function fetchMiResena(id){
+  const rows=await sbGet('resenas',`marca_email=eq.${encodeURIComponent(currentUser.email)}&creator_id=eq.${id}&select=comentario,rating`,getToken());
+  if(rows&&rows[0]){ document.getElementById('rsnaText').value=rows[0].comentario||''; rsnaVal=rows[0].rating||rsnaVal; paintStars(); }
+}
+async function submitResena(){
+  if(rsnaVal<1)return;
+  const save=document.getElementById('rsnaSave'); save.disabled=true; save.textContent='Publicando...';
+  const email=currentUser.email;
+  const nombre=(userProfile&&(userProfile.nombre_marca||userProfile.razon_social||userProfile.nombre))||'Marca';
+  const body={
+    creator_id:rsnaCreatorId, marca_email:email, marca_nombre:nombre,
+    rating:rsnaVal, comentario:(document.getElementById('rsnaText').value||'').trim()||null,
+    updated_at:new Date().toISOString()
+  };
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/resenas?on_conflict=marca_email,creator_id`,{
+      method:'POST',
+      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+getToken(),'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify(body)
+    });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    closeResena();
+    showToast('✓ ¡Gracias por tu reseña!','ok');
+    if(document.getElementById('compradosWrap')) loadComprados('compradosWrap');
+    else if(document.getElementById('cxMarcaWrap')) loadComprados('cxMarcaWrap');
+  }catch(e){
+    showToast('No se pudo publicar la reseña','err');
+  }finally{ save.disabled=false; save.textContent='Publicar'; }
 }
 
 // ── CREATORS GUARDADOS (favoritos de la marca) ──

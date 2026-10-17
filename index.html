@@ -231,6 +231,8 @@ section{padding:5rem 1.5rem;border-top:1px solid #161616}
 .fav-btn{background:none;border:none;cursor:pointer;font-size:1.15rem;line-height:1;color:#555;padding:0;transition:color .15s,transform .15s}
 .fav-btn:hover{color:#888;transform:scale(1.15)}
 .fav-btn.on{color:var(--green)}
+.card-rating{font-size:.72rem;font-weight:800;color:#f5b301;margin:-.4rem 0 .5rem;letter-spacing:.02em}
+.card-rating span{color:var(--muted,#777);font-weight:600}
 .badge-new{background:#1a0a2a;color:var(--purple);border:1px solid #3a1a5a}
 .card-name{font-size:.92rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.2rem}
 .card-niche{font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:.875rem}
@@ -274,6 +276,14 @@ section{padding:5rem 1.5rem;border-top:1px solid #161616}
 .m-foto{display:block;aspect-ratio:1;border-radius:2px;overflow:hidden;border:1px solid #1a1a1a;cursor:pointer;transition:border-color .2s}
 .m-foto:hover{border-color:var(--green)}
 .m-foto img{width:100%;height:100%;object-fit:cover;display:block}
+.m-rating{font-size:.95rem;font-weight:800;color:#f5b301;margin-bottom:.875rem}
+.m-rating span{color:var(--muted2);font-size:.78rem;font-weight:600}
+.m-resenas-t{font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin:.25rem 0 .6rem}
+.m-resena{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:2px;padding:.7rem .8rem;margin-bottom:.5rem}
+.m-resena-top{display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem}
+.m-resena-stars{color:#f5b301;font-size:.8rem;letter-spacing:.05em}
+.m-resena-who{font-size:.7rem;font-weight:700;color:var(--muted2)}
+.m-resena p{margin:0;font-size:.78rem;color:var(--muted2);line-height:1.5}
 /* LIGHTBOX */
 .lightbox{display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.94);align-items:center;justify-content:center;padding:2rem}
 .lightbox.open{display:flex}
@@ -719,6 +729,26 @@ function pintarPrecios(){
 
 cargarPrecios();
 
+// ── RESEÑAS en el preview de compra ──
+async function cargarResenasModal(id){
+  const box=document.getElementById('mResenas');
+  if(!box)return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/resenas?select=rating,comentario,marca_nombre,created_at&creator_id=eq.${id}&order=created_at.desc&limit=3`,{
+      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
+    });
+    if(!r.ok)return;
+    const rows=await r.json();
+    const conTexto=(rows||[]).filter(x=>x.comentario&&x.comentario.trim());
+    if(!conTexto.length)return;
+    box.innerHTML=`<div class="m-resenas-t">Lo que dicen las marcas</div>`+conTexto.map(x=>{
+      const estrellas='★'.repeat(x.rating)+'☆'.repeat(5-x.rating);
+      const quien=x.marca_nombre||'Marca';
+      return `<div class="m-resena"><div class="m-resena-top"><span class="m-resena-stars">${estrellas}</span> <span class="m-resena-who">${quien}</span></div><p>${x.comentario}</p></div>`;
+    }).join('');
+  }catch(_){}
+}
+
 // ── RANKING LIGA (top 5 por índice, en vivo) ──
 async function loadLigaRanking(){
   const el=document.getElementById('ligaRanking');
@@ -797,7 +827,7 @@ async function loadCreators(){
     // viajaban al cliente, visibles en DevTools sin pagar.
     const COLS = 'id,nombre,pais,ciudad,bio,niches,nicho_esp,plats,audiencia,'
                + 'ig_seg,ig_er,ig_alc,tt_seg,tt_er,tt_vistas,yt_seg,yt_vistas,'
-               + 't_story,t_reel,t_post,canje,disponibilidad,avatar_url,fotos,indice,racha,created_at';
+               + 't_story,t_reel,t_post,canje,disponibilidad,avatar_url,fotos,indice,racha,rating_prom,rating_count,created_at';
     const r=await fetch(`${SB_URL}/rest/v1/creators?select=${COLS}&status=eq.aprobado&order=created_at.desc`,{
       headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
     });
@@ -889,6 +919,7 @@ function renderBolsa(){
       </div>
       <div class="card-name">${c.nombre}</div>
       <div class="card-niche" style="color:${col}">${niches}</div>
+      ${c.rating_count>0?`<div class="card-rating">★ ${Number(c.rating_prom).toFixed(1)} <span>(${c.rating_count} ${c.rating_count==1?'reseña':'reseñas'})</span></div>`:''}
       <div class="card-stats">
         <div class="cs"><strong>${seg}</strong><span>Seguidores</span></div>
         <div class="cs"><strong style="color:${col}">${er?er+'%':'—'}</strong><span>Eng.</span></div>
@@ -912,10 +943,13 @@ function openModal(id,i){
   document.getElementById('mPreview').innerHTML=`<div class="m-av" style="background:${bg};border-color:${col}44;color:${col}">${avHtml}</div><div><div class="m-name">${c.nombre}</div><div class="m-niche" style="color:${col}">${(c.niches||[]).join(' · ')} · ${fmtSeg(c.ig_seg||c.tt_seg)}</div></div>`;
   // Preview antes de comprar: SOLO card + descripción + fotos que cargó el creador
   let extra='';
+  if(c.rating_count>0) extra+=`<div class="m-rating">★ ${Number(c.rating_prom).toFixed(1)} <span>· ${c.rating_count} ${c.rating_count==1?'reseña':'reseñas'}</span></div>`;
   if(c.bio) extra+=`<p class="m-bio">${c.bio}</p>`;
   const fotos=Array.isArray(c.fotos)?c.fotos:[];
   if(fotos.length) extra+=`<div class="m-fotos">${fotos.slice(0,6).map((u,ix)=>`<div class="m-foto" onclick="verFoto(${ix})"><img src="${u}" alt="" loading="lazy"></div>`).join('')}</div>`;
+  extra+=`<div id="mResenas"></div>`;
   document.getElementById('mExtra').innerHTML=extra;
+  if(c.rating_count>0) cargarResenasModal(c.id);
   document.getElementById('mForm').style.display='block';
   document.getElementById('mSuccess').style.display='none';
   document.getElementById('contactModal').classList.add('open');

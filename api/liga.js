@@ -92,9 +92,13 @@ async function emailDelToken(token) {
   return u?.email ? u.email.trim().toLowerCase() : null;
 }
 
-// Busca al creador por email (el vínculo auth↔perfil es por email)
+// Busca al creador por email (el vínculo auth↔perfil es por email).
+// OJO: puede haber perfiles DUPLICADOS con el mismo email. Para que el juego
+// no "pierda" puntos saltando entre duplicados, elegimos SIEMPRE la misma
+// fila: la que tiene más progreso (índice/puntos), luego el aprobado, luego
+// la más antigua. El fix definitivo es deduplicar la tabla (SQL aparte).
 async function creatorPorEmail(email) {
-  const rows = await sb(`creators?email=ilike.${encodeURIComponent(email)}&select=*`);
+  const rows = await sb(`creators?email=ilike.${encodeURIComponent(email)}&select=*&order=indice.desc,puntos_mes.desc,created_at.asc`);
   return rows?.[0] || null;
 }
 

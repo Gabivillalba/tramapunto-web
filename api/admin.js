@@ -6,26 +6,27 @@
 //   ADMIN_PASS          → contraseña del panel (elegí una fuerte y larga)
 //   SUPABASE_URL        → https://mcpmabvxmdepastmpzbi.supabase.co
 //   SUPABASE_SERVICE_KEY→ service_role key (Settings → API → service_role)
-//   SITE_URL            → https://tramapunto-web.vercel.app (para los emails)
+//   SITE_URL            → https://www.tramapunto.com (para los emails)
 //
 // El front manda la contraseña en el header 'x-admin-pass'. Se compara
-// en el servidor con comparación de tiempo constante para no filtrar
-// información por timing.
-
-import crypto from 'crypto';
+// en el servidor con una comparación de tiempo constante propia (sin
+// depender del módulo 'crypto', para que funcione en cualquier runtime).
 
 const SB_URL      = process.env.SUPABASE_URL;
 const SB_SERVICE  = process.env.SUPABASE_SERVICE_KEY;
 const ADMIN_PASS  = process.env.ADMIN_PASS;
-const SITE_URL    = process.env.SITE_URL || 'https://tramapunto-web.vercel.app';
+const SITE_URL    = process.env.SITE_URL || 'https://www.tramapunto.com';
 
-// Comparación de contraseñas resistente a timing attacks
+// Comparación de contraseñas resistente a timing attacks, sin 'crypto'.
 function passOk(input) {
   if (!input || !ADMIN_PASS) return false;
-  const a = Buffer.from(String(input));
-  const b = Buffer.from(String(ADMIN_PASS));
-  if (a.length !== b.length) return false;
-  return crypto.timingSafeEqual(a, b);
+  const a = String(input);
+  const b = String(ADMIN_PASS);
+  let diff = a.length ^ b.length;
+  for (let i = 0; i < b.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
 }
 
 // Helper para pegarle a Supabase con service_role (bypassea RLS)
@@ -141,26 +142,38 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
-      // — Eliminar un creator DEFINITIVAMENTE —
-      // Borra la fila de creators. Si existen postulaciones del creator y la FK
-      // tiene ON DELETE CASCADE (migración de campañas), se borran también.
-      // Las conexiones (pagos) NO se tocan: se conservan como registro histórico.
+      // — Leer la configuración (precios) —
+      case 'get_config': {
+        const data = await sb('config?select=*&order=clave');
+        return res.status(200).json({ ok: true, data });
+      }
+
+      // — Guardar un valor de configuración —
+      case 'set_config': {
+        const { clave, valor } = payload;
+        if (!clave || valor === undefined) {
+          return res.status(400).json({ error: 'Faltan clave/valor' });
+        }
+        if (clave.startsWith('precio_')) {
+          const n = Number(valor);
+          if (!Number.isFinite(n) || n < 0 || n > 10000000) {
+            return res.status(400).json({ error: 'Precio inválido' });
+          }
+        }
+        await sb(`config?clave=eq.${encodeURIComponent(clave)}`, 'PATCH', { valor: String(valor) });
+        return res.status(200).json({ ok: true });
+      }
+
+      // — Eliminar un creator DEFINITIVAMENTE (fila + cuenta de Auth) —
       case 'delete_creator': {
         const { id } = payload;
         if (!id) return res.status(400).json({ error: 'Falta id' });
-
-        // Traemos el email para, si existe, borrar también la cuenta de Auth
         let email = null;
         try {
           const rows = await sb(`creators?id=eq.${id}&select=email`);
           email = rows?.[0]?.email || null;
-        } catch (_) { /* si no se puede leer, seguimos igual */ }
-
-        // Borrado de la fila en la tabla
+        } catch (_) { /* seguimos igual */ }
         await sb(`creators?id=eq.${id}`, 'DELETE');
-
-        // Si el creator tenía cuenta de login, la eliminamos también de Auth
-        // para no dejar usuarios huérfanos. Best-effort: no rompe el borrado.
         if (email) {
           try {
             const u = await fetch(
@@ -176,28 +189,16 @@ export default async function handler(req, res) {
             }
           } catch (_) { /* best-effort */ }
         }
-
         return res.status(200).json({ ok: true });
       }
 
       // — Crear cuentas de acceso para creators que no la tienen (backfill) —
-      // Compara los emails de la tabla creators contra los usuarios de Auth,
-      // y para cada uno que falte: crea la cuenta (confirmada, sin contraseña)
-      // y le manda el email de "definí tu contraseña" (recover).
-      // Procesa de a lotes (payload.limit, default 20) para no timeoutear ni
-      // pasarse de los límites de envío. Devolvé cuántos quedan.
       case 'backfill_cuentas': {
         const LOTE = Math.min(Number(payload.limit) || 20, 40);
-
-        // 1) Emails de todos los creators
         const creators = await sb('creators?select=email');
         const emailsCreators = [...new Set(
-          (creators || [])
-            .map(c => (c.email || '').trim().toLowerCase())
-            .filter(Boolean)
+          (creators || []).map(c => (c.email || '').trim().toLowerCase()).filter(Boolean)
         )];
-
-        // 2) Emails que YA tienen cuenta en Auth (paginado)
         const authEmails = new Set();
         let page = 1;
         for (;;) {
@@ -210,29 +211,21 @@ export default async function handler(req, res) {
           list.forEach(u => u.email && authEmails.add(u.email.trim().toLowerCase()));
           if (!list.length || list.length < 1000) break;
           page++;
-          if (page > 20) break; // tope de seguridad
+          if (page > 20) break;
         }
-
-        // 3) Los que faltan
         const faltantes = emailsCreators.filter(e => !authEmails.has(e));
         const aProcesar = faltantes.slice(0, LOTE);
-
         let creadas = 0, mails = 0;
         const errores = [];
         for (const email of aProcesar) {
           try {
-            // Crear usuario confirmado, sin contraseña (la define por email)
             const cr = await fetch(`${SB_URL}/auth/v1/admin/users`, {
               method: 'POST',
               headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}`, 'Content-Type': 'application/json' },
               body: JSON.stringify({ email, email_confirm: true }),
             });
-            if (!cr.ok) {
-              const e = await cr.json().catch(() => ({}));
-              throw new Error(e.msg || e.message || `HTTP ${cr.status}`);
-            }
+            if (!cr.ok) { const e = await cr.json().catch(() => ({})); throw new Error(e.msg || e.message || `HTTP ${cr.status}`); }
             creadas++;
-            // Mandar el email de "definí tu contraseña"
             const rec = await fetch(`${SB_URL}/auth/v1/recover`, {
               method: 'POST',
               headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}`, 'Content-Type': 'application/json' },
@@ -243,12 +236,10 @@ export default async function handler(req, res) {
             errores.push({ email, error: e.message });
           }
         }
-
         return res.status(200).json({
           ok: true,
           total_faltantes: faltantes.length,
-          creadas,
-          mails,
+          creadas, mails,
           restantes: faltantes.length - aProcesar.length,
           errores,
         });
@@ -259,7 +250,6 @@ export default async function handler(req, res) {
         const { email, password } = payload;
         if (!email || !password) return res.status(400).json({ error: 'Faltan email/password' });
         if (String(password).length < 6) return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
-        // Buscar la cuenta de Auth por email
         const u = await fetch(
           `${SB_URL}/auth/v1/admin/users?email=${encodeURIComponent(email)}`,
           { headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}` } }

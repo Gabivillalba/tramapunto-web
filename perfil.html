@@ -210,6 +210,8 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .cx-name{font-size:.88rem;font-weight:700}
 .cx-meta{font-size:.68rem;color:var(--muted);margin-top:.1rem}
 .cx-contact{font-size:.74rem;color:var(--green);margin-top:.35rem;word-break:break-word}
+.cx-link{color:var(--green);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .15s}
+.cx-link:hover{border-bottom-color:var(--green)}
 .cx-venc{display:inline-block;font-size:.56rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:.15rem .4rem;border-radius:2px;vertical-align:middle;margin-left:.3rem}
 .cx-venc.ok{background:#0f1a00;color:var(--green);border:1px solid #2a4000}
 .cx-venc.exp{background:#2a0f00;color:#f87171;border:1px solid #4a1a00}
@@ -1087,6 +1089,19 @@ async function loadContactosCreator(){
   </div>`;
 }
 
+// Convierte los datos de contacto en hipervínculos clickeables
+function waLink(tel){ let d=(tel||'').replace(/\D/g,''); if(!d)return ''; if(!d.startsWith('54')) d='54'+d; return 'https://wa.me/'+d; }
+function igHandle(u){ return (u||'').trim().replace(/^@/,'').replace(/^https?:\/\//,'').replace(/^(www\.)?instagram\.com\//i,'').replace(/\/.*$/,''); }
+function ttHandle(u){ return (u||'').trim().replace(/^@/,'').replace(/^https?:\/\//,'').replace(/^(www\.)?tiktok\.com\/@?/i,'').replace(/\/.*$/,''); }
+function contactoLinks(c){
+  const p=[];
+  if(c.email) p.push(`<a href="mailto:${c.email}" class="cx-link">✉ ${c.email}</a>`);
+  if(c.ig_user){ const h=igHandle(c.ig_user); p.push(h?`<a href="https://instagram.com/${h}" target="_blank" rel="noopener" class="cx-link">📸 @${h}</a>`:`📸 ${c.ig_user}`); }
+  if(c.tt_user){ const h=ttHandle(c.tt_user); p.push(h?`<a href="https://tiktok.com/@${h}" target="_blank" rel="noopener" class="cx-link">🎵 @${h}</a>`:`🎵 ${c.tt_user}`); }
+  if(c.tel){ const w=waLink(c.tel); p.push(w?`<a href="${w}" target="_blank" rel="noopener" class="cx-link">💬 ${c.tel}</a>`:`💬 ${c.tel}`); }
+  return p.length?p.join(' · '):'Sin datos de contacto';
+}
+
 // Vista del COMPRADOR (marca o creador): contactos que YA compró, con los datos a mano
 async function loadComprados(wrapId){
   const wrap=document.getElementById(wrapId); if(!wrap)return;
@@ -1121,7 +1136,7 @@ async function loadComprados(wrapId){
       : `<span class="cx-venc exp">Acceso vencido</span>`;
     let cuerpo;
     if(activo){
-      const contacto=[c.email?`✉ ${c.email}`:'',c.ig_user?`📸 ${c.ig_user}`:'',c.tel?`💬 ${c.tel}`:''].filter(Boolean).join(' · ');
+      const contacto=contactoLinks(c);
       const miRating=ratingByCreator[String(c.id)];
       const btnResena=miRating
         ? `<button class="resena-btn done" onclick="openResena('${c.id}',${JSON.stringify(nom).replace(/"/g,'&quot;')},${miRating})">${'★'.repeat(miRating)} · Editar</button>`

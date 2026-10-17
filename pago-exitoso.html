@@ -24,6 +24,8 @@ nav{height:56px;padding:0 1.5rem;display:flex;align-items:center;justify-content
 .c-ic{font-size:.9rem;width:20px;text-align:center;color:var(--green)}
 .c-key{color:var(--muted);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;width:80px;flex-shrink:0}
 .c-val{color:var(--white);font-weight:600;word-break:break-all}
+a.c-link{color:var(--green);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .15s;cursor:pointer}
+a.c-link:hover{border-bottom-color:var(--green)}
 .voucher-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid #161616;font-size:.8rem}
 .voucher-row:last-child{border:none}
 .v-k{color:var(--muted)}
@@ -151,6 +153,11 @@ function showSuccess(c, marcaEmail, paymentId, PRECIO, entregas){
       <div class="contact-title">Material del creador (${entregas.length})</div>
       ${entregas.map(e=>`<a class="mat-item" href="${e.link}" target="_blank" rel="noopener"><span class="mat-tipo">${e.tipo||'reto'}</span><span class="mat-cons">${e.consigna||''}</span><span class="mat-go">ver ↗</span></a>`).join('')}
     </div>` : '';
+  // Datos de contacto como hipervínculos clickeables
+  const waLink=(tel)=>{let d=(tel||'').replace(/\D/g,'');if(!d)return'';if(!d.startsWith('54'))d='54'+d;return'https://wa.me/'+d;};
+  const igH=(u)=>(u||'').trim().replace(/^@/,'').replace(/^https?:\/\//,'').replace(/^(www\.)?instagram\.com\//i,'').replace(/\/.*$/,'');
+  const ttH=(u)=>(u||'').trim().replace(/^@/,'').replace(/^https?:\/\//,'').replace(/^(www\.)?tiktok\.com\/@?/i,'').replace(/\/.*$/,'');
+  const ytH=(u)=>(u||'').trim().replace(/^@/,'').replace(/^https?:\/\//,'').replace(/^(www\.)?youtube\.com\//i,'').replace(/\/.*$/,'');
   document.getElementById('content').innerHTML=`
     <div class="ic">✅</div>
     <div class="tag">Conexión desbloqueada · TRAMA.</div>
@@ -159,11 +166,11 @@ function showSuccess(c, marcaEmail, paymentId, PRECIO, entregas){
 
     <div class="contact-box">
       <div class="contact-title">Datos de contacto verificados</div>
-      ${c.email?`<div class="c-item"><span class="c-ic">✉</span><span class="c-key">Email</span><span class="c-val">${c.email}</span></div>`:''}
-      ${c.ig_user?`<div class="c-item"><span class="c-ic">📸</span><span class="c-key">Instagram</span><span class="c-val">${c.ig_user}</span></div>`:''}
-      ${c.tt_user?`<div class="c-item"><span class="c-ic">🎵</span><span class="c-key">TikTok</span><span class="c-val">${c.tt_user}</span></div>`:''}
-      ${c.yt_user?`<div class="c-item"><span class="c-ic">▶️</span><span class="c-key">YouTube</span><span class="c-val">${c.yt_user}</span></div>`:''}
-      ${c.tel?`<div class="c-item"><span class="c-ic">💬</span><span class="c-key">WhatsApp</span><span class="c-val">${c.tel}</span></div>`:''}
+      ${c.email?`<div class="c-item"><span class="c-ic">✉</span><span class="c-key">Email</span><a class="c-val c-link" href="mailto:${c.email}">${c.email}</a></div>`:''}
+      ${c.ig_user?`<div class="c-item"><span class="c-ic">📸</span><span class="c-key">Instagram</span><a class="c-val c-link" href="https://instagram.com/${igH(c.ig_user)}" target="_blank" rel="noopener">@${igH(c.ig_user)}</a></div>`:''}
+      ${c.tt_user?`<div class="c-item"><span class="c-ic">🎵</span><span class="c-key">TikTok</span><a class="c-val c-link" href="https://tiktok.com/@${ttH(c.tt_user)}" target="_blank" rel="noopener">@${ttH(c.tt_user)}</a></div>`:''}
+      ${c.yt_user?`<div class="c-item"><span class="c-ic">▶️</span><span class="c-key">YouTube</span><a class="c-val c-link" href="https://youtube.com/@${ytH(c.yt_user)}" target="_blank" rel="noopener">${c.yt_user}</a></div>`:''}
+      ${c.tel?`<div class="c-item"><span class="c-ic">💬</span><span class="c-key">WhatsApp</span><a class="c-val c-link" href="${waLink(c.tel)}" target="_blank" rel="noopener">${c.tel}</a></div>`:''}
     </div>
 
     ${materialHtml}

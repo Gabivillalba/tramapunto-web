@@ -98,23 +98,27 @@ async function creatorPorEmail(email) {
   return rows?.[0] || null;
 }
 
-// La misión de hoy (tipo + contenido), determinística por fecha
-async function misionDeHoy(wd) {
+// La misión de hoy (tipo + contenido). Rota cada SEMANA (distinta combinación
+// por semana, pero estable de lunes a domingo → coincide con el mail semanal).
+async function misionDeHoy(wd, iso) {
   const tipo = AGENDA[wd] || 'tendencia';
-  if (tipo === 'libre') return { tipo: 'libre', contenido: null, base: 0 };
+  if (tipo === 'libre') return { tipo: 'libre', contenido: null, base: 0, requiere_material: false, extra: null };
   let contenido = FALLBACK[tipo];
   let extra = null;
+  let requiere_material = (tipo === 'reto');
   try {
-    const pool = await sb(`misiones_pool?tipo=eq.${tipo}&activo=eq.true&select=contenido,extra&order=id`);
+    const pool = await sb(`misiones_pool?tipo=eq.${tipo}&activo=eq.true&select=contenido,extra,requiere_material&order=id`);
     if (pool && pool.length) {
-      // índice determinístico por día del año → mismo contenido en el mail y en el perfil
-      const doy = Math.floor((Date.now()) / 86400000);
-      const pick = pool[doy % pool.length];
+      const dayNum = Math.floor(Date.parse(iso) / 86400000);  // días desde epoch
+      const week = Math.floor((dayNum + 4) / 7);               // nº de semana (alineado a lunes)
+      const wdIdx = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 }[wd] || 0;
+      const pick = pool[(week * 7 + wdIdx) % pool.length];     // semilla semana+día
       contenido = pick.contenido;
       extra = pick.extra || null;
+      requiere_material = !!pick.requiere_material;
     }
   } catch (_) { /* pool vacío → usamos el fallback */ }
-  return { tipo, contenido, extra, base: PUNTOS[tipo] || 10 };
+  return { tipo, contenido, extra, requiere_material, base: PUNTOS[tipo] || 10 };
 }
 
 // Posición del creador entre los aprobados (#X de Y)
@@ -147,16 +151,26 @@ export default async function handler(req, res) {
     if (!creator) return res.status(404).json({ error: 'No encontramos tu perfil de creador.' });
 
     const { iso, wd } = hoyART();
-    const mision = await misionDeHoy(wd);
+    const mision = await misionDeHoy(wd, iso);
 
     // ————— ESTADO —————
     if (action === 'estado') {
       const { posicion: pos, total } = await posicion(creator.indice || 0);
       const campeon = await campeonVigente();
+      let entregas = [];
+      try {
+        entregas = await sb(`entregas?creator_id=eq.${encodeURIComponent(String(creator.id))}&select=fecha,tipo,consigna,link&order=created_at.desc&limit=8`);
+      } catch (_) { /* sin entregas aún */ }
       return res.status(200).json({
         ok: true,
         data: {
-          mision: { tipo: mision.tipo, contenido: mision.contenido, extra: mision.extra || null },
+          mision: {
+            tipo: mision.tipo,
+            contenido: mision.contenido,
+            requiere_material: !!mision.requiere_material,
+            opciones: (mision.extra && mision.extra.opciones) || null,
+          },
+          entregas,
           es_libre: mision.tipo === 'libre',
           ya_cumplida: creator.ultima_mision === iso,
           base_hoy: mision.base,
@@ -182,6 +196,29 @@ export default async function handler(req, res) {
           ok: true, ya: true,
           data: { puntos_mes: creator.puntos_mes, racha: creator.racha, indice: creator.indice },
         });
+      }
+
+      const { link, respuesta } = req.body || {};
+
+      // Trivia → hay que acertar antes de sumar puntos
+      if (mision.tipo === 'trivia' && mision.extra && typeof mision.extra.correcta === 'number') {
+        if (Number(respuesta) !== mision.extra.correcta) {
+          return res.status(200).json({ ok: false, incorrecta: true, error: 'Respuesta incorrecta, ¡probá de nuevo!' });
+        }
+      }
+
+      // Reto con material → exigir link válido y guardar la entrega
+      if (mision.requiere_material) {
+        const url = (link || '').trim();
+        if (!/^https?:\/\/.+/i.test(url)) {
+          return res.status(200).json({ ok: false, falta_link: true, error: 'Pegá el link de tu publicación para registrar el reto.' });
+        }
+        try {
+          await sb('entregas', 'POST', {
+            creator_id: String(creator.id), fecha: iso, tipo: mision.tipo,
+            consigna: mision.contenido, link: url,
+          });
+        } catch (_) { /* la entrega no bloquea el puntaje */ }
       }
 
       // Racha: si ayer cumplió → +1, si no → vuelve a 1

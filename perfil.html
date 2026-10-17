@@ -210,6 +210,10 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .cx-name{font-size:.88rem;font-weight:700}
 .cx-meta{font-size:.68rem;color:var(--muted);margin-top:.1rem}
 .cx-contact{font-size:.74rem;color:var(--green);margin-top:.35rem;word-break:break-word}
+.cx-venc{display:inline-block;font-size:.56rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:.15rem .4rem;border-radius:2px;vertical-align:middle;margin-left:.3rem}
+.cx-venc.ok{background:#0f1a00;color:var(--green);border:1px solid #2a4000}
+.cx-venc.exp{background:#2a0f00;color:#f87171;border:1px solid #4a1a00}
+.cx-item.cx-exp{opacity:.72}
 .resena-btn{margin-top:.6rem;background:none;border:1px solid #2a2a2a;color:var(--muted2,#aaa);font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.4rem .7rem;border-radius:2px;cursor:pointer;transition:border-color .15s,color .15s}
 .resena-btn:hover{border-color:var(--green);color:var(--green)}
 .resena-btn.done{color:#f5b301;border-color:#3a2e00}
@@ -1099,22 +1103,38 @@ async function loadComprados(wrapId){
   // Reseñas que esta cuenta ya dejó (para mostrar estado / permitir editar)
   const misResenas=await sbGet('resenas',`marca_email=eq.${encodeURIComponent(email)}&select=creator_id,rating`,getToken());
   const ratingByCreator=Object.fromEntries((misResenas||[]).map(x=>[String(x.creator_id),x.rating]));
+  const DIAS_ACCESO=60;
   const vistos=new Set();
   const items=cxs.map(cx=>{
     const c=byId[String(cx.creator_id)]; if(!c)return '';
     if(vistos.has(String(cx.creator_id)))return ''; vistos.add(String(cx.creator_id));
     const f=cx.created_at?new Date(cx.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
-    const contacto=[c.email?`✉ ${c.email}`:'',c.ig_user?`📸 ${c.ig_user}`:'',c.tel?`💬 ${c.tel}`:''].filter(Boolean).join(' · ');
     const nom=`${c.nombre||''} ${c.apellido||''}`.trim()||'Creador';
     const av=c.avatar_url?`<img src="${c.avatar_url}" style="width:100%;height:100%;object-fit:cover">`:'🎥';
-    const miRating=ratingByCreator[String(c.id)];
-    const btnResena=miRating
-      ? `<button class="resena-btn done" onclick="openResena('${c.id}',${JSON.stringify(nom).replace(/"/g,'&quot;')},${miRating})">${'★'.repeat(miRating)} · Editar</button>`
-      : `<button class="resena-btn" onclick="openResena('${c.id}',${JSON.stringify(nom).replace(/"/g,'&quot;')},0)">⭐ Dejar reseña</button>`;
-    return `<div class="cx-item"><div class="cx-ic">${av}</div><div class="cx-body"><div class="cx-name">${nom}</div><div class="cx-meta">${f}${cx.origen==='campania'?' · campaña':''}</div><div class="cx-contact">${contacto||'Sin datos de contacto'}</div>${btnResena}</div></div>`;
+    // Vigencia del acceso al dato: 60 días desde la compra
+    const diasPasados=cx.created_at?Math.floor((Date.now()-new Date(cx.created_at).getTime())/86400000):0;
+    const diasRest=DIAS_ACCESO-diasPasados;
+    const activo=diasRest>0;
+    const vence=new Date(new Date(cx.created_at).getTime()+DIAS_ACCESO*86400000).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const venceBadge=activo
+      ? `<span class="cx-venc ok">${diasRest<=7?(diasRest===1?'Vence mañana':`Vence en ${diasRest} días`):`Vigente hasta ${vence}`}</span>`
+      : `<span class="cx-venc exp">Acceso vencido</span>`;
+    let cuerpo;
+    if(activo){
+      const contacto=[c.email?`✉ ${c.email}`:'',c.ig_user?`📸 ${c.ig_user}`:'',c.tel?`💬 ${c.tel}`:''].filter(Boolean).join(' · ');
+      const miRating=ratingByCreator[String(c.id)];
+      const btnResena=miRating
+        ? `<button class="resena-btn done" onclick="openResena('${c.id}',${JSON.stringify(nom).replace(/"/g,'&quot;')},${miRating})">${'★'.repeat(miRating)} · Editar</button>`
+        : `<button class="resena-btn" onclick="openResena('${c.id}',${JSON.stringify(nom).replace(/"/g,'&quot;')},0)">⭐ Dejar reseña</button>`;
+      cuerpo=`<div class="cx-contact">${contacto||'Sin datos de contacto'}</div>${btnResena}`;
+    } else {
+      cuerpo=`<div class="cx-contact" style="color:var(--muted)">El acceso al contacto venció (60 días). <a href="/" style="color:var(--green)">Volver a comprar →</a></div>`;
+    }
+    return `<div class="cx-item${activo?'':' cx-exp'}"><div class="cx-ic">${av}</div><div class="cx-body"><div class="cx-name">${nom} ${venceBadge}</div><div class="cx-meta">Comprado el ${f}${cx.origen==='campania'?' · campaña':''}</div>${cuerpo}</div></div>`;
   }).join('');
   wrap.innerHTML=`<div class="tab-content active">
     <div class="sec-title">Creadores comprados (${cxs.length})</div>
+    <div style="font-size:.72rem;color:var(--muted);margin:-.75rem 0 1rem">El acceso a cada contacto queda disponible por <strong style="color:var(--muted2)">60 días</strong> desde la compra.</div>
     <div class="cx-list">${items}</div>
   </div>`;
 }

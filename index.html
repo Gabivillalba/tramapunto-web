@@ -559,6 +559,15 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
         <a href="./creadores-ugc-fotografia.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Fotografía</a>
         <a href="./creadores-ugc-educacion.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Educación</a>
       </div>
+      <div style="font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted,#666);margin:1.5rem 0 1rem">Creadores por ciudad</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem">
+        <a href="./creadores-ugc-buenos-aires.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Buenos Aires</a>
+        <a href="./creadores-ugc-cordoba.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Córdoba</a>
+        <a href="./creadores-ugc-rosario.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Rosario</a>
+        <a href="./creadores-ugc-mendoza.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Mendoza</a>
+        <a href="./creadores-ugc-mar-del-plata.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Mar del Plata</a>
+        <a href="./creadores-ugc-la-plata.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">La Plata</a>
+      </div>
     </div>
   </div>
   <footer>
@@ -627,7 +636,7 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
         </select>
       </div>
       <div class="adv-field">
-        <label>Tarifa reel máx.</label>
+        <label>Tarifa reel máx. (ARS)</label>
         <select id="fTarifa" onchange="renderBolsa()">
           <option value="0">Cualquiera</option>
           <option value="5000">Hasta $5.000</option>
@@ -910,7 +919,7 @@ async function loadCreators(){
     // viajaban al cliente, visibles en DevTools sin pagar.
     const COLS = 'id,nombre,pais,ciudad,bio,niches,nicho_esp,plats,audiencia,'
                + 'ig_seg,ig_er,ig_alc,tt_seg,tt_er,tt_vistas,yt_seg,yt_vistas,'
-               + 't_story,t_reel,t_post,canje,disponibilidad,avatar_url,fotos,indice,racha,rating_prom,rating_count,es_campeon,campeon_label,created_at';
+               + 't_story,t_reel,t_post,canje,moneda,disponibilidad,avatar_url,fotos,indice,racha,rating_prom,rating_count,es_campeon,campeon_label,created_at';
     const r=await fetch(`${SB_URL}/rest/v1/creators?select=${COLS}&status=eq.aprobado&order=created_at.desc`,{
       headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
     });
@@ -1009,7 +1018,7 @@ function renderBolsa(){
     const mCity=city==='todas'||((c.ciudad||'').trim().toLowerCase()===city.toLowerCase());
     const mSeg=!minSeg||segN(c)>=minSeg;
     const mEr=!minEr||erN(c)>=minEr;
-    const mTar=!maxTar||(c.t_reel&&c.t_reel<=maxTar);
+    const mTar=!maxTar||((c.moneda||'ARS')!=='USD'&&c.t_reel&&c.t_reel<=maxTar);
     const mRat=!minRat||(minRat===1?((c.rating_count||0)>0):(Number(c.rating_prom||0)>=minRat));
     return mN&&mP&&mQ&&mCity&&mSeg&&mEr&&mTar&&mRat;
   });

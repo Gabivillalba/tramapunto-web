@@ -68,4 +68,12 @@
   <url><loc>https://www.tramapunto.com/ugc-vs-influencer-marketing.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://www.tramapunto.com/primera-campana-ugc.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 
+  <!-- LANDINGS POR CIUDAD -->
+  <url><loc>https://www.tramapunto.com/creadores-ugc-buenos-aires.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.tramapunto.com/creadores-ugc-cordoba.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.tramapunto.com/creadores-ugc-rosario.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.tramapunto.com/creadores-ugc-mendoza.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.tramapunto.com/creadores-ugc-mar-del-plata.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.tramapunto.com/creadores-ugc-la-plata.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+
 </urlset>

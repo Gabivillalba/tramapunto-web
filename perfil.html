@@ -179,6 +179,13 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .entrega-tipo{font-size:.56rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--green);background:#0f1a00;border:1px solid #2a4000;padding:.2rem .45rem;border-radius:20px;flex-shrink:0}
 .entrega-cons{font-size:.74rem;color:var(--muted2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .entrega-link{font-size:.68rem;color:var(--green);font-weight:700;flex-shrink:0}
+.semana-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.5rem}
+.semana-day{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:3px;padding:.75rem .9rem}
+.semana-day.today{border-color:var(--green);background:#0f1a00}
+.semana-d{font-size:.6rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.45rem}
+.semana-day.today .semana-d{color:var(--green)}
+.semana-badge{display:inline-block;font-size:.54rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .5rem;border-radius:20px;margin-bottom:.45rem}
+.semana-text{font-size:.82rem;color:var(--white);line-height:1.5}
 </style>
 </head>
 <body>
@@ -804,12 +811,19 @@ async function loadLiga(){
   ligaData=res.data; renderLiga();
 }
 
-function agendaStrip(){
-  const js=new Date().getDay();        // 0=Dom..6=Sáb
-  const todayIdx=(js===0)?6:js-1;      // → 0=Lun..6=Dom
-  return `<div class="agenda">${AGENDA_UI.map((a,ix)=>
-    `<div class="agenda-day${ix===todayIdx?' today':''}"><div class="d">${a.d}</div><div class="i">${a.i}</div></div>`
-  ).join('')}</div>`;
+const DIAS_FULL={Mon:'Lunes',Tue:'Martes',Wed:'Miércoles',Thu:'Jueves',Fri:'Viernes',Sat:'Sábado',Sun:'Domingo'};
+function semanaList(){
+  const sem=(ligaData&&ligaData.semana)||[];
+  if(!sem.length) return '';
+  return `<div class="sec-title">Desafíos de la semana</div>
+    <div class="semana-list">${sem.map(s=>{
+      const t=TIPO_UI[s.tipo]||TIPO_UI.libre;
+      return `<div class="semana-day${s.es_hoy?' today':''}">
+        <div class="semana-d">${DIAS_FULL[s.wd]||s.wd}${s.es_hoy?' · hoy':''}</div>
+        <span class="semana-badge" style="color:${t.color};background:${t.bg};border:1px solid ${t.bd}">${t.icon} ${t.label}</span>
+        <div class="semana-text">${s.contenido||'Descanso — sin misión'}</div>
+      </div>`;
+    }).join('')}</div>`;
 }
 
 function renderLiga(){
@@ -863,7 +877,7 @@ function renderLiga(){
         <div class="liga-stat"><div class="n">${d.indice}</div><div class="l">Índice</div></div>
       </div>
     </div>
-    ${agendaStrip()}
+    ${semanaList()}
     ${champ}
     ${misionCard}
     ${entregasHtml}

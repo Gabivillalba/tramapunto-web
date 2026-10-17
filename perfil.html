@@ -80,8 +80,9 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .dash-header-inner{display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap}
 .dash-av{width:56px;height:56px;min-width:56px;border-radius:50%;border:2px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;flex-shrink:0;overflow:hidden}
 .dash-av img{width:100%;height:100%;object-fit:cover}
-.av-cam{position:absolute;right:-3px;bottom:-3px;width:22px;height:22px;border-radius:50%;background:var(--green);color:#080808;display:flex;align-items:center;justify-content:center;font-size:.62rem;cursor:pointer;border:2px solid var(--g1);line-height:1}
-.av-cam:hover{filter:brightness(1.1)}
+.dash-av-wrap{position:relative;flex-shrink:0;width:56px;height:56px}
+.av-cam{position:absolute;right:-4px;bottom:-4px;width:24px;height:24px;border-radius:50%;background:var(--green);color:#080808;display:flex;align-items:center;justify-content:center;font-size:.72rem;cursor:pointer;border:2px solid var(--g1);line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.4);transition:transform .12s,filter .12s;z-index:2}
+.av-cam:hover{filter:brightness(1.1);transform:scale(1.1)}
 .dash-name{font-size:1.1rem;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
 .dash-email{font-size:.75rem;color:var(--muted);margin-top:.2rem}
 .dash-badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.6rem;font-weight:900;letter-spacing:.15em;text-transform:uppercase;padding:.25rem .625rem;border-radius:20px;margin-top:.4rem}
@@ -210,6 +211,9 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .resena-btn{margin-top:.6rem;background:none;border:1px solid #2a2a2a;color:var(--muted2,#aaa);font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.4rem .7rem;border-radius:2px;cursor:pointer;transition:border-color .15s,color .15s}
 .resena-btn:hover{border-color:var(--green);color:var(--green)}
 .resena-btn.done{color:#f5b301;border-color:#3a2e00}
+.rep-badge{font-size:.6rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:.3rem .55rem;border-radius:2px}
+.rep-badge.camp{background:#2a2200;color:#f5d312;border:1px solid #4a3c00}
+.rep-badge.top{background:#2a1a00;color:#f5a301;border:1px solid #4a2e00}
 /* Modal reseña */
 .rsna-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:999;align-items:center;justify-content:center;padding:1.25rem}
 .rsna-ov.open{display:flex}
@@ -296,7 +300,9 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 <div class="view" id="vDash">
   <div class="dash-header">
     <div class="dash-header-inner">
-      <div class="dash-av" id="dashAv">?</div>
+      <div class="dash-av-wrap" id="dashAvWrap">
+        <div class="dash-av" id="dashAv">?</div>
+      </div>
       <div>
         <div class="dash-name" id="dashName">—</div>
         <div class="dash-email" id="dashEmail">—</div>
@@ -612,6 +618,7 @@ function renderCreatorTab(i,el){
       </div>
       <div class="sec-title">Reputación</div>
       <div style="margin-bottom:2rem">
+        ${(p.es_campeon || ((p.rating_count||0)>=3 && Number(p.rating_prom||0)>=4.5)) ? `<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.6rem">${p.es_campeon?`<span class="rep-badge camp">👑 ${p.campeon_label||'Campeón'}</span>`:''}${((p.rating_count||0)>=3&&Number(p.rating_prom||0)>=4.5)?`<span class="rep-badge top">⭐ Top valorado</span>`:''}</div>`:''}
         <div style="display:flex;align-items:center;gap:.6rem;background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1rem 1.25rem;margin-bottom:.75rem">
           <span style="font-size:1.4rem;font-weight:900;color:#f5b301">${(p.rating_count||0)?('★ '+Number(p.rating_prom||0).toFixed(1)):'—'}</span>
           <span style="font-size:.78rem;color:var(--muted)">${(p.rating_count||0)?`${p.rating_count} ${p.rating_count==1?'reseña':'reseñas'} de marcas`:'Todavía no recibiste reseñas. Se habilitan cuando una marca compra tu contacto.'}</span>
@@ -1193,14 +1200,13 @@ async function quitarGuardado(id){
 
 // ── FOTO DE PERFIL / AVATAR ──
 function montarCamaraAvatar(){
-  const av=document.getElementById('dashAv');
-  if(!av)return;
-  av.style.position='relative';
+  const wrap=document.getElementById('dashAvWrap');
+  if(!wrap)return;
   if(document.getElementById('avCam'))return;   // ya está
   const lbl=document.createElement('label');
   lbl.id='avCam'; lbl.className='av-cam'; lbl.title='Cambiar foto de perfil';
   lbl.innerHTML='📷<input type="file" accept="image/*" style="display:none" onchange="subirAvatar(this)">';
-  av.appendChild(lbl);
+  wrap.appendChild(lbl);
 }
 async function subirAvatar(input){
   const f=input.files&&input.files[0]; input.value='';

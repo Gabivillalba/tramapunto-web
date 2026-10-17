@@ -233,6 +233,10 @@ section{padding:5rem 1.5rem;border-top:1px solid #161616}
 .fav-btn.on{color:var(--green)}
 .card-rating{font-size:.72rem;font-weight:800;color:#f5b301;margin:-.4rem 0 .5rem;letter-spacing:.02em}
 .card-rating span{color:var(--muted,#777);font-weight:600}
+.card-reps{display:flex;flex-wrap:wrap;gap:.3rem;margin:.1rem 0 .4rem}
+.c-rep{font-size:.56rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:.2rem .45rem;border-radius:2px}
+.c-rep.camp{background:#2a2200;color:#f5d312;border:1px solid #4a3c00}
+.c-rep.top{background:#2a1a00;color:#f5a301;border:1px solid #4a2e00}
 .badge-new{background:#1a0a2a;color:var(--purple);border:1px solid #3a1a5a}
 .card-name{font-size:.92rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.2rem}
 .card-niche{font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:.875rem}
@@ -827,7 +831,7 @@ async function loadCreators(){
     // viajaban al cliente, visibles en DevTools sin pagar.
     const COLS = 'id,nombre,pais,ciudad,bio,niches,nicho_esp,plats,audiencia,'
                + 'ig_seg,ig_er,ig_alc,tt_seg,tt_er,tt_vistas,yt_seg,yt_vistas,'
-               + 't_story,t_reel,t_post,canje,disponibilidad,avatar_url,fotos,indice,racha,rating_prom,rating_count,created_at';
+               + 't_story,t_reel,t_post,canje,disponibilidad,avatar_url,fotos,indice,racha,rating_prom,rating_count,es_campeon,campeon_label,created_at';
     const r=await fetch(`${SB_URL}/rest/v1/creators?select=${COLS}&status=eq.aprobado&order=created_at.desc`,{
       headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
     });
@@ -881,6 +885,13 @@ function getColor(i){return COLORS[i%COLORS.length]}
 function getBg(i){return BGS[i%BGS.length]}
 function getInit(c){const n=(c.nombre||'?').trim();return (n[0]||'?').toUpperCase()}
 
+function badgesDe(c){
+  const b=[];
+  if(c.es_campeon) b.push(`<span class="c-rep camp">👑 Campeón</span>`);
+  if((c.rating_count||0)>=3 && Number(c.rating_prom||0)>=4.5) b.push(`<span class="c-rep top">⭐ Top valorado</span>`);
+  return b.length?`<div class="card-reps">${b.join('')}</div>`:'';
+}
+
 function renderBolsa(){
   const q=(document.getElementById('searchInp')?.value||'').toLowerCase().trim();
   let list=allCreators.filter(c=>{
@@ -918,6 +929,7 @@ function renderBolsa(){
         </div>
       </div>
       <div class="card-name">${c.nombre}</div>
+      ${badgesDe(c)}
       <div class="card-niche" style="color:${col}">${niches}</div>
       ${c.rating_count>0?`<div class="card-rating">★ ${Number(c.rating_prom).toFixed(1)} <span>(${c.rating_count} ${c.rating_count==1?'reseña':'reseñas'})</span></div>`:''}
       <div class="card-stats">
@@ -943,6 +955,7 @@ function openModal(id,i){
   document.getElementById('mPreview').innerHTML=`<div class="m-av" style="background:${bg};border-color:${col}44;color:${col}">${avHtml}</div><div><div class="m-name">${c.nombre}</div><div class="m-niche" style="color:${col}">${(c.niches||[]).join(' · ')} · ${fmtSeg(c.ig_seg||c.tt_seg)}</div></div>`;
   // Preview antes de comprar: SOLO card + descripción + fotos que cargó el creador
   let extra='';
+  extra+=badgesDe(c);
   if(c.rating_count>0) extra+=`<div class="m-rating">★ ${Number(c.rating_prom).toFixed(1)} <span>· ${c.rating_count} ${c.rating_count==1?'reseña':'reseñas'}</span></div>`;
   if(c.bio) extra+=`<p class="m-bio">${c.bio}</p>`;
   const fotos=Array.isArray(c.fotos)?c.fotos:[];

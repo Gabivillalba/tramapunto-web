@@ -60,4 +60,9 @@
   <url><loc>https://www.tramapunto.com/creadores-ugc-fotografia.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.tramapunto.com/creadores-ugc-educacion.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
 
+  <!-- GUÍAS / BLOG — intención: informacional (top of funnel) -->
+  <url><loc>https://www.tramapunto.com/guias.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.tramapunto.com/que-es-contenido-ugc.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.tramapunto.com/cuanto-cobra-creador-ugc-argentina.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
 </urlset>

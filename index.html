@@ -7,6 +7,8 @@
      con el token de recovery, rebota a reset.html conservando el hash.
      NO BORRAR este bloque. -->
 <script>(function(){try{var h=location.hash||'',q=location.search||'';if((h.indexOf('type=recovery')>-1||q.indexOf('type=recovery')>-1||h.indexOf('access_token=')>-1)&&location.pathname.indexOf('reset.html')===-1){location.replace('/reset.html'+h+q);}}catch(e){}})();</script>
+<!-- TRAMA. — captura de fuente de registro (first-touch). NO BORRAR -->
+<script>(function(){try{if(localStorage.getItem('trama_fuente'))return;var p=new URLSearchParams(location.search);var f=p.get('utm_source')||p.get('ref')||'';var camp=p.get('utm_campaign')||'';if(!f){var r=document.referrer||'';if(r){try{var h=new URL(r).hostname.replace(/^www\./,'');if(h&&location.hostname.indexOf(h)===-1)f=h;}catch(e){}}}if(!f)f='directo';localStorage.setItem('trama_fuente',(camp?f+' / '+camp:f).slice(0,120));}catch(e){}})();</script>
 
 <!-- ═══ SEO ═══ -->
 <title>TRAMA. — Creadores de contenido UGC verificados en Argentina</title>
@@ -1097,7 +1099,9 @@ async function iniciarPago(){
     });
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||'Error al crear preferencia');
-    const url=data.sandbox_init_point||data.init_point;
+    // Producción: usamos init_point (checkout real). sandbox_init_point solo
+    // existe como fallback por si faltara el real.
+    const url=data.init_point||data.sandbox_init_point;
     window.location.href=url;
   }catch(e){
     showToast('Error: '+e.message,'err');

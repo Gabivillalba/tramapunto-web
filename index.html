@@ -488,7 +488,8 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
     <div class="plat-filters" id="platFilters"></div>
     <div class="sort-row">
       <span class="sort-label">Ordenar:</span>
-      <button class="sort-btn on" onclick="setSort('seg',this)">Mayor audiencia</button>
+      <button class="sort-btn on" onclick="setSort('random',this)">Aleatorio</button>
+<button class="sort-btn" onclick="setSort('seg',this)">Mayor audiencia</button>
       <button class="sort-btn" onclick="setSort('er',this)">Mejor engagement</button>
       <button class="sort-btn" onclick="setSort('nombre',this)">A-Z</button>
     </div>
@@ -558,7 +559,7 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 const COLORS=['#C8FF1A','#4ade80','#fb923c','#60a5fa','#f472b6','#c084fc','#f59e0b','#34d399'];
 const BGS=['#0f1a00','#0a2010','#1a0a00','#0a1020','#1a0a14','#1a0a2a','#1a1000','#0a1a14'];
 
-let allCreators=[], bolsaNiche='todos', bolsaPlats=[], bolsaSort='seg';
+let allCreators=[], bolsaNiche='todos', bolsaPlats=[], bolsaSort='random';
 
 // ── PRECIOS DINÁMICOS ──
 // Se leen de /api/precios (que a su vez lee de la tabla config,
@@ -630,6 +631,7 @@ function closeGate(){
 
 // ── SUPABASE ──
 async function loadCreators(){
+      allCreators.forEach(c=>{c._rnd=Math.random()});
   try{
     // Solo columnas públicas: NUNCA traer email ni tel al navegador.
     // Antes usaba select=* y los contactos (que son lo que se vende)
@@ -698,7 +700,8 @@ function renderBolsa(){
     return mN&&mP&&mQ;
   });
   const segN=c=>Math.max(c.ig_seg||0,c.tt_seg||0,c.yt_seg||0);
-  if(bolsaSort==='seg')list.sort((a,b)=>segN(b)-segN(a));
+  if(bolsaSort==='random')list.sort((a,b)=>(a._rnd||0)-(b._rnd||0));
+  else if(bolsaSort==='seg')list.sort((a,b)=>segN(b)-segN(a));
   else if(bolsaSort==='er')list.sort((a,b)=>(b.ig_er||0)-(a.ig_er||0));
   else list.sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''));
 

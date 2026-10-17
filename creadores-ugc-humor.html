@@ -33,10 +33,16 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1.1rem
 @media(min-width:768px){.hero{padding:4rem 4rem 2.5rem}}
 .crumb{font-size:.72rem;color:var(--muted);margin-bottom:1rem}
 .crumb a:hover{color:var(--green)}
+.n-badge{display:inline-flex;align-items:center;gap:.5rem;background:#0f1a00;border:1px solid #2a4000;color:var(--green);font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.35rem .7rem;border-radius:100px;margin-bottom:1rem}
+.n-badge .em{font-size:1rem}
 h1{font-size:2rem;font-weight:900;letter-spacing:-.02em;line-height:1.1;margin-bottom:1rem}
 @media(min-width:768px){h1{font-size:2.8rem}}
 .intro{font-size:1.05rem;color:var(--muted2);max-width:640px;margin-bottom:1.75rem}
-.cta-row{display:flex;flex-wrap:wrap;gap:.75rem}
+.mosaic{display:flex;align-items:center;margin-top:1.75rem;min-height:46px}
+.mosaic .mi{width:46px;height:46px;border-radius:50%;border:2px solid var(--black);margin-left:-12px;object-fit:cover;background:#0f1a00;display:flex;align-items:center;justify-content:center;color:var(--green);font-weight:900;font-size:.9rem;overflow:hidden}
+.mosaic .mi:first-child{margin-left:0}
+.mosaic .more{margin-left:.9rem;font-size:.82rem;color:var(--muted2)}
+.cta-row{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.75rem}
 .btn{padding:.75rem 1.3rem;border-radius:2px;font-weight:800;font-size:.8rem;letter-spacing:.03em}
 .btn-g{background:var(--green);color:#080808}
 .btn-o{border:1px solid #2a2a2a;color:var(--white)}
@@ -47,7 +53,7 @@ main{max-width:1100px;margin:0 auto;padding:1rem 1.5rem 3rem}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.9rem}
 .card{background:var(--g1);border:1px solid #1a1a1a;border-radius:4px;padding:1.1rem;text-align:center;transition:border-color .2s}
 .card:hover{border-color:#2a2a2a}
-.av{width:56px;height:56px;border-radius:50%;margin:0 auto .7rem;background:#0f1a00;border:1px solid #2a4000;display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--green);overflow:hidden}
+.av{width:66px;height:66px;border-radius:50%;margin:0 auto .7rem;background:#0f1a00;border:1px solid #2a4000;display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--green);overflow:hidden}
 .av img{width:100%;height:100%;object-fit:cover}
 .c-nom{font-weight:800;font-size:.9rem;margin-bottom:.15rem}
 .c-sub{font-size:.68rem;color:var(--muted);margin-bottom:.5rem}
@@ -69,8 +75,10 @@ footer a:hover{color:var(--green)}
 
 <header class="hero">
   <div class="crumb"><a href="/">Inicio</a> › Creadores de Humor</div>
+  <div class="n-badge"><span class="em">😂</span> Creadores de Humor</div>
   <h1>Creadores UGC de Humor en Argentina</h1>
   <p class="intro">Creadores de humor que generan sketches, contenido viral y formatos entretenidos de alto alcance. Ideales para marcas que quieren visibilidad y engagement.</p>
+  <div class="mosaic" id="mosaic"></div>
   <div class="cta-row">
     <a class="btn btn-g" href="/">Ver la bolsa completa →</a>
     <a class="btn btn-o" href="/marcas.html">Soy una marca</a>
@@ -105,7 +113,16 @@ const fmt=n=>!n?'':n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/10
   try{
     const r=await fetch(`${SB_URL}/rest/v1/creators?select=nombre,niches,ig_seg,tt_seg,yt_seg,avatar_url,rating_prom,rating_count,indice&status=eq.aprobado&order=indice.desc`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});
     const all=await r.json();
-    const list=(all||[]).filter(c=>(c.niches||[]).includes(NICHO)).slice(0,30);
+    const todos=(all||[]).filter(c=>(c.niches||[]).includes(NICHO));
+    const list=todos.slice(0,30);
+    // Mosaico de caras reales en el hero
+    const mos=document.getElementById('mosaic');
+    const conFoto=todos.filter(c=>c.avatar_url);
+    if(mos && conFoto.length>=3){
+      const caras=conFoto.slice(0,9).map(c=>`<img class="mi" src="${c.avatar_url}" alt="Creador de ${NICHO}" loading="lazy">`).join('');
+      const extra=todos.length>9?`<span class="more">+${todos.length-9} creadores</span>`:`<span class="more">${todos.length} ${todos.length===1?'creador':'creadores'}</span>`;
+      mos.innerHTML=caras+extra;
+    }
     if(!list.length){ g.innerHTML='<div class="empty">Pronto vas a ver creadores de '+NICHO+' acá. <a href="/" style="color:var(--green)">Ver la bolsa →</a></div>'; return; }
     g.innerHTML=list.map(c=>{
       const seg=fmt(c.ig_seg||c.tt_seg||c.yt_seg);

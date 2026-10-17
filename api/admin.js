@@ -330,7 +330,8 @@ export default async function handler(req, res) {
         let enviados = 0;
         for (let i = 0; i < faltan.length; i += 100) {
           const grupo = faltan.slice(i, i + 100).map(c => ({
-            from: 'TRAMA. <info.tramapunto@gmail.com>',
+            from: 'TRAMA. <info@tramapunto.com>',
+            reply_to: 'info.tramapunto@gmail.com',
             to: [c.email.trim()],
             subject: 'Cargá tu portfolio en TRAMA. 📎',
             html: html(c.nombre),

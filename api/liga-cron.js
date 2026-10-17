@@ -18,7 +18,8 @@ const SB_SERVICE    = process.env.SUPABASE_SERVICE_KEY;
 const RESEND_KEY    = process.env.RESEND_API_KEY;
 const CRON_SECRET   = process.env.CRON_SECRET;
 const SITE_URL      = process.env.SITE_URL || 'https://www.tramapunto.com';
-const FROM          = 'TRAMA. <info.tramapunto@gmail.com>';
+const FROM          = 'TRAMA. <info@tramapunto.com>';   // dominio verificado en Resend
+const REPLY_TO      = 'info.tramapunto@gmail.com';       // respuestas a la casilla real
 
 const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const DIA   = { Mon:'Lunes', Tue:'Martes', Wed:'Miércoles', Thu:'Jueves', Fri:'Viernes', Sat:'Sábado', Sun:'Domingo' };
@@ -95,6 +96,7 @@ async function enviarMailSemanal(iso){
   for (const grupo of chunk(dests, 100)){
     const batch = grupo.map(c => ({
       from: FROM,
+      reply_to: REPLY_TO,
       to: [c.email.trim()],
       subject: 'Tu semana en la Liga TRAMA. 🔥',
       html: emailSemana(c.nombre, dias),

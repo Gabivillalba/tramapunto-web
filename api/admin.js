@@ -180,6 +180,80 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
+      // — Crear cuentas de acceso para creators que no la tienen (backfill) —
+      // Compara los emails de la tabla creators contra los usuarios de Auth,
+      // y para cada uno que falte: crea la cuenta (confirmada, sin contraseña)
+      // y le manda el email de "definí tu contraseña" (recover).
+      // Procesa de a lotes (payload.limit, default 20) para no timeoutear ni
+      // pasarse de los límites de envío. Devolvé cuántos quedan.
+      case 'backfill_cuentas': {
+        const LOTE = Math.min(Number(payload.limit) || 20, 40);
+
+        // 1) Emails de todos los creators
+        const creators = await sb('creators?select=email');
+        const emailsCreators = [...new Set(
+          (creators || [])
+            .map(c => (c.email || '').trim().toLowerCase())
+            .filter(Boolean)
+        )];
+
+        // 2) Emails que YA tienen cuenta en Auth (paginado)
+        const authEmails = new Set();
+        let page = 1;
+        for (;;) {
+          const r = await fetch(`${SB_URL}/auth/v1/admin/users?page=${page}&per_page=1000`, {
+            headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}` },
+          });
+          if (!r.ok) break;
+          const j = await r.json();
+          const list = j.users || j.data || (Array.isArray(j) ? j : []);
+          list.forEach(u => u.email && authEmails.add(u.email.trim().toLowerCase()));
+          if (!list.length || list.length < 1000) break;
+          page++;
+          if (page > 20) break; // tope de seguridad
+        }
+
+        // 3) Los que faltan
+        const faltantes = emailsCreators.filter(e => !authEmails.has(e));
+        const aProcesar = faltantes.slice(0, LOTE);
+
+        let creadas = 0, mails = 0;
+        const errores = [];
+        for (const email of aProcesar) {
+          try {
+            // Crear usuario confirmado, sin contraseña (la define por email)
+            const cr = await fetch(`${SB_URL}/auth/v1/admin/users`, {
+              method: 'POST',
+              headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, email_confirm: true }),
+            });
+            if (!cr.ok) {
+              const e = await cr.json().catch(() => ({}));
+              throw new Error(e.msg || e.message || `HTTP ${cr.status}`);
+            }
+            creadas++;
+            // Mandar el email de "definí tu contraseña"
+            const rec = await fetch(`${SB_URL}/auth/v1/recover`, {
+              method: 'POST',
+              headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email }),
+            });
+            if (rec.ok) mails++;
+          } catch (e) {
+            errores.push({ email, error: e.message });
+          }
+        }
+
+        return res.status(200).json({
+          ok: true,
+          total_faltantes: faltantes.length,
+          creadas,
+          mails,
+          restantes: faltantes.length - aProcesar.length,
+          errores,
+        });
+      }
+
       default:
         return res.status(400).json({ error: `Acción desconocida: ${action}` });
     }

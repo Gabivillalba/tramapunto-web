@@ -254,6 +254,40 @@ export default async function handler(req, res) {
         });
       }
 
+      // — Definir una contraseña nueva para un creator (desde el admin) —
+      case 'set_creator_password': {
+        const { email, password } = payload;
+        if (!email || !password) return res.status(400).json({ error: 'Faltan email/password' });
+        if (String(password).length < 6) return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+        // Buscar la cuenta de Auth por email
+        const u = await fetch(
+          `${SB_URL}/auth/v1/admin/users?email=${encodeURIComponent(email)}`,
+          { headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}` } }
+        ).then(r => r.ok ? r.json() : null);
+        const authId = u?.users?.[0]?.id || u?.[0]?.id || null;
+        if (!authId) return res.status(404).json({ error: 'Ese creator no tiene cuenta de acceso' });
+        const up = await fetch(`${SB_URL}/auth/v1/admin/users/${authId}`, {
+          method: 'PUT',
+          headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: String(password) }),
+        });
+        if (!up.ok) { const e = await up.json().catch(() => ({})); throw new Error(e.msg || e.message || `HTTP ${up.status}`); }
+        return res.status(200).json({ ok: true });
+      }
+
+      // — Mandarle a un creator el email de reseteo de contraseña —
+      case 'send_reset': {
+        const { email } = payload;
+        if (!email) return res.status(400).json({ error: 'Falta email' });
+        const rr = await fetch(`${SB_URL}/auth/v1/recover`, {
+          method: 'POST',
+          headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        if (!rr.ok) { const e = await rr.json().catch(() => ({})); throw new Error(e.msg || e.message || `HTTP ${rr.status}`); }
+        return res.status(200).json({ ok: true });
+      }
+
       default:
         return res.status(400).json({ error: `Acción desconocida: ${action}` });
     }

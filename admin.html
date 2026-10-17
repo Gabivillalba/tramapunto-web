@@ -170,6 +170,7 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
     </div>
     <div class="top-actions">
       <button class="btn-sm" onclick="loadAll()">↻ Actualizar</button>
+      <button class="btn-sm" onclick="backfillCuentas()">🔑 Recuperar accesos</button>
       <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
     </div>
   </div>
@@ -469,6 +470,31 @@ function closeModal(){
 document.getElementById('modalBg').addEventListener('click',e=>{
   if(e.target===document.getElementById('modalBg'))closeModal();
 });
+
+// ── RECUPERAR ACCESOS (backfill de cuentas) ──
+// Crea las cuentas de login para los creators que no la tienen y les manda
+// el email de "definí tu contraseña". Procesa de a lotes hasta terminar.
+async function backfillCuentas(){
+  if(!confirm('Esto va a:\n\n• Crear la cuenta de acceso para todos los creators que hoy no pueden loguearse.\n• Mandarles un email de "definí tu contraseña".\n\nSe hace una sola vez. ¿Continuar?')) return;
+
+  let total=null, creadasAcc=0, mailsAcc=0, erroresAcc=[];
+  showToast('Procesando cuentas faltantes...','info');
+  try{
+    for(let vuelta=0; vuelta<25; vuelta++){
+      const {total_faltantes, creadas, mails, restantes, errores}=await adminCall('backfill_cuentas',{limit:20});
+      if(total===null) total=total_faltantes;
+      creadasAcc+=creadas||0;
+      mailsAcc+=mails||0;
+      if(errores&&errores.length) erroresAcc.push(...errores);
+      if(restantes<=0 || (creadas===0 && (!errores||!errores.length))) break;
+      showToast(`Creando accesos... ${creadasAcc} listos (quedan ${restantes})`,'info');
+    }
+    if(erroresAcc.length) console.warn('Backfill — con errores:', erroresAcc);
+    showToast(`✓ ${creadasAcc} cuenta(s) creada(s), ${mailsAcc} email(s) de "definí tu contraseña" enviado(s)`+(erroresAcc.length?` · ${erroresAcc.length} con error (ver consola)`:''),'ok');
+  }catch(e){
+    showToast('Error en el proceso: '+e.message,'err');
+  }
+}
 
 // ── NOTA INTERNA ──
 async function saveNota(){

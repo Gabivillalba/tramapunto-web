@@ -47,6 +47,19 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 @media(min-width:768px){.stat{padding:1.25rem 4rem}}
 .stat-n{font-size:1.8rem;font-weight:900;letter-spacing:-.02em}
 .stat-l{font-size:.62rem;color:var(--muted);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-top:.15rem}
+.dash-section{padding:1.5rem}
+@media(min-width:768px){.dash-section{padding:1.75rem 4rem}}
+.dash-cols{display:grid;grid-template-columns:1fr;gap:1.25rem}
+@media(min-width:768px){.dash-cols{grid-template-columns:1fr 1fr}}
+.dash-box{background:#111;border:1px solid #1f1f1f;border-radius:4px;padding:1.1rem 1.25rem}
+.dash-box h3{font-size:.6rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--green);margin:0 0 .6rem}
+.dash-row{display:flex;align-items:center;gap:.6rem;padding:.5rem 0;border-bottom:1px solid #161616;font-size:.8rem}
+.dash-row:last-child{border:none}
+.dash-pos{font-weight:900;color:var(--green);min-width:16px;text-align:center}
+.dash-name{font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-val{color:var(--muted);font-size:.72rem;white-space:nowrap}
+.dash-empty{color:var(--muted);font-size:.78rem;padding:.4rem 0}
+.dash-champ{background:#1a1200;border:1px solid #2a2000;border-radius:4px;padding:.9rem 1.25rem;margin-top:1.25rem;font-size:.82rem;color:#f59e0b}
 
 .filters{padding:1rem 1.5rem;border-bottom:1px solid #161616;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
 @media(min-width:768px){.filters{padding:1rem 4rem}}
@@ -245,7 +258,10 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 
   <!-- TABS -->
   <div class="tabs">
-    <button class="tab on" id="tabCreators" onclick="switchTab('creators')">
+    <button class="tab on" id="tabDashboard" onclick="switchTab('dashboard')">
+      📊 Dashboard
+    </button>
+    <button class="tab" id="tabCreators" onclick="switchTab('creators')">
       Creators <span class="tab-badge" id="badgeCreators">—</span>
     </button>
     <button class="tab" id="tabCampanias" onclick="switchTab('campanias')">
@@ -256,8 +272,31 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
     </button>
   </div>
 
+  <!-- ══ VISTA DASHBOARD ══ -->
+  <div class="tab-view on" id="viewDashboard">
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="m-ingresos" style="color:var(--green)">—</div><div class="stat-l">Ingresos totales</div></div>
+      <div class="stat"><div class="stat-n" id="m-ventas">—</div><div class="stat-l">Conexiones vendidas</div></div>
+      <div class="stat"><div class="stat-n" id="m-ventasMes">—</div><div class="stat-l">Ventas del mes</div></div>
+      <div class="stat"><div class="stat-n" id="m-ingresosMes" style="color:var(--green)">—</div><div class="stat-l">Ingresos del mes</div></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="m-aprobados">—</div><div class="stat-l">Creadores aprobados</div></div>
+      <div class="stat"><div class="stat-n" id="m-pendientes" style="color:#f59e0b">—</div><div class="stat-l">Pendientes</div></div>
+      <div class="stat"><div class="stat-n" id="m-jugando">—</div><div class="stat-l">Jugando la Liga 🔥</div></div>
+      <div class="stat"><div class="stat-n" id="m-campanias">—</div><div class="stat-l">Campañas activas</div></div>
+    </div>
+    <div class="dash-section">
+      <div class="dash-cols">
+        <div class="dash-box"><h3>Top creadores por ventas</h3><div id="m-top"><div class="dash-empty">Cargando…</div></div></div>
+        <div class="dash-box"><h3>Últimas ventas</h3><div id="m-ultimas"><div class="dash-empty">Cargando…</div></div></div>
+      </div>
+      <div class="dash-champ" id="m-campeon">—</div>
+    </div>
+  </div>
+
   <!-- ══ VISTA CREATORS ══ -->
-  <div class="tab-view on" id="viewCreators">
+  <div class="tab-view" id="viewCreators">
     <div class="stats">
       <div class="stat"><div class="stat-n" id="st-total" style="color:var(--white)">—</div><div class="stat-l">Totales</div></div>
       <div class="stat"><div class="stat-n" id="st-pend" style="color:var(--amber)">—</div><div class="stat-l">Pendientes</div></div>
@@ -438,7 +477,7 @@ function doLogout(){
 // ══════════ TABS ══════════
 let allCampanias = [];
 let campFilter = 'todas';
-let currentTab = 'creators';
+let currentTab = 'dashboard';
 
 // Manda el mail "cargá tu portfolio" a los creadores que todavía no lo cargaron
 async function recordarPortfolio(){
@@ -452,14 +491,42 @@ async function recordarPortfolio(){
 
 function switchTab(t){
   currentTab = t;
-  ['creators','campanias','config'].forEach(k=>{
+  ['dashboard','creators','campanias','config'].forEach(k=>{
     const tabEl=document.getElementById('tab'+k.charAt(0).toUpperCase()+k.slice(1));
     const viewEl=document.getElementById('view'+k.charAt(0).toUpperCase()+k.slice(1));
     if(tabEl) tabEl.classList.toggle('on', t===k);
     if(viewEl) viewEl.classList.toggle('on', t===k);
   });
+  if(t==='dashboard') loadMetrics();
   if(t==='campanias' && allCampanias.length===0) loadCampanias();
   if(t==='config') loadConfig();
+}
+
+// ══════════ DASHBOARD (MÉTRICAS) ══════════
+async function loadMetrics(){
+  try{
+    const {data:m}=await adminCall('metrics');
+    const money=n=>'$'+Number(n||0).toLocaleString('es-AR');
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+    set('m-ingresos',money(m.ingresos)); set('m-ventas',m.ventas);
+    set('m-ventasMes',m.ventasMes); set('m-ingresosMes',money(m.ingresosMes));
+    set('m-aprobados',m.creadores.aprobados); set('m-pendientes',m.creadores.pendientes);
+    set('m-jugando',m.creadores.jugando); set('m-campanias',m.campanias.activas);
+
+    const top=document.getElementById('m-top');
+    top.innerHTML=(m.top&&m.top.length)
+      ? m.top.map((t,i)=>`<div class="dash-row"><span class="dash-pos">${i+1}</span><span class="dash-name">${t.nombre}</span><span class="dash-val">${t.ventas} ${t.ventas===1?'venta':'ventas'} · ${money(t.monto)}</span></div>`).join('')
+      : '<div class="dash-empty">Todavía no hay ventas.</div>';
+
+    const ult=document.getElementById('m-ultimas');
+    ult.innerHTML=(m.ultimas&&m.ultimas.length)
+      ? m.ultimas.map(u=>{const f=u.fecha?new Date(u.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):'';return `<div class="dash-row"><span class="dash-name">${u.nombre}</span><span class="dash-val">${money(u.monto)} · ${u.origen==='campania'?'campaña':'bolsa'} · ${f}</span></div>`;}).join('')
+      : '<div class="dash-empty">Sin ventas recientes.</div>';
+
+    document.getElementById('m-campeon').innerHTML = m.campeon
+      ? `👑 Campeón de la Liga: <strong style="color:var(--green)">${m.campeon}</strong>`
+      : '👑 Liga: todavía sin campeón coronado.';
+  }catch(e){ showToast('Error al cargar métricas: '+e.message,'err'); }
 }
 
 // ══════════ CONFIGURACIÓN (PRECIOS) ══════════
@@ -636,6 +703,7 @@ async function loadAll(){
     document.getElementById('badgeCreators').textContent=allCreators.length;
     const now=new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
     document.getElementById('panelMeta').textContent=`Última actualización: ${now}`;
+    loadMetrics();
     loadCampanias();
   }catch(e){
     document.getElementById('cardsList').innerHTML=`<div class="empty">Error al cargar: ${e.message}</div>`;

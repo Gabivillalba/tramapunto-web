@@ -369,6 +369,64 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, fotos });
       }
 
+      // — Métricas del negocio para el dashboard —
+      case 'metrics': {
+        const [conexiones, creators, campanias] = await Promise.all([
+          sb('conexiones?select=monto,origen,estado,creator_id,created_at').catch(() => []),
+          sb('creators?select=id,nombre,status,racha,es_campeon,ig_user').catch(() => []),
+          sb('campanias?select=estado').catch(() => []),
+        ]);
+        const num = v => Number(v || 0);
+        const pagadas = (conexiones || []).filter(c => (c.estado || 'pagado') === 'pagado');
+        const ym = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires', year: 'numeric', month: '2-digit' }).format(new Date()).slice(0, 7);
+        const esDelMes = c => (c.created_at || '').slice(0, 7) === ym;
+
+        const ingresos = pagadas.reduce((a, c) => a + num(c.monto), 0);
+        const delMes = pagadas.filter(esDelMes);
+        const origen = {
+          bolsa: pagadas.filter(c => c.origen !== 'campania').length,
+          campania: pagadas.filter(c => c.origen === 'campania').length,
+        };
+
+        const byId = Object.fromEntries((creators || []).map(c => [String(c.id), c.nombre]));
+        const porCreador = {};
+        pagadas.forEach(c => {
+          const k = String(c.creator_id);
+          if (!k || k === 'null') return;
+          (porCreador[k] = porCreador[k] || { ventas: 0, monto: 0 }).ventas++;
+          porCreador[k].monto += num(c.monto);
+        });
+        const top = Object.entries(porCreador)
+          .map(([id, v]) => ({ nombre: byId[id] || '—', ventas: v.ventas, monto: v.monto }))
+          .sort((a, b) => b.ventas - a.ventas).slice(0, 5);
+
+        const ultimas = [...pagadas]
+          .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || '')).slice(0, 6)
+          .map(c => ({ nombre: byId[String(c.creator_id)] || '—', monto: num(c.monto), origen: c.origen || 'bolsa', fecha: c.created_at }));
+
+        const cr = creators || [];
+        const creadores = {
+          total: cr.length,
+          aprobados: cr.filter(c => c.status === 'aprobado').length,
+          pendientes: cr.filter(c => c.status === 'pendiente' || !c.status).length,
+          rechazados: cr.filter(c => c.status === 'rechazado').length,
+          jugando: cr.filter(c => num(c.racha) > 0).length,
+        };
+        const champ = cr.find(c => c.es_campeon);
+        const cp = campanias || [];
+
+        return res.status(200).json({
+          ok: true,
+          data: {
+            ingresos, ventas: pagadas.length,
+            ventasMes: delMes.length, ingresosMes: delMes.reduce((a, c) => a + num(c.monto), 0),
+            origen, creadores, top, ultimas,
+            campeon: champ ? (champ.ig_user || champ.nombre) : null,
+            campanias: { total: cp.length, activas: cp.filter(c => c.estado === 'activa').length, en_revision: cp.filter(c => c.estado === 'en_revision').length },
+          },
+        });
+      }
+
       default:
         return res.status(400).json({ error: `Acción desconocida: ${action}` });
     }

@@ -138,6 +138,12 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .porto-callout{background:#0f1a00;border:1px solid #2a4000;border-radius:3px;padding:.9rem 1.1rem;margin-bottom:1.1rem}
 .porto-callout-t{font-size:.8rem;font-weight:900;color:var(--green);margin-bottom:.3rem}
 .porto-callout-d{font-size:.74rem;color:var(--muted2);line-height:1.5}
+.fotos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:.5rem;margin-bottom:.75rem}
+.foto-item{position:relative;aspect-ratio:1;border-radius:2px;overflow:hidden;border:1px solid #222}
+.foto-item img{width:100%;height:100%;object-fit:cover;display:block}
+.foto-del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.72);color:#fff;border:none;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:.68rem;line-height:1;display:flex;align-items:center;justify-content:center}
+.foto-add{display:inline-block;background:#0d0d0d;border:1px dashed #333;color:var(--green);padding:.7rem 1.1rem;font-size:.78rem;font-weight:700;border-radius:2px;cursor:pointer;margin-bottom:1.5rem;transition:border-color .2s}
+.foto-add:hover{border-color:var(--green)}
 .btn-save{background:var(--green);color:var(--black);border:none;padding:.75rem 1.75rem;font-weight:900;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s}
 .btn-save:hover{opacity:.85}
 .btn-save:disabled{opacity:.5;cursor:not-allowed}
@@ -689,8 +695,14 @@ function renderCreatorTab(i,el){
         <div class="fg-edit fg-full"><label>Colaboraciones anteriores</label><textarea id="e-colabs" placeholder="Marcas con las que ya trabajaste...">${p.colabs||''}</textarea></div>
       </div>
 
+      <div class="sec-title">Fotos de muestra</div>
+      <p style="font-size:.76rem;color:var(--muted2);line-height:1.5;margin-bottom:.9rem">Subí fotos de tu contenido. Las marcas las ven como preview antes de contactarte. (Se guardan al toque, no vuelven a revisión.)</p>
+      <div id="fotosGrid" class="fotos-grid"></div>
+      <label class="foto-add">📷 Agregar fotos<input type="file" accept="image/*" multiple style="display:none" onchange="subirFotos(this)"></label>
+
       <button class="btn-save" onclick="saveCreator()">Guardar y enviar a revisión →</button>
     </div>`;
+    renderFotos();
   }
   else if(i===5){
     el.innerHTML=`<div class="tab-content active" id="contactosWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
@@ -995,6 +1007,47 @@ async function loadComprados(wrapId){
     <div class="sec-title">Creadores comprados (${cxs.length})</div>
     <div class="cx-list">${items}</div>
   </div>`;
+}
+
+// ── FOTOS (muestras del creador, se guardan en Supabase Storage) ──
+function renderFotos(){
+  const g=document.getElementById('fotosGrid'); if(!g)return;
+  const fotos=(userProfile&&userProfile.fotos)||[];
+  g.innerHTML = fotos.length
+    ? fotos.map((u,i)=>`<div class="foto-item"><img src="${u}" alt=""><button class="foto-del" title="Quitar" onclick="borrarFoto(${i})">✕</button></div>`).join('')
+    : `<div style="color:var(--muted);font-size:.76rem;padding:.4rem 0">Sin fotos todavía.</div>`;
+}
+async function subirFotos(input){
+  const files=[...input.files]; input.value='';
+  if(!files.length)return;
+  showToast('Subiendo fotos...','info');
+  const token=getToken();
+  const nuevas=[];
+  for(const f of files){
+    if(!f.type.startsWith('image/')) continue;
+    const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'');
+    const path=`${userProfile.id}/${Date.now()}_${safe}`;
+    try{
+      const r=await fetch(`${SB_URL}/storage/v1/object/creator-fotos/${path}`,{
+        method:'POST',
+        headers:{'apikey':SB_ANON,'Authorization':'Bearer '+token},
+        body:f
+      });
+      if(r.ok) nuevas.push(`${SB_URL}/storage/v1/object/public/creator-fotos/${path}`);
+    }catch(_){}
+  }
+  if(!nuevas.length){ showToast('No se pudieron subir las fotos','err'); return; }
+  const fotos=[...((userProfile.fotos)||[]), ...nuevas];
+  const ok=await sbPatch('creators',`id=eq.${userProfile.id}`,{fotos},getToken());
+  if(ok){ userProfile.fotos=fotos; renderFotos(); showToast('✓ Fotos subidas','ok'); }
+  else showToast('Error al guardar las fotos','err');
+}
+async function borrarFoto(i){
+  const fotos=[...((userProfile.fotos)||[])];
+  fotos.splice(i,1);
+  const ok=await sbPatch('creators',`id=eq.${userProfile.id}`,{fotos},getToken());
+  if(ok){ userProfile.fotos=fotos; renderFotos(); }
+  else showToast('Error al quitar la foto','err');
 }
 
 // ── TOAST ──

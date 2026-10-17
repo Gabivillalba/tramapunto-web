@@ -186,6 +186,16 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .semana-day.today .semana-d{color:var(--green)}
 .semana-badge{display:inline-block;font-size:.54rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .5rem;border-radius:20px;margin-bottom:.45rem}
 .semana-text{font-size:.82rem;color:var(--white);line-height:1.5}
+.cx-count{display:flex;align-items:baseline;gap:.6rem;margin-bottom:1.5rem}
+.cx-count-n{font-size:2.2rem;font-weight:900;color:var(--green);line-height:1}
+.cx-count-l{font-size:.8rem;color:var(--muted2);font-weight:700}
+.cx-list{display:flex;flex-direction:column;gap:.5rem}
+.cx-item{display:flex;align-items:center;gap:.875rem;background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:.9rem 1rem}
+.cx-ic{width:40px;height:40px;min-width:40px;border-radius:50%;background:#0d0d0d;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-size:1.1rem;overflow:hidden}
+.cx-body{flex:1;min-width:0}
+.cx-name{font-size:.88rem;font-weight:700}
+.cx-meta{font-size:.68rem;color:var(--muted);margin-top:.1rem}
+.cx-contact{font-size:.74rem;color:var(--green);margin-top:.35rem;word-break:break-word}
 </style>
 </head>
 <body>
@@ -514,7 +524,7 @@ function showDash(){
 
 function buildTabs(){
   const tabs = userType==='creator'
-    ?['Mi perfil','🔥 Liga','Mis redes','Estado','Editar']
+    ?['Mi perfil','🔥 Liga','Mis redes','Estado','Editar','📊 Contactos']
     :['Mi cuenta','Creators guardados','Mis conexiones','Editar'];
   document.getElementById('dashTabs').innerHTML = tabs.map((t,i)=>
     `<button class="tab${i===0?' active':''}" onclick="switchTab(${i},this)">${t}</button>`
@@ -670,6 +680,10 @@ function renderCreatorTab(i,el){
       <button class="btn-save" onclick="saveCreator()">Guardar y enviar a revisión →</button>
     </div>`;
   }
+  else if(i===5){
+    el.innerHTML=`<div class="tab-content active" id="contactosWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadContactosCreator();
+  }
 }
 
 // ── MARCA TABS ──
@@ -695,7 +709,8 @@ function renderMarcaTab(i,el){
     el.innerHTML=`<div class="tab-content active"><div class="sec-title">Creators guardados</div><div class="empty-state"><div>🔖</div>Todavía no guardaste ningún creator.<br><a href="/" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
   }
   else if(i===2){
-    el.innerHTML=`<div class="tab-content active"><div class="sec-title">Historial de conexiones</div><div class="empty-state"><div>📭</div>Todavía no realizaste ninguna conexión.<br><a href="/" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Ver creators →</a></div></div>`;
+    el.innerHTML=`<div class="tab-content active" id="cxMarcaWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadConexionesMarca();
   }
   else if(i===3){
     el.innerHTML=`<div class="tab-content active">
@@ -919,6 +934,51 @@ async function enviarCumplir(extra){
     showToast(res.error||'No se pudo registrar la misión','err');
     await loadLiga();   // re-habilita los botones (trivia errada / falta link)
   }
+}
+
+// ── CONEXIONES (contactos comprados) ──
+// Vista del CREADOR: qué marcas compraron su contacto (+ recuento)
+async function loadContactosCreator(){
+  const wrap=document.getElementById('contactosWrap'); if(!wrap)return;
+  const rows=await sbGet('conexiones',`creator_id=eq.${encodeURIComponent(userProfile.id)}&estado=eq.pagado&select=marca_email,marca_nombre,origen,created_at&order=created_at.desc`,getToken());
+  const n=rows.length;
+  const items = n ? rows.map(r=>{
+    const f=r.created_at?new Date(r.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
+    const quien=r.marca_nombre||r.marca_email||'Marca';
+    return `<div class="cx-item"><div class="cx-ic">🏢</div><div class="cx-body"><div class="cx-name">${quien}</div><div class="cx-meta">${f}${r.origen==='campania'?' · campaña':''}</div></div></div>`;
+  }).join('') : `<div class="empty-state"><div>📭</div>Todavía ninguna marca compró tu contacto.<br>Completá tu perfil y entrá a la Liga para ganar visibilidad.</div>`;
+  wrap.innerHTML=`<div class="tab-content active">
+    <div class="sec-title">Marcas que compraron tu contacto</div>
+    <div class="cx-count"><span class="cx-count-n">${n}</span><span class="cx-count-l">${n===1?'marca te contactó':'marcas te contactaron'}</span></div>
+    <div class="cx-list">${items}</div>
+  </div>`;
+}
+
+// Vista de la MARCA: creadores cuyo contacto ya desbloqueó (con el contacto a mano)
+async function loadConexionesMarca(){
+  const wrap=document.getElementById('cxMarcaWrap'); if(!wrap)return;
+  const email=currentUser.email;
+  const cxs=await sbGet('conexiones',`marca_email=eq.${encodeURIComponent(email)}&estado=eq.pagado&select=creator_id,origen,created_at&order=created_at.desc`,getToken());
+  if(!cxs.length){
+    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Mis conexiones</div><div class="empty-state"><div>📭</div>Todavía no desbloqueaste ningún contacto.<br><a href="/" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
+    return;
+  }
+  const ids=[...new Set(cxs.map(c=>c.creator_id).filter(Boolean))];
+  const inList='('+ids.map(encodeURIComponent).join(',')+')';
+  const creators=await sbGet('creators',`id=in.${inList}&select=id,nombre,apellido,email,ig_user,tt_user,yt_user,tel,avatar_url`,getToken());
+  const byId=Object.fromEntries((creators||[]).map(c=>[String(c.id),c]));
+  const items=cxs.map(cx=>{
+    const c=byId[String(cx.creator_id)]; if(!c)return '';
+    const f=cx.created_at?new Date(cx.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
+    const contacto=[c.email?`✉ ${c.email}`:'',c.ig_user?`📸 ${c.ig_user}`:'',c.tel?`💬 ${c.tel}`:''].filter(Boolean).join(' · ');
+    const nom=`${c.nombre||''} ${c.apellido||''}`.trim()||'Creador';
+    const av=c.avatar_url?`<img src="${c.avatar_url}" style="width:100%;height:100%;object-fit:cover">`:'🎥';
+    return `<div class="cx-item"><div class="cx-ic">${av}</div><div class="cx-body"><div class="cx-name">${nom}</div><div class="cx-meta">${f}${cx.origen==='campania'?' · campaña':''}</div><div class="cx-contact">${contacto||'Sin datos de contacto'}</div></div></div>`;
+  }).join('');
+  wrap.innerHTML=`<div class="tab-content active">
+    <div class="sec-title">Mis conexiones (${cxs.length})</div>
+    <div class="cx-list">${items}</div>
+  </div>`;
 }
 
 // ── TOAST ──

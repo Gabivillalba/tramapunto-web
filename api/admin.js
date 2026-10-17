@@ -160,7 +160,15 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Precio inválido' });
           }
         }
-        await sb(`config?clave=eq.${encodeURIComponent(clave)}`, 'PATCH', { valor: String(valor) });
+        // Upsert manual: PATCH si la clave existe, INSERT si no.
+        // (Antes un PATCH sobre una clave inexistente devolvía OK sin
+        //  cambiar nada → el precio quedaba "pegado" en el fallback.)
+        const existe = await sb(`config?clave=eq.${encodeURIComponent(clave)}&select=clave`);
+        if (existe && existe.length) {
+          await sb(`config?clave=eq.${encodeURIComponent(clave)}`, 'PATCH', { valor: String(valor) });
+        } else {
+          await sb('config', 'POST', { clave, valor: String(valor) });
+        }
         return res.status(200).json({ ok: true });
       }
 

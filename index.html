@@ -1,14 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="google-site-verification" content="utPzLJVT4JVR4dEpPBghptamBLN1DzAqcl2Yoqb4yQw" />
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- Reenvía los links de recuperación de contraseña que caen en el home -->
-<script>
-(function(){try{var h=location.hash||'';if(h.indexOf('type=recovery')>-1&&location.pathname!=='/reset.html'){location.replace('/reset.html'+h);}}catch(e){}})();
-</script>
-  
+
 <!-- ═══ SEO ═══ -->
 <title>TRAMA. — Creadores de contenido UGC verificados en Argentina</title>
 <meta name="description" content="Conectá tu marca con creadores de contenido UGC e influencers verificados uno por uno. Marketplace argentino de creator marketing. Publicá tu campaña gratis.">
@@ -488,8 +483,7 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
     <div class="plat-filters" id="platFilters"></div>
     <div class="sort-row">
       <span class="sort-label">Ordenar:</span>
-      <button class="sort-btn on" onclick="setSort('random',this)">Aleatorio</button>
-<button class="sort-btn" onclick="setSort('seg',this)">Mayor audiencia</button>
+      <button class="sort-btn on" onclick="setSort('seg',this)">Mayor audiencia</button>
       <button class="sort-btn" onclick="setSort('er',this)">Mejor engagement</button>
       <button class="sort-btn" onclick="setSort('nombre',this)">A-Z</button>
     </div>
@@ -559,7 +553,7 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 const COLORS=['#C8FF1A','#4ade80','#fb923c','#60a5fa','#f472b6','#c084fc','#f59e0b','#34d399'];
 const BGS=['#0f1a00','#0a2010','#1a0a00','#0a1020','#1a0a14','#1a0a2a','#1a1000','#0a1a14'];
 
-let allCreators=[], bolsaNiche='todos', bolsaPlats=[], bolsaSort='random';
+let allCreators=[], bolsaNiche='todos', bolsaPlats=[], bolsaSort='seg';
 
 // ── PRECIOS DINÁMICOS ──
 // Se leen de /api/precios (que a su vez lee de la tabla config,
@@ -631,7 +625,6 @@ function closeGate(){
 
 // ── SUPABASE ──
 async function loadCreators(){
-      allCreators.forEach(c=>{c._rnd=Math.random()});
   try{
     // Solo columnas públicas: NUNCA traer email ni tel al navegador.
     // Antes usaba select=* y los contactos (que son lo que se vende)
@@ -700,8 +693,7 @@ function renderBolsa(){
     return mN&&mP&&mQ;
   });
   const segN=c=>Math.max(c.ig_seg||0,c.tt_seg||0,c.yt_seg||0);
-  if(bolsaSort==='random')list.sort((a,b)=>(a._rnd||0)-(b._rnd||0));
-  else if(bolsaSort==='seg')list.sort((a,b)=>segN(b)-segN(a));
+  if(bolsaSort==='seg')list.sort((a,b)=>segN(b)-segN(a));
   else if(bolsaSort==='er')list.sort((a,b)=>(b.ig_er||0)-(a.ig_er||0));
   else list.sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''));
 
@@ -769,10 +761,11 @@ document.getElementById('contactModal').addEventListener('click',e=>{if(e.target
 async function iniciarPago(){
   const btn=document.querySelector('.m-pay-btn');
   btn.disabled=true;btn.textContent='Conectando con MercadoPago...';
-  const session=localStorage.getItem('trama_marca');
-  const marcaData=session?JSON.parse(session):{};
-  const marcaEmail=marcaData.email||'anonimo@trama.com';
-  const marcaNombre=marcaData.nombre||'Marca TRAMA.';
+  // El comprador puede ser una marca O un creador (se compran contactos entre creadores)
+  const session=localStorage.getItem('trama_marca')||localStorage.getItem('trama_creator');
+  const buyer=session?JSON.parse(session):{};
+  const marcaEmail=buyer.email||'anonimo@trama.com';
+  const marcaNombre=buyer.nombre||'Comprador TRAMA.';
   try{
     const res=await fetch('/api/crear-preferencia',{
       method:'POST',
@@ -786,7 +779,7 @@ async function iniciarPago(){
     });
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||'Error al crear preferencia');
-    const url=data.init_point;
+    const url=data.sandbox_init_point||data.init_point;
     window.location.href=url;
   }catch(e){
     showToast('Error: '+e.message,'err');

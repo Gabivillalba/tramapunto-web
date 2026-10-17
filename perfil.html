@@ -734,7 +734,8 @@ function renderMarcaTab(i,el){
     </div>`;
   }
   else if(i===1){
-    el.innerHTML=`<div class="tab-content active"><div class="sec-title">Creators guardados</div><div class="empty-state"><div>🔖</div>Todavía no guardaste ningún creator.<br><a href="/" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
+    el.innerHTML=`<div class="tab-content active" id="guardadosWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadGuardados('guardadosWrap');
   }
   else if(i===2){
     el.innerHTML=`<div class="tab-content active" id="cxMarcaWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
@@ -1007,6 +1008,61 @@ async function loadComprados(wrapId){
     <div class="sec-title">Creadores comprados (${cxs.length})</div>
     <div class="cx-list">${items}</div>
   </div>`;
+}
+
+// ── CREATORS GUARDADOS (favoritos de la marca) ──
+function fmtSegP(n){if(!n)return'—';return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':n}
+async function loadGuardados(wrapId){
+  const wrap=document.getElementById(wrapId); if(!wrap)return;
+  const email=currentUser.email;
+  const favs=await sbGet('favoritos',`marca_email=eq.${encodeURIComponent(email)}&select=creator_id,created_at&order=created_at.desc`,getToken());
+  if(!favs||!favs.length){
+    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Creators guardados</div><div class="empty-state"><div>🔖</div>Todavía no guardaste ningún creator.<br><a href="/" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
+    return;
+  }
+  const ids=[...new Set(favs.map(f=>f.creator_id).filter(Boolean))];
+  const inList='('+ids.map(encodeURIComponent).join(',')+')';
+  // Solo columnas públicas (sin email/tel): guardar no revela el contacto.
+  const creators=await sbGet('creators',`id=in.${inList}&status=eq.aprobado&select=id,nombre,niches,pais,ciudad,ig_seg,tt_seg,yt_seg,ig_er,avatar_url`,getToken());
+  const byId=Object.fromEntries((creators||[]).map(c=>[String(c.id),c]));
+  const items=favs.map(f=>{
+    const c=byId[String(f.creator_id)]; if(!c)return '';
+    const nom=c.nombre||'Creador';
+    const seg=fmtSegP(c.ig_seg||c.tt_seg||c.yt_seg);
+    const niches=(c.niches||[]).join(' · ')||'—';
+    const av=c.avatar_url?`<img src="${c.avatar_url}" style="width:100%;height:100%;object-fit:cover">`:'🎥';
+    return `<div class="cx-item" id="fav-${c.id}">
+      <div class="cx-ic">${av}</div>
+      <div class="cx-body">
+        <div class="cx-name">${nom}</div>
+        <div class="cx-meta">${niches}</div>
+        <div class="cx-contact">${seg} seguidores${c.ig_er?` · ${c.ig_er}% eng.`:''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.4rem;align-items:flex-end">
+        <a href="/" style="background:var(--green);color:#080808;font-size:.64rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:.4rem .7rem;border-radius:2px;text-decoration:none;white-space:nowrap">Conectar →</a>
+        <button onclick="quitarGuardado('${c.id}')" style="background:none;border:1px solid #2a2a2a;color:var(--muted);font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.35rem .6rem;border-radius:2px;cursor:pointer;white-space:nowrap">Quitar</button>
+      </div>
+    </div>`;
+  }).join('');
+  wrap.innerHTML=`<div class="tab-content active">
+    <div class="sec-title">Creators guardados (${ids.length})</div>
+    <div class="cx-list">${items}</div>
+  </div>`;
+}
+async function quitarGuardado(id){
+  const email=currentUser.email;
+  const el=document.getElementById('fav-'+id);
+  if(el){ el.style.opacity='.4'; }
+  try{
+    await fetch(`${SB_URL}/rest/v1/favoritos?marca_email=eq.${encodeURIComponent(email)}&creator_id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+getToken()}
+    });
+    if(el) el.remove();
+    // Si quedó vacío, recargamos el estado vacío
+    const list=document.querySelector('#guardadosWrap .cx-list');
+    if(list && !list.children.length) loadGuardados('guardadosWrap');
+  }catch(_){ if(el) el.style.opacity='1'; showToast('No se pudo quitar','err'); }
 }
 
 // ── FOTOS (muestras del creador, se guardan en Supabase Storage) ──

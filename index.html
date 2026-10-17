@@ -227,6 +227,10 @@ section{padding:5rem 1.5rem;border-top:1px solid #161616}
 .card-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .card-badge{font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .5rem;border-radius:2px}
 .badge-top{background:#1a2a00;color:var(--green);border:1px solid #2a4000}
+.card-top-r{display:flex;align-items:center;gap:.4rem}
+.fav-btn{background:none;border:none;cursor:pointer;font-size:1.15rem;line-height:1;color:#555;padding:0;transition:color .15s,transform .15s}
+.fav-btn:hover{color:#888;transform:scale(1.15)}
+.fav-btn.on{color:var(--green)}
 .badge-new{background:#1a0a2a;color:var(--purple);border:1px solid #3a1a5a}
 .card-name{font-size:.92rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.2rem}
 .card-niche{font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:.875rem}
@@ -626,6 +630,64 @@ const COLORS=['#C8FF1A','#4ade80','#fb923c','#60a5fa','#f472b6','#c084fc','#f59e
 const BGS=['#0f1a00','#0a2010','#1a0a00','#0a1020','#1a0a14','#1a0a2a','#1a1000','#0a1a14'];
 
 let allCreators=[], bolsaNiche='todos', bolsaPlats=[], bolsaSort='liga';
+let favSet=new Set();   // ids de creators guardados por el usuario logueado
+
+// Email del usuario logueado (marca o creador). null si no hay sesión.
+function buyerEmail(){
+  try{
+    const s=localStorage.getItem('trama_marca')||localStorage.getItem('trama_creator');
+    const b=s?JSON.parse(s):null;
+    return b&&b.email?b.email.trim():null;
+  }catch(_){ return null; }
+}
+
+// ── FAVORITOS ──
+async function cargarFavoritos(){
+  const email=buyerEmail();
+  if(!email){ favSet=new Set(); return; }
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/favoritos?select=creator_id&marca_email=eq.${encodeURIComponent(email)}`,{
+      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
+    });
+    if(!r.ok) return;
+    const rows=await r.json();
+    favSet=new Set((rows||[]).map(x=>x.creator_id));
+  }catch(_){ /* queda vacío */ }
+}
+
+async function toggleFav(id,ev){
+  if(ev){ ev.stopPropagation(); }
+  const email=buyerEmail();
+  if(!email){
+    // Sin sesión: lo mandamos a crear cuenta / iniciar sesión
+    document.getElementById('gateModal')?.classList.add('open');
+    document.body.style.overflow='hidden';
+    return;
+  }
+  const btn=ev?.currentTarget;
+  const yaEsta=favSet.has(id);
+  // Optimista: cambiamos la UI al toque
+  if(yaEsta){ favSet.delete(id); } else { favSet.add(id); }
+  if(btn){ btn.classList.toggle('on',!yaEsta); btn.textContent=yaEsta?'☆':'★'; }
+  try{
+    if(yaEsta){
+      await fetch(`${SB_URL}/rest/v1/favoritos?marca_email=eq.${encodeURIComponent(email)}&creator_id=eq.${id}`,{
+        method:'DELETE',
+        headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
+      });
+    }else{
+      await fetch(`${SB_URL}/rest/v1/favoritos`,{
+        method:'POST',
+        headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json','Prefer':'resolution=ignore-duplicates'},
+        body:JSON.stringify({marca_email:email,creator_id:id})
+      });
+    }
+  }catch(_){
+    // Si falla, revertimos
+    if(yaEsta){ favSet.add(id); } else { favSet.delete(id); }
+    if(btn){ btn.classList.toggle('on',yaEsta); btn.textContent=yaEsta?'★':'☆'; }
+  }
+}
 
 // ── PRECIOS DINÁMICOS ──
 // Se leen de /api/precios (que a su vez lee de la tabla config,
@@ -741,6 +803,7 @@ async function loadCreators(){
     });
     if(!r.ok)throw new Error('HTTP '+r.status);
     allCreators=await r.json();
+    await cargarFavoritos();
     buildFilters();
     renderBolsa();
   }catch(e){
@@ -819,7 +882,10 @@ function renderBolsa(){
     return`<div class="c-card">
       <div class="card-top">
         <div class="card-av" style="background:${bg};border-color:${col}33;color:${col}">${avHtml}</div>
-        ${c.racha>0?`<span class="card-badge badge-top">🔥 ${c.racha}</span>`:'<span></span>'}
+        <div class="card-top-r">
+          ${c.racha>0?`<span class="card-badge badge-top">🔥 ${c.racha}</span>`:''}
+          <button class="fav-btn${favSet.has(c.id)?' on':''}" title="Guardar" onclick="toggleFav('${c.id}',event)">${favSet.has(c.id)?'★':'☆'}</button>
+        </div>
       </div>
       <div class="card-name">${c.nombre}</div>
       <div class="card-niche" style="color:${col}">${niches}</div>

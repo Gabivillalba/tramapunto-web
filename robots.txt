@@ -1,8 +1,9 @@
 User-agent: *
 Allow: /
 
-# El panel admin no debe indexarse nunca
+# El panel admin y el perfil privado no deben indexarse nunca
 Disallow: /admin.html
+Disallow: /perfil.html
 Disallow: /api/
 
 # Páginas de resultado de pago: no aportan valor en búsquedas

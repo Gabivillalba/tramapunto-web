@@ -179,6 +179,11 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .modal-x:hover{color:var(--white)}
 .modal-av{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;flex-shrink:0;overflow:hidden;position:relative}
 .modal-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.adm-fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:.4rem}
+.adm-foto{position:relative;aspect-ratio:1;border-radius:2px;overflow:hidden;border:1px solid #222}
+.adm-foto img{width:100%;height:100%;object-fit:cover;display:block}
+.adm-foto-del{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.75);color:#fff;border:none;width:19px;height:19px;border-radius:50%;cursor:pointer;font-size:.62rem;line-height:1;display:flex;align-items:center;justify-content:center}
+.adm-foto-del:hover{background:#ff4444}
 .det-section{margin-bottom:1.25rem}
 .det-stitle{font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--green);border-bottom:1px solid #1a1a1a;padding-bottom:.4rem;margin-bottom:.75rem}
 .det-row{display:flex;justify-content:space-between;padding:.38rem 0;border-bottom:1px solid #111;font-size:.78rem;gap:1rem}
@@ -788,6 +793,18 @@ async function sendResetCreator(email){
   }catch(e){ showToast('Error: '+e.message,'err'); }
 }
 
+// Eliminar una foto de muestra de un creador (moderación)
+async function borrarFotoAdmin(id, encUrl){
+  const url=decodeURIComponent(encUrl);
+  if(!confirm('¿Eliminar esta foto del perfil del creador?')) return;
+  try{
+    const r=await adminCall('remove_creator_foto',{id, url});
+    const c=allCreators.find(x=>x.id===id);
+    if(c){ c.fotos=r.fotos||((c.fotos||[]).filter(f=>f!==url)); openModal(id); }
+    showToast('✓ Foto eliminada','ok');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+}
+
 // ── MODAL ──
 function openModal(id){
   const c=allCreators.find(x=>x.id===id);
@@ -831,7 +848,8 @@ function openModal(id){
     </div>
     ${c.bio?`<div class="det-section"><div class="det-stitle">Bio</div><p style="font-size:.78rem;color:var(--muted2);line-height:1.65">${c.bio}</p></div>`:''}
     ${c.colabs?`<div class="det-section"><div class="det-stitle">Colaboraciones anteriores</div><p style="font-size:.78rem;color:var(--muted2);line-height:1.65">${c.colabs}</p></div>`:''}
-    ${(c.links||[]).length?`<div class="det-section"><div class="det-stitle">Portfolio links</div>${c.links.map(l=>`<div class="det-row"><a href="${l}" target="_blank" style="color:var(--purple);font-size:.75rem;word-break:break-all">${l}</a></div>`).join('')}</div>`:''}`;
+    ${(c.links||[]).length?`<div class="det-section"><div class="det-stitle">Portfolio links</div>${c.links.map(l=>`<div class="det-row"><a href="${l}" target="_blank" style="color:var(--purple);font-size:.75rem;word-break:break-all">${l}</a></div>`).join('')}</div>`:''}
+    ${(c.fotos||[]).length?`<div class="det-section"><div class="det-stitle">Fotos de muestra (${c.fotos.length})</div><div class="adm-fotos">${c.fotos.map(u=>`<div class="adm-foto"><img src="${u}" alt=""><button class="adm-foto-del" title="Eliminar foto" onclick="borrarFotoAdmin('${c.id}','${encodeURIComponent(u)}')">✕</button></div>`).join('')}</div></div>`:''}`;
 
   // Sección de acceso: no se puede VER la contraseña (está hasheada),
   // pero el admin puede definir una nueva o mandar el email de reseteo.

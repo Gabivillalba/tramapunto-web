@@ -286,6 +286,65 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
+      // — Recordatorio de portfolio a los creadores que no lo cargaron —
+      case 'recordar_portfolio': {
+        const RESEND = process.env.RESEND_API_KEY;
+        if (!RESEND) return res.status(500).json({ error: 'Falta RESEND_API_KEY' });
+
+        const creators = await sb('creators?select=nombre,email,links,status');
+        const faltan = (creators || []).filter(c => {
+          const sinLink = !c.links || (Array.isArray(c.links) && c.links.filter(Boolean).length === 0);
+          return c.email && /@/.test(c.email) && c.status !== 'rechazado' && sinLink;
+        });
+        if (!faltan.length) {
+          return res.status(200).json({ ok: true, enviados: 0, total: 0, msg: 'Todos ya tienen portfolio cargado' });
+        }
+
+        const html = (nombre) => `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>TRAMA.</title></head>
+<body style="margin:0;padding:0;background:#080808;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#080808;padding:40px 20px"><tr><td align="center">
+    <table width="100%" style="max-width:560px;background:#111;border:1px solid #1a1a1a;border-radius:4px;overflow:hidden">
+      <tr><td style="background:#080808;padding:24px 32px;border-bottom:1px solid #1a1a1a">
+        <span style="font-size:20px;font-weight:900;letter-spacing:.18em;color:#C8FF1A">TRAMA.</span>
+      </td></tr>
+      <tr><td style="padding:32px">
+        <p style="margin:0 0 8px;font-size:13px;color:#C8FF1A;font-weight:700;letter-spacing:.1em;text-transform:uppercase">Sumá tu portfolio 📎</p>
+        <h1 style="margin:0 0 16px;font-size:24px;font-weight:900;text-transform:uppercase;letter-spacing:-.02em;color:#F4F4EF">Mostrá tu trabajo, ${nombre || 'crack'}</h1>
+        <p style="margin:0 0 16px;font-size:15px;color:#999;line-height:1.7">
+          Las marcas ahora pueden ver una <strong style="color:#F4F4EF">preview de tu portfolio</strong> antes de contactarte.
+          Cargá el link a tu mejor contenido en tu perfil y aumentá tus chances de que te elijan.
+        </p>
+        <a href="${SITE_URL}/perfil.html" style="display:inline-block;background:#C8FF1A;color:#080808;padding:12px 24px;font-weight:900;font-size:13px;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none">Cargar mi portfolio →</a>
+        <p style="margin:24px 0 0;font-size:12px;color:#555;line-height:1.6">Entrá a tu perfil, andá a "Editar" y pegá el link en el campo de Portfolio.</p>
+      </td></tr>
+      <tr><td style="padding:20px 32px;border-top:1px solid #1a1a1a;background:#0d0d0d">
+        <p style="margin:0;font-size:11px;color:#555;line-height:1.6">© TRAMA. — Buenos Aires, Argentina<br>
+          <a href="${SITE_URL}" style="color:#C8FF1A;text-decoration:none">tramapunto.com</a> ·
+          <a href="mailto:info.tramapunto@gmail.com" style="color:#555;text-decoration:none">info.tramapunto@gmail.com</a>
+        </p>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`;
+
+        let enviados = 0;
+        for (let i = 0; i < faltan.length; i += 100) {
+          const grupo = faltan.slice(i, i + 100).map(c => ({
+            from: 'TRAMA. <info.tramapunto@gmail.com>',
+            to: [c.email.trim()],
+            subject: 'Cargá tu portfolio en TRAMA. 📎',
+            html: html(c.nombre),
+          }));
+          const r = await fetch('https://api.resend.com/emails/batch', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${RESEND}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(grupo),
+          });
+          if (r.ok) { const j = await r.json().catch(() => ({})); enviados += (j.data && j.data.length) || grupo.length; }
+        }
+        return res.status(200).json({ ok: true, enviados, total: faltan.length });
+      }
+
       default:
         return res.status(400).json({ error: `Acción desconocida: ${action}` });
     }

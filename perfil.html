@@ -166,6 +166,19 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .agenda-day.today .d{color:var(--green)}
 .agenda-day .i{font-size:1.05rem;margin-top:.25rem}
 .champ{background:#1a1200;border:1px solid #2a2000;border-radius:3px;padding:.75rem 1rem;font-size:.8rem;color:var(--amber);display:flex;align-items:center;gap:.5rem;margin-bottom:1.25rem}
+.trivia-opts{display:flex;flex-direction:column;gap:.5rem}
+.trivia-opt{background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.8rem 1rem;font-size:.86rem;font-family:inherit;text-align:left;border-radius:2px;cursor:pointer;transition:all .2s}
+.trivia-opt:hover{border-color:var(--green);background:#0f1a00}
+.trivia-opt:disabled{opacity:.5;cursor:not-allowed}
+.liga-lbl{display:block;font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.liga-input{width:100%;background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.7rem .875rem;font-size:.86rem;font-family:inherit;outline:none;border-radius:2px;margin-bottom:.75rem}
+.liga-input:focus{border-color:var(--green)}
+.entregas-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.5rem}
+.entrega-item{display:flex;align-items:center;gap:.6rem;background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:.6rem .8rem;text-decoration:none;transition:border-color .2s}
+.entrega-item:hover{border-color:var(--green)}
+.entrega-tipo{font-size:.56rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--green);background:#0f1a00;border:1px solid #2a4000;padding:.2rem .45rem;border-radius:20px;flex-shrink:0}
+.entrega-cons{font-size:.74rem;color:var(--muted2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.entrega-link{font-size:.68rem;color:var(--green);font-weight:700;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -773,10 +786,10 @@ const TIPO_UI={
   libre:{label:'Día libre',icon:'🌙',color:'var(--muted2)',bg:'#0d0d0d',bd:'#222'}
 };
 
-async function ligaCall(action){
+async function ligaCall(action,extra){
   const r=await fetch('/api/liga',{
     method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({action,token:getToken()})
+    body:JSON.stringify(Object.assign({action,token:getToken()}, extra||{}))
   });
   return r.json().catch(()=>({ok:false,error:'Respuesta inválida del servidor'}));
 }
@@ -809,18 +822,35 @@ function renderLiga(){
     ? `<div class="champ">👑 <span>Campeón del mes: <strong>${d.campeon.handle||d.campeon.nombre}</strong></span></div>`
     : '';
 
-  let btn;
+  // Acción según el tipo de misión
+  let accion='';
   if(d.es_libre){
-    btn=`<button class="btn-mission" disabled>Hoy es día libre 🌙</button>`;
+    accion=`<button class="btn-mission" disabled>Hoy es día libre 🌙</button>`;
   } else if(d.ya_cumplida){
-    btn=`<button class="btn-mission" disabled>✓ Ya cumpliste la misión de hoy</button>`;
+    accion=`<button class="btn-mission" disabled>✓ Ya cumpliste la misión de hoy</button>`;
+  } else if(d.mision&&d.mision.opciones&&d.mision.opciones.length){
+    accion=`<div class="trivia-opts">${d.mision.opciones.map((o,ix)=>
+      `<button class="trivia-opt" onclick="responderTrivia(${ix})">${o}</button>`).join('')}</div>`;
+  } else if(d.mision&&d.mision.requiere_material){
+    accion=`<label class="liga-lbl">Pegá el link de tu publicación</label>
+      <input class="liga-input" id="ligaLink" type="url" placeholder="https://instagram.com/p/...">
+      <button class="btn-mission" id="ligaBtn" onclick="cumplirMision()">Entregar reto (+${d.base_hoy}) 🔥</button>`;
   } else {
-    btn=`<button class="btn-mission" id="ligaBtn" onclick="cumplirMision()">Cumplir misión (+${d.base_hoy}) 🔥</button>`;
+    accion=`<button class="btn-mission" id="ligaBtn" onclick="cumplirMision()">Ya participé (+${d.base_hoy}) 🔥</button>`;
   }
 
   const misionCard = d.es_libre
-    ? `<div class="mission-card"><div class="mission-badge" style="color:${t.color};background:${t.bg};border:1px solid ${t.bd}">${t.icon} ${t.label}</div><div class="mission-text">Hoy no hay misión. Aprovechá para descansar o preparar contenido para mañana. 🌙</div>${btn}</div>`
-    : `<div class="mission-card"><div class="mission-badge" style="color:${t.color};background:${t.bg};border:1px solid ${t.bd}">${t.icon} Misión de hoy · ${t.label}</div><div class="mission-text">${(d.mision&&d.mision.contenido)||''}</div>${btn}</div>`;
+    ? `<div class="mission-card"><div class="mission-badge" style="color:${t.color};background:${t.bg};border:1px solid ${t.bd}">${t.icon} ${t.label}</div><div class="mission-text">Hoy no hay misión. Aprovechá para descansar o preparar contenido para mañana. 🌙</div>${accion}</div>`
+    : `<div class="mission-card"><div class="mission-badge" style="color:${t.color};background:${t.bg};border:1px solid ${t.bd}">${t.icon} Misión de hoy · ${t.label}</div><div class="mission-text">${(d.mision&&d.mision.contenido)||''}</div>${accion}</div>`;
+
+  // Mis entregas (material subido por el creador)
+  const ents=(d.entregas||[]);
+  const entregasHtml = ents.length
+    ? `<div class="sec-title" style="margin-top:.5rem">Mi material entregado</div>
+       <div class="entregas-list">${ents.map(e=>
+         `<a class="entrega-item" href="${e.link}" target="_blank" rel="noopener"><span class="entrega-tipo">${e.tipo||'reto'}</span><span class="entrega-cons">${e.consigna||''}</span><span class="entrega-link">ver ↗</span></a>`
+       ).join('')}</div>`
+    : '';
 
   wrap.innerHTML=`<div class="tab-content active">
     <div class="sec-title">Liga TRAMA. · Temporada de ${mes}</div>
@@ -836,14 +866,31 @@ function renderLiga(){
     ${agendaStrip()}
     ${champ}
     ${misionCard}
+    ${entregasHtml}
     <p style="font-size:.72rem;color:var(--muted);line-height:1.6">Entrá todos los días y cumplí la misión para subir en la bolsa. Si cortás la racha, bajás. A fin de mes se corona al #1 y arranca una liga nueva.</p>
   </div>`;
 }
 
 async function cumplirMision(){
   const b=document.getElementById('ligaBtn');
-  if(b){ b.disabled=true; b.textContent='Sumando...'; }
-  const res=await ligaCall('cumplir');
+  const linkEl=document.getElementById('ligaLink');
+  const extra={};
+  if(linkEl){
+    const url=(linkEl.value||'').trim();
+    if(!/^https?:\/\/.+/i.test(url)){ showToast('Pegá un link válido de tu publicación','err'); return; }
+    extra.link=url;
+  }
+  if(b){ b.disabled=true; b.textContent='Enviando...'; }
+  await enviarCumplir(extra);
+}
+
+async function responderTrivia(ix){
+  document.querySelectorAll('.trivia-opt').forEach(el=>el.disabled=true);
+  await enviarCumplir({respuesta:ix});
+}
+
+async function enviarCumplir(extra){
+  const res=await ligaCall('cumplir',extra);
   if(res.ok){
     if(res.libre){ showToast(res.msg||'Hoy es día libre 🌙','info'); return; }
     if(res.ya){ showToast('Ya cumpliste hoy 😉','info'); }
@@ -856,7 +903,7 @@ async function cumplirMision(){
     await loadLiga();
   } else {
     showToast(res.error||'No se pudo registrar la misión','err');
-    if(b){ b.disabled=false; b.textContent='Reintentar'; }
+    await loadLiga();   // re-habilita los botones (trivia errada / falta link)
   }
 }
 

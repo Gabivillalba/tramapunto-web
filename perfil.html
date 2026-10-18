@@ -114,8 +114,9 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .s-apro{background:#0f1a00;color:var(--green);border:1px solid #1a3000;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
 .s-rech{background:#1a0000;color:var(--red);border:1px solid #2a0000;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
 
-.dash-tabs{display:flex;border-bottom:1px solid #161616;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.tab{padding:.875rem 1.5rem;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none}
+.dash-tabs{display:flex;border-bottom:1px solid #161616;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:sticky;top:0;z-index:20;background:var(--black)}
+.dash-tabs::-webkit-scrollbar{height:0}
+.tab{padding:.875rem 1.25rem;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none}
 .tab:hover{color:var(--white)}
 .tab.active{color:var(--green);border-bottom-color:var(--green)}
 
@@ -679,13 +680,15 @@ document.addEventListener('click',e=>{
 });
 
 function buildTabs(){
+  // {l: etiqueta, i: índice de contenido} — el orden visual se desacopla del
+  // índice interno (renderCreatorTab/renderMarcaTab siguen usando el mismo i).
   const tabs = userType==='creator'
-    ?['Mi perfil','🔥 Liga','Mis redes','Estado','Editar','📊 Contactos','🛒 Comprados','📋 Campañas']
-    :['Mi cuenta','Creators guardados','Mis conexiones','Editar','📋 Mis campañas'];
-  document.getElementById('dashTabs').innerHTML = tabs.map((t,i)=>
-    `<button class="tab${i===0?' active':''}" onclick="switchTab(${i},this)">${t}</button>`
+    ?[{l:'👤 Mi perfil',i:0},{l:'📊 Contactos',i:5},{l:'📋 Campañas',i:7},{l:'🛒 Comprados',i:6},{l:'🔥 Liga',i:1},{l:'🔗 Mis redes',i:2},{l:'✏️ Editar',i:4},{l:'⏳ Estado',i:3}]
+    :[{l:'👤 Mi cuenta',i:0},{l:'🔗 Mis conexiones',i:2},{l:'📋 Mis campañas',i:4},{l:'☆ Guardados',i:1},{l:'✏️ Editar',i:3}];
+  document.getElementById('dashTabs').innerHTML = tabs.map((t,pos)=>
+    `<button class="tab${pos===0?' active':''}" data-i="${t.i}" onclick="switchTab(${t.i},this)">${t.l}</button>`
   ).join('');
-  renderTab(0);
+  renderTab(tabs[0].i);
 }
 
 function switchTab(i,btn){
@@ -693,7 +696,8 @@ function switchTab(i,btn){
   btn.classList.add('active');
   renderTab(i);
 }
-function irATab(i){ const t=document.querySelectorAll('#dashTabs .tab')[i]; if(t){ t.click(); t.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}); } }
+// Va a un tab por su ÍNDICE DE CONTENIDO (no por posición visual)
+function irATab(i){ const t=document.querySelector(`#dashTabs .tab[data-i="${i}"]`); if(t){ t.click(); t.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}); } }
 
 function renderTab(i){
   const el=document.getElementById('dashContent');

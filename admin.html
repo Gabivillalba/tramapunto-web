@@ -137,9 +137,10 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* TABS */
-.tabs{display:flex;gap:0;border-bottom:1px solid #1a1a1a;padding:0 1.5rem;margin-bottom:1.25rem}
+.tabs{display:flex;gap:0;border-bottom:1px solid #1a1a1a;padding:0 1.5rem;margin-bottom:1.25rem;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{height:0}
 @media(min-width:768px){.tabs{padding:0 2rem}}
-.tab{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);padding:.875rem 1.1rem;font-size:.75rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.45rem}
+.tab{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);padding:.875rem 1rem;font-size:.75rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.4rem;white-space:nowrap;flex-shrink:0}
 .tab:hover{color:var(--white)}
 .tab.on{color:var(--green);border-bottom-color:var(--green)}
 .tab-badge{background:#2a2a2a;color:var(--white);font-size:.62rem;font-weight:900;padding:.1rem .4rem;border-radius:10px;min-width:18px;text-align:center}
@@ -292,24 +293,12 @@ textarea.em-inp{resize:vertical;line-height:1.5}
 
   <!-- TABS -->
   <div class="tabs">
-    <button class="tab on" id="tabDashboard" onclick="switchTab('dashboard')">
-      📊 Dashboard
-    </button>
-    <button class="tab" id="tabCreators" onclick="switchTab('creators')">
-      Creators <span class="tab-badge" id="badgeCreators">—</span>
-    </button>
-    <button class="tab" id="tabCampanias" onclick="switchTab('campanias')">
-      Campañas <span class="tab-badge" id="badgeCampanias">—</span>
-    </button>
-    <button class="tab" id="tabConfig" onclick="switchTab('config')">
-      Precios
-    </button>
-    <button class="tab" id="tabComunicacion" onclick="switchTab('comunicacion')">
-      ✉ Emails
-    </button>
-    <button class="tab" id="tabResenas" onclick="switchTab('resenas')">
-      ⭐ Reseñas
-    </button>
+    <button class="tab on" id="tabDashboard" onclick="switchTab('dashboard')">📊 Dashboard</button>
+    <button class="tab" id="tabCreators" onclick="switchTab('creators')">👥 Creators <span class="tab-badge" id="badgeCreators">—</span></button>
+    <button class="tab" id="tabCampanias" onclick="switchTab('campanias')">📋 Campañas <span class="tab-badge" id="badgeCampanias">—</span></button>
+    <button class="tab" id="tabResenas" onclick="switchTab('resenas')">⭐ Reseñas</button>
+    <button class="tab" id="tabComunicacion" onclick="switchTab('comunicacion')">✉ Emails</button>
+    <button class="tab" id="tabConfig" onclick="switchTab('config')">💲 Precios</button>
   </div>
 
   <!-- ══ VISTA DASHBOARD ══ -->

@@ -284,6 +284,7 @@ textarea.em-inp{resize:vertical;line-height:1.5}
     <div class="top-actions">
       <button class="btn-sm" onclick="loadAll()">↻ Actualizar</button>
       <button class="btn-sm" onclick="backfillCuentas()">🔑 Recuperar accesos</button>
+      <button class="btn-sm" onclick="limpiarHuerfanas()">🧹 Limpiar cuentas huérfanas</button>
       <button class="btn-sm" onclick="recordarPortfolio()">📎 Recordar portfolio</button>
       <button class="btn-sm" onclick="abrirEnvioMasivo()">✉ Envío masivo</button>
       <button class="btn-sm" onclick="exportCreatorsCSV()">⬇ CSV creadores</button>
@@ -815,6 +816,16 @@ let campFilter = 'todas';
 let currentTab = 'dashboard';
 
 // Manda el mail "cargá tu portfolio" a los creadores que todavía no lo cargaron
+async function limpiarHuerfanas(){
+  if(!confirm('¿Borrar las cuentas que tienen usuario pero NINGÚN perfil (creador ni marca)?\n\nSon registros abandonados. No afecta a creadores ni marcas con perfil.')) return;
+  try{
+    const r=await adminCall('limpiar_huerfanas');
+    const n=(r.borrados||[]).length;
+    if(n===0) showToast('No había cuentas huérfanas 🎉','ok');
+    else showToast(`✓ ${n} cuenta${n===1?'':'s'} huérfana${n===1?'':'s'} borrada${n===1?'':'s'}`,'ok');
+    loadAll();
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+}
 async function recordarPortfolio(){
   if(!confirm('¿Enviar el mail "cargá tu portfolio" a los creadores que todavía no lo cargaron?')) return;
   try{

@@ -297,6 +297,39 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, data });
       }
 
+      // — Limpiar cuentas de Auth sin perfil (huérfanas) —
+      case 'limpiar_huerfanas': {
+        const [creators, marcas] = await Promise.all([
+          sb('creators?select=email').catch(() => []),
+          sb('marcas?select=email').catch(() => []),
+        ]);
+        const conPerfil = new Set([...(creators || []), ...(marcas || [])].map(x => String(x.email || '').toLowerCase()).filter(Boolean));
+        const borrados = [];
+        let page = 1, revisados = 0;
+        while (page <= 30) {
+          const r = await fetch(`${SB_URL}/auth/v1/admin/users?page=${page}&per_page=100`, {
+            headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}` },
+          });
+          if (!r.ok) break;
+          const j = await r.json().catch(() => ({}));
+          const users = j.users || [];
+          if (!users.length) break;
+          revisados += users.length;
+          for (const u of users) {
+            const em = String(u.email || '').toLowerCase();
+            if (!em || conPerfil.has(em)) continue;
+            const dr = await fetch(`${SB_URL}/auth/v1/admin/users/${u.id}`, {
+              method: 'DELETE',
+              headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}` },
+            });
+            if (dr.ok) borrados.push(u.email);
+          }
+          if (users.length < 100) break;
+          page++;
+        }
+        return res.status(200).json({ ok: true, borrados, revisados });
+      }
+
       // — Guardar un valor de configuración —
       case 'set_config': {
         const { clave, valor } = payload;

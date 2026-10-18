@@ -151,10 +151,32 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, data });
       }
 
-      // — Listar marcas (para export / vistas) —
+      // — Listar marcas (+ stats de compra) y separar a los creadores que compran —
       case 'list_marcas': {
-        const data = await sb('marcas?select=*&order=created_at.desc');
-        return res.status(200).json({ ok: true, data });
+        const [marcas, conexiones, creators] = await Promise.all([
+          sb('marcas?select=*&order=created_at.desc'),
+          sb('conexiones?select=marca_email,estado,monto').catch(() => []),
+          sb('creators?select=id,email,nombre,apellido').catch(() => []),
+        ]);
+        const pagadas = (conexiones || []).filter(c => (c.estado || 'pagado') === 'pagado');
+        const comprasPorEmail = {};
+        pagadas.forEach(c => {
+          const e = String(c.marca_email || '').toLowerCase(); if (!e) return;
+          (comprasPorEmail[e] = comprasPorEmail[e] || { n: 0, monto: 0 }).n++;
+          comprasPorEmail[e].monto += Number(c.monto || 0);
+        });
+        const emailsMarca = new Set((marcas || []).map(m => String(m.email || '').toLowerCase()));
+        const creatorByEmail = Object.fromEntries((creators || []).map(c => [String(c.email || '').toLowerCase(), c]));
+        // Compradores que NO son marcas registradas → creadores (u otros) que compran contactos
+        const compradores_no_marca = [];
+        Object.keys(comprasPorEmail).forEach(e => {
+          if (emailsMarca.has(e)) return;
+          const cr = creatorByEmail[e];
+          compradores_no_marca.push({ email: e, nombre: cr ? `${cr.nombre || ''} ${cr.apellido || ''}`.trim() : null, esCreador: !!cr, ...comprasPorEmail[e] });
+        });
+        compradores_no_marca.sort((a, b) => b.n - a.n);
+        const data = (marcas || []).map(m => ({ ...m, compras: comprasPorEmail[String(m.email || '').toLowerCase()] || { n: 0, monto: 0 } }));
+        return res.status(200).json({ ok: true, data, compradores_no_marca });
       }
 
       // — Export de todas las postulaciones (con creador y título de campaña) —

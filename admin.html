@@ -298,6 +298,7 @@ textarea.em-inp{resize:vertical;line-height:1.5}
   <div class="tabs">
     <button class="tab on" id="tabDashboard" onclick="switchTab('dashboard')">📊 Dashboard</button>
     <button class="tab" id="tabCreators" onclick="switchTab('creators')">👥 Creators <span class="tab-badge" id="badgeCreators">—</span></button>
+    <button class="tab" id="tabMarcas" onclick="switchTab('marcas')">🏢 Marcas <span class="tab-badge" id="badgeMarcas">—</span></button>
     <button class="tab" id="tabCampanias" onclick="switchTab('campanias')">📋 Campañas <span class="tab-badge" id="badgeCampanias">—</span></button>
     <button class="tab" id="tabResenas" onclick="switchTab('resenas')">⭐ Reseñas</button>
     <button class="tab" id="tabComunicacion" onclick="switchTab('comunicacion')">✉ Emails</button>
@@ -382,6 +383,22 @@ textarea.em-inp{resize:vertical;line-height:1.5}
       <div class="cards-list" id="cardsList">
         <div class="loading"><div class="spin"></div><span>Cargando perfiles...</span></div>
       </div>
+    </div>
+  </div>
+
+  <!-- ══ VISTA MARCAS ══ -->
+  <div class="tab-view" id="viewMarcas">
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="mk-total">—</div><div class="stat-l">Marcas registradas</div></div>
+      <div class="stat"><div class="stat-n" id="mk-corp" style="color:var(--purple)">—</div><div class="stat-l">Empresas corporativas</div></div>
+      <div class="stat"><div class="stat-n" id="mk-reunion" style="color:#f59e0b">—</div><div class="stat-l">Piden reunión</div></div>
+      <div class="stat"><div class="stat-n" id="mk-compradoras" style="color:var(--green)">—</div><div class="stat-l">Compraron contacto</div></div>
+    </div>
+    <div style="padding:0 1.5rem;margin-bottom:1rem"><div style="font-size:.78rem;color:var(--muted);line-height:1.5">Las marcas entran <strong style="color:var(--white)">activas</strong> (no requieren aprobación). Abajo, aparte, los <strong style="color:var(--white)">creadores que compran contactos</strong> (compran con su propio email, no son marcas).</div></div>
+    <div id="marcasList" style="padding:0 1.5rem"><div class="loading"><div class="spin"></div><span>Cargando marcas…</span></div></div>
+    <div style="padding:1.5rem">
+      <div style="font-size:.9rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.9rem;color:var(--white)">Creadores que compran contactos</div>
+      <div id="compradoresList" style="font-size:.84rem;color:var(--muted)">—</div>
     </div>
   </div>
 
@@ -902,7 +919,7 @@ async function enviarMasivo(){
 
 function switchTab(t){
   currentTab = t;
-  ['dashboard','creators','campanias','config','comunicacion','resenas'].forEach(k=>{
+  ['dashboard','creators','marcas','campanias','config','comunicacion','resenas'].forEach(k=>{
     const tabEl=document.getElementById('tab'+k.charAt(0).toUpperCase()+k.slice(1));
     const viewEl=document.getElementById('view'+k.charAt(0).toUpperCase()+k.slice(1));
     if(tabEl) tabEl.classList.toggle('on', t===k);
@@ -913,6 +930,7 @@ function switchTab(t){
   if(t==='config') loadConfig();
   if(t==='comunicacion') loadProgramados();
   if(t==='resenas') loadResenas();
+  if(t==='marcas') loadMarcas();
 }
 
 // ══════════ DASHBOARD (MÉTRICAS) ══════════
@@ -943,6 +961,7 @@ async function loadMetrics(){
     set('m-conversion',(m.conversion||0)+'%');
     set('m-rating', (m.resenas&&m.resenas.total)?('★ '+Number(m.resenas.prom).toFixed(1)):'—');
     set('m-marcas', (m.marcas?`${m.marcas.compradoras}/${m.marcas.total}`:'—'));
+    if(m.marcas){ const bm=document.getElementById('badgeMarcas'); if(bm) bm.textContent=m.marcas.total; }
     set('m-aprobados',m.creadores.aprobados); set('m-pendientes',m.creadores.pendientes);
     set('m-jugando',m.creadores.jugando); set('m-campanias',m.campanias.activas);
 
@@ -983,6 +1002,60 @@ async function loadMetrics(){
         : '<div class="dash-empty">Activá el seguimiento de fuentes (falta correr el SQL).</div>';
     }
   }catch(e){ showToast('Error al cargar métricas: '+e.message,'err'); }
+}
+
+// ══════════ MARCAS ══════════
+let marcasData=[];
+async function loadMarcas(){
+  const el=document.getElementById('marcasList'); if(!el)return;
+  el.innerHTML='<div class="loading"><div class="spin"></div><span>Cargando marcas…</span></div>';
+  const money=n=>'$'+Number(n||0).toLocaleString('es-AR');
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  try{
+    const {data, compradores_no_marca}=await adminCall('list_marcas');
+    marcasData=data||[];
+    set('mk-total',marcasData.length);
+    set('mk-corp',marcasData.filter(m=>m.tipo==='corporativa').length);
+    set('mk-reunion',marcasData.filter(m=>m.status==='reunion_pendiente').length);
+    set('mk-compradoras',marcasData.filter(m=>m.compras&&m.compras.n>0).length);
+    const badge=document.getElementById('badgeMarcas'); if(badge) badge.textContent=marcasData.length;
+    if(!marcasData.length){ el.innerHTML='<div class="empty">Todavía no hay marcas registradas.</div>'; }
+    else{
+      el.innerHTML=marcasData.map(m=>{
+        const f=m.created_at?new Date(m.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
+        const nombreMarca=escR(m.nombre_marca||m.razon_social||'');
+        const persona=escR(`${m.nombre||''} ${m.apellido||''}`.trim());
+        const esCorp=m.tipo==='corporativa';
+        const tipoBadge=`<span style="font-size:.6rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:.2rem .5rem;border-radius:2px;background:${esCorp?'#1a0a2a':'#0f1a00'};color:${esCorp?'var(--purple)':'var(--green)'};border:1px solid ${esCorp?'#3a1a5a':'#2a4000'}">${esCorp?'Empresa corporativa':'Marca'}</span>`;
+        const reunionBadge=m.status==='reunion_pendiente'?`<span style="font-size:.6rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:.2rem .5rem;border-radius:2px;background:#1a1200;color:#f59e0b;border:1px solid #2a2000">📞 Pide reunión</span>`:'';
+        const comprasTxt=m.compras&&m.compras.n>0?`<span style="color:var(--green);font-weight:800">${m.compras.n} compra${m.compras.n===1?'':'s'} · ${money(m.compras.monto)}</span>`:'<span style="color:var(--muted)">Sin compras</span>';
+        const datos=[m.rubro&&('Rubro: '+escR(m.rubro)), m.presupuesto&&('Presupuesto: '+escR(m.presupuesto)), m.pais&&escR(m.pais), m.fuente&&('vía '+escR(m.fuente))].filter(Boolean).join(' · ');
+        const brief=m.brief?`<div style="margin-top:.5rem;font-size:.78rem;color:#bbb;line-height:1.5;background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:.6rem .8rem"><strong style="color:var(--muted2)">Brief:</strong> ${escR(m.brief)}</div>`:'';
+        return `<div style="border:1px solid #1a1a1a;border-radius:3px;padding:1rem;margin-bottom:.8rem">
+          <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:flex-start">
+            <div>
+              <div style="font-weight:900;color:var(--white);font-size:.95rem">${nombreMarca||persona||escR(m.email)}</div>
+              ${nombreMarca&&persona?`<div style="font-size:.74rem;color:var(--muted)">Contacto: ${persona}</div>`:''}
+              <div style="font-size:.74rem;color:var(--muted);margin-top:.15rem">${escR(m.email)}${m.tel?' · '+escR(m.tel):''} · ${f}</div>
+              ${datos?`<div style="font-size:.74rem;color:var(--muted2);margin-top:.25rem">${datos}</div>`:''}
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">
+              <div style="display:flex;gap:.35rem;flex-wrap:wrap;justify-content:flex-end">${tipoBadge}${reunionBadge}</div>
+              <div style="font-size:.76rem">${comprasTxt}</div>
+            </div>
+          </div>
+          ${brief}
+        </div>`;
+      }).join('');
+    }
+    const cl=document.getElementById('compradoresList');
+    if(cl){
+      const otros=(compradores_no_marca||[]);
+      cl.innerHTML = otros.length
+        ? otros.map(o=>`<div class="dash-row"><span class="dash-name">${o.esCreador?('🎥 '+escR(o.nombre||o.email)+' <span style=\'font-size:.6rem;color:var(--purple);font-weight:800;text-transform:uppercase\'>creador</span>'):escR(o.email)}</span><span class="dash-val">${o.n} compra${o.n===1?'':'s'} · ${money(o.monto)}</span></div>`).join('')
+        : '<div class="dash-empty">Ningún creador compró contactos todavía.</div>';
+    }
+  }catch(e){ el.innerHTML=`<span style="color:#f87171">Error: ${escR(e.message)}</span>`; }
 }
 
 // ══════════ CONFIGURACIÓN (PRECIOS) ══════════

@@ -1250,7 +1250,7 @@ function renderBolsa(){
   }
   g.innerHTML=list.map((c,i)=>{
     const col=getColor(i),bg=getBg(i),init=getInit(c);
-    const seg=fmtSeg(c.ig_seg||c.tt_seg||c.yt_seg);
+    const seg=fmtSeg(Math.max(c.ig_seg||0,c.tt_seg||0,c.yt_seg||0));
     const er=c.ig_er||c.tt_er||0;
     const plats=c.plats||[];
     const niches=(c.niches||[]).join(' · ')||'—';
@@ -1288,7 +1288,7 @@ function openModal(id,i){
   const col=getColor(i),bg=getBg(i),init=getInit(c);
   document.getElementById('mTitle').textContent=`Conectá con ${c.nombre}`;
   const avHtml=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre}">`:`${init}`;
-  document.getElementById('mPreview').innerHTML=`<div class="m-av" style="background:${bg};border-color:${col}44;color:${col}">${avHtml}</div><div><div class="m-name">${c.nombre}</div><div class="m-niche" style="color:${col}">${(c.niches||[]).join(' · ')} · ${fmtSeg(c.ig_seg||c.tt_seg)}</div></div>`;
+  document.getElementById('mPreview').innerHTML=`<div class="m-av" style="background:${bg};border-color:${col}44;color:${col}">${avHtml}</div><div><div class="m-name">${c.nombre}</div><div class="m-niche" style="color:${col}">${(c.niches||[]).join(' · ')} · ${fmtSeg(Math.max(c.ig_seg||0,c.tt_seg||0,c.yt_seg||0))}</div></div>`;
   // Preview antes de comprar: SOLO card + descripción + fotos que cargó el creador
   let extra='';
   extra+=badgesDe(c);

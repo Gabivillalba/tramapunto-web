@@ -476,10 +476,14 @@ export default async function handler(req, res) {
 
       // — Métricas del negocio para el dashboard —
       case 'metrics': {
-        const [conexiones, creators, campanias] = await Promise.all([
-          sb('conexiones?select=monto,origen,estado,creator_id,created_at').catch(() => []),
+        const [conexiones, creators, campanias, marcas, resenas, postulaciones, vistas] = await Promise.all([
+          sb('conexiones?select=monto,origen,estado,creator_id,created_at,marca_email').catch(() => []),
           sb('creators?select=id,nombre,status,racha,es_campeon,ig_user').catch(() => []),
           sb('campanias?select=estado').catch(() => []),
+          sb('marcas?select=email').catch(() => []),
+          sb('resenas?select=rating,oculta').catch(() => []),
+          sb('postulaciones?select=estado').catch(() => []),
+          sb('vistas_perfil?select=id').catch(() => []),
         ]);
         const num = v => Number(v || 0);
         const pagadas = (conexiones || []).filter(c => (c.estado || 'pagado') === 'pagado');
@@ -520,6 +524,21 @@ export default async function handler(req, res) {
         const champ = cr.find(c => c.es_campeon);
         const cp = campanias || [];
 
+        // Métricas nuevas
+        const vistasTotal = (vistas || []).length;
+        const conversion = vistasTotal ? Math.round((pagadas.length / vistasTotal) * 100) : 0;
+        const ticket = pagadas.length ? Math.round(ingresos / pagadas.length) : 0;
+        const compradoras = new Set(pagadas.map(c => String(c.marca_email || '').toLowerCase()).filter(Boolean)).size;
+        const resVis = (resenas || []).filter(r => !r.oculta);
+        const resenasStat = { total: resVis.length, prom: resVis.length ? (resVis.reduce((a, r) => a + num(r.rating), 0) / resVis.length) : 0 };
+        const marcasStat = { total: (marcas || []).length, compradoras };
+        const postStat = { total: (postulaciones || []).length };
+        // Ventas por día, últimos 14 (UTC)
+        const ventasPorDia = [];
+        for (let i = 13; i >= 0; i--) ventasPorDia.push({ dia: new Date(Date.now() - i * 86400000).toISOString().slice(0, 10), n: 0, monto: 0 });
+        const didx = Object.fromEntries(ventasPorDia.map((d, i) => [d.dia, i]));
+        pagadas.forEach(c => { const k = (c.created_at || '').slice(0, 10); if (k in didx) { ventasPorDia[didx[k]].n++; ventasPorDia[didx[k]].monto += num(c.monto); } });
+
         // Fuentes de registro (fetch aparte: si la columna no existe aún, no rompe el resto)
         let fuentes = null;
         try {
@@ -541,6 +560,8 @@ export default async function handler(req, res) {
             ingresos, ventas: pagadas.length,
             ventasMes: delMes.length, ingresosMes: delMes.reduce((a, c) => a + num(c.monto), 0),
             origen, creadores, top, ultimas, fuentes,
+            vistas: vistasTotal, conversion, ticket,
+            resenas: resenasStat, marcas: marcasStat, postulaciones: postStat, ventasPorDia,
             campeon: champ ? (champ.ig_user || champ.nombre) : null,
             campanias: { total: cp.length, activas: cp.filter(c => c.estado === 'activa').length, en_revision: cp.filter(c => c.estado === 'en_revision').length },
           },

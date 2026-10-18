@@ -314,19 +314,32 @@ textarea.em-inp{resize:vertical;line-height:1.5}
 
   <!-- ══ VISTA DASHBOARD ══ -->
   <div class="tab-view on" id="viewDashboard">
+    <!-- Dinero -->
     <div class="stats">
       <div class="stat"><div class="stat-n" id="m-ingresos" style="color:var(--green)">—</div><div class="stat-l">Ingresos totales</div></div>
-      <div class="stat"><div class="stat-n" id="m-ventas">—</div><div class="stat-l">Conexiones vendidas</div></div>
-      <div class="stat"><div class="stat-n" id="m-ventasMes">—</div><div class="stat-l">Ventas del mes</div></div>
       <div class="stat"><div class="stat-n" id="m-ingresosMes" style="color:var(--green)">—</div><div class="stat-l">Ingresos del mes</div></div>
+      <div class="stat"><div class="stat-n" id="m-ticket">—</div><div class="stat-l">Ticket promedio</div></div>
+      <div class="stat"><div class="stat-n" id="m-ventas">—</div><div class="stat-l">Conexiones vendidas</div></div>
     </div>
+    <!-- Actividad -->
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="m-vistas">—</div><div class="stat-l">Vistas de perfil</div></div>
+      <div class="stat"><div class="stat-n" id="m-conversion" style="color:var(--green)">—</div><div class="stat-l">Conversión vista→venta</div></div>
+      <div class="stat"><div class="stat-n" id="m-rating" style="color:#f5b301">—</div><div class="stat-l">Reseñas (promedio)</div></div>
+      <div class="stat"><div class="stat-n" id="m-marcas">—</div><div class="stat-l">Marcas (compradoras)</div></div>
+    </div>
+    <!-- Comunidad -->
     <div class="stats">
       <div class="stat"><div class="stat-n" id="m-aprobados">—</div><div class="stat-l">Creadores aprobados</div></div>
-      <div class="stat"><div class="stat-n" id="m-pendientes" style="color:#f59e0b">—</div><div class="stat-l">Pendientes</div></div>
+      <div class="stat"><div class="stat-n" id="m-pendientes" style="color:#f59e0b">—</div><div class="stat-l">Pendientes de revisar</div></div>
       <div class="stat"><div class="stat-n" id="m-jugando">—</div><div class="stat-l">Jugando la Liga 🔥</div></div>
       <div class="stat"><div class="stat-n" id="m-campanias">—</div><div class="stat-l">Campañas activas</div></div>
     </div>
     <div class="dash-section">
+      <div class="dash-cols">
+        <div class="dash-box"><h3>Acciones pendientes</h3><div id="m-acciones"><div class="dash-empty">Cargando…</div></div></div>
+        <div class="dash-box"><h3>Ventas · últimos 14 días</h3><div id="m-chart"><div class="dash-empty">Cargando…</div></div></div>
+      </div>
       <div class="dash-cols">
         <div class="dash-box"><h3>Top creadores por ventas</h3><div id="m-top"><div class="dash-empty">Cargando…</div></div></div>
         <div class="dash-box"><h3>Últimas ventas</h3><div id="m-ultimas"><div class="dash-empty">Cargando…</div></div></div>
@@ -907,9 +920,36 @@ async function loadMetrics(){
     const money=n=>'$'+Number(n||0).toLocaleString('es-AR');
     const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
     set('m-ingresos',money(m.ingresos)); set('m-ventas',m.ventas);
-    set('m-ventasMes',m.ventasMes); set('m-ingresosMes',money(m.ingresosMes));
+    set('m-ingresosMes',money(m.ingresosMes)); set('m-ticket',money(m.ticket));
+    set('m-vistas',(m.vistas||0).toLocaleString('es-AR'));
+    set('m-conversion',(m.conversion||0)+'%');
+    set('m-rating', (m.resenas&&m.resenas.total)?('★ '+Number(m.resenas.prom).toFixed(1)):'—');
+    set('m-marcas', (m.marcas?`${m.marcas.compradoras}/${m.marcas.total}`:'—'));
     set('m-aprobados',m.creadores.aprobados); set('m-pendientes',m.creadores.pendientes);
     set('m-jugando',m.creadores.jugando); set('m-campanias',m.campanias.activas);
+
+    // Acciones pendientes
+    const accEl=document.getElementById('m-acciones');
+    if(accEl){
+      const acc=[];
+      if(m.creadores.pendientes>0) acc.push({txt:`${m.creadores.pendientes} creador${m.creadores.pendientes===1?'':'es'} pendiente${m.creadores.pendientes===1?'':'s'} de revisar`, tab:'creators', btn:'Revisar'});
+      if(m.campanias.en_revision>0) acc.push({txt:`${m.campanias.en_revision} campaña${m.campanias.en_revision===1?'':'s'} en revisión`, tab:'campanias', btn:'Ver'});
+      accEl.innerHTML = acc.length
+        ? acc.map(a=>`<div class="dash-row"><span class="dash-name">${a.txt}</span><button class="btn-sm" onclick="switchTab('${a.tab}')">${a.btn} →</button></div>`).join('')
+        : '<div class="dash-empty">Todo al día ✅</div>';
+    }
+
+    // Mini-gráfico: ventas últimos 14 días
+    const chartEl=document.getElementById('m-chart');
+    if(chartEl){
+      const dias=m.ventasPorDia||[];
+      const maxN=Math.max(1,...dias.map(d=>d.n));
+      const totalN=dias.reduce((a,d)=>a+d.n,0);
+      const lbl=s=>new Date(s+'T12:00:00Z').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'});
+      chartEl.innerHTML=`<div style="display:flex;align-items:flex-end;gap:3px;height:90px;margin-bottom:.5rem">`
+        + dias.map(d=>{const h=d.n?Math.max(Math.round(d.n/maxN*100),8):2;return `<div title="${lbl(d.dia)}: ${d.n} ${d.n===1?'venta':'ventas'} · ${money(d.monto)}" style="flex:1;background:${d.n?'var(--green)':'#1a1a1a'};height:${h}%;border-radius:2px 2px 0 0"></div>`;}).join('')
+        + `</div><div style="font-size:.7rem;color:var(--muted);display:flex;justify-content:space-between"><span>${dias.length?lbl(dias[0].dia):''}</span><span style="color:var(--white)">Total: ${totalN} ${totalN===1?'venta':'ventas'}</span><span>hoy</span></div>`;
+    }
 
     const top=document.getElementById('m-top');
     top.innerHTML=(m.top&&m.top.length)

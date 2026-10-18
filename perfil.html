@@ -52,14 +52,14 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .role-btn span{font-size:.95rem}
 .role-btn:hover{border-color:#444}
 .role-tag{font-size:.72rem;color:var(--muted2);text-align:center;margin-bottom:1.5rem;min-height:1.05em;line-height:1.4}
-/* Tema creator (lima) */
-.lb-creator .role-btn.active{border-color:var(--green);color:var(--green);background:#0f1400}
-.lb-creator .ltab.active{color:var(--green);border-bottom-color:var(--green)}
-.lb-creator .btn-primary{background:var(--green);color:var(--black)}
-/* Tema marca (lila) */
-.lb-marca .role-btn.active{border-color:var(--purple);color:var(--purple);background:#160a22}
-.lb-marca .ltab.active{color:var(--purple);border-bottom-color:var(--purple)}
-.lb-marca .btn-primary{background:var(--purple);color:var(--black)}
+/* Tema creator (lila) */
+.lb-creator .role-btn.active{border-color:var(--purple);color:var(--purple);background:#160a22}
+.lb-creator .ltab.active{color:var(--purple);border-bottom-color:var(--purple)}
+.lb-creator .btn-primary{background:var(--purple);color:var(--black)}
+/* Tema marca (lima) */
+.lb-marca .role-btn.active{border-color:var(--green);color:var(--green);background:#0f1400}
+.lb-marca .ltab.active{color:var(--green);border-bottom-color:var(--green)}
+.lb-marca .btn-primary{background:var(--green);color:var(--black)}
 /* Chooser de recuperación */
 .np-btn{display:block;padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;border-radius:2px;text-decoration:none}
 .np-primary.np-green{background:var(--green);color:var(--black)}
@@ -129,7 +129,7 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .dash-email{font-size:.75rem;color:var(--muted);margin-top:.2rem}
 .dash-badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.6rem;font-weight:900;letter-spacing:.15em;text-transform:uppercase;padding:.25rem .625rem;border-radius:20px;margin-top:.4rem}
 .badge-creator{background:#1a0a2a;color:var(--purple);border:1px solid #3a1a5a}
-.badge-marca{background:#1a0a2a;color:var(--purple);border:1px solid #3a1a5a}
+.badge-marca{background:#0f1a00;color:var(--green);border:1px solid #1a3000}
 .badge-corp{background:#0a1020;color:var(--blue);border:1px solid #1a2a40}
 .s-pend{background:#1a1200;color:var(--amber);border:1px solid #2a2000;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
 .s-apro{background:#0f1a00;color:var(--green);border:1px solid #1a3000;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
@@ -140,15 +140,15 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .tab{padding:.875rem 1.25rem;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none}
 .tab:hover{color:var(--white)}
 .tab.active{color:var(--green);border-bottom-color:var(--green)}
-/* Identidad LILA para el perfil de marca */
-body.t-marca .tab.active{color:var(--purple);border-bottom-color:var(--purple)}
-body.t-marca .sec-title{color:var(--purple)}
-body.t-marca .sec-title::before{background:var(--purple)}
-body.t-marca .notif-bell:hover{border-color:var(--purple)}
-body.t-marca .notif-head button{color:var(--purple)}
-body.t-marca .notif-item.unread{background:#140a1f}
-body.t-marca .dash-av{border-color:#3a1a5a}
-body.t-marca .spin{border-top-color:var(--purple)}
+/* Identidad LILA para el perfil de creador (la marca usa el verde lima por defecto) */
+body.t-creator .tab.active{color:var(--purple);border-bottom-color:var(--purple)}
+body.t-creator .sec-title{color:var(--purple)}
+body.t-creator .sec-title::before{background:var(--purple)}
+body.t-creator .notif-bell:hover{border-color:var(--purple)}
+body.t-creator .notif-head button{color:var(--purple)}
+body.t-creator .notif-item.unread{background:#140a1f}
+body.t-creator .dash-av{border-color:#3a1a5a}
+body.t-creator .spin{border-top-color:var(--purple)}
 
 .tab-content{display:none;padding:2rem 1.5rem}
 @media(min-width:768px){.tab-content{padding:2.5rem 4rem}}
@@ -623,8 +623,8 @@ function showLogin(){
 
 function showNoPerfil(){
   const pref = (function(){ try{ return localStorage.getItem('trama_rol_pref'); }catch(_){ return null; } })() || regTipo || 'creator';
-  const btnCreator = `<a href="./registro.html" class="np-btn ${pref==='creator'?'np-primary np-green':'np-ghost'}">Completar perfil creator →</a>`;
-  const btnMarca   = `<a href="./marcas.html" class="np-btn ${pref==='marca'?'np-primary np-purple':'np-ghost'}">Completar perfil marca →</a>`;
+  const btnCreator = `<a href="./registro.html" class="np-btn ${pref==='creator'?'np-primary np-purple':'np-ghost'}">Completar perfil creator →</a>`;
+  const btnMarca   = `<a href="./marcas.html" class="np-btn ${pref==='marca'?'np-primary np-green':'np-ghost'}">Completar perfil marca →</a>`;
   document.getElementById('vLogin').innerHTML=`
     <div class="login-box" style="text-align:center">
       <div class="login-logo">TRAMA</div>
@@ -677,8 +677,8 @@ function showDash(){
     const tipo=p.tipo;
     badge.innerHTML=`<span class="dash-badge ${tipo==='corporativa'?'badge-corp':'badge-marca'}">${tipo==='corporativa'?'Empresa corporativa':'Marca'}</span>`;
   }
-  // Identidad visual lila para marcas, verde para creadores
-  document.body.classList.toggle('t-marca', userType==='marca');
+  // Identidad visual lila para creadores, verde lima para marcas
+  document.body.classList.toggle('t-creator', userType==='creator');
 
   buildTabs();
   loadNotifs();

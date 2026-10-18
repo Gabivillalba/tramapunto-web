@@ -945,6 +945,8 @@ function renderCreatorTab(i,el){
       <label class="foto-add">📷 Agregar fotos<input type="file" accept="image/*" multiple style="display:none" onchange="subirFotos(this)"></label>
 
       <button class="btn-save" onclick="saveCreator()">Guardar y enviar a revisión →</button>
+
+      ${pwdBlockHTML()}
     </div>`;
     renderFotos();
   }
@@ -1037,6 +1039,8 @@ function renderMarcaTab(i,el){
         <div class="fg-edit fg-full"><label>Descripción</label><textarea id="em-desc">${p.descripcion||''}</textarea></div>
       </div>
       <button class="btn-save" onclick="saveMarca()">Guardar cambios</button>
+
+      ${pwdBlockHTML()}
     </div>`;
   }
   else if(i===4){
@@ -1199,6 +1203,36 @@ async function saveMarca(){
   if(ok){Object.assign(userProfile,body);showToast('✓ Cuenta actualizada','ok')}
   else showToast('Error al guardar','err');
   btn.disabled=false; btn.textContent='Guardar cambios';
+}
+
+// ── CAMBIO DE CONTRASEÑA (dentro del panel, creator y marca) ──
+function pwdBlockHTML(){
+  return `
+    <div class="sec-title" style="margin-top:2.5rem">Seguridad</div>
+    <p style="font-size:.76rem;color:var(--muted2);line-height:1.5;margin-bottom:.9rem">Cambiá tu contraseña. Si entraste con una contraseña temporal, elegí una propia acá.</p>
+    <div class="edit-grid" style="margin-bottom:1rem">
+      <div class="fg-edit"><label>Nueva contraseña</label><input type="password" id="pw-new" placeholder="Mínimo 8 caracteres"></div>
+      <div class="fg-edit"><label>Repetir contraseña</label><input type="password" id="pw-new2" placeholder="Repetí la contraseña"></div>
+    </div>
+    <button class="btn-save" onclick="cambiarPassword(this)">Cambiar contraseña</button>`;
+}
+async function cambiarPassword(btn){
+  const p1=(document.getElementById('pw-new')||{}).value||'';
+  const p2=(document.getElementById('pw-new2')||{}).value||'';
+  if(p1.length<8){ showToast('La contraseña debe tener al menos 8 caracteres','err'); return; }
+  if(p1!==p2){ showToast('Las contraseñas no coinciden','err'); return; }
+  btn.disabled=true; const prev=btn.textContent; btn.textContent='Guardando...';
+  try{
+    const r=await fetch(`${SB_URL}/auth/v1/user`,{
+      method:'PUT',
+      headers:{apikey:SB_ANON,Authorization:'Bearer '+getToken(),'Content-Type':'application/json'},
+      body:JSON.stringify({password:p1})
+    });
+    if(!r.ok){ const j=await r.json().catch(()=>({})); throw new Error(j.msg||j.message||'No se pudo cambiar la contraseña'); }
+    document.getElementById('pw-new').value=''; document.getElementById('pw-new2').value='';
+    showToast('✓ Contraseña actualizada','ok');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+  btn.disabled=false; btn.textContent=prev;
 }
 
 // ── LIGA TRAMA. ──

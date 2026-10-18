@@ -380,6 +380,7 @@ textarea.em-inp{resize:vertical;line-height:1.5}
       <button class="f-btn" onclick="setFilter('pendiente',this)">Pendientes</button>
       <button class="f-btn" onclick="setFilter('aprobado',this)">Aprobados</button>
       <button class="f-btn" onclick="setFilter('rechazado',this)">Rechazados</button>
+      <button class="f-btn" id="fbtn-contacto" onclick="setFilter('contacto',this)">⚠️ Posible contacto</button>
     </div>
 
     <div class="cards-wrap">
@@ -1037,9 +1038,9 @@ async function loadMetrics(){
       if(m.campanias.en_revision>0) acc.push({txt:`${m.campanias.en_revision} campaña${m.campanias.en_revision===1?'':'s'} en revisión`, tab:'campanias', btn:'Ver'});
       if(m.resenas&&m.resenas.recientes>0) acc.push({txt:`${m.resenas.recientes} reseña${m.resenas.recientes===1?'':'s'} nueva${m.resenas.recientes===1?'':'s'} (últimos 7 días)`, tab:'resenas', btn:'Moderar'});
       const conContacto=(allCreators||[]).filter(c=>detectarContacto(c).length).length;
-      if(conContacto>0) acc.push({txt:`⚠️ ${conContacto} creador${conContacto===1?'':'es'} con posible contacto en campos públicos`, tab:'creators', btn:'Revisar'});
+      if(conContacto>0) acc.push({txt:`⚠️ ${conContacto} creador${conContacto===1?'':'es'} con posible contacto en campos públicos`, tab:'creators', btn:'Revisar', accion:'revisarContacto()'});
       accEl.innerHTML = acc.length
-        ? acc.map(a=>`<div class="dash-row"><span class="dash-name">${a.txt}</span><button class="btn-sm" onclick="switchTab('${a.tab}')">${a.btn} →</button></div>`).join('')
+        ? acc.map(a=>`<div class="dash-row"><span class="dash-name">${a.txt}</span><button class="btn-sm" onclick="${a.accion||`switchTab('${a.tab}')`}">${a.btn} →</button></div>`).join('')
         : '<div class="dash-empty">Todo al día ✅</div>';
     }
 
@@ -1375,10 +1376,18 @@ function updateStats(){
 function setFilter(f,btn){
   adminFilter=f;
   document.querySelectorAll('#viewCreators .f-btn').forEach(b=>{b.classList.remove('on','on-pend','on-rech')});
-  btn.classList.add('on');
-  if(f==='pendiente')btn.classList.add('on-pend');
-  if(f==='rechazado')btn.classList.add('on-rech');
+  const target = btn || document.getElementById('fbtn-'+f);
+  if(target){
+    target.classList.add('on');
+    if(f==='pendiente')target.classList.add('on-pend');
+    if(f==='rechazado')target.classList.add('on-rech');
+  }
   renderCards();
+}
+// Desde el dashboard: ir a Creadores y filtrar los que tienen posible contacto
+function revisarContacto(){
+  switchTab('creators');
+  setFilter('contacto');
 }
 
 // ── RENDER ──
@@ -1411,7 +1420,9 @@ function detectarContacto(c){
 
 function renderCards(){
   const q=(document.getElementById('searchInp').value||'').toLowerCase().trim();
-  let list=adminFilter==='todos'?allCreators:allCreators.filter(c=>c.status===adminFilter);
+  let list=adminFilter==='contacto'
+    ? allCreators.filter(c=>detectarContacto(c).length)
+    : adminFilter==='todos'?allCreators:allCreators.filter(c=>c.status===adminFilter);
   if(q)list=list.filter(c=>
     (c.nombre+' '+c.apellido).toLowerCase().includes(q)||
     (c.email||'').toLowerCase().includes(q)||

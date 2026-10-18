@@ -244,6 +244,26 @@ section{padding:5rem 1.5rem;border-top:1px solid #161616}
 .fav-btn{background:none;border:none;cursor:pointer;font-size:1.15rem;line-height:1;color:#555;padding:0;transition:color .15s,transform .15s}
 .fav-btn:hover{color:#888;transform:scale(1.15)}
 .fav-btn.on{color:var(--green)}
+.cmp-btn{background:none;border:none;cursor:pointer;font-size:1rem;line-height:1;color:#555;padding:0;transition:color .15s,transform .15s}
+.cmp-btn:hover{color:#888;transform:scale(1.15)}
+.cmp-btn.on{color:var(--green)}
+#compareBar{position:fixed;left:50%;transform:translateX(-50%);bottom:1rem;z-index:350;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:4px;box-shadow:0 8px 30px -6px #000;display:none;align-items:center;gap:.9rem;padding:.6rem .9rem;max-width:92vw}
+#compareBar.show{display:flex}
+.cmp-bar-txt{font-size:.78rem;color:var(--muted,#999);font-weight:700}
+.cmp-bar-txt b{color:#fff}
+.cmp-bar-go{background:var(--green);color:#000;border:none;font-weight:900;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:.55rem .9rem;border-radius:2px;cursor:pointer}
+.cmp-bar-go:disabled{opacity:.4;cursor:not-allowed}
+.cmp-bar-clear{background:none;border:none;color:var(--muted,#999);font-size:.72rem;cursor:pointer;text-decoration:underline}
+.cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cmp-table{border-collapse:collapse;width:100%;min-width:380px;font-size:.8rem}
+.cmp-table th,.cmp-table td{border-bottom:1px solid #1a1a1a;padding:.55rem .65rem;text-align:left;vertical-align:middle}
+.cmp-table th.cmp-lbl{color:var(--muted,#999);font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:.64rem;white-space:nowrap}
+.cmp-head{display:flex;flex-direction:column;align-items:center;gap:.35rem;text-align:center}
+.cmp-av{width:44px;height:44px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:900;border:2px solid #222;position:relative}
+.cmp-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cmp-name{font-weight:900;font-size:.78rem;line-height:1.1}
+.cmp-best{color:var(--green);font-weight:900}
+.cmp-conn{background:var(--green);color:#000;border:none;font-weight:900;font-size:.62rem;letter-spacing:.05em;text-transform:uppercase;padding:.45rem .5rem;border-radius:2px;cursor:pointer;width:100%}
 .card-rating{font-size:.72rem;font-weight:800;color:#f5b301;margin:-.4rem 0 .5rem;letter-spacing:.02em}
 .card-rating span{color:var(--muted,#777);font-weight:600}
 .card-reps{display:flex;flex-wrap:wrap;gap:.3rem;margin:.1rem 0 .4rem}
@@ -731,6 +751,21 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
   <button class="lb-nav lb-next" onclick="navFoto(1,event)" aria-label="Siguiente">›</button>
 </div>
 
+<!-- COMPARADOR -->
+<div id="compareBar">
+  <span class="cmp-bar-txt"><b id="cmpN">0</b> para comparar</span>
+  <button class="cmp-bar-go" id="cmpGo" onclick="abrirComparador()" disabled>Comparar</button>
+  <button class="cmp-bar-clear" onclick="limpiarCompare()">Limpiar</button>
+</div>
+<div class="modal-bg" id="compareModal">
+  <div class="modal" style="max-width:760px">
+    <button class="modal-x" onclick="cerrarComparador()">✕</button>
+    <div class="m-tag">Comparar creators · TRAMA.</div>
+    <h3 class="m-title" style="margin-bottom:1rem">Comparación</h3>
+    <div class="cmp-wrap" id="cmpBody"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -742,6 +777,7 @@ const BGS=['#0f1a00','#0a2010','#1a0a00','#0a1020','#1a0a14','#1a0a2a','#1a1000'
 
 let allCreators=[], bolsaNiche='todos', bolsaPlats=[], bolsaSort='liga';
 let favSet=new Set();   // ids de creators guardados por el usuario logueado
+let compareSet=new Set();   // ids seleccionados para comparar (máx 3)
 
 // Email del usuario logueado (marca o creador). null si no hay sesión.
 function buyerEmail(){
@@ -1059,6 +1095,7 @@ function renderBolsa(){
         <div class="card-av" style="background:${bg};border-color:${col}33;color:${col}">${avHtml}</div>
         <div class="card-top-r">
           ${c.racha>0?`<span class="card-badge badge-top">🔥 ${c.racha}</span>`:''}
+          <button class="cmp-btn${compareSet.has(c.id)?' on':''}" title="Comparar" onclick="toggleCompare('${c.id}',event)">⚖</button>
           <button class="fav-btn${favSet.has(c.id)?' on':''}" title="Guardar" onclick="toggleFav('${c.id}',event)">${favSet.has(c.id)?'★':'☆'}</button>
         </div>
       </div>
@@ -1119,6 +1156,67 @@ function closeModal(){
   document.body.style.overflow='';
 }
 document.getElementById('contactModal').addEventListener('click',e=>{if(e.target===document.getElementById('contactModal'))closeModal()});
+
+// ── COMPARADOR DE CREADORES ──
+function toggleCompare(id,ev){
+  if(ev){ev.stopPropagation();ev.preventDefault();}
+  if(compareSet.has(id)){ compareSet.delete(id); }
+  else{
+    if(compareSet.size>=3){ showToast('Podés comparar hasta 3 creators a la vez','info'); return; }
+    compareSet.add(id);
+  }
+  if(ev&&ev.currentTarget){ ev.currentTarget.classList.toggle('on', compareSet.has(id)); }
+  renderCompareBar();
+}
+function renderCompareBar(){
+  const bar=document.getElementById('compareBar'); if(!bar)return;
+  const n=compareSet.size;
+  document.getElementById('cmpN').textContent=n;
+  document.getElementById('cmpGo').disabled=n<2;
+  bar.classList.toggle('show', n>0);
+}
+function limpiarCompare(){
+  compareSet.clear();
+  document.querySelectorAll('.cmp-btn.on').forEach(b=>b.classList.remove('on'));
+  renderCompareBar();
+}
+function cerrarComparador(){
+  document.getElementById('compareModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+function abrirComparador(){
+  const cs=[...compareSet].map(id=>allCreators.find(x=>x.id===id)).filter(Boolean);
+  if(cs.length<2) return;
+  const money=(n,m)=> n?('$'+Number(n).toLocaleString('es-AR')+' '+(m||'ARS')):'—';
+  const maxOf=f=>Math.max(...cs.map(c=>Number(f(c)||0)));
+  const maxIg=maxOf(c=>c.ig_seg),maxTt=maxOf(c=>c.tt_seg),maxYt=maxOf(c=>c.yt_seg),
+        maxRat=maxOf(c=>c.rating_prom),maxEr=maxOf(c=>c.ig_er);
+  const cell=(v,best)=>`<td class="${best?'cmp-best':''}">${v}</td>`;
+  const row=(lbl,fn)=>`<tr><th class="cmp-lbl">${lbl}</th>${cs.map(fn).join('')}</tr>`;
+  const head=cs.map(c=>{
+    const i=allCreators.indexOf(c), col=getColor(i<0?0:i), bg=getBg(i<0?0:i);
+    const av=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre}">`:`<span>${getInit(c)}</span>`;
+    return `<td><div class="cmp-head"><div class="cmp-av" style="background:${bg};border-color:${col}44;color:${col}">${av}</div><div class="cmp-name">${c.nombre}</div></div></td>`;
+  }).join('');
+  document.getElementById('cmpBody').innerHTML=`<table class="cmp-table">
+    <tr><th class="cmp-lbl"></th>${head}</tr>
+    ${row('Ciudad',c=>cell(c.ciudad||'—'))}
+    ${row('Nicho',c=>cell((c.niches||[]).join(', ')||'—'))}
+    ${row('IG seguidores',c=>cell(fmtSeg(c.ig_seg),(c.ig_seg||0)===maxIg&&maxIg>0))}
+    ${row('IG engagement',c=>cell(c.ig_er?c.ig_er+'%':'—',Number(c.ig_er||0)===maxEr&&maxEr>0))}
+    ${row('TikTok seguidores',c=>cell(fmtSeg(c.tt_seg),(c.tt_seg||0)===maxTt&&maxTt>0))}
+    ${row('YouTube',c=>cell(fmtSeg(c.yt_seg),(c.yt_seg||0)===maxYt&&maxYt>0))}
+    ${row('Rating',c=>cell(c.rating_count>0?('★ '+Number(c.rating_prom).toFixed(1)):'—',Number(c.rating_prom||0)===maxRat&&maxRat>0))}
+    ${row('Tarifa reel',c=>cell(money(c.t_reel,c.moneda)))}
+    ${row('Tarifa story',c=>cell(money(c.t_story,c.moneda)))}
+    ${row('Tarifa post',c=>cell(money(c.t_post,c.moneda)))}
+    ${row('Disponibilidad',c=>cell((c.disponibilidad||[]).join(', ')||'—'))}
+    <tr><th class="cmp-lbl"></th>${cs.map(c=>{const i=allCreators.indexOf(c);return `<td><button class="cmp-conn" onclick="cerrarComparador();openModal('${c.id}',${i<0?0:i})">Conectar</button></td>`;}).join('')}</tr>
+  </table>`;
+  document.getElementById('compareModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+document.getElementById('compareModal').addEventListener('click',e=>{if(e.target===document.getElementById('compareModal'))cerrarComparador()});
 
 // ── quickPay ELIMINADA ──
 // Antes esta función revelaba email, teléfono e Instagram del creator

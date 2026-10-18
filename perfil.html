@@ -220,6 +220,8 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .resena-btn{margin-top:.6rem;background:none;border:1px solid #2a2a2a;color:var(--muted2,#aaa);font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.4rem .7rem;border-radius:2px;cursor:pointer;transition:border-color .15s,color .15s}
 .resena-btn:hover{border-color:var(--green);color:var(--green)}
 .resena-btn.done{color:#f5b301;border-color:#3a2e00}
+.comp-btn{margin-top:.6rem;margin-left:.5rem;background:none;border:1px solid #2a2a2a;color:var(--muted2,#aaa);font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.4rem .7rem;border-radius:2px;cursor:pointer;transition:border-color .15s,color .15s}
+.comp-btn:hover{border-color:var(--green);color:var(--green)}
 .rep-badge{font-size:.6rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:.3rem .55rem;border-radius:2px}
 .rep-badge.camp{background:#2a2200;color:#f5d312;border:1px solid #4a3c00}
 .rep-badge.top{background:#2a1a00;color:#f5a301;border:1px solid #4a2e00}
@@ -1277,10 +1279,70 @@ function contactoLinks(c){
 }
 
 // Vista del COMPRADOR (marca o creador): contactos que YA compró, con los datos a mano
+// Comprobante de compra: abre una ventana imprimible (guardar como PDF)
+let compradosData={};
+function fmtMetodoPago(m){
+  const map={account_money:'Dinero en cuenta',credit_card:'Tarjeta de crédito',debit_card:'Tarjeta de débito',ticket:'Efectivo (ticket)',bank_transfer:'Transferencia',digital_currency:'Dinero digital',prepaid_card:'Tarjeta prepaga'};
+  return map[m]||(m?m:'Mercado Pago');
+}
+function descargarComprobante(cxId){
+  const d=compradosData[cxId]; if(!d){ showToast('No se encontró la compra','err'); return; }
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const fecha=d.fecha?new Date(d.fecha).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+  const nro=d.voucher?esc(d.voucher):esc(String(d.id).slice(0,8).toUpperCase());
+  const monto=(d.monto&&Number(d.monto)>0)?('$ '+Number(d.monto).toLocaleString('es-AR')+' ARS'):'Bonificado';
+  const compradorNom=esc((userProfile&&userProfile.nombre)||'—');
+  const compradorMail=esc(currentUser.email||'');
+  const detalle='Acceso a datos de contacto de creador — '+esc(d.creador)+(d.origen==='campania'?' (vía campaña)':'');
+  const html=`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Comprobante TRAMA. ${nro}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#111;background:#f4f4f4;padding:24px}
+    .doc{max-width:620px;margin:0 auto;background:#fff;border:1px solid #e3e3e3;border-radius:6px;overflow:hidden}
+    .top{background:#0d0d0d;color:#fff;padding:22px 28px;display:flex;justify-content:space-between;align-items:flex-end}
+    .brand{font-size:1.5rem;font-weight:900;letter-spacing:.02em}
+    .brand span{color:#C8FF1A}
+    .ctype{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;opacity:.8}
+    .body{padding:28px}
+    .nro{font-size:.8rem;color:#666;margin-bottom:18px}
+    .nro b{color:#111}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;margin-bottom:22px}
+    .f{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:#999;font-weight:700;margin-bottom:3px}
+    .v{font-size:.9rem;color:#111;font-weight:600}
+    .detalle{border-top:1px solid #eee;border-bottom:1px solid #eee;padding:16px 0;margin-bottom:18px}
+    .tot{display:flex;justify-content:space-between;align-items:center;font-size:1.15rem;font-weight:900}
+    .tot .lbl{font-size:.8rem;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.06em}
+    .note{font-size:.68rem;color:#999;line-height:1.6;margin-top:22px;border-top:1px dashed #ddd;padding-top:14px}
+    .pay{display:inline-block;background:#eafbd0;color:#3a5a00;font-size:.7rem;font-weight:800;padding:3px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:.05em}
+    @media print{body{background:#fff;padding:0}.doc{border:none}}
+  </style></head><body>
+  <div class="doc">
+    <div class="top"><div class="brand">TRAMA<span>.</span></div><div class="ctype">Comprobante de compra</div></div>
+    <div class="body">
+      <div class="nro">Comprobante N.º <b>${nro}</b> · <span class="pay">Pagado</span></div>
+      <div class="grid">
+        <div><div class="f">Fecha</div><div class="v">${fecha}</div></div>
+        <div><div class="f">Medio de pago</div><div class="v">${esc(fmtMetodoPago(d.metodo))}</div></div>
+        <div><div class="f">Comprador</div><div class="v">${compradorNom}</div></div>
+        <div><div class="f">Email</div><div class="v">${compradorMail}</div></div>
+      </div>
+      <div class="detalle"><div class="f">Detalle</div><div class="v" style="font-weight:600;margin-top:4px">${detalle}</div></div>
+      <div class="tot"><span class="lbl">Total</span><span>${monto}</span></div>
+      <div class="note">Este es un comprobante de compra emitido por TRAMA. por el servicio de acceso a datos de contacto. No constituye factura fiscal (AFIP). El pago fue procesado por Mercado Pago. Ante cualquier consulta escribinos a info.tramapunto@gmail.com · tramapunto.com</div>
+    </div>
+  </div>
+  <script>window.onload=function(){setTimeout(function(){window.print();},250);};<\/script>
+  </body></html>`;
+  const w=window.open('','_blank');
+  if(!w){ showToast('Permití las ventanas emergentes para descargar el comprobante','info'); return; }
+  w.document.write(html); w.document.close(); w.focus();
+}
+
 async function loadComprados(wrapId){
   const wrap=document.getElementById(wrapId); if(!wrap)return;
   const email=currentUser.email;
-  const cxs=await sbGet('conexiones',`marca_email=eq.${encodeURIComponent(email)}&estado=eq.pagado&select=creator_id,origen,created_at&order=created_at.desc`,getToken());
+  const cxs=await sbGet('conexiones',`marca_email=eq.${encodeURIComponent(email)}&estado=eq.pagado&select=id,creator_id,origen,created_at,monto,metodo,voucher_id&order=created_at.desc`,getToken());
+  compradosData={};
   if(!cxs.length){
     wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Creadores comprados</div><div class="empty-state"><div>📭</div>Todavía no desbloqueaste ningún contacto.<br><a href="/" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
     return;
@@ -1322,6 +1384,9 @@ async function loadComprados(wrapId){
     } else {
       cuerpo=`<div class="cx-contact" style="color:var(--muted)">El acceso al contacto venció (60 días). <a href="/" style="color:var(--green)">Volver a comprar →</a></div>`;
     }
+    // Comprobante de compra (disponible siempre, vigente o no)
+    compradosData[cx.id]={ id:cx.id, creador:nom, fecha:cx.created_at, monto:cx.monto, metodo:cx.metodo, voucher:cx.voucher_id, origen:cx.origen };
+    cuerpo+=`<button class="comp-btn" onclick="descargarComprobante('${cx.id}')">🧾 Comprobante</button>`;
     return `<div class="cx-item${activo?'':' cx-exp'}"><div class="cx-ic">${av}</div><div class="cx-body"><div class="cx-name">${nom} ${venceBadge}</div><div class="cx-meta">Comprado el ${f}${cx.origen==='campania'?' · campaña':''}</div>${cuerpo}</div></div>`;
   }).join('');
   wrap.innerHTML=`<div class="tab-content active">

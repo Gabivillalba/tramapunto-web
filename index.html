@@ -969,6 +969,8 @@ async function cargarShowcase(){
   }catch(_){ box.innerHTML='<div style="padding:1.5rem;text-align:center;color:var(--muted)"><a href="/" onclick="checkAndShowBolsa();return false" style="color:var(--green)">Mirá los creadores en la bolsa →</a></div>'; }
 }
 cargarShowcase();
+// Permite entrar directo a la bolsa desde otra página con /#bolsa
+if(location.hash==='#bolsa'){ try{ checkAndShowBolsa(); }catch(_){} }
 
 let currentCreator=null, filtersBuilt=false;
 

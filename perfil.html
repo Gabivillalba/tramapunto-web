@@ -683,7 +683,7 @@ function buildTabs(){
   // {l: etiqueta, i: índice de contenido} — el orden visual se desacopla del
   // índice interno (renderCreatorTab/renderMarcaTab siguen usando el mismo i).
   const tabs = userType==='creator'
-    ?[{l:'👤 Mi perfil',i:0},{l:'📊 Contactos',i:5},{l:'📋 Campañas',i:7},{l:'🛒 Comprados',i:6},{l:'🔥 Liga',i:1},{l:'🔗 Mis redes',i:2},{l:'✏️ Editar',i:4},{l:'⏳ Estado',i:3}]
+    ?[{l:'👤 Mi perfil',i:0},{l:'📊 Contactos',i:5},{l:'📋 Campañas',i:7},{l:'🛒 Comprados',i:6},{l:'🔥 Liga',i:1},{l:'🔗 Mis redes',i:2},{l:'✏️ Editar',i:4}]
     :[{l:'👤 Mi cuenta',i:0},{l:'🔗 Mis conexiones',i:2},{l:'📋 Mis campañas',i:4},{l:'☆ Guardados',i:1},{l:'✏️ Editar',i:3}];
   document.getElementById('dashTabs').innerHTML = tabs.map((t,pos)=>
     `<button class="tab${pos===0?' active':''}" data-i="${t.i}" onclick="switchTab(${t.i},this)">${t.l}</button>`
@@ -733,7 +733,14 @@ function renderCreatorTab(i,el){
           <div class="cl-bar"><div class="cl-bar-fill" style="width:${pct}%"></div></div>
           <div class="cl-items">${pend.map(x=>`<button class="cl-item" onclick="${x.cta==='foto'?`showToast('Tocá el 📷 sobre tu foto de perfil, arriba','info')`:`irATab(${x.cta})`}">○ ${x.txt} <span>→</span></button>`).join('')}</div>
         </div>`;
+    const estMap={
+      pendiente:{bg:'#1a1200',bd:'#2a2000',col:'#f59e0b',ic:'⏳',txt:'<strong>Perfil en revisión.</strong> El equipo TRAMA. lo está revisando — en 48-72hs te confirmamos si quedás en la bolsa.'},
+      rechazado:{bg:'#1a0a0a',bd:'#3a1a1a',col:'#f87171',ic:'❌',txt:'<strong>Perfil no aprobado.</strong> Escribinos a info.tramapunto@gmail.com si querés que lo revisemos de nuevo.'},
+    };
+    const est=estMap[p.status];
+    const estadoBanner = est?`<div style="background:${est.bg};border:1px solid ${est.bd};border-radius:3px;padding:.9rem 1.1rem;margin-bottom:1.5rem;font-size:.8rem;color:${est.col};line-height:1.5;display:flex;gap:.6rem;align-items:flex-start"><span style="font-size:1.1rem;line-height:1">${est.ic}</span><span>${est.txt}</span></div>`:'';
     el.innerHTML=`<div class="tab-content active">
+      ${estadoBanner}
       <div class="sec-title" style="margin-top:0">Tu rendimiento</div>
       <div id="statsWrap" style="margin-bottom:2rem"></div>
       ${checklistHTML}

@@ -35,7 +35,8 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .panel{display:none;padding-top:56px}
 .panel.show{display:block}
 
-.panel-top{background:var(--g1);border-bottom:1px solid #1a1a1a;padding:1.5rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between}
+.panel-top{background:var(--g1);border-bottom:1px solid #1a1a1a;padding:1.5rem;display:flex;flex-direction:column;gap:1rem}
+.panel-top-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
 @media(min-width:768px){.panel-top{padding:1.5rem 4rem}}
 .panel-title{font-size:1.1rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
 .panel-title span{color:var(--green)}
@@ -267,9 +268,18 @@ textarea.em-inp{resize:vertical;line-height:1.5}
 <!-- PANEL -->
 <div class="panel" id="panel">
   <div class="panel-top">
-    <div>
-      <div class="panel-title">Panel <span>TRAMA.</span></div>
-      <div class="panel-meta" id="panelMeta">Cargando...</div>
+    <div class="panel-top-head">
+      <div>
+        <div class="panel-title">Panel <span>TRAMA.</span></div>
+        <div class="panel-meta" id="panelMeta">Cargando...</div>
+      </div>
+      <div class="notif-wrap" style="position:relative;flex-shrink:0">
+        <button class="notif-bell" id="notifBell" onclick="toggleAdminNotif()" aria-label="Notificaciones">🔔<span class="notif-dot" id="notifDot" style="display:none"></span></button>
+        <div class="notif-panel" id="notifPanel">
+          <div class="notif-head"><span>Notificaciones</span><button onclick="marcarAdminNotifLeidas()">Marcar leídas</button></div>
+          <div id="notifList"></div>
+        </div>
+      </div>
     </div>
     <div class="top-actions">
       <button class="btn-sm" onclick="loadAll()">↻ Actualizar</button>
@@ -280,13 +290,6 @@ textarea.em-inp{resize:vertical;line-height:1.5}
       <button class="btn-sm" onclick="exportMarcasCSV()">⬇ CSV marcas</button>
       <button class="btn-sm" onclick="exportVentasCSV()">⬇ CSV ventas</button>
       <button class="btn-sm" onclick="exportPostulacionesCSV()">⬇ CSV postulaciones</button>
-      <div class="notif-wrap" style="position:relative;display:inline-block">
-        <button class="notif-bell" id="notifBell" onclick="toggleAdminNotif()" aria-label="Notificaciones">🔔<span class="notif-dot" id="notifDot" style="display:none"></span></button>
-        <div class="notif-panel" id="notifPanel">
-          <div class="notif-head"><span>Notificaciones</span><button onclick="marcarAdminNotifLeidas()">Marcar leídas</button></div>
-          <div id="notifList"></div>
-        </div>
-      </div>
       <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
     </div>
   </div>
@@ -950,6 +953,8 @@ async function loadMetrics(){
       if(m.creadores.pendientes>0) acc.push({txt:`${m.creadores.pendientes} creador${m.creadores.pendientes===1?'':'es'} pendiente${m.creadores.pendientes===1?'':'s'} de revisar`, tab:'creators', btn:'Revisar'});
       if(m.campanias.en_revision>0) acc.push({txt:`${m.campanias.en_revision} campaña${m.campanias.en_revision===1?'':'s'} en revisión`, tab:'campanias', btn:'Ver'});
       if(m.resenas&&m.resenas.recientes>0) acc.push({txt:`${m.resenas.recientes} reseña${m.resenas.recientes===1?'':'s'} nueva${m.resenas.recientes===1?'':'s'} (últimos 7 días)`, tab:'resenas', btn:'Moderar'});
+      const conContacto=(allCreators||[]).filter(c=>detectarContacto(c).length).length;
+      if(conContacto>0) acc.push({txt:`⚠️ ${conContacto} creador${conContacto===1?'':'es'} con posible contacto en campos públicos`, tab:'creators', btn:'Revisar'});
       accEl.innerHTML = acc.length
         ? acc.map(a=>`<div class="dash-row"><span class="dash-name">${a.txt}</span><button class="btn-sm" onclick="switchTab('${a.tab}')">${a.btn} →</button></div>`).join('')
         : '<div class="dash-empty">Todo al día ✅</div>';
@@ -1199,6 +1204,27 @@ function getInit(c){return((c.nombre||'?')[0]+(c.apellido||'?')[0]).toUpperCase(
 function fmtSeg(n){return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':n||'—'}
 function fmtFecha(s){return new Date(s).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})}
 
+// Detecta datos de contacto metidos en campos PÚBLICOS (para saltear el pago):
+// email, teléfono, @usuarios, links de redes o palabras tipo "whatsapp".
+function detectarContacto(c){
+  const campos={ 'Bio':c.bio, 'Nicho esp.':c.nicho_esp, 'Nota dispon.':c.dispon_nota, 'Colabs':c.colabs };
+  const reEmail=/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i;
+  const reTel=/(?:\+?54\s?9?\s?)?(?:\d[\s().\-]?){8,}\d/;
+  const reHandle=/(^|[^\w@/.])@[a-z0-9._]{3,}/i;
+  const reUrl=/(instagram\.com|tiktok\.com|wa\.me|api\.whatsapp|whatsapp\.com|t\.me|youtube\.com|youtu\.be|facebook\.com|fb\.me)/i;
+  const rePalabra=/\b(whats?app|wsp|wpp|cel(?:ular)?|t[eé]l[eé]fono|mi\s*(?:mail|correo|cel|n[uú]mero|whatsapp)|escrib[ií]me|contact[aá]me|ll?am[aá]me)\b/i;
+  const señales=[];
+  for(const [campo,v] of Object.entries(campos)){
+    const txt=String(v||''); if(!txt) continue;
+    if(reEmail.test(txt)) señales.push(campo+': email');
+    else if(reTel.test(txt)) señales.push(campo+': teléfono');
+    if(reHandle.test(txt)) señales.push(campo+': @usuario');
+    if(reUrl.test(txt)) señales.push(campo+': link de red');
+    if(rePalabra.test(txt)) señales.push(campo+': palabra de contacto');
+  }
+  return [...new Set(señales)];
+}
+
 function renderCards(){
   const q=(document.getElementById('searchInp').value||'').toLowerCase().trim();
   let list=adminFilter==='todos'?allCreators:allCreators.filter(c=>c.status===adminFilter);
@@ -1218,12 +1244,14 @@ function renderCards(){
     const avHtml=c.avatar_url
       ?`<img src="${c.avatar_url}" alt="${c.nombre}">`
       :`<span>${init}</span>`;
+    const leak=detectarContacto(c);
     return `<div class="ac" id="ac-${c.id}">
       <div class="ac-left">
         <div class="ac-av" style="background:${bg};border:2px solid ${col}44;color:${col}">${avHtml}</div>
         <div class="ac-info">
           <div class="ac-name">${c.nombre} ${c.apellido}</div>
           <div class="ac-niche" style="color:${col}">${(c.niches||[]).join(' · ')||'—'}</div>
+          ${leak.length?`<div style="margin-top:.35rem"><span title="${leak.join(' · ')}" style="display:inline-block;background:#2a0f00;color:#ff6b4a;border:1px solid #4a1a00;font-size:.6rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:.2rem .45rem;border-radius:2px">⚠️ Posible contacto público (${leak.length})</span></div>`:''}
           <div class="ac-meta">${c.email} · ${c.ciudad||'—'} · ${fmtFecha(c.created_at)}</div>
           <div class="ac-stats">
             <div class="acs"><strong>${seg}</strong>Seguidores</div>

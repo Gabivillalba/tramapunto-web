@@ -1399,16 +1399,17 @@ async function loadComprados(wrapId){
 // Reseñas recibidas por el creador (se muestran en su propio perfil)
 async function loadResenasRecibidas(creatorId){
   const box=document.getElementById('repWrap'); if(!box)return;
-  const rows=await sbGet('resenas',`creator_id=eq.${creatorId}&select=rating,comentario,marca_nombre,created_at&order=created_at.desc&limit=10`,getToken());
+  const rows=await sbGet('resenas',`creator_id=eq.${creatorId}&select=rating,comentario,marca_nombre,created_at,respuesta&oculta=not.is.true&order=created_at.desc&limit=10`,getToken());
   const conTexto=(rows||[]).filter(x=>x.comentario&&x.comentario.trim());
   if(!conTexto.length)return;
   box.innerHTML=conTexto.map(x=>{
     const estrellas='★'.repeat(x.rating)+'☆'.repeat(5-x.rating);
     const quien=x.marca_nombre||'Marca';
     const f=x.created_at?new Date(x.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
+    const resp=x.respuesta?`<div style="margin-top:.45rem;padding:.45rem .65rem;background:#0f1a00;border-left:2px solid var(--green);font-size:.76rem;color:#cde8a0;line-height:1.5"><strong>Respuesta de TRAMA.:</strong> ${x.respuesta}</div>`:'';
     return `<div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:.8rem 1rem;margin-bottom:.5rem">
       <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem"><span style="color:#f5b301;font-size:.85rem">${estrellas}</span><span style="font-size:.72rem;font-weight:700;color:var(--muted2,#aaa)">${quien}</span><span style="font-size:.66rem;color:var(--muted);margin-left:auto">${f}</span></div>
-      <p style="margin:0;font-size:.8rem;color:var(--muted2,#aaa);line-height:1.5">${x.comentario}</p>
+      <p style="margin:0;font-size:.8rem;color:var(--muted2,#aaa);line-height:1.5">${x.comentario}</p>${resp}
     </div>`;
   }).join('');
 }

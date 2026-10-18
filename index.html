@@ -226,6 +226,9 @@ section{padding:5rem 1.5rem;border-top:1px solid #161616}
 .adv-field select:focus{outline:none;border-color:var(--green)}
 .adv-clear{background:transparent;border:1px solid #2a2a2a;color:var(--muted);padding:.5rem .9rem;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:2px;height:fit-content}
 .adv-clear:hover{border-color:#f87171;color:#f87171}
+.saved-row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.9rem}
+.saved-sel{background:#0d0d0d;border:1px solid #222;color:var(--white,#f4f4ef);padding:.45rem .7rem;font-size:.72rem;border-radius:2px;cursor:pointer;font-family:inherit}
+.saved-sel:focus{outline:none;border-color:var(--green)}
 .bolsa-count{margin-top:1rem;font-size:.72rem;color:var(--muted);font-weight:600}
 .bolsa-inner{padding:0 1.5rem 3rem}
 @media(min-width:768px){.bolsa-inner{padding:0 4rem 4rem}}
@@ -683,6 +686,11 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
       </div>
       <button class="adv-clear" onclick="limpiarFiltros()">Limpiar filtros</button>
     </div>
+    <div class="saved-row" id="savedRow">
+      <button class="adv-toggle" style="margin-top:0" onclick="guardarBusqueda()">💾 Guardar búsqueda</button>
+      <select class="saved-sel" id="savedSel" onchange="aplicarGuardada(this.value)"><option value="">Mis búsquedas guardadas…</option></select>
+      <button class="adv-clear" id="delSaved" onclick="borrarGuardada()" style="display:none">✕ Borrar</button>
+    </div>
     <div class="bolsa-count" id="bolsaCount"></div>
   </div>
   <div class="bolsa-inner">
@@ -871,7 +879,7 @@ async function cargarResenasModal(id){
   const box=document.getElementById('mResenas');
   if(!box)return;
   try{
-    const r=await fetch(`${SB_URL}/rest/v1/resenas?select=rating,comentario,marca_nombre,created_at&creator_id=eq.${id}&order=created_at.desc&limit=3`,{
+    const r=await fetch(`${SB_URL}/rest/v1/resenas?select=rating,comentario,marca_nombre,created_at,respuesta&creator_id=eq.${id}&oculta=not.is.true&order=created_at.desc&limit=3`,{
       headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
     });
     if(!r.ok)return;
@@ -881,7 +889,8 @@ async function cargarResenasModal(id){
     box.innerHTML=`<div class="m-resenas-t">Lo que dicen las marcas</div>`+conTexto.map(x=>{
       const estrellas='★'.repeat(x.rating)+'☆'.repeat(5-x.rating);
       const quien=x.marca_nombre||'Marca';
-      return `<div class="m-resena"><div class="m-resena-top"><span class="m-resena-stars">${estrellas}</span> <span class="m-resena-who">${quien}</span></div><p>${x.comentario}</p></div>`;
+      const resp=x.respuesta?`<div style="margin-top:.4rem;padding:.4rem .6rem;background:#0f1a00;border-left:2px solid var(--green);font-size:.78rem;color:#cde8a0"><strong>TRAMA.:</strong> ${x.respuesta}</div>`:'';
+      return `<div class="m-resena"><div class="m-resena-top"><span class="m-resena-stars">${estrellas}</span> <span class="m-resena-who">${quien}</span></div><p>${x.comentario}</p>${resp}</div>`;
     }).join('');
   }catch(_){}
 }
@@ -1010,6 +1019,7 @@ function buildFilters(){
     const cities=[...new Set(allCreators.map(c=>(c.ciudad||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
     cities.forEach(ci=>{ const o=document.createElement('option'); o.value=ci; o.textContent=ci; fc.appendChild(o); });
   }
+  refreshSavedUI();
 }
 
 function toggleAdv(){
@@ -1017,6 +1027,58 @@ function toggleAdv(){
   const ch=document.getElementById('advChevron');
   const open=p.classList.toggle('open');
   if(ch) ch.textContent=open?'⌃':'⌄';
+}
+
+// ── BÚSQUEDAS GUARDADAS (por usuario, en este navegador) ──
+function sesionEmail(){ try{const s=localStorage.getItem('trama_marca')||localStorage.getItem('trama_creator'); return s?(JSON.parse(s).email||'anon'):'anon';}catch(_){return 'anon';} }
+function savedKey(){ return 'trama_filtros_'+sesionEmail(); }
+function getSaved(){ try{return JSON.parse(localStorage.getItem(savedKey())||'[]');}catch(_){return [];} }
+function setSaved(a){ try{localStorage.setItem(savedKey(), JSON.stringify(a));}catch(_){} }
+function estadoActual(){
+  const g=id=>document.getElementById(id)?document.getElementById(id).value:'';
+  return {niche:bolsaNiche, plats:[...bolsaPlats], sort:bolsaSort, city:g('fCity'), seg:g('fSeg'), er:g('fEr'), tarifa:g('fTarifa'), rating:g('fRating')};
+}
+function aplicarEstado(st){
+  bolsaNiche=st.niche||'todos'; bolsaPlats=Array.isArray(st.plats)?[...st.plats]:[]; bolsaSort=st.sort||'liga';
+  const set=(id,v)=>{const el=document.getElementById(id); if(el&&v!=null) el.value=v;};
+  set('fCity',st.city||'todas'); set('fSeg',st.seg||'0'); set('fEr',st.er||'0'); set('fTarifa',st.tarifa||'0'); set('fRating',st.rating||'0');
+  document.querySelectorAll('#nicheFilters .f-btn').forEach(x=>x.classList.toggle('on', (bolsaNiche==='todos'&&x.textContent==='Todos')||x.textContent===bolsaNiche));
+  document.querySelectorAll('#platFilters .p-btn').forEach(x=>x.classList.toggle('on', bolsaPlats.includes(x.textContent)));
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('on'));
+  const sortIdx={liga:0,seg:1,er:2,rating:3,nombre:4}[bolsaSort];
+  const sb=document.querySelectorAll('.sort-btn')[sortIdx!=null?sortIdx:0]; if(sb) sb.classList.add('on');
+  renderBolsa();
+}
+function refreshSavedUI(){
+  const sel=document.getElementById('savedSel'); if(!sel)return;
+  const arr=getSaved();
+  sel.innerHTML='<option value="">Mis búsquedas guardadas…</option>'+arr.map(s=>`<option value="${s.name.replace(/"/g,'&quot;')}">${s.name}</option>`).join('');
+  const row=document.getElementById('savedRow'); if(row) row.style.display=arr.length||true?'flex':'flex';
+}
+function guardarBusqueda(){
+  const name=(prompt('Nombre para esta búsqueda (ej: "Fitness BA 10K+")')||'').trim();
+  if(!name)return;
+  const arr=getSaved();
+  const i=arr.findIndex(s=>s.name.toLowerCase()===name.toLowerCase());
+  const item={name, state:estadoActual()};
+  if(i>=0) arr[i]=item; else arr.push(item);
+  setSaved(arr); refreshSavedUI();
+  const sel=document.getElementById('savedSel'); if(sel) sel.value=name;
+  document.getElementById('delSaved').style.display='inline-block';
+  showToast('Búsqueda guardada','ok');
+}
+function aplicarGuardada(name){
+  const del=document.getElementById('delSaved');
+  if(!name){ if(del) del.style.display='none'; return; }
+  const s=getSaved().find(x=>x.name===name);
+  if(s){ aplicarEstado(s.state); if(del) del.style.display='inline-block'; }
+}
+function borrarGuardada(){
+  const sel=document.getElementById('savedSel'); if(!sel||!sel.value)return;
+  const name=sel.value;
+  setSaved(getSaved().filter(s=>s.name!==name));
+  refreshSavedUI(); document.getElementById('delSaved').style.display='none';
+  showToast('Búsqueda borrada','info');
 }
 
 function limpiarFiltros(){

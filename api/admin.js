@@ -574,6 +574,58 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, enviados, total: dests.length });
       }
 
+      case 'list_resenas': {
+        const r = await sb('resenas?select=*&order=created_at.desc');
+        const ids = [...new Set((r || []).map(x => x.creator_id).filter(Boolean))];
+        let names = {};
+        if (ids.length) {
+          const cs = await sb(`creators?id=in.(${ids.join(',')})&select=id,nombre,apellido`);
+          names = Object.fromEntries((cs || []).map(c => [c.id, `${c.nombre || ''} ${c.apellido || ''}`.trim()]));
+        }
+        return res.status(200).json({ ok: true, resenas: (r || []).map(x => ({ ...x, creador: names[x.creator_id] || '—' })) });
+      }
+
+      case 'moderar_resena': {
+        const { id, oculta } = payload;
+        if (!id) return res.status(400).json({ error: 'Falta id' });
+        await sb(`resenas?id=eq.${id}`, 'PATCH', { oculta: !!oculta });
+        return res.status(200).json({ ok: true });
+      }
+
+      case 'responder_resena': {
+        const { id, respuesta } = payload;
+        if (!id) return res.status(400).json({ error: 'Falta id' });
+        await sb(`resenas?id=eq.${id}`, 'PATCH', { respuesta: (respuesta || '').trim() || null, respuesta_at: new Date().toISOString() });
+        return res.status(200).json({ ok: true });
+      }
+
+      case 'delete_resena': {
+        const { id } = payload;
+        if (!id) return res.status(400).json({ error: 'Falta id' });
+        await sb(`resenas?id=eq.${id}`, 'DELETE');
+        return res.status(200).json({ ok: true });
+      }
+
+      case 'programar_envio': {
+        const { asunto, cuerpo, segmento, enviar_at } = payload;
+        if (!asunto || !cuerpo || !enviar_at) return res.status(400).json({ error: 'Faltan datos (asunto, cuerpo o fecha)' });
+        if (new Date(enviar_at).getTime() <= Date.now()) return res.status(400).json({ error: 'La fecha debe ser futura' });
+        await sb('emails_programados', 'POST', { asunto, cuerpo, segmento: segmento || 'todos', enviar_at, estado: 'pendiente' });
+        return res.status(200).json({ ok: true });
+      }
+
+      case 'list_programados': {
+        const r = await sb('emails_programados?select=*&order=enviar_at.desc');
+        return res.status(200).json({ ok: true, programados: r || [] });
+      }
+
+      case 'cancelar_programado': {
+        const { id } = payload;
+        if (!id) return res.status(400).json({ error: 'Falta id' });
+        await sb(`emails_programados?id=eq.${id}&estado=eq.pendiente`, 'PATCH', { estado: 'cancelado' });
+        return res.status(200).json({ ok: true });
+      }
+
       default:
         return res.status(400).json({ error: `Acción desconocida: ${action}` });
     }

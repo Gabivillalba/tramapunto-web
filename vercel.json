@@ -1,5 +1,6 @@
 {
   "crons": [
-    { "path": "/api/liga-cron", "schedule": "0 12 * * *" }
+    { "path": "/api/liga-cron", "schedule": "0 12 * * *" },
+    { "path": "/api/emails-cron", "schedule": "0 * * * *" }
   ]
 }

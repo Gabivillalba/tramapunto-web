@@ -46,3 +46,23 @@ drop trigger if exists trg_recalc_rating on public.resenas;
 create trigger trg_recalc_rating
   after insert or update or delete on public.resenas
   for each row execute function public.recalc_rating();
+
+-- ════════════════════════════════════════════════════════════
+-- MODERACIÓN (agregado 18-oct-2026): ocultar/responder reseñas desde el admin.
+-- El rating cacheado ignora las ocultas. Aplicado en producción.
+-- ════════════════════════════════════════════════════════════
+alter table public.resenas add column if not exists oculta       boolean not null default false;
+alter table public.resenas add column if not exists respuesta    text;
+alter table public.resenas add column if not exists respuesta_at timestamptz;
+
+create or replace function public.recalc_rating() returns trigger
+language plpgsql as $$
+declare cid uuid;
+begin
+  cid := coalesce(new.creator_id, old.creator_id);
+  update public.creators set
+    rating_count = (select count(*)                            from public.resenas where creator_id = cid and oculta is not true),
+    rating_prom  = coalesce((select round(avg(rating)::numeric,2) from public.resenas where creator_id = cid and oculta is not true), 0)
+  where id = cid;
+  return null;
+end $$;

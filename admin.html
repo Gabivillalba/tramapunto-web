@@ -1296,7 +1296,7 @@ async function setStatus(id,st){
 async function deleteCreator(id){
   const c=allCreators.find(x=>x.id===id);
   const nombre=c?`${c.nombre||''} ${c.apellido||''}`.trim()||'este perfil':'este perfil';
-  if(!confirm(`¿Eliminar DEFINITIVAMENTE a ${nombre}?\n\nSe borra el perfil por completo. Esta acción no se puede deshacer.`)) return;
+  if(!confirm(`¿Eliminar DEFINITIVAMENTE a ${nombre}?\n\nSe borra el perfil y TODO lo asociado: ventas/conexiones, reseñas, vistas y postulaciones. Esta acción no se puede deshacer.`)) return;
   const card=document.getElementById('ac-'+id);
   card&&card.querySelectorAll('button').forEach(b=>b.disabled=true);
   try{

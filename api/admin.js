@@ -286,6 +286,9 @@ export default async function handler(req, res) {
           const rows = await sb(`creators?id=eq.${id}&select=email`);
           email = rows?.[0]?.email || null;
         } catch (_) { /* seguimos igual */ }
+        // Las conexiones (ventas) tienen FK sin cascade: hay que borrarlas antes.
+        // El resto (reseñas, vistas, postulaciones, favoritos) cae solo por ON DELETE CASCADE.
+        try { await sb(`conexiones?creator_id=eq.${id}`, 'DELETE'); } catch (_) { /* sin ventas */ }
         await sb(`creators?id=eq.${id}`, 'DELETE');
         if (email) {
           try {

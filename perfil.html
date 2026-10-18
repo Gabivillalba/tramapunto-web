@@ -605,7 +605,7 @@ function showDash(){
 
 function buildTabs(){
   const tabs = userType==='creator'
-    ?['Mi perfil','🔥 Liga','Mis redes','Estado','Editar','📊 Contactos','🛒 Comprados']
+    ?['Mi perfil','🔥 Liga','Mis redes','Estado','Editar','📊 Contactos','🛒 Comprados','📋 Campañas']
     :['Mi cuenta','Creators guardados','Mis conexiones','Editar'];
   document.getElementById('dashTabs').innerHTML = tabs.map((t,i)=>
     `<button class="tab${i===0?' active':''}" onclick="switchTab(${i},this)">${t}</button>`
@@ -819,6 +819,39 @@ function renderCreatorTab(i,el){
     el.innerHTML=`<div class="tab-content active" id="compradosWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
     loadComprados('compradosWrap');
   }
+  else if(i===7){
+    el.innerHTML=`<div class="tab-content active" id="campCreWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadCampanasCreador('campCreWrap');
+  }
+}
+
+// ── CAMPAÑAS (vista del creador: campañas abiertas + mis postulaciones) ──
+async function loadCampanasCreador(wrapId){
+  const wrap=document.getElementById(wrapId); if(!wrap)return;
+  const token=getToken();
+  const activas=await sbGet('campanias','estado=eq.activa&select=id,titulo,tipo,presupuesto_min,presupuesto_max,moneda,fecha_limite&order=created_at.desc',token);
+  const mis=await sbGet('postulaciones',`creador_id=eq.${userProfile.id}&select=campania_id,estado,created_at&order=created_at.desc`,token);
+  const nActivas=(activas||[]).length;
+  const estadoTxt={pendiente:'En revisión',preseleccionada:'Preseleccionada ⭐',aceptada:'¡Aceptada! ✅',rechazada:'No seleccionada',retirada:'Retirada'};
+  const estadoCol={pendiente:'var(--muted2)',preseleccionada:'#f5b301',aceptada:'var(--green)',rechazada:'#f87171',retirada:'var(--muted)'};
+  // mapa de títulos
+  const titById={}; (activas||[]).forEach(c=>titById[c.id]=c.titulo);
+  const misHtml=(mis&&mis.length)? mis.map(p=>{
+    const f=p.created_at?new Date(p.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):'';
+    const tit=titById[p.campania_id]||'Campaña';
+    return `<div class="cx-item"><div class="cx-ic">📋</div><div class="cx-body"><div class="cx-name">${tit}</div><div class="cx-meta">Postulado el ${f}</div><div style="font-size:.74rem;font-weight:800;margin-top:.35rem;color:${estadoCol[p.estado]||'var(--muted2)'}">${estadoTxt[p.estado]||p.estado}</div></div></div>`;
+  }).join('') : `<div class="empty-state" style="padding:1.5rem"><div>📭</div>Todavía no te postulaste a ninguna campaña.</div>`;
+  wrap.innerHTML=`<div class="tab-content active">
+    <div style="background:#0f0a1a;border:1px solid #2a1a40;border-radius:6px;padding:1.4rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+      <div>
+        <div style="font-size:1.5rem;font-weight:900;color:var(--purple)">${nActivas} ${nActivas===1?'campaña abierta':'campañas abiertas'}</div>
+        <div style="font-size:.82rem;color:var(--muted2);margin-top:.2rem">Las marcas publican su brief y vos te postulás a las que te cierran.</div>
+      </div>
+      <a href="/oportunidades.html" style="background:var(--purple);color:#fff;font-size:.8rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;padding:.7rem 1.2rem;border-radius:2px;white-space:nowrap">Ver campañas →</a>
+    </div>
+    <div class="sec-title">Mis postulaciones (${(mis||[]).length})</div>
+    <div class="cx-list">${misHtml}</div>
+  </div>`;
 }
 
 // ── MARCA TABS ──
@@ -835,8 +868,15 @@ function renderMarcaTab(i,el){
         ${p.tel?`<div class="info-card"><div class="ic-label">Teléfono</div><div class="ic-val">${p.tel}</div></div>`:''}
       </div>
       ${(p.objetivos?.length)?`<div class="sec-title">Objetivos</div><div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:2rem">${p.objetivos.map(o=>`<span style="background:#0f1a00;color:var(--green);border:1px solid #2a4000;padding:.3rem .75rem;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:2px">${o}</span>`).join('')}</div>`:''}
-      <div style="background:#0a1020;border:1px solid #1a2a40;border-radius:3px;padding:1.1rem;font-size:.78rem;color:var(--muted2);line-height:1.6">
-        💡 <strong style="color:var(--white)">¿Querés ver la bolsa de creators de TRAMA.?</strong> <a href="/" style="color:var(--green)">Ir al inicio →</a>
+      <div style="display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem">
+        <a href="/campanas.html" style="flex:1;min-width:200px;background:#0f1a00;border:1px solid #2a4000;border-radius:4px;padding:1.1rem 1.25rem;text-decoration:none">
+          <div style="font-size:.9rem;font-weight:800;color:var(--green)">📋 Publicá una campaña</div>
+          <div style="font-size:.76rem;color:var(--muted2);margin-top:.25rem;line-height:1.5">Dejá tu brief y recibí postulaciones de creadores que encajan.</div>
+        </a>
+        <a href="/" style="flex:1;min-width:200px;background:#0a1020;border:1px solid #1a2a40;border-radius:4px;padding:1.1rem 1.25rem;text-decoration:none">
+          <div style="font-size:.9rem;font-weight:800;color:var(--white)">🔍 Explorar la bolsa</div>
+          <div style="font-size:.76rem;color:var(--muted2);margin-top:.25rem;line-height:1.5">Buscá y conectá con creadores verificados por nicho.</div>
+        </a>
       </div>
     </div>`;
   }

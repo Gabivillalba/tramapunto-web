@@ -42,3 +42,24 @@ grant select (
 
 alter policy conexiones_insert on public.conexiones
   with check (estado is distinct from 'pagado');
+
+-- ════════════════════════════════════════════════════════════
+-- FIX (18-oct-2026) — regresión de la Fase 2.
+-- Al revocar SELECT de creators.email a 'authenticated', se rompieron las
+-- políticas RLS que hacían una subconsulta a creators.email
+-- (el creador no podía ver sus ventas, vistas ni postulaciones: "permission
+-- denied for table creators"). Solución: función SECURITY DEFINER que
+-- devuelve los ids del creador logueado, y las políticas la usan en vez de
+-- consultar creators.email directamente.
+-- ════════════════════════════════════════════════════════════
+create or replace function public.mis_creator_ids()
+returns setof uuid language sql stable security definer set search_path=public as $$
+  select id from public.creators where lower(email)=lower(auth.jwt()->>'email')
+$$;
+revoke all on function public.mis_creator_ids() from public;
+grant execute on function public.mis_creator_ids() to authenticated, anon;
+
+alter policy conexiones_select_creador   on public.conexiones    using (creator_id in (select public.mis_creator_ids()));
+alter policy vistas_select_propias        on public.vistas_perfil using (creator_id in (select public.mis_creator_ids()));
+alter policy postulaciones_select_propias on public.postulaciones using (creador_id in (select public.mis_creator_ids()));
+alter policy postulaciones_update_retirar on public.postulaciones using (creador_id in (select public.mis_creator_ids()));

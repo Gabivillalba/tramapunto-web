@@ -46,6 +46,27 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .ltab-content{display:none}
 .ltab-content.active{display:block}
 
+/* SELECTOR DE ROL (login diferenciado) */
+.role-switch{display:flex;gap:.5rem;margin-bottom:.75rem}
+.role-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.7rem .5rem;border-radius:3px;font-size:.7rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;background:#141414;border:1.5px solid #222;color:var(--muted);transition:all .18s}
+.role-btn span{font-size:.95rem}
+.role-btn:hover{border-color:#444}
+.role-tag{font-size:.72rem;color:var(--muted2);text-align:center;margin-bottom:1.5rem;min-height:1.05em;line-height:1.4}
+/* Tema creator (lima) */
+.lb-creator .role-btn.active{border-color:var(--green);color:var(--green);background:#0f1400}
+.lb-creator .ltab.active{color:var(--green);border-bottom-color:var(--green)}
+.lb-creator .btn-primary{background:var(--green);color:var(--black)}
+/* Tema marca (lila) */
+.lb-marca .role-btn.active{border-color:var(--purple);color:var(--purple);background:#160a22}
+.lb-marca .ltab.active{color:var(--purple);border-bottom-color:var(--purple)}
+.lb-marca .btn-primary{background:var(--purple);color:var(--black)}
+/* Chooser de recuperación */
+.np-btn{display:block;padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;border-radius:2px;text-decoration:none}
+.np-primary.np-green{background:var(--green);color:var(--black)}
+.np-primary.np-purple{background:var(--purple);color:var(--black)}
+.np-ghost{background:transparent;border:1px solid #2a2a2a;color:var(--muted2)}
+.np-ghost:hover{border-color:#444;color:var(--white)}
+
 /* REGISTRO TIPO */
 .tipo-opts{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.25rem}
 .tipo-opt{display:flex;align-items:center;gap:.75rem;padding:.875rem 1rem;border-radius:2px;cursor:pointer;transition:all .2s;border:1.5px solid #222}
@@ -296,12 +317,19 @@ body.t-marca .spin{border-top-color:var(--purple)}
 
 <!-- ══ LOGIN ══ -->
 <div class="view active" id="vLogin">
-  <div class="login-box">
+  <div class="login-box lb-creator" id="loginBox">
     <div class="login-logo">TRAMA</div>
+
+    <!-- Selector de rol — diferencia el ingreso de creator y de marca -->
+    <div class="role-switch">
+      <button class="role-btn active" id="role-creator" onclick="setRole('creator')"><span>🎥</span>Soy creator</button>
+      <button class="role-btn" id="role-marca" onclick="setRole('marca')"><span>🏢</span>Soy marca</button>
+    </div>
+    <p class="role-tag" id="roleTag">Subí tu perfil y recibí propuestas de marcas.</p>
 
     <div class="login-tabs">
       <button class="ltab active" onclick="switchLTab(0,this)">Ingresar</button>
-      <button class="ltab" onclick="switchLTab(1,this)">Registrarme</button>
+      <button class="ltab" onclick="switchLTab(1,this)">Crear cuenta</button>
     </div>
 
     <!-- INGRESAR -->
@@ -313,37 +341,14 @@ body.t-marca .spin{border-top-color:var(--purple)}
       <div class="hint-link"><a onclick="showForgot()">Olvidé mi contraseña</a></div>
     </div>
 
-    <!-- REGISTRARSE -->
+    <!-- CREAR CUENTA (corto) -->
     <div class="ltab-content" id="lt1">
       <div class="form-err" id="regErr"></div>
-      <p style="font-size:.78rem;color:var(--muted2);margin-bottom:1rem;line-height:1.5">Primero elegí qué sos, después completás tu perfil completo.</p>
-
-      <div class="tipo-opts">
-        <div class="tipo-opt" id="opt-creator" onclick="selTipo('creator')">
-          <span class="tipo-icon">🎥</span>
-          <div>
-            <div class="tipo-label" style="color:var(--purple)">Soy creator</div>
-            <div class="tipo-desc">Subí tu perfil y recibí propuestas de marcas</div>
-          </div>
-        </div>
-        <div class="tipo-opt" id="opt-marca" onclick="selTipo('marca')">
-          <span class="tipo-icon">🏢</span>
-          <div>
-            <div class="tipo-label" style="color:var(--green)">Soy marca</div>
-            <div class="tipo-desc">Encontrá creators y gestioná tus campañas</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="fg-row">
-        <div class="fg"><label>Nombre</label><input type="text" id="r-nombre" placeholder="Tu nombre"></div>
-        <div class="fg"><label>Apellido</label><input type="text" id="r-apellido" placeholder="Apellido"></div>
-      </div>
+      <div class="fg"><label id="lblNombre">Nombre y apellido</label><input type="text" id="r-nombre" placeholder="Ej: Martina Gómez"></div>
       <div class="fg"><label>Email</label><input type="email" id="r-email" placeholder="tu@email.com"></div>
-      <div class="fg"><label>Contraseña</label><input type="password" id="r-pass" placeholder="Mínimo 8 caracteres"></div>
-      <div class="fg"><label>Confirmar contraseña</label><input type="password" id="r-pass2" placeholder="Repetí la contraseña"></div>
+      <div class="fg"><label>Contraseña</label><input type="password" id="r-pass" placeholder="Mínimo 8 caracteres" onkeydown="if(event.key==='Enter')doRegister()"></div>
       <button class="btn-primary btn-green" id="btnReg" onclick="doRegister()">Crear cuenta →</button>
-      <div class="hint-link" style="margin-top:.75rem;font-size:.7rem;color:var(--muted)">Después de crear tu cuenta vas a completar tu perfil completo. Al registrarte aceptás los <a href="./terminos.html" target="_blank">Términos y privacidad</a> de TRAMA.</div>
+      <div class="hint-link" style="margin-top:.75rem;font-size:.68rem;color:var(--muted)">Al crear tu cuenta aceptás los <a href="./terminos.html" target="_blank">Términos y privacidad</a> de TRAMA.</div>
     </div>
 
   </div>
@@ -403,7 +408,7 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 let currentUser = null;
 let userProfile = null;
 let userType    = null;
-let regTipo     = null;
+let regTipo     = 'creator';
 let ligaData    = null;
 
 // ── HELPERS ──
@@ -443,6 +448,7 @@ async function sbPatch(table, filter, body, token){
 
 // ── INIT ──
 (async function init(){
+  try{ setRole(localStorage.getItem('trama_rol_pref')||'creator'); }catch(_){}
   const token = getToken();
   if(!token){ showLogin(); return; }
   const {ok, data} = await sbFetch('/auth/v1/user','GET',null,token);
@@ -459,13 +465,18 @@ function switchLTab(i, btn){
   document.getElementById('lt'+i).classList.add('active');
 }
 
-// ── TIPO SELECTOR ──
-function selTipo(t){
+// ── SELECTOR DE ROL (login/registro diferenciado) ──
+function setRole(t){
   regTipo = t;
-  document.getElementById('opt-creator').className='tipo-opt'+(t==='creator'?' selected-creator':'');
-  document.getElementById('opt-marca').className='tipo-opt'+(t==='marca'?' selected-marca':'');
-  const btn = document.getElementById('btnReg');
-  btn.className = 'btn-primary '+(t==='creator'?'btn-purple':'btn-green');
+  document.getElementById('loginBox').className = 'login-box lb-'+t;
+  document.getElementById('role-creator').classList.toggle('active', t==='creator');
+  document.getElementById('role-marca').classList.toggle('active', t==='marca');
+  document.getElementById('roleTag').textContent = t==='creator'
+    ? 'Subí tu perfil y recibí propuestas de marcas.'
+    : 'Encontrá creators y gestioná tus campañas.';
+  document.getElementById('lblNombre').textContent = t==='creator' ? 'Nombre y apellido' : 'Nombre de la marca';
+  document.getElementById('r-nombre').placeholder  = t==='creator' ? 'Ej: Martina Gómez'  : 'Ej: Estudio Trama';
+  try{ localStorage.setItem('trama_rol_pref', t); }catch(_){}
 }
 
 // ── REGISTRO ──
@@ -473,17 +484,18 @@ async function doRegister(){
   const err = document.getElementById('regErr');
   err.classList.remove('show');
 
-  if(!regTipo){ err.textContent='Elegí si sos creator o marca.'; err.classList.add('show'); return; }
-  const nombre   = document.getElementById('r-nombre').value.trim();
-  const apellido = document.getElementById('r-apellido').value.trim();
-  const email    = document.getElementById('r-email').value.trim();
-  const pass     = document.getElementById('r-pass').value;
-  const pass2    = document.getElementById('r-pass2').value;
+  const tipo  = regTipo || 'creator';
+  const full  = document.getElementById('r-nombre').value.trim();
+  const email = document.getElementById('r-email').value.trim();
+  const pass  = document.getElementById('r-pass').value;
 
-  if(!nombre||!apellido){ err.textContent='Completá nombre y apellido.'; err.classList.add('show'); return; }
+  if(!full){ err.textContent = tipo==='creator' ? 'Ingresá tu nombre y apellido.' : 'Ingresá el nombre de la marca.'; err.classList.add('show'); return; }
   if(!email||!/\S+@\S+\.\S+/.test(email)){ err.textContent='Email inválido.'; err.classList.add('show'); return; }
   if(pass.length<8){ err.textContent='La contraseña debe tener al menos 8 caracteres.'; err.classList.add('show'); return; }
-  if(pass!==pass2){ err.textContent='Las contraseñas no coinciden.'; err.classList.add('show'); return; }
+
+  // Partir el nombre completo (para creators). En marcas va todo como nombre.
+  let nombre = full, apellido = '';
+  if(tipo==='creator'){ const sp = full.split(/\s+/); nombre = sp.shift(); apellido = sp.join(' '); }
 
   const btn = document.getElementById('btnReg');
   btn.disabled=true; btn.textContent='Creando cuenta...';
@@ -502,27 +514,35 @@ async function doRegister(){
   const authId  = data.user?.id;
   saveSession(token, refresh);
 
-  // Insertar perfil en la tabla correspondiente
+  // Insertar perfil en la tabla correspondiente — verificando que no falle
+  // (si el auth se crea pero la fila no, queda una cuenta huérfana que luego
+  //  dispara el cartel "Cuenta creada" al ingresar).
   const fuente = (localStorage.getItem('trama_fuente')||'directo');
-  const perfil = {nombre, apellido, email, auth_id: authId, fuente, status: regTipo==='creator'?'pendiente':'activa'};
-  if(regTipo==='creator'){
-    await fetch(`${SB_URL}/rest/v1/creators`,{
+  const perfil = {nombre, apellido, email, auth_id: authId, fuente, status: tipo==='creator'?'pendiente':'activa'};
+  const tabla  = tipo==='creator' ? 'creators' : 'marcas';
+  const body   = tipo==='creator' ? perfil : {...perfil, tipo:'fisica'};
+
+  let insOk=false;
+  try{
+    const ri = await fetch(`${SB_URL}/rest/v1/${tabla}`,{
       method:'POST',
       headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token}`,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body: JSON.stringify(perfil)
+      body: JSON.stringify(body)
     });
-    localStorage.setItem('trama_creator', JSON.stringify({nombre, email}));
-  } else {
-    await fetch(`${SB_URL}/rest/v1/marcas`,{
-      method:'POST',
-      headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token}`,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body: JSON.stringify({...perfil, tipo:'fisica'})
-    });
-    localStorage.setItem('trama_marca', JSON.stringify({nombre, email}));
+    insOk = ri.ok;
+    if(!insOk) console.warn('insert perfil fallo', ri.status, await ri.text().catch(()=>''));
+  }catch(e){ console.warn('insert perfil error', e); }
+
+  if(!insOk){
+    err.textContent='Tu cuenta se creó pero no pudimos guardar el perfil. Reintentá en unos segundos.';
+    err.classList.add('show');
+    btn.disabled=false; btn.textContent='Crear cuenta →';
+    return;
   }
 
+  localStorage.setItem(tipo==='creator'?'trama_creator':'trama_marca', JSON.stringify({nombre, email}));
   currentUser = data.user;
-  await loadProfile(token);
+  await loadProfile(token, tipo);
 }
 
 // ── LOGIN ──
@@ -568,7 +588,7 @@ async function fetchContacto(ids){
   }catch(_){ return {}; }
 }
 // El perfil propio se trae del servidor (ya no se busca por email desde el cliente)
-async function loadProfile(token){
+async function loadProfile(token, knownType){
   const email = currentUser.email;
   let data=null;
   try{
@@ -585,7 +605,13 @@ async function loadProfile(token){
     localStorage.setItem('trama_marca', JSON.stringify({nombre:userProfile.nombre, email}));
     showDash(); return;
   }
-  // Sin perfil — pedir que complete registro
+  // Perfil recién creado que aún no aparece (latencia): reintentar una vez.
+  if(knownType && !loadProfile._retried){
+    loadProfile._retried = true;
+    await new Promise(r=>setTimeout(r,1200));
+    return loadProfile(token, knownType);
+  }
+  // Sin perfil — recuperación (cuenta huérfana)
   showNoPerfil();
 }
 
@@ -596,15 +622,17 @@ function showLogin(){
 }
 
 function showNoPerfil(){
+  const pref = (function(){ try{ return localStorage.getItem('trama_rol_pref'); }catch(_){ return null; } })() || regTipo || 'creator';
+  const btnCreator = `<a href="./registro.html" class="np-btn ${pref==='creator'?'np-primary np-green':'np-ghost'}">Completar perfil creator →</a>`;
+  const btnMarca   = `<a href="./marcas.html" class="np-btn ${pref==='marca'?'np-primary np-purple':'np-ghost'}">Completar perfil marca →</a>`;
   document.getElementById('vLogin').innerHTML=`
     <div class="login-box" style="text-align:center">
       <div class="login-logo">TRAMA</div>
       <div style="font-size:2rem;margin-bottom:1rem">👋</div>
-      <h2 style="font-size:1.1rem;font-weight:900;text-transform:uppercase;margin-bottom:.5rem">Cuenta creada</h2>
-      <p style="font-size:.82rem;color:var(--muted2);line-height:1.6;margin-bottom:1.75rem">Tu cuenta está activa. Ahora completá tu perfil según tu rol.</p>
+      <h2 style="font-size:1.1rem;font-weight:900;text-transform:uppercase;margin-bottom:.5rem">Un paso más</h2>
+      <p style="font-size:.82rem;color:var(--muted2);line-height:1.6;margin-bottom:1.75rem">Tu cuenta está activa pero todavía no tiene perfil. Completá el tuyo para entrar.</p>
       <div style="display:flex;flex-direction:column;gap:.625rem">
-        <a href="./registro.html" style="display:block;background:var(--purple);color:var(--black);padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none">Completar perfil creator →</a>
-        <a href="./marcas.html" style="display:block;background:var(--green);color:var(--black);padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none">Completar perfil marca →</a>
+        ${pref==='marca' ? btnMarca+btnCreator : btnCreator+btnMarca}
         <button onclick="doLogout()" style="background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;margin-top:.5rem">Cerrar sesión</button>
       </div>
     </div>`;

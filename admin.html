@@ -173,6 +173,8 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .ca-btn:hover{opacity:.85}
 .ca-aprobar{background:var(--green);color:var(--black)}
 .ca-rechazar{background:transparent;border:1px solid #2a0000;color:var(--red)}
+.ca-eliminar{background:transparent;border:1px solid #3a0000;color:#ff6b6b;opacity:.8}
+.ca-eliminar:hover{opacity:1;background:#1a0000}
 .ca-cerrar{background:transparent;border:1px solid #2a2a2a;color:var(--muted2)}
 .ca-ver{background:transparent;border:1px solid #2a2a2a;color:var(--white)}
 .postu-box{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:2px;padding:.75rem;margin-top:.6rem}
@@ -1190,6 +1192,7 @@ function renderCampanias(){
     if((c.total_postulaciones||0)>0){
       acciones.push(`<button class="ca-btn ca-ver" onclick="verPostulaciones('${c.id}')">Ver ${c.total_postulaciones} postulación${c.total_postulaciones>1?'es':''}</button>`);
     }
+    acciones.push(`<button class="ca-btn ca-eliminar" onclick="eliminarCampania('${c.id}','${(c.titulo||'').replace(/'/g,"\\'")}')">🗑 Eliminar</button>`);
 
     return `<div class="camp-card">
       <div class="camp-head">
@@ -1237,6 +1240,17 @@ async function setCampStatus(id, estado){
     updateCampStats();
     renderCampanias();
     showToast(`✓ Campaña ${labels[estado]||estado}`, estado==='rechazada'?'err':'ok');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+}
+
+async function eliminarCampania(id, titulo){
+  if(!confirm(`¿Eliminar definitivamente la campaña "${titulo||''}"?\n\nSe borran también sus postulaciones. Las ventas/conexiones ya realizadas se conservan. No se puede deshacer.`)) return;
+  try{
+    await adminCall('delete_campania',{id});
+    allCampanias = allCampanias.filter(c=>c.id!==id);
+    updateCampStats();
+    renderCampanias();
+    showToast('🗑 Campaña eliminada','ok');
   }catch(e){ showToast('Error: '+e.message,'err'); }
 }
 

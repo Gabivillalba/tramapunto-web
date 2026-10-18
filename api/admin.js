@@ -254,6 +254,14 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
+      case 'delete_campania': {
+        const { id } = payload;
+        if (!id) return res.status(400).json({ error: 'Falta id' });
+        // FK seguras: postulaciones.campania_id = CASCADE, conexiones.campania_id = SET NULL
+        await sb(`campanias?id=eq.${id}`, 'DELETE');
+        return res.status(200).json({ ok: true });
+      }
+
       // — Avisar a TODOS los creadores aprobados de una campaña nueva —
       case 'notificar_campania': {
         const { id } = payload;

@@ -186,17 +186,23 @@ export default async function handler(req, res) {
         const rows = await sb(`marcas?id=eq.${marca_id}&select=*`);
         const m = rows?.[0];
         if (!m) return res.status(404).json({ error: 'Marca no encontrada' });
-        if (!m.brief || !String(m.brief).trim()) return res.status(400).json({ error: 'Esta marca no tiene brief cargado' });
         const marcaName = m.nombre_marca || m.razon_social || `${m.nombre || ''} ${m.apellido || ''}`.trim() || 'Marca';
+        const tieneBrief = m.brief && String(m.brief).trim();
+        // Sin brief no falla: crea un borrador con texto de ejemplo para completar.
+        const descripcion = tieneBrief
+          ? String(m.brief).slice(0, 4000)
+          : (m.descripcion && String(m.descripcion).trim())
+            ? String(m.descripcion).slice(0, 4000)
+            : `(Completar) Campaña de ${marcaName}. Describí qué producto/servicio es, qué buscás y qué perfil de creador necesitás antes de activarla.`;
         const created = await sb('campanias', 'POST', {
           marca_nombre: marcaName,
           marca_email: m.email,
           marca_telefono: m.tel || null,
           titulo: (marcaName + ' busca creadores de contenido').slice(0, 120),
-          descripcion: String(m.brief).slice(0, 4000),
+          descripcion,
           tipo: 'ugc',
           estado: 'en_revision',
-          nota_admin: 'Generada desde el brief de registro de la marca.',
+          nota_admin: tieneBrief ? 'Generada desde el brief de registro de la marca.' : 'Borrador creado sin brief — completar antes de activar.',
         });
         return res.status(200).json({ ok: true, campania: created?.[0] || null });
       }

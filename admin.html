@@ -1070,7 +1070,7 @@ async function loadMarcas(){
           </div>
           ${brief}
           <div style="margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap">
-            ${m.brief?`<button class="btn-sm" onclick="crearCampaniaDesdeMarca('${m.id}')">📋 Crear campaña con este brief</button>`:''}
+            <button class="btn-sm" onclick="crearCampaniaDesdeMarca('${m.id}',${m.brief?'true':'false'})">📋 ${m.brief?'Crear campaña con este brief':'Crear campaña'}</button>
             <button class="btn-sm" onclick="darAccesoMarca('${m.id}','${nombreMarca||persona||escR(m.email)}')">🔑 Dar acceso</button>
           </div>
         </div>`;
@@ -1104,8 +1104,11 @@ async function darAccesoMarca(id, nombre){
   }
 }
 
-async function crearCampaniaDesdeMarca(id){
-  if(!confirm('¿Crear una campaña a partir del brief de esta marca?\n\nQueda EN REVISIÓN: la revisás y activás en la pestaña Campañas, y recién ahí los creadores la ven y se pueden postular.')) return;
+async function crearCampaniaDesdeMarca(id, tieneBrief){
+  const msg = tieneBrief
+    ? '¿Crear una campaña a partir del brief de esta marca?\n\nQueda EN REVISIÓN: la revisás y activás en la pestaña Campañas, y recién ahí los creadores la ven y se pueden postular.'
+    : 'Esta marca no tiene brief cargado.\n\n¿Crear igual una campaña en borrador? Queda EN REVISIÓN con un texto de ejemplo que completás vos en la pestaña Campañas antes de activarla.';
+  if(!confirm(msg)) return;
   try{
     await adminCall('campania_desde_marca',{marca_id:id});
     showToast('✓ Campaña creada (en revisión). Activala en Campañas.','ok');

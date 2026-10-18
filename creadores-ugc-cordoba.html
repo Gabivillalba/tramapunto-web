@@ -45,7 +45,7 @@ main{max-width:1100px;margin:0 auto;padding:1rem 1.5rem 3rem}
 .av img{width:100%;height:100%;object-fit:cover}
 .c-nom{font-weight:800;font-size:.9rem;margin-bottom:.15rem}
 .c-sub{font-size:.68rem;color:var(--muted);margin-bottom:.5rem}
-.c-rat{font-size:.66rem;color:#f5b301;font-weight:800;margin-bottom:.5rem}
+.c-rat{font-size:.66rem;color:#f5b301;font-weight:800;margin-bottom:.5rem}.c-reps{display:flex;flex-wrap:wrap;gap:.3rem;justify-content:center;margin-bottom:.5rem}.c-rep{font-size:.58rem;font-weight:900;letter-spacing:.05em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}.c-rep.camp{background:#2a2200;color:#f5d312;border:1px solid #4a3c00}.c-rep.top{background:#2a1a00;color:#f5a301;border:1px solid #4a2e00}
 .seo-copy{margin-top:3rem;padding-top:2rem;border-top:1px solid #161616;color:var(--muted2);font-size:.92rem;max-width:720px}
 .seo-copy h2{font-size:1.2rem;color:var(--white);margin-bottom:.75rem;font-weight:800}
 .seo-copy p{margin-bottom:1rem}
@@ -112,7 +112,7 @@ const norm=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,
 (async function(){
   const g=document.getElementById('grid');
   try{
-    const r=await fetch(`${SB_URL}/rest/v1/creators?select=nombre,ciudad,ig_seg,tt_seg,yt_seg,avatar_url,rating_prom,rating_count,indice&status=eq.aprobado&order=indice.desc`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});
+    const r=await fetch(`${SB_URL}/rest/v1/creators?select=nombre,ciudad,ig_seg,tt_seg,yt_seg,avatar_url,rating_prom,rating_count,es_campeon,campeon_label,indice&status=eq.aprobado&order=indice.desc`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});
     const all=await r.json();
     const list=(all||[]).filter(c=>{const cc=norm(c.ciudad);return ALIASES.some(a=>cc.includes(a));}).slice(0,30);
     if(!list.length){ g.innerHTML='<div class="empty">Pronto vas a ver creadores de '+CIUDAD+' acá. <a href="/" style="color:var(--green)">Ver toda la bolsa →</a></div>'; return; }
@@ -121,7 +121,11 @@ const norm=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,
       const ini=((c.nombre||'?').trim()[0]||'?').toUpperCase();
       const av=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre}">`:ini;
       const rat=(c.rating_count>0)?`<div class="c-rat">★ ${Number(c.rating_prom).toFixed(1)}</div>`:'';
-      return `<a class="card" href="/"><div class="av">${av}</div><div class="c-nom">${c.nombre}</div><div class="c-sub">${seg?seg+' seguidores':'Creador/a'}</div>${rat}</a>`;
+      const reps=[];
+      if(c.es_campeon) reps.push('<span class="c-rep camp">\uD83D\uDC51 '+(c.campeon_label||'Campeón')+'</span>');
+      if((c.rating_count||0)>=3 && Number(c.rating_prom||0)>=4.5) reps.push('<span class="c-rep top">\u2B50 Top valorado</span>');
+      const repsHtml=reps.length?('<div class="c-reps">'+reps.join('')+'</div>'):'';
+      return `<a class="card" href="/"><div class="av">${av}</div><div class="c-nom">${c.nombre}</div><div class="c-sub">${seg?seg+' seguidores':'Creador/a'}</div>${repsHtml}${rat}</a>`;
     }).join('');
   }catch(e){ g.innerHTML='<div class="empty">No se pudieron cargar los creadores. <a href="/" style="color:var(--green)">Ir a la bolsa →</a></div>'; }
 })();

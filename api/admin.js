@@ -262,6 +262,34 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
+      // — Crear acceso (login) para una marca cargada a mano —
+      // Genera la cuenta de Auth con una contraseña temporal y la devuelve
+      // para que el admin se la pase a la marca. No manda emails automáticos.
+      case 'dar_acceso_marca': {
+        const { id } = payload;
+        if (!id) return res.status(400).json({ error: 'Falta id' });
+        const rows = await sb(`marcas?id=eq.${id}&select=email,nombre`);
+        const m = rows && rows[0];
+        if (!m || !m.email) return res.status(400).json({ error: 'La marca no tiene email cargado' });
+        const email = String(m.email).toLowerCase();
+
+        // Contraseña temporal legible (cumple el mínimo de 8 y mezcla tipos)
+        const temp = 'Trama' + Math.random().toString(36).slice(2, 7) + Math.floor(10 + Math.random() * 89) + '!';
+        const cr = await fetch(`${SB_URL}/auth/v1/admin/users`, {
+          method: 'POST',
+          headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password: temp, email_confirm: true }),
+        });
+        if (!cr.ok) {
+          const t = await cr.text().catch(() => '');
+          if (cr.status === 422 || /already|registered|exists/i.test(t)) {
+            return res.status(409).json({ error: 'Esta marca ya tiene una cuenta de acceso.' });
+          }
+          return res.status(500).json({ error: 'No se pudo crear el acceso', detail: t });
+        }
+        return res.status(200).json({ ok: true, email, password: temp, nombre: m.nombre || '' });
+      }
+
       // — Avisar a TODOS los creadores aprobados de una campaña nueva —
       case 'notificar_campania': {
         const { id } = payload;

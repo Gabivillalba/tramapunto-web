@@ -1069,7 +1069,10 @@ async function loadMarcas(){
             </div>
           </div>
           ${brief}
-          ${m.brief?`<div style="margin-top:.6rem"><button class="btn-sm" onclick="crearCampaniaDesdeMarca('${m.id}')">📋 Crear campaña con este brief</button></div>`:''}
+          <div style="margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap">
+            ${m.brief?`<button class="btn-sm" onclick="crearCampaniaDesdeMarca('${m.id}')">📋 Crear campaña con este brief</button>`:''}
+            <button class="btn-sm" onclick="darAccesoMarca('${m.id}','${nombreMarca||persona||escR(m.email)}')">🔑 Dar acceso</button>
+          </div>
         </div>`;
       }).join('');
     }
@@ -1081,6 +1084,24 @@ async function loadMarcas(){
         : '<div class="dash-empty">Ningún creador compró contactos todavía.</div>';
     }
   }catch(e){ el.innerHTML=`<span style="color:#f87171">Error: ${escR(e.message)}</span>`; }
+}
+
+async function darAccesoMarca(id, nombre){
+  if(!confirm(`¿Crear un acceso (login) para "${nombre}"?\n\nSe genera una cuenta con contraseña temporal que después le pasás vos a la marca. No se envía ningún email automático.`)) return;
+  try{
+    const r = await adminCall('dar_acceso_marca',{id});
+    const msg = `Acceso creado para ${nombre}\n\n`
+      + `Email: ${r.email}\n`
+      + `Contraseña temporal: ${r.password}\n\n`
+      + `Pasale estos datos a la marca. Entra en tramapunto.com/perfil.html eligiendo "Soy marca".`;
+    // Modal simple con opción de copiar
+    if(confirm(msg + `\n\n¿Copiar las credenciales al portapapeles?`)){
+      try{ await navigator.clipboard.writeText(`Email: ${r.email}\nContraseña: ${r.password}\nIngresá en https://www.tramapunto.com/perfil.html`); showToast('✓ Credenciales copiadas','ok'); }
+      catch(_){ showToast('No se pudo copiar, anotalas manualmente','err'); }
+    }
+  }catch(e){
+    showToast(e.message.includes('ya tiene')? e.message : ('Error: '+e.message), 'err');
+  }
 }
 
 async function crearCampaniaDesdeMarca(id){

@@ -788,9 +788,10 @@ function renderCreatorTab(i,el){
             <option value="USD" ${p.moneda==='USD'?'selected':''}>USD – Dólares</option>
           </select>
         </div>
-        <div class="fg-edit"><label>Tarifa Story</label><input type="number" id="e-story" value="${p.t_story||''}" placeholder="0"></div>
-        <div class="fg-edit"><label>Tarifa Reel / TikTok</label><input type="number" id="e-reel" value="${p.t_reel||''}" placeholder="0"></div>
-        <div class="fg-edit"><label>Tarifa Post feed</label><input type="number" id="e-post" value="${p.t_post||''}" placeholder="0"></div>
+        <div class="fg-edit"><label>Tarifa Story</label><input type="number" min="0" id="e-story" value="${p.t_story||''}" placeholder="0"></div>
+        <div class="fg-edit"><label>Tarifa Reel / TikTok</label><input type="number" min="0" id="e-reel" value="${p.t_reel||''}" placeholder="0"></div>
+        <div class="fg-edit"><label>Tarifa Post feed</label><input type="number" min="0" id="e-post" value="${p.t_post||''}" placeholder="0"></div>
+        <div style="grid-column:1/-1;font-size:.7rem;color:var(--muted);line-height:1.5">💡 Poné el valor en la moneda elegida. Referencia: en ARS, de $1.000 a $5.000.000; en USD, de US$5 a US$50.000. El precio que se arregla con la marca es aparte; TRAMA. solo cobra el contacto.</div>
         <div class="fg-edit"><label>Canje</label>
           <select id="e-canje">
             <option value="">Seleccioná</option>
@@ -1035,6 +1036,15 @@ async function saveCreator(){
     // Vuelve a revisión al editar
     status:'pendiente',
   };
+  // Validación de tarifas según la moneda (evita valores absurdos: un reel de $10, etc.)
+  const rangos = body.moneda==='USD' ? {min:5, max:50000, lbl:'US$'} : {min:1000, max:5000000, lbl:'$'};
+  for(const [n,v] of [['Story',body.t_story],['Reel',body.t_reel],['Post',body.t_post]]){
+    if(v!=null && (v<rangos.min || v>rangos.max)){
+      showToast(`Tarifa ${n} fuera de rango para ${body.moneda}: poné un valor entre ${rangos.lbl}${rangos.min.toLocaleString('es-AR')} y ${rangos.lbl}${rangos.max.toLocaleString('es-AR')}.`,'err');
+      btn.disabled=false; btn.textContent='Guardar cambios';
+      return;
+    }
+  }
   const ok=await sbPatch('creators',`id=eq.${userProfile.id}`,body,getToken());
   if(ok){
     Object.assign(userProfile,body);

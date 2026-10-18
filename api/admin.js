@@ -151,6 +151,21 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, data });
       }
 
+      // — Listar marcas (para export / vistas) —
+      case 'list_marcas': {
+        const data = await sb('marcas?select=*&order=created_at.desc');
+        return res.status(200).json({ ok: true, data });
+      }
+
+      // — Export de todas las postulaciones (con creador y título de campaña) —
+      case 'export_postulaciones': {
+        const posts = await sb('postulaciones?select=*,creators(nombre,apellido,email)&order=created_at.desc');
+        const camps = await sb('campanias?select=id,titulo');
+        const ct = Object.fromEntries((camps || []).map(c => [String(c.id), c.titulo]));
+        const data = (posts || []).map(p => ({ ...p, campania_titulo: ct[String(p.campania_id)] || '' }));
+        return res.status(200).json({ ok: true, data });
+      }
+
       // — Cambiar estado de un creator (aprobar/rechazar) + email —
       case 'set_creator_status': {
         const { id, status, nota } = payload;

@@ -261,7 +261,9 @@ textarea.em-inp{resize:vertical;line-height:1.5}
       <button class="btn-sm" onclick="recordarPortfolio()">📎 Recordar portfolio</button>
       <button class="btn-sm" onclick="abrirEnvioMasivo()">✉ Envío masivo</button>
       <button class="btn-sm" onclick="exportCreatorsCSV()">⬇ CSV creadores</button>
+      <button class="btn-sm" onclick="exportMarcasCSV()">⬇ CSV marcas</button>
       <button class="btn-sm" onclick="exportVentasCSV()">⬇ CSV ventas</button>
+      <button class="btn-sm" onclick="exportPostulacionesCSV()">⬇ CSV postulaciones</button>
       <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
     </div>
   </div>
@@ -770,6 +772,41 @@ async function exportVentasCSV(){
     ];
     descargarCSV('trama_ventas_'+hoyISO()+'.csv', toCSV(data, cols));
     showToast('✓ CSV de ventas descargado','ok');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+}
+async function exportMarcasCSV(){
+  try{
+    showToast('Generando CSV...','info');
+    const {data}=await adminCall('list_marcas');
+    if(!data||!data.length){ showToast('No hay marcas cargadas','err'); return; }
+    const cols=[
+      {label:'Nombre',key:'nombre'},{label:'Apellido',key:'apellido'},{label:'Email',key:'email'},
+      {label:'Tel',key:'tel'},{label:'Tipo',key:'tipo'},{label:'Marca',key:'nombre_marca'},
+      {label:'Razon social',key:'razon_social'},{label:'CUIT',key:'cuit'},{label:'Rubro',key:'rubro'},
+      {label:'Pais',key:'pais'},{label:'Presupuesto',key:'presupuesto'},
+      {label:'Fuente',key:'fuente'},{label:'Status',key:'status'},{label:'Alta',key:'created_at'},
+    ];
+    descargarCSV('trama_marcas_'+hoyISO()+'.csv', toCSV(data, cols));
+    showToast('✓ CSV de marcas descargado','ok');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+}
+async function exportPostulacionesCSV(){
+  try{
+    showToast('Generando CSV...','info');
+    const {data}=await adminCall('export_postulaciones');
+    if(!data||!data.length){ showToast('No hay postulaciones registradas','err'); return; }
+    const nom=r=>r.creators?`${r.creators.nombre||''} ${r.creators.apellido||''}`.trim():'—';
+    const cols=[
+      {label:'Fecha',key:'created_at'},
+      {label:'Campaña',key:'campania_titulo'},
+      {label:'Creador',get:nom},
+      {label:'Email creador',get:r=>r.creators?.email||''},
+      {label:'Tarifa propuesta',key:'tarifa_propuesta'},
+      {label:'Estado',key:'estado'},
+      {label:'Mensaje',key:'mensaje'},
+    ];
+    descargarCSV('trama_postulaciones_'+hoyISO()+'.csv', toCSV(data, cols));
+    showToast('✓ CSV de postulaciones descargado','ok');
   }catch(e){ showToast('Error: '+e.message,'err'); }
 }
 

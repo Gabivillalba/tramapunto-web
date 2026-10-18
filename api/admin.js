@@ -178,7 +178,14 @@ export default async function handler(req, res) {
         const rows = await sb(`creators?id=eq.${id}&select=nombre,email`);
         const c = rows?.[0];
         if (c) {
-          if (status === 'aprobado') await enviarEmail('creator_aprobado', c.email, { nombre: c.nombre });
+          if (status === 'aprobado') {
+            await enviarEmail('creator_aprobado', c.email, { nombre: c.nombre });
+            // Notificación in-app de bienvenida
+            await sb('notificaciones', 'POST', {
+              para_email: c.email, tipo: 'sistema', titulo: '¡Tu perfil fue aprobado! ✅',
+              cuerpo: 'Ya estás visible en la bolsa de TRAMA. Completá tu perfil y entrá a la Liga para ganar visibilidad.', link: '/perfil.html',
+            }).catch(() => {});
+          }
           if (status === 'rechazado') await enviarEmail('creator_rechazado', c.email, { nombre: c.nombre, nota: nota || '' });
         }
         return res.status(200).json({ ok: true });
@@ -587,6 +594,17 @@ export default async function handler(req, res) {
 
         const enviados = await enviarBatch(dests, asunto, htmlFn);
         return res.status(200).json({ ok: true, enviados, total: dests.length });
+      }
+
+      case 'list_notif': {
+        const data = await sb('notificaciones?para_admin=is.true&select=*&order=created_at.desc&limit=50');
+        const noLeidas = (data || []).filter(n => !n.leida).length;
+        return res.status(200).json({ ok: true, notif: data || [], noLeidas });
+      }
+
+      case 'notif_leidas': {
+        await sb('notificaciones?para_admin=is.true&leida=is.false', 'PATCH', { leida: true });
+        return res.status(200).json({ ok: true });
       }
 
       case 'list_resenas': {

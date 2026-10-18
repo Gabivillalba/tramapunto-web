@@ -113,6 +113,20 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .btn-ver:hover{border-color:var(--purple);color:var(--purple)}
 .btn-sm{background:transparent;border:1px solid #2a2a2a;color:var(--muted);padding:.38rem .8rem;font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s}
 .btn-sm:hover{border-color:var(--green);color:var(--green)}
+.notif-bell{position:relative;background:transparent;border:1px solid #2a2a2a;color:var(--white,#f4f4ef);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1rem;line-height:1;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle}
+.notif-bell:hover{border-color:var(--green)}
+.notif-dot{position:absolute;top:-4px;right:-4px;min-width:15px;height:15px;padding:0 3px;background:#f43f5e;color:#fff;border-radius:8px;font-size:.56rem;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #0a0a0a}
+.notif-panel{display:none;position:absolute;right:0;top:42px;width:320px;max-width:86vw;max-height:70vh;overflow-y:auto;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:4px;box-shadow:0 12px 40px -8px #000;z-index:300;text-align:left}
+.notif-panel.open{display:block}
+.notif-head{display:flex;justify-content:space-between;align-items:center;padding:.7rem 1rem;border-bottom:1px solid #1a1a1a;font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted2,#aaa);position:sticky;top:0;background:#0d0d0d}
+.notif-head button{background:none;border:none;color:var(--green);font-size:.62rem;font-weight:700;cursor:pointer;text-transform:uppercase}
+.notif-item{padding:.7rem 1rem;border-bottom:1px solid #141414;font-size:.78rem;line-height:1.45;display:block;color:inherit;text-decoration:none}
+.notif-item:hover{background:#111}
+.notif-item.unread{background:#0f1500}
+.notif-item .nt{font-weight:800;color:var(--white,#f4f4ef);margin-bottom:.15rem}
+.notif-item .nc{color:var(--muted2,#aaa)}
+.notif-item .nf{color:var(--muted);font-size:.64rem;margin-top:.25rem}
+.notif-empty{padding:1.4rem 1rem;text-align:center;color:var(--muted);font-size:.78rem}
 .btn-logout{border:1px solid #2a2a2a;background:transparent;color:var(--muted);padding:.38rem .8rem;font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s}
 .btn-logout:hover{border-color:var(--red);color:var(--red)}
 
@@ -264,6 +278,13 @@ textarea.em-inp{resize:vertical;line-height:1.5}
       <button class="btn-sm" onclick="exportMarcasCSV()">⬇ CSV marcas</button>
       <button class="btn-sm" onclick="exportVentasCSV()">⬇ CSV ventas</button>
       <button class="btn-sm" onclick="exportPostulacionesCSV()">⬇ CSV postulaciones</button>
+      <div class="notif-wrap" style="position:relative;display:inline-block">
+        <button class="notif-bell" id="notifBell" onclick="toggleAdminNotif()" aria-label="Notificaciones">🔔<span class="notif-dot" id="notifDot" style="display:none"></span></button>
+        <div class="notif-panel" id="notifPanel">
+          <div class="notif-head"><span>Notificaciones</span><button onclick="marcarAdminNotifLeidas()">Marcar leídas</button></div>
+          <div id="notifList"></div>
+        </div>
+      </div>
       <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
     </div>
   </div>
@@ -711,6 +732,39 @@ async function eliminarResena(id){
   try{ await adminCall('delete_resena',{id}); loadResenas(); }catch(e){ showToast('Error: '+e.message,'err'); }
 }
 
+// ══════════ NOTIFICACIONES (ADMIN) ══════════
+let adminNotif=[];
+async function loadAdminNotifs(){
+  try{
+    const {notif,noLeidas}=await adminCall('list_notif');
+    adminNotif=notif||[];
+    renderAdminNotifs(noLeidas||0);
+  }catch(_){}
+}
+function renderAdminNotifs(noLeidas){
+  const dot=document.getElementById('notifDot'); const list=document.getElementById('notifList'); if(!list)return;
+  if(noLeidas==null) noLeidas=adminNotif.filter(n=>!n.leida).length;
+  if(dot){ if(noLeidas>0){ dot.textContent=noLeidas>9?'9+':noLeidas; dot.style.display='flex'; } else dot.style.display='none'; }
+  if(!adminNotif.length){ list.innerHTML='<div class="notif-empty">Sin notificaciones.</div>'; return; }
+  list.innerHTML=adminNotif.map(n=>{
+    const f=n.created_at?new Date(n.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+    return `<div class="notif-item${n.leida?'':' unread'}"><div class="nt">${escR(n.titulo||'')}</div>${n.cuerpo?`<div class="nc">${escR(n.cuerpo)}</div>`:''}<div class="nf">${f}</div></div>`;
+  }).join('');
+}
+function toggleAdminNotif(){
+  const p=document.getElementById('notifPanel'); if(!p)return;
+  const abierto=p.classList.toggle('open');
+  if(abierto && adminNotif.some(n=>!n.leida)) marcarAdminNotifLeidas();
+}
+async function marcarAdminNotifLeidas(){
+  if(!adminNotif.some(n=>!n.leida))return;
+  try{ await adminCall('notif_leidas'); adminNotif.forEach(n=>n.leida=true); renderAdminNotifs(0); }catch(e){ showToast('Error: '+e.message,'err'); }
+}
+document.addEventListener('click',e=>{
+  const w=document.querySelector('.notif-wrap'); const p=document.getElementById('notifPanel');
+  if(w&&p&&p.classList.contains('open')&&!w.contains(e.target)) p.classList.remove('open');
+});
+
 // ══════════ TABS ══════════
 let allCampanias = [];
 let campFilter = 'todas';
@@ -1066,6 +1120,7 @@ async function loadAll(){
     document.getElementById('panelMeta').textContent=`Última actualización: ${now}`;
     loadMetrics();
     loadCampanias();
+    loadAdminNotifs();
   }catch(e){
     document.getElementById('cardsList').innerHTML=`<div class="empty">Error al cargar: ${e.message}</div>`;
     showToast('Error al conectar con Supabase','err');

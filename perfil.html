@@ -78,6 +78,20 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 
 /* DASHBOARD */
 #vDash{padding-top:56px}
+.notif-bell{position:relative;background:var(--g1);border:1px solid #2a2a2a;color:var(--white,#f4f4ef);width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.1rem;line-height:1;display:flex;align-items:center;justify-content:center}
+.notif-bell:hover{border-color:var(--green)}
+.notif-dot{position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;padding:0 4px;background:#f43f5e;color:#fff;border-radius:8px;font-size:.58rem;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #000}
+.notif-panel{display:none;position:absolute;right:0;top:48px;width:320px;max-width:86vw;max-height:70vh;overflow-y:auto;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:4px;box-shadow:0 12px 40px -8px #000;z-index:200}
+.notif-panel.open{display:block}
+.notif-head{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1rem;border-bottom:1px solid #1a1a1a;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted2,#aaa);position:sticky;top:0;background:#0d0d0d}
+.notif-head button{background:none;border:none;color:var(--green);font-size:.64rem;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.05em}
+.notif-item{padding:.75rem 1rem;border-bottom:1px solid #141414;font-size:.8rem;line-height:1.45;display:block;color:inherit;text-decoration:none}
+.notif-item:hover{background:#111}
+.notif-item.unread{background:#0f1500}
+.notif-item .nt{font-weight:800;color:var(--white,#f4f4ef);margin-bottom:.15rem}
+.notif-item .nc{color:var(--muted2,#aaa)}
+.notif-item .nf{color:var(--muted);font-size:.66rem;margin-top:.25rem}
+.notif-empty{padding:1.5rem 1rem;text-align:center;color:var(--muted);font-size:.8rem}
 .dash-header{background:var(--g1);border-bottom:1px solid #1a1a1a;padding:2rem 1.5rem}
 @media(min-width:768px){.dash-header{padding:2.5rem 4rem}}
 .dash-header-inner{display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap}
@@ -332,6 +346,13 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
         <div class="dash-name" id="dashName">—</div>
         <div class="dash-email" id="dashEmail">—</div>
         <div id="dashBadge" style="margin-top:.4rem"></div>
+      </div>
+      <div class="notif-wrap" style="margin-left:auto;position:relative">
+        <button class="notif-bell" id="notifBell" onclick="toggleNotifPanel()" aria-label="Notificaciones">🔔<span class="notif-dot" id="notifDot" style="display:none"></span></button>
+        <div class="notif-panel" id="notifPanel">
+          <div class="notif-head"><span>Notificaciones</span><button onclick="marcarNotifLeidas()">Marcar leídas</button></div>
+          <div id="notifList"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -616,7 +637,42 @@ function showDash(){
   }
 
   buildTabs();
+  loadNotifs();
 }
+
+// ── NOTIFICACIONES IN-APP ──
+let notifItems=[];
+async function loadNotifs(){
+  const email=currentUser&&currentUser.email; if(!email)return;
+  notifItems=await sbGet('notificaciones',`para_email=eq.${encodeURIComponent(email)}&select=id,tipo,titulo,cuerpo,link,leida,created_at&order=created_at.desc&limit=30`,getToken());
+  renderNotifs();
+}
+function renderNotifs(){
+  const dot=document.getElementById('notifDot'); const list=document.getElementById('notifList'); if(!list)return;
+  const noLeidas=(notifItems||[]).filter(n=>!n.leida).length;
+  if(dot){ if(noLeidas>0){ dot.textContent=noLeidas>9?'9+':noLeidas; dot.style.display='flex'; } else dot.style.display='none'; }
+  if(!notifItems||!notifItems.length){ list.innerHTML='<div class="notif-empty">No tenés notificaciones todavía.</div>'; return; }
+  list.innerHTML=notifItems.map(n=>{
+    const f=n.created_at?new Date(n.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+    const tag=n.link?'a':'div'; const href=n.link?` href="${n.link}"`:'';
+    return `<${tag} class="notif-item${n.leida?'':' unread'}"${href}><div class="nt">${n.titulo||''}</div>${n.cuerpo?`<div class="nc">${n.cuerpo}</div>`:''}<div class="nf">${f}</div></${tag}>`;
+  }).join('');
+}
+function toggleNotifPanel(){
+  const p=document.getElementById('notifPanel'); if(!p)return;
+  const abierto=p.classList.toggle('open');
+  if(abierto && (notifItems||[]).some(n=>!n.leida)) marcarNotifLeidas();
+}
+async function marcarNotifLeidas(){
+  const email=currentUser&&currentUser.email; if(!email)return;
+  if(!(notifItems||[]).some(n=>!n.leida)) return;
+  await sbPatch('notificaciones',`para_email=eq.${encodeURIComponent(email)}&leida=eq.false`,{leida:true},getToken());
+  notifItems.forEach(n=>n.leida=true); renderNotifs();
+}
+document.addEventListener('click',e=>{
+  const w=document.querySelector('.notif-wrap'); const p=document.getElementById('notifPanel');
+  if(w&&p&&p.classList.contains('open')&&!w.contains(e.target)) p.classList.remove('open');
+});
 
 function buildTabs(){
   const tabs = userType==='creator'

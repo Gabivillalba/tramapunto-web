@@ -953,12 +953,10 @@ document.addEventListener('click',e=>{
 
 // ── GATE ──
 function checkAndShowBolsa(){
-  const session=localStorage.getItem('trama_marca')||localStorage.getItem('trama_creator');
-  if(session){ showPage('bolsa'); }
-  else{
-    document.getElementById('gateModal').classList.add('open');
-    document.body.style.overflow='hidden';
-  }
+  // Cualquiera puede espiar la bolsa (los datos públicos ya se ven en las
+  // páginas de SEO). El contacto sigue detrás del pago, y el registro se pide
+  // recién al tocar "Conectar".
+  showPage('bolsa');
 }
 function closeGate(){
   document.getElementById('gateModal').classList.remove('open');
@@ -1288,11 +1286,18 @@ document.getElementById('compareModal').addEventListener('click',e=>{if(e.target
 // que MercadoPago confirma el pago.
 
 async function iniciarPago(){
-  const btn=document.querySelector('.m-pay-btn');
-  btn.disabled=true;btn.textContent='Conectando con MercadoPago...';
   // El comprador puede ser una marca O un creador (se compran contactos entre creadores)
   const session=localStorage.getItem('trama_marca')||localStorage.getItem('trama_creator');
-  const buyer=session?JSON.parse(session):{};
+  // Visitante sin cuenta: pedir registro recién acá (punto de conversión)
+  if(!session){
+    closeModal();
+    document.getElementById('gateModal').classList.add('open');
+    document.body.style.overflow='hidden';
+    return;
+  }
+  const btn=document.querySelector('.m-pay-btn');
+  btn.disabled=true;btn.textContent='Conectando con MercadoPago...';
+  const buyer=JSON.parse(session);
   const marcaEmail=buyer.email||'anonimo@trama.com';
   const marcaNombre=buyer.nombre||'Comprador TRAMA.';
   try{

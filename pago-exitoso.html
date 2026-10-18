@@ -102,8 +102,9 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
       if(pr.ok){ const pj = await pr.json(); if(pj?.bolsa?.label) PRECIO = pj.bolsa; }
     } catch(_){ /* se queda con el fallback */ }
 
-    // Buscar creator en Supabase
-    const r = await fetch(`${SB_URL}/rest/v1/creators?id=eq.${creatorId}&select=*`,{
+    // Buscar creator en Supabase — SOLO datos públicos (el contacto ya no es
+    // legible con la clave pública; se trae del endpoint seguro más abajo).
+    const r = await fetch(`${SB_URL}/rest/v1/creators?id=eq.${creatorId}&select=nombre,avatar_url`,{
       headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
     });
     const creators = await r.json();
@@ -135,6 +136,23 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
         estado: 'pagado',
       })
     });
+
+    // Traer el contacto desde el endpoint seguro (verifica el pago con el token del comprador)
+    try {
+      const tok = localStorage.getItem('sb_token');
+      if (tok) {
+        const cr = await fetch('/api/contacto', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
+          body: JSON.stringify({ creator_id: creatorId })
+        });
+        if (cr.ok) {
+          const j = await cr.json();
+          const ct = (j.contactos && j.contactos[creatorId]) || {};
+          Object.assign(c, ct);   // mergea email, tel, ig_user, etc.
+        }
+      }
+    } catch(_){ /* si falla, mostramos lo que haya + aviso */ }
 
     // Mostrar datos de contacto
     showSuccess(c, marcaEmail, paymentId, PRECIO, entregas);
@@ -171,6 +189,7 @@ function showSuccess(c, marcaEmail, paymentId, PRECIO, entregas){
       ${c.tt_user?`<div class="c-item"><span class="c-ic">🎵</span><span class="c-key">TikTok</span><a class="c-val c-link" href="https://tiktok.com/@${ttH(c.tt_user)}" target="_blank" rel="noopener">@${ttH(c.tt_user)}</a></div>`:''}
       ${c.yt_user?`<div class="c-item"><span class="c-ic">▶️</span><span class="c-key">YouTube</span><a class="c-val c-link" href="https://youtube.com/@${ytH(c.yt_user)}" target="_blank" rel="noopener">${c.yt_user}</a></div>`:''}
       ${c.tel?`<div class="c-item"><span class="c-ic">💬</span><span class="c-key">WhatsApp</span><a class="c-val c-link" href="${waLink(c.tel)}" target="_blank" rel="noopener">${c.tel}</a></div>`:''}
+      ${(!c.email&&!c.ig_user&&!c.tt_user&&!c.yt_user&&!c.tel)?`<div class="c-item" style="color:var(--muted,#999)">Te enviamos el contacto por email. También lo ves ingresando a tu cuenta → <a class="c-link" href="/perfil.html" style="color:var(--green)">Mis conexiones</a>.</div>`:''}
     </div>
 
     ${materialHtml}

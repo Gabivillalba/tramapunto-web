@@ -213,8 +213,8 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
         <div class="fg"><label>WhatsApp</label><input type="tel" id="f-tel" placeholder="+54 9 11 0000-0000"></div>
         <div class="fg"><label>País</label><select id="f-pais"><option value="AR">Argentina</option><option value="UY">Uruguay</option><option value="CL">Chile</option><option value="MX">México</option><option value="otro">Otro</option></select></div>
       </div>
-      <div class="fg" id="fg-ciudad"><label>Ciudad<span class="req">*</span></label><input type="text" id="f-ciudad" placeholder="Buenos Aires..."><div class="err-msg">Campo requerido</div></div>
-      <div class="fg"><label>Bio corta<span class="req">*</span></label><textarea id="f-bio" placeholder="Contá en 2-3 oraciones quién sos y qué tipo de contenido hacés..." maxlength="300"></textarea><div class="hint">Máx. 300 caracteres. Esta bio aparece en tu perfil.</div></div>
+      <div class="fg" id="fg-ciudad"><label>Ciudad</label><input type="text" id="f-ciudad" placeholder="Buenos Aires..."><div class="err-msg">Campo requerido</div></div>
+      <div class="fg"><label>Bio corta</label><textarea id="f-bio" placeholder="Contá en 2-3 oraciones quién sos y qué tipo de contenido hacés..." maxlength="300"></textarea><div class="hint">Opcional. Máx. 300 caracteres. La podés completar después desde tu perfil.</div></div>
     </div>
 
     <!-- PASO 2 -->
@@ -280,7 +280,7 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
       </div>
       <div class="fg"><label>Canje</label><select id="f-canje"><option value="">Seleccioná</option><option>Sí, acepto canje</option><option>Solo canje + fee</option><option>No, solo pago</option></select></div>
       <div class="fg">
-        <label>Disponibilidad<span class="req">*</span></label>
+        <label>Disponibilidad</label>
         <div class="dispon-pills">
           <button type="button" class="dispon-pill" onclick="toggleDisp(this)">Inmediata</button>
           <button type="button" class="dispon-pill" onclick="toggleDisp(this)">En 2 semanas</button>
@@ -445,7 +445,7 @@ function prevStep(){if(regStep>0){regStep--;showStep(regStep)}}
 function validate(s){
   let ok=true;
   if(s===0){
-    ['nombre','apellido','email','ciudad'].forEach(f=>{
+    ['nombre','apellido','email'].forEach(f=>{
       const el=document.getElementById('f-'+f);
       const fg=document.getElementById('fg-'+f);
       const v=el?el.value.trim():'';

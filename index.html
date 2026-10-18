@@ -69,10 +69,14 @@
 :root{
   --black:#080808;--green:#C8FF1A;--white:#F4F4EF;
   --g1:#111;--g2:#1C1C1C;--g3:#2A2A2A;
-  --muted:#666;--muted2:#999;--purple:#c084fc;
+  --muted:#8a8a8a;--muted2:#aaa;--purple:#c084fc;
   --red:#ff4444;--amber:#f59e0b;--blue:#60a5fa;
 }
 html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
 body{background:var(--black);color:var(--white);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased;min-height:100vh}
 
 /* NAV */
@@ -450,8 +454,8 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
       <a href="./marcas.html" class="h-btn btn-g" onclick="event.stopPropagation()">Soy marca →</a>
       <div class="h-proof">
         <div><div class="proof-n">+120</div><div class="proof-l">Creators verificados</div></div>
-        <div><div class="proof-n">4M+</div><div class="proof-l">Alcance combinado</div></div>
-        <div><div class="proof-n">+50</div><div class="proof-l">Marcas activas</div></div>
+        <div><div class="proof-n">1 a 1</div><div class="proof-l">Verificados a mano</div></div>
+        <div><div class="proof-n">Directo</div><div class="proof-l">Hablás sin intermediarios</div></div>
       </div>
     </div>
     <div class="vs-badge">VS</div>
@@ -462,9 +466,9 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
       <p class="h-copy">Cargá tu perfil y accedé a marcas que <strong>buscan exactamente lo que vos tenés.</strong></p>
       <a href="./registro.html" class="h-btn btn-p" onclick="event.stopPropagation()">Soy creator →</a>
       <div class="h-proof">
-        <div><div class="proof-n">$0</div><div class="proof-l">Para registrarse</div></div>
-        <div><div class="proof-n">48hs</div><div class="proof-l">Primera propuesta</div></div>
-        <div><div class="proof-n">100%</div><div class="proof-l">Pago garantizado</div></div>
+        <div><div class="proof-n">$0</div><div class="proof-l">Para registrarte</div></div>
+        <div><div class="proof-n">0%</div><div class="proof-l">Comisión sobre tu tarifa</div></div>
+        <div><div class="proof-n">Vos</div><div class="proof-l">Ponés tu precio</div></div>
       </div>
     </div>
   </div>
@@ -473,12 +477,12 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
     <div class="s-tag">El proceso</div>
     <div class="s-line"></div>
     <h2 class="s-h2">Sin vueltas.<br>Así funciona.</h2>
-    <p class="s-sub">Cuatro pasos entre conocernos y tener una campaña corriendo.</p>
+    <p class="s-sub">Cuatro pasos, de registrarte a tener el contacto.</p>
     <div class="como-grid">
-      <div class="como-card"><div class="como-num">01</div><div class="como-icon">🎯</div><div class="como-title">Te escuchamos</div><div class="como-desc">Marcas nos cuentan qué necesitan. Creators nos muestran lo que hacen. Entendemos el contexto antes de proponer cualquier cosa.</div></div>
-      <div class="como-card"><div class="como-num">02</div><div class="como-icon">🔍</div><div class="como-title">Armamos el match</div><div class="como-desc">No es un algoritmo frío. Hay personas revisando perfiles y afinidades para que la conexión tenga sentido de verdad.</div></div>
-      <div class="como-card"><div class="como-num">03</div><div class="como-icon">🤝</div><div class="como-title">Se conectan</div><div class="como-desc">Marca y creator hablan directo. TRAMA. acompaña para que el brief sea claro y las expectativas estén alineadas.</div></div>
-      <div class="como-card"><div class="como-num">04</div><div class="como-icon">📈</div><div class="como-title">Medimos juntos</div><div class="como-desc">Resultados reales, ajustes en tiempo real. No desaparecemos cuando termina el brief.</div></div>
+      <div class="como-card"><div class="como-num">01</div><div class="como-icon">🙌</div><div class="como-title">Sumate gratis</div><div class="como-desc">Los creadores arman su perfil sin costo. Las marcas crean su cuenta. Empezar no cuesta nada.</div></div>
+      <div class="como-card"><div class="como-num">02</div><div class="como-icon">✅</div><div class="como-title">Verificamos</div><div class="como-desc">Revisamos cada perfil a mano antes de publicarlo en la bolsa. Nada de bots ni cuentas infladas.</div></div>
+      <div class="como-card"><div class="como-num">03</div><div class="como-icon">🔍</div><div class="como-title">Conectan</div><div class="como-desc">La marca busca en la bolsa, encuentra al creador que encaja y desbloquea su contacto. Hablan directo.</div></div>
+      <div class="como-card"><div class="como-num">04</div><div class="como-icon">🤝</div><div class="como-title">Trabajan</div><div class="como-desc">Arreglan la colaboración y la tarifa entre ellos. TRAMA. no se queda con tu plata ni cobra comisión al creador.</div></div>
     </div>
   </section>
 
@@ -518,11 +522,11 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
         <div class="s-tag" style="color:var(--purple)">Para creators</div>
         <div class="s-line" style="background:var(--purple)"></div>
         <h2 class="s-h2">Tu contenido vale.<br>Que te paguen por eso.</h2>
-        <p class="s-sub">En TRAMA. no sos un número. Sos un perfil que cuidan, presentan y acompañan.</p>
+        <p class="s-sub">En TRAMA. no sos un número. Sos un perfil verificado que las marcas encuentran y contactan directo.</p>
         <div class="feats">
           <div class="feat"><div class="feat-ic" style="background:#1a0a2a;border-color:#3a1a5a">✨</div><div><h4>Registrate gratis</h4><p>Cargás tu perfil y quedás visible para las marcas de la red.</p></div></div>
           <div class="feat"><div class="feat-ic" style="background:#1a0a2a;border-color:#3a1a5a">💬</div><div><h4>Campañas abiertas</h4><p>Las marcas publican sus briefs y vos te postulás a las que van con tu nicho. Propuestas reales, no spam.</p></div></div>
-          <div class="feat"><div class="feat-ic" style="background:#1a0a2a;border-color:#3a1a5a">🔒</div><div><h4>Pago garantizado</h4><p>TRAMA. retiene el pago antes de que empieces. Vos entregás, vos cobrás.</p></div></div>
+          <div class="feat"><div class="feat-ic" style="background:#1a0a2a;border-color:#3a1a5a">💸</div><div><h4>0% de comisión</h4><p>Vos ponés tu tarifa y la arreglás directo con la marca. TRAMA. no te cobra comisión por tu trabajo.</p></div></div>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.75rem">
           <a href="./registro.html" class="h-btn btn-p" style="display:inline-flex">Subir mi perfil →</a>
@@ -694,6 +698,10 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
     <div class="bolsa-count" id="bolsaCount"></div>
   </div>
   <div class="bolsa-inner">
+    <div id="visitorCta" style="display:none;background:#0f1500;border:1px solid #2a4000;border-radius:4px;padding:.9rem 1.1rem;margin-bottom:1.1rem;display:none;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+      <span style="font-size:.82rem;color:var(--white,#f4f4ef)">Estás mirando como visitante. <strong>Registrate gratis</strong> para guardar búsquedas y contactar creadores.</span>
+      <a href="./registro.html" style="background:var(--green);color:#000;font-weight:900;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;padding:.55rem .9rem;border-radius:2px;text-decoration:none;white-space:nowrap">Registrarme →</a>
+    </div>
     <div class="c-grid" id="cGrid">
       <div class="loading-bolsa"><div class="spin"></div><span>Cargando creators...</span></div>
     </div>
@@ -771,6 +779,20 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
     <div class="m-tag">Comparar creators · TRAMA.</div>
     <h3 class="m-title" style="margin-bottom:1rem">Comparación</h3>
     <div class="cmp-wrap" id="cmpBody"></div>
+  </div>
+</div>
+
+<!-- PROMPT PROPIO (reemplaza el prompt() nativo) -->
+<div class="modal-bg" id="promptModal">
+  <div class="modal" style="max-width:420px">
+    <button class="modal-x" onclick="uiPromptResolve(null)">✕</button>
+    <div class="m-tag">TRAMA.</div>
+    <h3 class="m-title" id="promptTitle" style="margin-bottom:1rem"></h3>
+    <input id="promptInput" type="text" style="width:100%;background:#0d0d0d;border:1px solid #222;color:var(--white,#f4f4ef);padding:.7rem;font-size:.9rem;border-radius:3px;box-sizing:border-box;font-family:inherit">
+    <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1.1rem">
+      <button onclick="uiPromptResolve(null)" style="background:none;border:1px solid #2a2a2a;color:var(--muted2,#aaa);padding:.55rem 1rem;border-radius:2px;cursor:pointer;font-weight:700;font-size:.74rem">Cancelar</button>
+      <button onclick="uiPromptConfirm()" style="background:var(--green);color:#000;border:none;padding:.55rem 1.1rem;border-radius:2px;cursor:pointer;font-weight:900;font-size:.74rem">Guardar</button>
+    </div>
   </div>
 </div>
 
@@ -957,6 +979,8 @@ function checkAndShowBolsa(){
   // páginas de SEO). El contacto sigue detrás del pago, y el registro se pide
   // recién al tocar "Conectar".
   showPage('bolsa');
+  const cta=document.getElementById('visitorCta');
+  if(cta) cta.style.display = logueado() ? 'none' : 'flex';
 }
 function closeGate(){
   document.getElementById('gateModal').classList.remove('open');
@@ -1087,8 +1111,25 @@ async function refreshSavedUI(){
   savedCache=arr;
   sel.innerHTML='<option value="">Mis búsquedas guardadas…</option>'+arr.map(s=>`<option value="${(s.name||'').replace(/"/g,'&quot;')}">${s.name}</option>`).join('');
 }
+// Prompt propio (promesa), reemplaza el prompt() nativo
+let _promptResolver=null;
+function uiPrompt(titulo, placeholder){
+  return new Promise(res=>{
+    _promptResolver=res;
+    document.getElementById('promptTitle').textContent=titulo||'';
+    const inp=document.getElementById('promptInput'); inp.value=''; inp.placeholder=placeholder||'';
+    inp.onkeydown=e=>{ if(e.key==='Enter'){e.preventDefault();uiPromptConfirm();} };
+    document.getElementById('promptModal').classList.add('open');
+    document.body.style.overflow='hidden';
+    setTimeout(()=>inp.focus(),50);
+  });
+}
+function _closePrompt(){ document.getElementById('promptModal').classList.remove('open'); document.body.style.overflow=''; }
+function uiPromptConfirm(){ const v=document.getElementById('promptInput').value; _closePrompt(); if(_promptResolver){const r=_promptResolver;_promptResolver=null;r(v);} }
+function uiPromptResolve(val){ _closePrompt(); if(_promptResolver){const r=_promptResolver;_promptResolver=null;r(val);} }
+
 async function guardarBusqueda(){
-  const name=(prompt('Nombre para esta búsqueda (ej: "Fitness BA 10K+")')||'').trim();
+  const name=((await uiPrompt('Guardar búsqueda','ej: Fitness BA 10K+'))||'').trim();
   if(!name)return;
   const state=estadoActual();
   if(logueado()){
@@ -1319,6 +1360,15 @@ function abrirComparador(){
   document.body.style.overflow='hidden';
 }
 document.getElementById('compareModal').addEventListener('click',e=>{if(e.target===document.getElementById('compareModal'))cerrarComparador()});
+// Cerrar cualquier modal con Esc
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  let cerre=false;
+  document.querySelectorAll('.modal-bg.open').forEach(m=>{ m.classList.remove('open'); cerre=true; });
+  const lb=document.getElementById('lightbox'); if(lb&&lb.classList.contains('open')){ lb.classList.remove('open'); cerre=true; }
+  if(_promptResolver){ const r=_promptResolver; _promptResolver=null; r(null); }
+  if(cerre) document.body.style.overflow='';
+});
 
 // ── quickPay ELIMINADA ──
 // Antes esta función revelaba email, teléfono e Instagram del creator

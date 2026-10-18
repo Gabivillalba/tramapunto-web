@@ -805,9 +805,9 @@ async function fSubmit(){
       body:JSON.stringify({tipo:'bienvenida_marca',to:email,data:{nombre:document.getElementById('ff-nombre').value.trim(),tipo:'fisica'}})
     }).catch(()=>{});
 
-    document.getElementById('fWrapper').style.display='none';
-    document.getElementById('fSuccess').classList.add('show');
-    window.scrollTo({top:0,behavior:'smooth'});
+    // Ya tiene cuenta + perfil: lo llevamos directo a su perfil de marca
+    showToast('✓ Cuenta creada. Entrando a tu perfil…','ok');
+    setTimeout(()=>{ window.location.href='/perfil.html'; }, 800);
   }catch(e){
     showToast(e.message.includes('unique')?'Este email ya está registrado':'Error: '+e.message,'err');
     btn.disabled=false;btn.textContent='Crear cuenta →';
@@ -894,9 +894,9 @@ async function cSubmit(){
       body:JSON.stringify({tipo:'bienvenida_marca',to:email,data:{nombre:document.getElementById('cf-nombre').value.trim(),tipo:'corporativa'}})
     }).catch(()=>{});
 
-    document.getElementById('cWrapper').style.display='none';
-    document.getElementById('cSuccess').classList.add('show');
-    window.scrollTo({top:0,behavior:'smooth'});
+    // Cuenta + perfil corporativo creados: lo llevamos a su perfil de marca
+    showToast('✓ Cuenta creada. Entrando a tu perfil…','ok');
+    setTimeout(()=>{ window.location.href='/perfil.html'; }, 800);
   }catch(e){
     showToast(e.message.includes('unique')?'Este email ya está registrado':'Error: '+e.message,'err');
     btn.disabled=false;btn.textContent='Confirmar →';

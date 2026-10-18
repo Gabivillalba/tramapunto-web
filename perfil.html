@@ -518,7 +518,8 @@ async function doRegister(){
   // (si el auth se crea pero la fila no, queda una cuenta huérfana que luego
   //  dispara el cartel "Cuenta creada" al ingresar).
   const fuente = (localStorage.getItem('trama_fuente')||'directo');
-  const perfil = {nombre, apellido, email, auth_id: authId, fuente, status: tipo==='creator'?'pendiente':'activa'};
+  // Nota: el vínculo con la cuenta de Auth es por email (las tablas no tienen auth_id).
+  const perfil = {nombre, apellido, email, fuente, status: tipo==='creator'?'pendiente':'activa'};
   const tabla  = tipo==='creator' ? 'creators' : 'marcas';
   const body   = tipo==='creator' ? perfil : {...perfil, tipo:'fisica'};
 

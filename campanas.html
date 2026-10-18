@@ -168,9 +168,10 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
     <!-- PASO 1: TU MARCA -->
     <div class="form-sec active" id="s0">
       <div class="fs-title">Tu marca</div>
-      <div class="fs-sub">Para que sepamos quién publica y podamos contactarte con las postulaciones.</div>
+      <div class="fs-sub">Creás tu cuenta de marca para seguir las postulaciones desde tu panel. Es gratis.</div>
       <div class="fg" id="fg-marca"><label>Nombre de la marca<span class="req">*</span></label><input type="text" id="c-marca" placeholder="¿Cómo se llama tu marca?"><div class="err-msg">Campo requerido</div></div>
       <div class="fg" id="fg-email"><label>Email de contacto<span class="req">*</span></label><input type="email" id="c-email" placeholder="tu@marca.com"><div class="err-msg">Email inválido</div></div>
+      <div class="fg" id="fg-pass"><label>Contraseña<span class="req">*</span></label><input type="password" id="c-pass" placeholder="Mínimo 8 caracteres"><div class="hint">Con este email y contraseña entrás a tu panel a ver las postulaciones.</div><div class="err-msg">Mínimo 8 caracteres</div></div>
       <div class="fg-row">
         <div class="fg"><label>WhatsApp</label><input type="tel" id="c-tel" placeholder="+54 9 11 0000-0000"></div>
         <div class="fg"><label>Instagram de la marca</label><input type="text" id="c-ig" placeholder="@tumarca"></div>
@@ -348,6 +349,7 @@ function validate(s){
     bad = markErr('fg-marca', !document.getElementById('c-marca').value.trim()) || bad;
     const email=document.getElementById('c-email').value.trim();
     bad = markErr('fg-email', !/\S+@\S+\.\S+/.test(email)) || bad;
+    bad = markErr('fg-pass', document.getElementById('c-pass').value.length<8) || bad;
   }
   if(s===1){
     if(!selTipo){document.getElementById('err-tipo').style.display='block';bad=true;}
@@ -384,15 +386,54 @@ function buildResumen(){
 }
 
 // ── SUBMIT ──
+// Crea (o recupera) la sesión de la marca con el email+contraseña del form.
+// Devuelve {token, authId} si quedó logueada, o null si no se pudo (y ahí
+// la campaña se publica igual, ligada por email).
+async function crearSesionMarca(email, pass){
+  // 1) Intentar registro
+  let r = await fetch(`${SB_URL}/auth/v1/signup`,{
+    method:'POST', headers:{'apikey':SB_ANON,'Content-Type':'application/json'},
+    body:JSON.stringify({email, password:pass})
+  });
+  let d = await r.json().catch(()=>({}));
+  if(r.ok && d.access_token){ return {token:d.access_token, refresh:d.refresh_token, authId:d.user?.id, nuevo:true}; }
+  // 2) Si el email ya existe, intentar iniciar sesión con la contraseña dada
+  r = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`,{
+    method:'POST', headers:{'apikey':SB_ANON,'Content-Type':'application/json'},
+    body:JSON.stringify({email, password:pass})
+  });
+  d = await r.json().catch(()=>({}));
+  if(r.ok && d.access_token){ return {token:d.access_token, refresh:d.refresh_token, authId:d.user?.id, nuevo:false}; }
+  return null;
+}
+
 async function submitCampania(){
   if(!document.getElementById('chkTerms').checked){showToast('Aceptá los términos para continuar','err');return}
   const btn=document.getElementById('btnSubmit');
-  btn.disabled=true;btn.textContent='Enviando...';
+  btn.disabled=true;btn.textContent='Creando tu cuenta...';
   const g=id=>document.getElementById(id).value.trim();
+  const email=g('c-email'), pass=document.getElementById('c-pass').value;
   try{
+    // 1) Cuenta de la marca (login para su panel)
+    const ses = await crearSesionMarca(email, pass);
+
+    // 2) Si es cuenta nueva, crear su perfil de marca (para que tenga panel)
+    if(ses && ses.nuevo){
+      await fetch(`${SB_URL}/rest/v1/marcas`,{
+        method:'POST',
+        headers:{'apikey':SB_ANON,'Authorization':'Bearer '+ses.token,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({
+          nombre:g('c-marca'), apellido:'', nombre_marca:g('c-marca'), email,
+          tel:g('c-tel')||null, tipo:'fisica', status:'activa', fuente:'campaña'
+        })
+      }).catch(()=>{});
+    }
+
+    btn.textContent='Publicando campaña...';
+    // 3) La campaña (ligada por marca_email; se ve en su panel)
     await sbPost('campanias',{
       marca_nombre:g('c-marca'),
-      marca_email:g('c-email'),
+      marca_email:email,
       marca_telefono:g('c-tel')||null,
       marca_instagram:g('c-ig')||null,
       titulo:g('c-titulo'),
@@ -415,11 +456,29 @@ async function submitCampania(){
     // Email de confirmación a la marca (best-effort, no bloquea)
     fetch('/api/enviar-email',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({tipo:'campania_recibida',to:g('c-email'),data:{nombre:g('c-marca'),titulo:g('c-titulo')}})
+      body:JSON.stringify({tipo:'campania_recibida',to:email,data:{nombre:g('c-marca'),titulo:g('c-titulo')}})
     }).catch(()=>{});
 
+    // 4) Si quedó logueada, la mandamos directo a su panel
+    if(ses && ses.token){
+      try{
+        localStorage.setItem('sb_token', ses.token);
+        if(ses.refresh) localStorage.setItem('sb_refresh', ses.refresh);
+        localStorage.setItem('trama_rol_pref','marca');
+      }catch(_){}
+      showToast('✓ Campaña enviada. Entrando a tu panel…','ok');
+      setTimeout(()=>{ window.location.href='/perfil.html'; }, 900);
+      return;
+    }
+
+    // Si no se pudo loguear (ej: email ya registrado con otra contraseña),
+    // publicamos igual y mostramos el éxito con aviso.
     document.getElementById('formWrapper').style.display='none';
     document.getElementById('successScreen').classList.add('show');
+    if(ses===null){
+      document.querySelector('#successScreen .suc-sub').innerHTML +=
+        '<br><br>Ese email ya tiene una cuenta en TRAMA. Ingresá en <a href="/perfil.html" style="color:var(--blue)">tu panel</a> para seguir las postulaciones.';
+    }
     window.scrollTo({top:0,behavior:'smooth'});
   }catch(e){
     showToast('Error: '+e.message,'err');

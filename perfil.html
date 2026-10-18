@@ -606,7 +606,7 @@ function showDash(){
 function buildTabs(){
   const tabs = userType==='creator'
     ?['Mi perfil','🔥 Liga','Mis redes','Estado','Editar','📊 Contactos','🛒 Comprados','📋 Campañas']
-    :['Mi cuenta','Creators guardados','Mis conexiones','Editar'];
+    :['Mi cuenta','Creators guardados','Mis conexiones','Editar','📋 Mis campañas'];
   document.getElementById('dashTabs').innerHTML = tabs.map((t,i)=>
     `<button class="tab${i===0?' active':''}" onclick="switchTab(${i},this)">${t}</button>`
   ).join('');
@@ -902,6 +902,90 @@ function renderMarcaTab(i,el){
       <button class="btn-save" onclick="saveMarca()">Guardar cambios</button>
     </div>`;
   }
+  else if(i===4){
+    el.innerHTML=`<div class="tab-content active" id="campMarWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadCampanasMarca('campMarWrap');
+  }
+}
+
+// ── MIS CAMPAÑAS (vista de la marca: sus campañas + postulantes) ──
+const EST_POST={pendiente:'Nuevo',preseleccionada:'Preseleccionado ⭐',aceptada:'Aceptado ✅',rechazada:'Descartado',retirada:'Retirada'};
+const EST_CAMP={en_revision:'En revisión',activa:'Activa',cerrada:'Cerrada',rechazada:'Rechazada',cancelada:'Cancelada'};
+async function loadCampanasMarca(wrapId){
+  const wrap=document.getElementById(wrapId); if(!wrap)return;
+  const token=getToken();
+  const camps=await sbGet('campanias',`marca_email=eq.${encodeURIComponent(currentUser.email)}&select=id,titulo,estado,created_at,cupos,fecha_limite&order=created_at.desc`,token);
+  if(!camps||!camps.length){
+    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Mis campañas</div><div class="empty-state"><div>📋</div>Todavía no publicaste ninguna campaña.<br><a href="/campanas.html" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Publicar una campaña →</a></div></div>`;
+    return;
+  }
+  const ids=camps.map(c=>c.id);
+  const inList='('+ids.map(encodeURIComponent).join(',')+')';
+  const posts=await sbGet('postulaciones',`campania_id=in.${inList}&select=id,campania_id,creador_id,mensaje,tarifa_propuesta,estado,created_at&order=created_at.desc`,token);
+  const creIds=[...new Set((posts||[]).map(p=>p.creador_id).filter(Boolean))];
+  let byCre={};
+  if(creIds.length){
+    const cre=await sbGet('creators',`id=in.(${creIds.map(encodeURIComponent).join(',')})&select=id,nombre,apellido,niches,ig_seg,tt_seg,yt_seg,avatar_url,rating_prom,rating_count`,token);
+    byCre=Object.fromEntries((cre||[]).map(c=>[String(c.id),c]));
+  }
+  const postsByCamp={};
+  (posts||[]).forEach(p=>{ (postsByCamp[p.campania_id]=postsByCamp[p.campania_id]||[]).push(p); });
+  const fmtSegM=n=>!n?'—':n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':n;
+  const estColor={pendiente:'var(--muted2)',preseleccionada:'#f5b301',aceptada:'var(--green)',rechazada:'#f87171',retirada:'var(--muted)'};
+  const bloques=camps.map(c=>{
+    const ps=postsByCamp[c.id]||[];
+    const items=ps.map(p=>{
+      const cr=byCre[String(p.creador_id)]||{};
+      const nom=`${cr.nombre||''} ${cr.apellido||''}`.trim()||'Creador';
+      const seg=fmtSegM(cr.ig_seg||cr.tt_seg||cr.yt_seg);
+      const nich=(cr.niches||[]).slice(0,2).join(' · ')||'';
+      const av=cr.avatar_url?`<img src="${cr.avatar_url}" style="width:100%;height:100%;object-fit:cover">`:'🎥';
+      const tarifa=p.tarifa_propuesta?('$'+Number(p.tarifa_propuesta).toLocaleString('es-AR')):'A convenir';
+      return `<div class="cx-item">
+        <div class="cx-ic">${av}</div>
+        <div class="cx-body">
+          <div class="cx-name">${nom} <span style="font-size:.6rem;font-weight:800;color:${estColor[p.estado]||'var(--muted2)'};text-transform:uppercase;margin-left:.3rem">${EST_POST[p.estado]||p.estado}</span></div>
+          <div class="cx-meta">${nich}${seg!=='—'?' · '+seg+' seg.':''} · pide ${tarifa}</div>
+          ${p.mensaje?`<div style="font-size:.76rem;color:var(--muted2);margin-top:.35rem;line-height:1.5">“${p.mensaje.slice(0,180)}”</div>`:''}
+          <button class="resena-btn" style="margin-top:.5rem" onclick="desbloquearPostulante('${p.creador_id}','${c.id}','${p.id}')">🔓 Desbloquear contacto</button>
+        </div>
+      </div>`;
+    }).join('');
+    const f=c.fecha_limite?new Date(c.fecha_limite+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):null;
+    return `<div style="margin-bottom:2rem">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;flex-wrap:wrap">
+        <span style="font-size:1rem;font-weight:900">${c.titulo||'Campaña'}</span>
+        <span class="cx-venc ${c.estado==='activa'?'ok':'exp'}" style="border-radius:2px">${EST_CAMP[c.estado]||c.estado}</span>
+        <span style="font-size:.72rem;color:var(--muted)">${ps.length} postulante${ps.length===1?'':'s'}${f?' · cierra '+f:''}</span>
+      </div>
+      <div class="cx-list">${ps.length?items:'<div class="empty-state" style="padding:1.25rem"><div>📭</div>Sin postulantes todavía.</div>'}</div>
+    </div>`;
+  }).join('');
+  wrap.innerHTML=`<div class="tab-content active">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.5rem">
+      <div class="sec-title" style="margin:0">Mis campañas (${camps.length})</div>
+      <a href="/campanas.html" style="background:var(--green);color:#080808;font-size:.74rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;padding:.55rem 1rem;border-radius:2px">+ Nueva campaña</a>
+    </div>
+    ${bloques}
+  </div>`;
+}
+async function desbloquearPostulante(creator_id, campania_id, postulacion_id){
+  try{
+    const buyer=userProfile||{};
+    const res=await fetch('/api/crear-preferencia',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        creator_id, origen:'campania', campania_id, postulacion_id,
+        marca_email:currentUser.email,
+        marca_nombre:(buyer.nombre_marca||buyer.razon_social||buyer.nombre||'Marca'),
+      })
+    });
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error||'Error');
+    if(data.gratis){ showToast('✓ Contacto desbloqueado (bonificado). Lo ves en “Mis conexiones”.','ok'); return; }
+    const url=data.init_point||data.sandbox_init_point;
+    if(url){ window.location.href=url; } else { showToast('No se pudo iniciar el pago','err'); }
+  }catch(e){ showToast('Error: '+e.message,'err'); }
 }
 
 // ── GUARDAR ──

@@ -792,6 +792,7 @@ function renderCampanias(){
       acciones.push(`<button class="ca-btn ca-rechazar" onclick="setCampStatus('${c.id}','rechazada')">✕ Rechazar</button>`);
     }
     if(c.estado==='activa'){
+      acciones.push(`<button class="ca-btn ca-ver" onclick="notifCampania('${c.id}',this)">📢 Avisar a creadores</button>`);
       acciones.push(`<button class="ca-btn ca-cerrar" onclick="setCampStatus('${c.id}','cerrada')">Cerrar campaña</button>`);
     }
     if((c.total_postulaciones||0)>0){
@@ -823,6 +824,16 @@ function renderCampanias(){
       <div id="postu-${c.id}"></div>
     </div>`;
   }).join('');
+}
+
+async function notifCampania(id, btn){
+  if(!confirm('¿Avisar por email a TODOS los creadores aprobados sobre esta campaña?')) return;
+  const prev=btn.textContent; btn.disabled=true; btn.textContent='Enviando...';
+  try{
+    const r=await adminCall('notificar_campania',{id});
+    showToast(`✓ Aviso enviado a ${r.enviados}/${r.total} creadores`,'ok');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+  finally{ btn.disabled=false; btn.textContent=prev; }
 }
 
 async function setCampStatus(id, estado){

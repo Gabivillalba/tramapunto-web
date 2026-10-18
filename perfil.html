@@ -691,7 +691,7 @@ function buildTabs(){
   // {l: etiqueta, i: índice de contenido} — el orden visual se desacopla del
   // índice interno (renderCreatorTab/renderMarcaTab siguen usando el mismo i).
   const tabs = userType==='creator'
-    ?[{l:'👤 Mi perfil',i:0},{l:'📊 Contactos',i:5},{l:'📋 Campañas',i:7},{l:'🛒 Comprados',i:6},{l:'🔥 Liga',i:1},{l:'🔗 Mis redes',i:2},{l:'✏️ Editar',i:4}]
+    ?[{l:'👤 Mi perfil',i:0},{l:'💼 Me compraron',i:5},{l:'📋 Campañas',i:7},{l:'🛒 Mis compras',i:6},{l:'🔥 Liga',i:1},{l:'🔗 Mis redes',i:2},{l:'✏️ Editar',i:4}]
     :[{l:'👤 Mi cuenta',i:0},{l:'🔗 Mis conexiones',i:2},{l:'📋 Mis campañas',i:4},{l:'☆ Guardados',i:1},{l:'✏️ Editar',i:3}];
   document.getElementById('dashTabs').innerHTML = tabs.map((t,pos)=>
     `<button class="tab${pos===0?' active':''}" data-i="${t.i}" onclick="switchTab(${t.i},this)">${t.l}</button>`
@@ -1433,7 +1433,7 @@ async function loadComprados(wrapId){
   const cxs=await sbGet('conexiones',`marca_email=eq.${encodeURIComponent(email)}&estado=eq.pagado&select=id,creator_id,origen,created_at,monto,metodo,voucher_id&order=created_at.desc`,getToken());
   compradosData={};
   if(!cxs.length){
-    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Creadores comprados</div><div class="empty-state"><div>📭</div>Todavía no desbloqueaste ningún contacto.<br><a href="/" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
+    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Contactos que compraste</div><div class="empty-state"><div>📭</div>Todavía no desbloqueaste ningún contacto.<br><a href="/" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
     return;
   }
   const ids=[...new Set(cxs.map(c=>c.creator_id).filter(Boolean))];
@@ -1479,7 +1479,7 @@ async function loadComprados(wrapId){
     return `<div class="cx-item${activo?'':' cx-exp'}"><div class="cx-ic">${av}</div><div class="cx-body"><div class="cx-name">${nom} ${venceBadge}</div><div class="cx-meta">Comprado el ${f}${cx.origen==='campania'?' · campaña':''}</div>${cuerpo}</div></div>`;
   }).join('');
   wrap.innerHTML=`<div class="tab-content active">
-    <div class="sec-title">Creadores comprados (${cxs.length})</div>
+    <div class="sec-title">Contactos que compraste (${cxs.length})</div>
     <div style="font-size:.72rem;color:var(--muted);margin:-.75rem 0 1rem">El acceso a cada contacto queda disponible por <strong style="color:var(--muted2)">60 días</strong> desde la compra.</div>
     <div class="cx-list">${items}</div>
   </div>`;

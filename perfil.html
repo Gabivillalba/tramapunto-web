@@ -668,6 +668,8 @@ function renderCreatorTab(i,el){
           <div class="cl-items">${pend.map(x=>`<button class="cl-item" onclick="${x.cta==='foto'?`showToast('Tocá el 📷 sobre tu foto de perfil, arriba','info')`:`irATab(${x.cta})`}">○ ${x.txt} <span>→</span></button>`).join('')}</div>
         </div>`;
     el.innerHTML=`<div class="tab-content active">
+      <div class="sec-title" style="margin-top:0">Tu rendimiento</div>
+      <div id="statsWrap" style="margin-bottom:2rem"></div>
       ${checklistHTML}
       <div class="sec-title">Información general</div>
       <div class="info-grid">
@@ -703,6 +705,7 @@ function renderCreatorTab(i,el){
       </div>
     </div>`;
     if(p.rating_count) loadResenasRecibidas(p.id);
+    loadStatsCreador();
   }
   else if(i===1){
     // ── LIGA TRAMA. (gamificación diaria) ──
@@ -1207,6 +1210,39 @@ async function enviarCumplir(extra){
     showToast(res.error||'No se pudo registrar la misión','err');
     await loadLiga();   // re-habilita los botones (trivia errada / falta link)
   }
+}
+
+// ── STATS DEL CREADOR (vistas, ventas, conversión) ──
+async function loadStatsCreador(){
+  const wrap=document.getElementById('statsWrap'); if(!wrap)return;
+  const id=userProfile.id, token=getToken();
+  const desde30=Date.now()-30*86400000;
+  const [vistas,ventas]=await Promise.all([
+    sbGet('vistas_perfil',`creator_id=eq.${encodeURIComponent(id)}&select=created_at`,token),
+    sbGet('conexiones',`creator_id=eq.${encodeURIComponent(id)}&estado=eq.pagado&select=created_at`,token),
+  ]);
+  const en30=x=>{const t=Date.parse(x.created_at);return !isNaN(t)&&t>=desde30;};
+  const v30=(vistas||[]).filter(en30).length;
+  const c30=(ventas||[]).filter(en30).length;
+  const vT=(vistas||[]).length, cT=(ventas||[]).length;
+  const conv=vT?Math.round(cT/vT*100):0;
+  const p=userProfile;
+  const rating=(p.rating_count||0)?('★ '+Number(p.rating_prom||0).toFixed(1)):'—';
+  const ratingSub=(p.rating_count||0)?`${p.rating_count} ${p.rating_count==1?'reseña':'reseñas'}`:'sin reseñas';
+  const tile=(num,label,sub,accent)=>`
+    <div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1.1rem 1rem">
+      <div style="font-size:1.7rem;font-weight:900;color:${accent||'var(--white)'};line-height:1">${num}</div>
+      <div style="font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted2,#aaa);margin-top:.5rem">${label}</div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:.15rem">${sub}</div>
+    </div>`;
+  wrap.innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.6rem">
+      ${tile(vT,'Vistas de perfil', v30?`+${v30} en 30 días`:'últimos 30 días: 0', 'var(--green)')}
+      ${tile(cT,'Contactos vendidos', c30?`+${c30} en 30 días`:'últimos 30 días: 0', 'var(--green)')}
+      ${tile(conv+'%','Conversión','de vista a venta')}
+      ${tile(rating,'Reputación',ratingSub,'#f5b301')}
+    </div>
+    ${vT===0?`<div style="font-size:.76rem;color:var(--muted);margin-top:.7rem;line-height:1.5">Todavía no registramos vistas. A medida que las marcas abran tu perfil en la bolsa, vas a ver acá cuántas te miraron y cuántas te contactaron.</div>`:''}`;
 }
 
 // ── CONEXIONES (contactos comprados / vendidos) ──

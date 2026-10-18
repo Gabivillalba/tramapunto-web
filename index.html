@@ -1102,6 +1102,17 @@ function openModal(id,i){
   document.getElementById('contactModal').classList.add('open');
   document.body.style.overflow='hidden';
   pintarPrecios();   // asegura que el precio mostrado sea el vigente
+  registrarVista(id);
+}
+// Registra una vista de perfil (una vez por creador por sesión, sin bloquear la UI)
+function registrarVista(id){
+  try{
+    const k='trama_vistas';
+    const seen=JSON.parse(sessionStorage.getItem(k)||'[]');
+    if(seen.includes(id)) return;
+    seen.push(id); sessionStorage.setItem(k, JSON.stringify(seen));
+    fetch('/api/ver-perfil',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({creator_id:id})}).catch(()=>{});
+  }catch(_){}
 }
 function closeModal(){
   document.getElementById('contactModal').classList.remove('open');

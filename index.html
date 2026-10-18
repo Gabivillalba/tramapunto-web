@@ -453,7 +453,7 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
       <p class="h-copy">Tenemos una red verificada con datos reales. <strong>Vos elegís, nosotros conectamos.</strong></p>
       <a href="./marcas.html" class="h-btn btn-g" onclick="event.stopPropagation()">Soy marca →</a>
       <div class="h-proof">
-        <div><div class="proof-n">+120</div><div class="proof-l">Creators verificados</div></div>
+        <div><div class="proof-n">+130</div><div class="proof-l">Creators verificados</div></div>
         <div><div class="proof-n">1 a 1</div><div class="proof-l">Verificados a mano</div></div>
         <div><div class="proof-n">Directo</div><div class="proof-l">Hablás sin intermediarios</div></div>
       </div>
@@ -512,11 +512,8 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
 
   <section id="creators" style="background:#09090e">
     <div class="two-col">
-      <div class="c-vis">
-        <div class="c-row" onclick="checkAndShowBolsa()"><div class="c-left"><div class="c-av">MC</div><div><div class="c-name">Martina Cruzado</div><div class="c-niche">Lifestyle · IG · TT</div></div></div><div class="c-stat"><strong>280K</strong><span>SEGUIDORES</span></div></div>
-        <div class="c-row" onclick="checkAndShowBolsa()"><div class="c-left"><div class="c-av">FR</div><div><div class="c-name">Felipe Rodas</div><div class="c-niche">Fitness · YT · IG</div></div></div><div class="c-stat"><strong>510K</strong><span>SEGUIDORES</span></div></div>
-        <div class="c-row" onclick="checkAndShowBolsa()"><div class="c-left"><div class="c-av">LV</div><div><div class="c-name">Lucía Varela</div><div class="c-niche">Gastronomía · IG · TT</div></div></div><div class="c-stat"><strong>190K</strong><span>SEGUIDORES</span></div></div>
-        <div class="c-row" onclick="checkAndShowBolsa()" style="border-top:1px solid #1a1a2a"><div class="c-left"><div class="c-av">AG</div><div><div class="c-name">Agus Gómez</div><div class="c-niche">Fotografía · IG</div></div></div><div style="display:flex;align-items:center;gap:.625rem"><div class="c-new">Nuevo</div><div class="c-stat"><strong>155K</strong><span>SEGUIDORES</span></div></div></div>
+      <div class="c-vis" id="creVis">
+        <div style="padding:1.5rem;text-align:center;color:var(--muted)"><div class="spin" style="margin:0 auto .5rem"></div>Cargando creators reales…</div>
       </div>
       <div>
         <div class="s-tag" style="color:var(--purple)">Para creators</div>
@@ -947,6 +944,31 @@ async function loadLigaRanking(){
   }
 }
 loadLigaRanking();
+
+// Showcase "Para creators": creadores REALES aprobados (no datos fijos)
+async function cargarShowcase(){
+  const box=document.getElementById('creVis'); if(!box)return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/creators?status=eq.aprobado&select=nombre,niches,plats,ig_seg,tt_seg,yt_seg,avatar_url,created_at&order=created_at.desc&limit=40`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});
+    if(!r.ok) throw 0;
+    const seg=c=>Math.max(c.ig_seg||0,c.tt_seg||0,c.yt_seg||0);
+    let list=(await r.json())||[];
+    list=list.sort((a,b)=>seg(b)-seg(a)).slice(0,4);
+    if(!list.length){ box.innerHTML='<div style="padding:1.5rem;text-align:center;color:var(--muted)">Pronto vas a ver creadores acá. <a href="/" onclick="checkAndShowBolsa();return false" style="color:var(--green)">Ver la bolsa →</a></div>'; return; }
+    box.innerHTML=list.map((c,i)=>{
+      const ini=((c.nombre||'?').trim()[0]||'?').toUpperCase();
+      const nombre=(c.nombre||'Creador').split(' ').slice(0,2).join(' ');
+      const av=c.avatar_url?`<div class="c-av" style="overflow:hidden;padding:0"><img src="${c.avatar_url}" alt="${nombre}" style="width:100%;height:100%;object-fit:cover"></div>`:`<div class="c-av">${ini}</div>`;
+      const plats=(c.plats||[]).slice(0,2).join(' · ');
+      const niche=(c.niches||[])[0]||'Creador';
+      const sub=plats?`${niche} · ${plats}`:niche;
+      const nuevo=(c.created_at&&(Date.now()-new Date(c.created_at).getTime())<14*86400000)?'<div class="c-new">Nuevo</div>':'';
+      const borde=i>0?' style="border-top:1px solid #1a1a2a"':'';
+      return `<div class="c-row" onclick="checkAndShowBolsa()"${borde}><div class="c-left">${av}<div><div class="c-name">${nombre}</div><div class="c-niche">${sub}</div></div></div><div style="display:flex;align-items:center;gap:.625rem">${nuevo}<div class="c-stat"><strong>${fmtSeg(seg(c))}</strong><span>SEGUIDORES</span></div></div></div>`;
+    }).join('');
+  }catch(_){ box.innerHTML='<div style="padding:1.5rem;text-align:center;color:var(--muted)"><a href="/" onclick="checkAndShowBolsa();return false" style="color:var(--green)">Mirá los creadores en la bolsa →</a></div>'; }
+}
+cargarShowcase();
 
 let currentCreator=null, filtersBuilt=false;
 

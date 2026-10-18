@@ -108,7 +108,7 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .dash-email{font-size:.75rem;color:var(--muted);margin-top:.2rem}
 .dash-badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.6rem;font-weight:900;letter-spacing:.15em;text-transform:uppercase;padding:.25rem .625rem;border-radius:20px;margin-top:.4rem}
 .badge-creator{background:#1a0a2a;color:var(--purple);border:1px solid #3a1a5a}
-.badge-marca{background:#0f1a00;color:var(--green);border:1px solid #2a4000}
+.badge-marca{background:#1a0a2a;color:var(--purple);border:1px solid #3a1a5a}
 .badge-corp{background:#0a1020;color:var(--blue);border:1px solid #1a2a40}
 .s-pend{background:#1a1200;color:var(--amber);border:1px solid #2a2000;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
 .s-apro{background:#0f1a00;color:var(--green);border:1px solid #1a3000;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
@@ -119,6 +119,15 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .tab{padding:.875rem 1.25rem;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none}
 .tab:hover{color:var(--white)}
 .tab.active{color:var(--green);border-bottom-color:var(--green)}
+/* Identidad LILA para el perfil de marca */
+body.t-marca .tab.active{color:var(--purple);border-bottom-color:var(--purple)}
+body.t-marca .sec-title{color:var(--purple)}
+body.t-marca .sec-title::before{background:var(--purple)}
+body.t-marca .notif-bell:hover{border-color:var(--purple)}
+body.t-marca .notif-head button{color:var(--purple)}
+body.t-marca .notif-item.unread{background:#140a1f}
+body.t-marca .dash-av{border-color:#3a1a5a}
+body.t-marca .spin{border-top-color:var(--purple)}
 
 .tab-content{display:none;padding:2rem 1.5rem}
 @media(min-width:768px){.tab-content{padding:2.5rem 4rem}}
@@ -640,6 +649,8 @@ function showDash(){
     const tipo=p.tipo;
     badge.innerHTML=`<span class="dash-badge ${tipo==='corporativa'?'badge-corp':'badge-marca'}">${tipo==='corporativa'?'Empresa corporativa':'Marca'}</span>`;
   }
+  // Identidad visual lila para marcas, verde para creadores
+  document.body.classList.toggle('t-marca', userType==='marca');
 
   buildTabs();
   loadNotifs();
@@ -1014,7 +1025,7 @@ async function loadCampanasMarca(wrapId){
   const token=getToken();
   const camps=await sbGet('campanias',`marca_email=eq.${encodeURIComponent(currentUser.email)}&select=id,titulo,estado,created_at,cupos,fecha_limite&order=created_at.desc`,token);
   if(!camps||!camps.length){
-    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Mis campañas</div><div class="empty-state"><div>📋</div>Todavía no publicaste ninguna campaña.<br><a href="/campanas.html" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Publicar una campaña →</a></div></div>`;
+    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Mis campañas</div><div class="empty-state"><div>📋</div>Todavía no publicaste ninguna campaña.<br><a href="/campanas.html" style="color:var(--purple);font-size:.8rem;display:inline-block;margin-top:.5rem">Publicar una campaña →</a></div></div>`;
     return;
   }
   const ids=camps.map(c=>c.id);
@@ -1565,7 +1576,7 @@ async function loadGuardados(wrapId){
   const email=currentUser.email;
   const favs=await sbGet('favoritos',`marca_email=eq.${encodeURIComponent(email)}&select=creator_id,created_at&order=created_at.desc`,getToken());
   if(!favs||!favs.length){
-    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Creators guardados</div><div class="empty-state"><div>🔖</div>Todavía no guardaste ningún creator.<br><a href="/" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
+    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Creators guardados</div><div class="empty-state"><div>🔖</div>Todavía no guardaste ningún creator.<br><a href="/" style="color:var(--purple);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
     return;
   }
   const ids=[...new Set(favs.map(f=>f.creator_id).filter(Boolean))];

@@ -264,16 +264,18 @@ async function cargarSesion(){
   const token=getToken();
   if(!token){ renderBanner('anon'); return; }
 
-  const {ok,data}=await sbFetch('/auth/v1/user','GET',null,token);
-  if(!ok){ renderBanner('anon'); return; }
+  // El perfil propio se trae del servidor (no se busca por email desde el cliente)
+  let perfil=null;
+  try{
+    const r=await fetch('/api/mi-perfil',{method:'POST',headers:{'Authorization':'Bearer '+token}});
+    if(r.ok) perfil=await r.json();
+  }catch(_){}
+  if(!perfil){ renderBanner('anon'); return; }
+  if(perfil.type!=='creator'){ renderBanner('no_creator'); return; }
 
-  const email=data.email;
-  document.getElementById('navUser').textContent=email;
+  document.getElementById('navUser').textContent=perfil.profile.email||'';
 
-  const rows=await sbGet('creators',`email=eq.${encodeURIComponent(email)}&select=id,nombre,status,t_reel,t_story,t_post`,token);
-  if(!rows.length){ renderBanner('no_creator'); return; }
-
-  creator=rows[0];
+  creator=perfil.profile;
   if(creator.status!=='aprobado'){ renderBanner(creator.status); return; }
 
   renderBanner('ok');

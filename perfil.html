@@ -521,17 +521,30 @@ async function doLogout(){
 }
 
 // ── CARGAR PERFIL ──
+// Trae el contacto (tel, @usuarios) de creadores desde el endpoint seguro
+// (solo devuelve el de compras pagadas vigentes, o el propio).
+async function fetchContacto(ids){
+  try{
+    const r=await fetch('/api/contacto',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},body:JSON.stringify({creator_ids:Array.isArray(ids)?ids:[ids]})});
+    if(!r.ok) return {};
+    const j=await r.json(); return j.contactos||{};
+  }catch(_){ return {}; }
+}
+// El perfil propio se trae del servidor (ya no se busca por email desde el cliente)
 async function loadProfile(token){
   const email = currentUser.email;
-  const creators = await sbGet('creators',`email=eq.${encodeURIComponent(email)}&select=*`,token);
-  if(creators?.length){
-    userProfile = creators[0]; userType='creator';
+  let data=null;
+  try{
+    const r=await fetch('/api/mi-perfil',{method:'POST',headers:{'Authorization':'Bearer '+token}});
+    if(r.ok) data=await r.json();
+  }catch(_){}
+  if(data && data.type==='creator'){
+    userProfile=data.profile; userType='creator';
     localStorage.setItem('trama_creator', JSON.stringify({nombre:userProfile.nombre, email}));
     showDash(); return;
   }
-  const marcas = await sbGet('marcas',`email=eq.${encodeURIComponent(email)}&select=*`,token);
-  if(marcas?.length){
-    userProfile = marcas[0]; userType='marca';
+  if(data && data.type==='marca'){
+    userProfile=data.profile; userType='marca';
     localStorage.setItem('trama_marca', JSON.stringify({nombre:userProfile.nombre, email}));
     showDash(); return;
   }
@@ -1238,8 +1251,11 @@ async function loadComprados(wrapId){
   }
   const ids=[...new Set(cxs.map(c=>c.creator_id).filter(Boolean))];
   const inList='('+ids.map(encodeURIComponent).join(',')+')';
-  const creators=await sbGet('creators',`id=in.${inList}&select=id,nombre,apellido,email,ig_user,tt_user,yt_user,tel,avatar_url`,getToken());
+  const creators=await sbGet('creators',`id=in.${inList}&select=id,nombre,apellido,avatar_url`,getToken());
   const byId=Object.fromEntries((creators||[]).map(c=>[String(c.id),c]));
+  // El contacto se trae del endpoint seguro (solo devuelve el de las compras pagadas vigentes)
+  const contactos=await fetchContacto(ids);
+  Object.keys(byId).forEach(id=>Object.assign(byId[id], contactos[id]||{}));
   // Reseñas que esta cuenta ya dejó (para mostrar estado / permitir editar)
   const misResenas=await sbGet('resenas',`marca_email=eq.${encodeURIComponent(email)}&select=creator_id,rating`,getToken());
   const ratingByCreator=Object.fromEntries((misResenas||[]).map(x=>[String(x.creator_id),x.rating]));

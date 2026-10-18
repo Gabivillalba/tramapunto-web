@@ -21,7 +21,24 @@ grant select (
   es_campeon, campeon_label, fotos, rating_prom, rating_count, fuente
 ) on public.creators to anon;
 
--- Nota: 'authenticated' conserva lectura de contacto por ahora (perfil propio
--- y "Mis conexiones" con el token del usuario). Cierre total del lado
--- autenticado = fase 2 (mover esas lecturas al endpoint + endurecer el alta
--- de conexiones, con testeo del webhook de Mercado Pago).
+-- ════════════════════════════════════════════════════════════
+-- FASE 2 (aplicada 17-oct-2026): cerrar el contacto también para
+-- 'authenticated'. El perfil propio ahora se trae de /api/mi-perfil y el
+-- contacto comprado de /api/contacto (ambos con service_role + verificación
+-- de identidad por JWT). Además se bloquea que un cliente forje una conexión
+-- 'pagado' (solo el webhook de Mercado Pago, con service_role, la marca).
+-- ════════════════════════════════════════════════════════════
+
+revoke select on public.creators from authenticated;
+
+grant select (
+  id, created_at, nombre, apellido, pais, ciudad, bio,
+  ig_seg, ig_er, ig_alc, tt_seg, tt_er, tt_vistas, yt_seg, yt_vistas, tw_seg,
+  plats, niches, nicho_esp, audiencia, idioma, moneda,
+  t_story, t_reel, t_post, t_yt, canje, disponibilidad, dispon_nota, links, colabs,
+  status, avatar_url, puntos_mes, racha, ultima_mision, indice,
+  es_campeon, campeon_label, fotos, rating_prom, rating_count, fuente
+) on public.creators to authenticated;
+
+alter policy conexiones_insert on public.conexiones
+  with check (estado is distinct from 'pagado');

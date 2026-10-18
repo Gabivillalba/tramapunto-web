@@ -1056,6 +1056,7 @@ async function loadMarcas(){
             </div>
           </div>
           ${brief}
+          ${m.brief?`<div style="margin-top:.6rem"><button class="btn-sm" onclick="crearCampaniaDesdeMarca('${m.id}')">📋 Crear campaña con este brief</button></div>`:''}
         </div>`;
       }).join('');
     }
@@ -1067,6 +1068,15 @@ async function loadMarcas(){
         : '<div class="dash-empty">Ningún creador compró contactos todavía.</div>';
     }
   }catch(e){ el.innerHTML=`<span style="color:#f87171">Error: ${escR(e.message)}</span>`; }
+}
+
+async function crearCampaniaDesdeMarca(id){
+  if(!confirm('¿Crear una campaña a partir del brief de esta marca?\n\nQueda EN REVISIÓN: la revisás y activás en la pestaña Campañas, y recién ahí los creadores la ven y se pueden postular.')) return;
+  try{
+    await adminCall('campania_desde_marca',{marca_id:id});
+    showToast('✓ Campaña creada (en revisión). Activala en Campañas.','ok');
+    switchTab('campanias'); loadCampanias();
+  }catch(e){ showToast('Error: '+e.message,'err'); }
 }
 
 // ══════════ CONFIGURACIÓN (PRECIOS) ══════════

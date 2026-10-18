@@ -179,6 +179,28 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, data, compradores_no_marca });
       }
 
+      // — Convertir el brief de una marca en una campaña (queda en revisión) —
+      case 'campania_desde_marca': {
+        const { marca_id } = payload;
+        if (!marca_id) return res.status(400).json({ error: 'Falta marca_id' });
+        const rows = await sb(`marcas?id=eq.${marca_id}&select=*`);
+        const m = rows?.[0];
+        if (!m) return res.status(404).json({ error: 'Marca no encontrada' });
+        if (!m.brief || !String(m.brief).trim()) return res.status(400).json({ error: 'Esta marca no tiene brief cargado' });
+        const marcaName = m.nombre_marca || m.razon_social || `${m.nombre || ''} ${m.apellido || ''}`.trim() || 'Marca';
+        const created = await sb('campanias', 'POST', {
+          marca_nombre: marcaName,
+          marca_email: m.email,
+          marca_telefono: m.tel || null,
+          titulo: (marcaName + ' busca creadores de contenido').slice(0, 120),
+          descripcion: String(m.brief).slice(0, 4000),
+          tipo: 'ugc',
+          estado: 'en_revision',
+          nota_admin: 'Generada desde el brief de registro de la marca.',
+        });
+        return res.status(200).json({ ok: true, campania: created?.[0] || null });
+      }
+
       // — Export de todas las postulaciones (con creador y título de campaña) —
       case 'export_postulaciones': {
         const posts = await sb('postulaciones?select=*,creators(nombre,apellido,email)&order=created_at.desc');

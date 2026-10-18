@@ -296,6 +296,27 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, email, password: temp, nombre: m.nombre || '' });
       }
 
+      // — Enviar un email puntual a UNA marca —
+      case 'enviar_email_marca': {
+        const { id, asunto, cuerpo } = payload;
+        if (!id) return res.status(400).json({ error: 'Falta id' });
+        if (!asunto || !cuerpo) return res.status(400).json({ error: 'Falta asunto o cuerpo' });
+        if (!process.env.RESEND_API_KEY) return res.status(500).json({ error: 'Falta RESEND_API_KEY' });
+        const rows = await sb(`marcas?id=eq.${id}&select=email,nombre`);
+        const m = rows && rows[0];
+        if (!m || !m.email) return res.status(400).json({ error: 'La marca no tiene email cargado' });
+        const cuerpoBase = escapeHtml(cuerpo).replace(/\n/g, '<br>');
+        const htmlFn = (nombre) => emailWrap({
+          titulo: '',
+          cuerpoHtml: `<p style="margin:0 0 16px">Hola <strong style="color:#F4F4EF">${escapeHtml(nombre) || 'equipo'}</strong>,</p>` +
+                      cuerpoBase.replace(/\{nombre\}/g, escapeHtml(nombre) || 'equipo'),
+          ctaText: 'Ir a TRAMA.', ctaHref: SITE_URL,
+        });
+        const enviados = await enviarBatch([{ nombre: m.nombre, email: m.email }], asunto, htmlFn);
+        if (!enviados) return res.status(500).json({ error: 'No se pudo enviar el email' });
+        return res.status(200).json({ ok: true, enviados, email: m.email });
+      }
+
       // — Avisar a TODOS los creadores aprobados de una campaña nueva —
       case 'notificar_campania': {
         const { id } = payload;

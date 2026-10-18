@@ -163,6 +163,9 @@ body.t-creator .spin{border-top-color:var(--purple)}
 .ic-label{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem}
 .ic-val{font-size:.9rem;font-weight:700}
 .ic-val.muted{color:var(--muted2);font-weight:400}
+.mc-stat{flex:1;min-width:92px;background:var(--g1);border:1px solid #1a1a1a;border-radius:6px;padding:.8rem 1rem;text-align:center}
+.mc-n{font-size:1.5rem;font-weight:900;line-height:1}
+.mc-l{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:.35rem}
 
 .redes-grid{display:grid;grid-template-columns:1fr;gap:1px;background:#161616;margin-bottom:2rem}
 @media(min-width:600px){.redes-grid{grid-template-columns:1fr 1fr}}
@@ -1053,12 +1056,21 @@ function renderMarcaTab(i,el){
 // ── MIS CAMPAÑAS (vista de la marca: sus campañas + postulantes) ──
 const EST_POST={pendiente:'Nuevo',preseleccionada:'Preseleccionado ⭐',aceptada:'Aceptado ✅',rechazada:'Descartado',retirada:'Retirada'};
 const EST_CAMP={en_revision:'En revisión',activa:'Activa',cerrada:'Cerrada',rechazada:'Rechazada',cancelada:'Cancelada'};
+const TIPO_CAMP={ugc:'UGC',influencer:'Influencer',combo:'Combo',activacion:'Activación'};
+function presuTxt(c){
+  const mon=c.moneda||'ARS';
+  const f=n=>'$'+Number(n).toLocaleString('es-AR')+(mon==='USD'?' USD':'');
+  if(c.presupuesto_min&&c.presupuesto_max) return `${f(c.presupuesto_min)} – ${f(c.presupuesto_max)}`;
+  if(c.presupuesto_min) return `Desde ${f(c.presupuesto_min)}`;
+  if(c.presupuesto_max) return `Hasta ${f(c.presupuesto_max)}`;
+  return 'A convenir';
+}
 async function loadCampanasMarca(wrapId){
   const wrap=document.getElementById(wrapId); if(!wrap)return;
   const token=getToken();
-  const camps=await sbGet('campanias',`marca_email=eq.${encodeURIComponent(currentUser.email)}&select=id,titulo,estado,created_at,cupos,fecha_limite&order=created_at.desc`,token);
+  const camps=await sbGet('campanias',`marca_email=eq.${encodeURIComponent(currentUser.email)}&select=id,titulo,estado,created_at,cupos,fecha_limite,tipo,descripcion,presupuesto_min,presupuesto_max,moneda,formatos,es_canje,es_presencial,entregables&order=created_at.desc`,token);
   if(!camps||!camps.length){
-    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Mis campañas</div><div class="empty-state"><div>📋</div>Todavía no publicaste ninguna campaña.<br><a href="/campanas.html" style="color:var(--purple);font-size:.8rem;display:inline-block;margin-top:.5rem">Publicar una campaña →</a></div></div>`;
+    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Mis campañas</div><div class="empty-state"><div>📋</div>Todavía no publicaste ninguna campaña.<br><a href="/campanas.html" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Publicar una campaña →</a></div></div>`;
     return;
   }
   const ids=camps.map(c=>c.id);
@@ -1074,6 +1086,10 @@ async function loadCampanasMarca(wrapId){
   (posts||[]).forEach(p=>{ (postsByCamp[p.campania_id]=postsByCamp[p.campania_id]||[]).push(p); });
   const fmtSegM=n=>!n?'—':n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':n;
   const estColor={pendiente:'var(--muted2)',preseleccionada:'#f5b301',aceptada:'var(--green)',rechazada:'#f87171',retirada:'var(--muted)'};
+  // Resumen
+  const nActivas=camps.filter(c=>c.estado==='activa').length;
+  const nRevision=camps.filter(c=>c.estado==='en_revision').length;
+  const totalPost=(posts||[]).length;
   const bloques=camps.map(c=>{
     const ps=postsByCamp[c.id]||[];
     const items=ps.map(p=>{
@@ -1094,19 +1110,47 @@ async function loadCampanasMarca(wrapId){
       </div>`;
     }).join('');
     const f=c.fecha_limite?new Date(c.fecha_limite+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):null;
-    return `<div style="margin-bottom:2rem">
-      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;flex-wrap:wrap">
-        <span style="font-size:1rem;font-weight:900">${c.titulo||'Campaña'}</span>
-        <span class="cx-venc ${c.estado==='activa'?'ok':'exp'}" style="border-radius:2px">${EST_CAMP[c.estado]||c.estado}</span>
-        <span style="font-size:.72rem;color:var(--muted)">${ps.length} postulante${ps.length===1?'':'s'}${f?' · cierra '+f:''}</span>
+    const alta=c.created_at?new Date(c.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}):'';
+    const activa=c.estado==='activa';
+    const chips=[
+      `🎬 ${TIPO_CAMP[c.tipo]||c.tipo||'UGC'}`,
+      `💰 ${presuTxt(c)}`,
+      `👥 ${c.cupos||1} cupo${(c.cupos||1)>1?'s':''}`,
+      (c.formatos&&c.formatos.length)?`🎞 ${c.formatos.join(', ')}`:'',
+      c.es_canje?'🎁 Canje':'',
+      c.es_presencial?'📍 Presencial':'',
+      f?`📅 Cierra ${f}`:'',
+    ].filter(Boolean);
+    const estadoNota = c.estado==='en_revision'
+      ? `<div style="font-size:.72rem;color:var(--amber);margin-top:.5rem">⏳ En revisión por el equipo TRAMA. Cuando la aprueben, los creadores la ven y se pueden postular.</div>`
+      : c.estado==='rechazada'
+      ? `<div style="font-size:.72rem;color:#f87171;margin-top:.5rem">Esta campaña fue rechazada. Escribinos si querés revisarla.</div>`
+      : '';
+    return `<div class="mc-card" style="border:1px solid #1a1a1a;border-radius:6px;padding:1.1rem 1.25rem;margin-bottom:1.25rem;background:var(--g1)">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem;flex-wrap:wrap">
+        <span style="font-size:1.02rem;font-weight:900">${c.titulo||'Campaña'}</span>
+        <span class="cx-venc ${activa?'ok':'exp'}" style="border-radius:2px">${EST_CAMP[c.estado]||c.estado}</span>
+        <span style="font-size:.7rem;color:var(--muted)">${ps.length} postulante${ps.length===1?'':'s'}${alta?' · publicada '+alta:''}</span>
       </div>
-      <div class="cx-list">${ps.length?items:'<div class="empty-state" style="padding:1.25rem"><div>📭</div>Sin postulantes todavía.</div>'}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.6rem">
+        ${chips.map(ch=>`<span style="font-size:.68rem;font-weight:700;color:var(--muted2);background:#121212;border:1px solid #222;border-radius:20px;padding:.25rem .65rem">${ch}</span>`).join('')}
+      </div>
+      ${c.descripcion?`<div style="font-size:.78rem;color:#bbb;line-height:1.55;margin-bottom:.4rem">${c.descripcion.slice(0,260)}${c.descripcion.length>260?'…':''}</div>`:''}
+      ${estadoNota}
+      <div style="font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:1rem 0 .6rem">Postulantes</div>
+      <div class="cx-list">${ps.length?items:'<div class="empty-state" style="padding:1.1rem"><div>📭</div>Sin postulantes todavía.</div>'}</div>
     </div>`;
   }).join('');
   wrap.innerHTML=`<div class="tab-content active">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.5rem">
-      <div class="sec-title" style="margin:0">Mis campañas (${camps.length})</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem">
+      <div class="sec-title" style="margin:0">Mis campañas</div>
       <a href="/campanas.html" style="background:var(--green);color:#080808;font-size:.74rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;padding:.55rem 1rem;border-radius:2px">+ Nueva campaña</a>
+    </div>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.5rem">
+      <div class="mc-stat"><div class="mc-n">${camps.length}</div><div class="mc-l">Campañas</div></div>
+      <div class="mc-stat"><div class="mc-n" style="color:var(--green)">${nActivas}</div><div class="mc-l">Activas</div></div>
+      ${nRevision?`<div class="mc-stat"><div class="mc-n" style="color:var(--amber)">${nRevision}</div><div class="mc-l">En revisión</div></div>`:''}
+      <div class="mc-stat"><div class="mc-n">${totalPost}</div><div class="mc-l">Postulantes</div></div>
     </div>
     ${bloques}
   </div>`;

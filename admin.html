@@ -573,6 +573,22 @@ textarea.em-inp{resize:vertical;line-height:1.5}
   </div>
 </div>
 
+<div class="modal-bg" id="emailMarcaBg">
+  <div class="modal">
+    <button class="modal-x" onclick="cerrarEmailMarca()">✕</button>
+    <h2 style="margin:0 0 .25rem;font-size:1.1rem;font-weight:900">Email a la marca</h2>
+    <p style="margin:0 0 1.25rem;font-size:.78rem;color:var(--muted)">Enviás solo a <strong id="emq-dest" style="color:var(--green)"></strong>. Se manda con el diseño de TRAMA. Podés usar <code style="color:var(--green)">{nombre}</code>.</p>
+    <label style="display:block;font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Asunto</label>
+    <input id="emq-asunto" type="text" maxlength="120" placeholder="Ej: Tu campaña ya está online en TRAMA." style="width:100%;background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.6rem;font-size:.82rem;border-radius:2px;margin-bottom:1rem;box-sizing:border-box;font-family:inherit">
+    <label style="display:block;font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Mensaje</label>
+    <textarea id="emq-cuerpo" placeholder="Hola {nombre}, te escribimos para contarte..." style="width:100%;min-height:140px;background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.6rem;font-size:.82rem;border-radius:2px;box-sizing:border-box;font-family:inherit;resize:vertical;line-height:1.5"></textarea>
+    <div style="display:flex;gap:.6rem;margin-top:1.25rem">
+      <button class="btn-sm" style="flex:1" onclick="cerrarEmailMarca()">Cancelar</button>
+      <button class="btn-sm" id="emq-enviar" style="flex:1;background:var(--green);color:#080808;border-color:var(--green);font-weight:900" onclick="enviarEmailMarca()">Enviar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -924,6 +940,30 @@ async function exportPostulacionesCSV(){
 // ══════════ ENVÍO MASIVO ══════════
 function abrirEnvioMasivo(){ document.getElementById('envioBg').classList.add('open'); }
 function cerrarEnvioMasivo(){ document.getElementById('envioBg').classList.remove('open'); }
+
+// ── EMAIL INDIVIDUAL A UNA MARCA ──
+let emailMarcaId=null;
+function abrirEmailMarca(id, nombre, email){
+  emailMarcaId=id;
+  document.getElementById('emq-dest').textContent=`${nombre} · ${email}`;
+  document.getElementById('emq-asunto').value='';
+  document.getElementById('emq-cuerpo').value='';
+  document.getElementById('emailMarcaBg').classList.add('open');
+}
+function cerrarEmailMarca(){ document.getElementById('emailMarcaBg').classList.remove('open'); emailMarcaId=null; }
+async function enviarEmailMarca(){
+  if(!emailMarcaId) return;
+  const asunto=document.getElementById('emq-asunto').value.trim();
+  const cuerpo=document.getElementById('emq-cuerpo').value.trim();
+  if(!asunto||!cuerpo){ showToast('Completá asunto y mensaje','err'); return; }
+  const btn=document.getElementById('emq-enviar'); btn.disabled=true; btn.textContent='Enviando...';
+  try{
+    const r=await adminCall('enviar_email_marca',{id:emailMarcaId, asunto, cuerpo});
+    showToast('✓ Email enviado a '+r.email,'ok');
+    cerrarEmailMarca();
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+  finally{ btn.disabled=false; btn.textContent='Enviar'; }
+}
 async function enviarMasivo(){
   const segmento=document.getElementById('em-segmento').value;
   const asunto=document.getElementById('em-asunto').value.trim();
@@ -1072,6 +1112,7 @@ async function loadMarcas(){
           <div style="margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap">
             <button class="btn-sm" onclick="crearCampaniaDesdeMarca('${m.id}',${m.brief?'true':'false'})">📋 ${m.brief?'Crear campaña con este brief':'Crear campaña'}</button>
             <button class="btn-sm" onclick="darAccesoMarca('${m.id}','${nombreMarca||persona||escR(m.email)}')">🔑 Dar acceso</button>
+            <button class="btn-sm" onclick="abrirEmailMarca('${m.id}','${nombreMarca||persona||escR(m.email)}','${escR(m.email)}')">✉️ Email</button>
           </div>
         </div>`;
       }).join('');

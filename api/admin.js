@@ -481,7 +481,7 @@ export default async function handler(req, res) {
           sb('creators?select=id,nombre,status,racha,es_campeon,ig_user').catch(() => []),
           sb('campanias?select=estado').catch(() => []),
           sb('marcas?select=email').catch(() => []),
-          sb('resenas?select=rating,oculta').catch(() => []),
+          sb('resenas?select=rating,oculta,created_at').catch(() => []),
           sb('postulaciones?select=estado').catch(() => []),
           sb('vistas_perfil?select=id').catch(() => []),
         ]);
@@ -530,12 +530,14 @@ export default async function handler(req, res) {
         const ticket = pagadas.length ? Math.round(ingresos / pagadas.length) : 0;
         const compradoras = new Set(pagadas.map(c => String(c.marca_email || '').toLowerCase()).filter(Boolean)).size;
         const resVis = (resenas || []).filter(r => !r.oculta);
-        const resenasStat = { total: resVis.length, prom: resVis.length ? (resVis.reduce((a, r) => a + num(r.rating), 0) / resVis.length) : 0 };
+        const hace7 = Date.now() - 7 * 86400000;
+        const resenasRecientes = resVis.filter(r => r.created_at && new Date(r.created_at).getTime() >= hace7).length;
+        const resenasStat = { total: resVis.length, prom: resVis.length ? (resVis.reduce((a, r) => a + num(r.rating), 0) / resVis.length) : 0, recientes: resenasRecientes };
         const marcasStat = { total: (marcas || []).length, compradoras };
         const postStat = { total: (postulaciones || []).length };
-        // Ventas por día, últimos 14 (UTC)
+        // Ventas por día, últimos 30 (UTC) — el panel permite ver 7/14/30
         const ventasPorDia = [];
-        for (let i = 13; i >= 0; i--) ventasPorDia.push({ dia: new Date(Date.now() - i * 86400000).toISOString().slice(0, 10), n: 0, monto: 0 });
+        for (let i = 29; i >= 0; i--) ventasPorDia.push({ dia: new Date(Date.now() - i * 86400000).toISOString().slice(0, 10), n: 0, monto: 0 });
         const didx = Object.fromEntries(ventasPorDia.map((d, i) => [d.dia, i]));
         pagadas.forEach(c => { const k = (c.created_at || '').slice(0, 10); if (k in didx) { ventasPorDia[didx[k]].n++; ventasPorDia[didx[k]].monto += num(c.monto); } });
 

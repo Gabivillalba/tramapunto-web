@@ -1030,8 +1030,40 @@ function toggleAdv(){
 // ── BÚSQUEDAS GUARDADAS (por usuario, en este navegador) ──
 function sesionEmail(){ try{const s=localStorage.getItem('trama_marca')||localStorage.getItem('trama_creator'); return s?(JSON.parse(s).email||'anon'):'anon';}catch(_){return 'anon';} }
 function savedKey(){ return 'trama_filtros_'+sesionEmail(); }
-function getSaved(){ try{return JSON.parse(localStorage.getItem(savedKey())||'[]');}catch(_){return [];} }
-function setSaved(a){ try{localStorage.setItem(savedKey(), JSON.stringify(a));}catch(_){} }
+function getSavedLocal(){ try{return JSON.parse(localStorage.getItem(savedKey())||'[]');}catch(_){return [];} }
+function setSavedLocal(a){ try{localStorage.setItem(savedKey(), JSON.stringify(a));}catch(_){} }
+function logueado(){ return !!localStorage.getItem('sb_token'); }
+let savedCache=[];   // {name, state} de la última carga (para aplicar sin re-consultar)
+
+// Refresca el access_token de Supabase usando el refresh_token (los tokens duran ~1h)
+async function refreshToken(){
+  const rt=localStorage.getItem('sb_refresh'); if(!rt) return null;
+  try{
+    const r=await fetch(`${SB_URL}/auth/v1/token?grant_type=refresh_token`,{method:'POST',headers:{'apikey':SB_ANON,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:rt})});
+    if(!r.ok) return null; const j=await r.json();
+    if(j.access_token){ localStorage.setItem('sb_token',j.access_token); if(j.refresh_token) localStorage.setItem('sb_refresh',j.refresh_token); return j.access_token; }
+  }catch(_){}
+  return null;
+}
+// fetch autenticado a PostgREST con reintento si el token venció
+async function sbAuthed(path, method='GET', body=null){
+  let tok=localStorage.getItem('sb_token'); if(!tok) return null;
+  const run=t=>{
+    const h={'apikey':SB_ANON,'Authorization':'Bearer '+t,'Content-Type':'application/json'};
+    if(method==='POST') h['Prefer']='resolution=merge-duplicates';
+    const o={method,headers:h}; if(body) o.body=JSON.stringify(body);
+    return fetch(`${SB_URL}/rest/v1/${path}`,o);
+  };
+  let r=await run(tok);
+  if(r.status===401){ const nt=await refreshToken(); if(nt) r=await run(nt); }
+  return r;
+}
+async function getSavedCloud(){
+  const r=await sbAuthed('filtros_guardados?select=nombre,estado&order=nombre.asc');
+  if(!r||!r.ok) return null;
+  const rows=await r.json().catch(()=>[]);
+  return (rows||[]).map(x=>({name:x.nombre, state:x.estado}));
+}
 function estadoActual(){
   const g=id=>document.getElementById(id)?document.getElementById(id).value:'';
   return {niche:bolsaNiche, plats:[...bolsaPlats], sort:bolsaSort, city:g('fCity'), seg:g('fSeg'), er:g('fEr'), tarifa:g('fTarifa'), rating:g('fRating')};
@@ -1047,20 +1079,26 @@ function aplicarEstado(st){
   const sb=document.querySelectorAll('.sort-btn')[sortIdx!=null?sortIdx:0]; if(sb) sb.classList.add('on');
   renderBolsa();
 }
-function refreshSavedUI(){
+async function refreshSavedUI(){
   const sel=document.getElementById('savedSel'); if(!sel)return;
-  const arr=getSaved();
-  sel.innerHTML='<option value="">Mis búsquedas guardadas…</option>'+arr.map(s=>`<option value="${s.name.replace(/"/g,'&quot;')}">${s.name}</option>`).join('');
-  const row=document.getElementById('savedRow'); if(row) row.style.display=arr.length||true?'flex':'flex';
+  let arr=null;
+  if(logueado()) arr=await getSavedCloud();      // cross-device si hay login
+  if(arr===null) arr=getSavedLocal();            // fallback por navegador
+  savedCache=arr;
+  sel.innerHTML='<option value="">Mis búsquedas guardadas…</option>'+arr.map(s=>`<option value="${(s.name||'').replace(/"/g,'&quot;')}">${s.name}</option>`).join('');
 }
-function guardarBusqueda(){
+async function guardarBusqueda(){
   const name=(prompt('Nombre para esta búsqueda (ej: "Fitness BA 10K+")')||'').trim();
   if(!name)return;
-  const arr=getSaved();
-  const i=arr.findIndex(s=>s.name.toLowerCase()===name.toLowerCase());
-  const item={name, state:estadoActual()};
-  if(i>=0) arr[i]=item; else arr.push(item);
-  setSaved(arr); refreshSavedUI();
+  const state=estadoActual();
+  if(logueado()){
+    const r=await sbAuthed('filtros_guardados?on_conflict=user_email,nombre','POST',{user_email:sesionEmail(), nombre:name, estado:state, updated_at:new Date().toISOString()});
+    if(!r||!r.ok){ showToast('No se pudo guardar','err'); return; }
+  }else{
+    const arr=getSavedLocal(); const i=arr.findIndex(s=>s.name.toLowerCase()===name.toLowerCase());
+    const item={name, state}; if(i>=0) arr[i]=item; else arr.push(item); setSavedLocal(arr);
+  }
+  await refreshSavedUI();
   const sel=document.getElementById('savedSel'); if(sel) sel.value=name;
   document.getElementById('delSaved').style.display='inline-block';
   showToast('Búsqueda guardada','ok');
@@ -1068,14 +1106,18 @@ function guardarBusqueda(){
 function aplicarGuardada(name){
   const del=document.getElementById('delSaved');
   if(!name){ if(del) del.style.display='none'; return; }
-  const s=getSaved().find(x=>x.name===name);
+  const s=savedCache.find(x=>x.name===name);
   if(s){ aplicarEstado(s.state); if(del) del.style.display='inline-block'; }
 }
-function borrarGuardada(){
+async function borrarGuardada(){
   const sel=document.getElementById('savedSel'); if(!sel||!sel.value)return;
   const name=sel.value;
-  setSaved(getSaved().filter(s=>s.name!==name));
-  refreshSavedUI(); document.getElementById('delSaved').style.display='none';
+  if(logueado()){
+    await sbAuthed(`filtros_guardados?user_email=eq.${encodeURIComponent(sesionEmail())}&nombre=eq.${encodeURIComponent(name)}`,'DELETE');
+  }else{
+    setSavedLocal(getSavedLocal().filter(s=>s.name!==name));
+  }
+  await refreshSavedUI(); document.getElementById('delSaved').style.display='none';
   showToast('Búsqueda borrada','info');
 }
 

@@ -779,10 +779,21 @@ function renderAdminNotifs(noLeidas){
   if(noLeidas==null) noLeidas=adminNotif.filter(n=>!n.leida).length;
   if(dot){ if(noLeidas>0){ dot.textContent=noLeidas>9?'9+':noLeidas; dot.style.display='flex'; } else dot.style.display='none'; }
   if(!adminNotif.length){ list.innerHTML='<div class="notif-empty">Sin notificaciones.</div>'; return; }
-  list.innerHTML=adminNotif.map(n=>{
+  list.innerHTML=adminNotif.map((n,i)=>{
     const f=n.created_at?new Date(n.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
-    return `<div class="notif-item${n.leida?'':' unread'}"><div class="nt">${escR(n.titulo||'')}</div>${n.cuerpo?`<div class="nc">${escR(n.cuerpo)}</div>`:''}<div class="nf">${f}</div></div>`;
+    return `<div class="notif-item${n.leida?'':' unread'}" style="cursor:pointer" onclick="irNotifAdmin(${i})"><div class="nt">${escR(n.titulo||'')}</div>${n.cuerpo?`<div class="nc">${escR(n.cuerpo)}</div>`:''}<div class="nf">${f}</div></div>`;
   }).join('');
+}
+// Al tocar una notificación del admin, ir a la pestaña correspondiente
+function irNotifAdmin(i){
+  const n=adminNotif[i]; if(!n) return;
+  const p=document.getElementById('notifPanel'); if(p) p.classList.remove('open');
+  let tab='dashboard';
+  if(n.tipo==='registro') tab = /marca/i.test(n.titulo||'') ? 'marcas' : 'creators';
+  else if(n.tipo==='venta') tab='dashboard';
+  else if(n.tipo==='postulacion') tab='campanias';
+  else if(n.tipo==='resena') tab='resenas';
+  switchTab(tab);
 }
 function toggleAdminNotif(){
   const p=document.getElementById('notifPanel'); if(!p)return;

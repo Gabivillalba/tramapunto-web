@@ -659,9 +659,17 @@ function renderNotifs(){
   if(!notifItems||!notifItems.length){ list.innerHTML='<div class="notif-empty">No tenés notificaciones todavía.</div>'; return; }
   list.innerHTML=notifItems.map(n=>{
     const f=n.created_at?new Date(n.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
-    const tag=n.link?'a':'div'; const href=n.link?` href="${n.link}"`:'';
-    return `<${tag} class="notif-item${n.leida?'':' unread'}"${href}><div class="nt">${n.titulo||''}</div>${n.cuerpo?`<div class="nc">${n.cuerpo}</div>`:''}<div class="nf">${f}</div></${tag}>`;
+    return `<div class="notif-item${n.leida?'':' unread'}" style="cursor:pointer" onclick="irNotif('${n.tipo||''}')"><div class="nt">${n.titulo||''}</div>${n.cuerpo?`<div class="nc">${n.cuerpo}</div>`:''}<div class="nf">${f}</div></div>`;
   }).join('');
+}
+// Al tocar una notificación, llevar al tab que corresponde según el tipo
+function irNotif(tipo){
+  const p=document.getElementById('notifPanel'); if(p) p.classList.remove('open');
+  let idx;
+  if(userType==='creator') idx={venta:5, resena:0, sistema:0, postulacion:7}[tipo];
+  else idx={postulacion:4, sistema:0, venta:2}[tipo];
+  if(idx==null) idx=0;
+  irATab(idx);
 }
 function toggleNotifPanel(){
   const p=document.getElementById('notifPanel'); if(!p)return;

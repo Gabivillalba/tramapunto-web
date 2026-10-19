@@ -117,6 +117,14 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .notif-item .nc{color:var(--muted2,#aaa)}
 .notif-item .nf{color:var(--muted);font-size:.66rem;margin-top:.25rem}
 .notif-empty{padding:1.5rem 1rem;text-align:center;color:var(--muted);font-size:.8rem}
+.welcome-banner{position:relative;border:1px solid #2a4000;border-radius:6px;padding:1.1rem 1.25rem;margin:1.25rem 1.5rem 0}
+@media(min-width:768px){.welcome-banner{margin:1.5rem 4rem 0}}
+.wb-x{position:absolute;top:.6rem;right:.7rem;background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem}
+.wb-title{font-size:1rem;font-weight:900;margin-bottom:.35rem;padding-right:1.5rem}
+.wb-text{font-size:.82rem;color:var(--muted2);line-height:1.55;margin-bottom:.9rem}
+.wb-ctas{display:flex;gap:.5rem;flex-wrap:wrap}
+.wb-cta{display:inline-block;color:#080808;font-size:.74rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;padding:.55rem 1rem;border-radius:3px;border:none;cursor:pointer;text-decoration:none}
+.wb-cta.ghost{background:transparent !important}
 .dash-header{background:var(--g1);border-bottom:1px solid #1a1a1a;padding:2rem 1.5rem}
 @media(min-width:768px){.dash-header{padding:2.5rem 4rem}}
 .dash-header-inner{display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap}
@@ -381,6 +389,7 @@ body.t-creator .spin{border-top-color:var(--purple)}
       </div>
     </div>
   </div>
+  <div id="welcomeBanner"></div>
   <div class="dash-tabs" id="dashTabs"></div>
   <div id="dashContent"></div>
 </div>
@@ -689,8 +698,48 @@ function showDash(){
   // Identidad visual lila para creadores, verde lima para marcas
   document.body.classList.toggle('t-creator', userType==='creator');
 
+  renderWelcomeBanner();
   buildTabs();
   loadNotifs();
+}
+
+// ── BANNER DE BIENVENIDA (onboarding, se puede cerrar) ──
+function renderWelcomeBanner(){
+  const box=document.getElementById('welcomeBanner'); if(!box)return;
+  const p=userProfile, email=(currentUser&&currentUser.email)||'';
+  const key='trama_welcome_off_'+email;
+  let off=false; try{ off=localStorage.getItem(key)==='1'; }catch(_){}
+  // Solo para cuentas nuevas (≤30 días) y que no lo hayan cerrado
+  const dias = p.created_at ? (Date.now()-new Date(p.created_at).getTime())/86400000 : 0;
+  if(off || dias>30){ box.innerHTML=''; return; }
+  const nombre = (p.nombre||'').split(' ')[0] || (userType==='marca'?'equipo':'crack');
+  const acc = userType==='creator' ? 'var(--purple)' : 'var(--green)';
+  const bg  = userType==='creator' ? '#160a22' : '#0f1500';
+  const bd  = userType==='creator' ? '#3a1a5a' : '#2a4000';
+  let titulo, texto, ctas;
+  if(userType==='creator'){
+    titulo=`¡Bienvenido/a a TRAMA, ${nombre}! 🎬`;
+    texto = p.status==='aprobado'
+      ? 'Ya estás en la bolsa. Completá tu perfil y subí tus <strong>videos de muestra</strong> para recibir más propuestas de marcas.'
+      : 'Tu perfil está <strong>en revisión</strong>. Mientras tanto, completalo y subí tus videos: cuanto más completo, mejor posicionado aparecés cuando te aprobemos.';
+    ctas=`<button class="wb-cta" style="background:${acc}" onclick="irATab(4)">Completar mi perfil →</button>
+          <button class="wb-cta ghost" style="border-color:${bd};color:${acc}" onclick="irATab(4)">Subir videos</button>`;
+  } else {
+    titulo=`¡Bienvenida/o a TRAMA, ${nombre}! 🏢`;
+    texto='Publicá tu primera campaña y recibí postulaciones de creadores verificados, o explorá la bolsa para contactarlos directo.';
+    ctas=`<a class="wb-cta" style="background:${acc}" href="/campanas.html">Publicar campaña →</a>
+          <a class="wb-cta ghost" style="border-color:${bd};color:${acc}" href="/#bolsa">Explorar la bolsa</a>`;
+  }
+  box.innerHTML=`<div class="welcome-banner" style="background:${bg};border-color:${bd}">
+    <button class="wb-x" onclick="cerrarWelcome('${key}')" aria-label="Cerrar">✕</button>
+    <div class="wb-title" style="color:${acc}">${titulo}</div>
+    <div class="wb-text">${texto}</div>
+    <div class="wb-ctas">${ctas}</div>
+  </div>`;
+}
+function cerrarWelcome(key){
+  try{ localStorage.setItem(key,'1'); }catch(_){}
+  const box=document.getElementById('welcomeBanner'); if(box) box.innerHTML='';
 }
 
 // ── NOTIFICACIONES IN-APP ──

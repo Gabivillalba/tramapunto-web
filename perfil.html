@@ -202,6 +202,9 @@ body.t-creator .spin{border-top-color:var(--purple)}
 .foto-del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.72);color:#fff;border:none;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:.68rem;line-height:1;display:flex;align-items:center;justify-content:center}
 .foto-add{display:inline-block;background:#0d0d0d;border:1px dashed #333;color:var(--green);padding:.7rem 1.1rem;font-size:.78rem;font-weight:700;border-radius:2px;cursor:pointer;margin-bottom:1.5rem;transition:border-color .2s}
 .foto-add:hover{border-color:var(--green)}
+.videos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.6rem;margin-bottom:.75rem}
+.video-item{position:relative;border-radius:3px;overflow:hidden;border:1px solid #222;background:#000}
+.video-item video{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;background:#000}
 .btn-save{background:var(--green);color:var(--black);border:none;padding:.75rem 1.75rem;font-weight:900;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s}
 .btn-save:hover{opacity:.85}
 .btn-save:disabled{opacity:.5;cursor:not-allowed}
@@ -405,6 +408,8 @@ body.t-creator .spin{border-top-color:var(--purple)}
 <div class="toast" id="toast"></div>
 
 <script>
+const MAX_VIDEOS = 4;
+const MAX_VIDEO_MB = 50;
 const SB_URL  = 'https://mcpmabvxmdepastmpzbi.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
 
@@ -948,11 +953,17 @@ function renderCreatorTab(i,el){
       <div id="fotosGrid" class="fotos-grid"></div>
       <label class="foto-add">📷 Agregar fotos<input type="file" accept="image/*" multiple style="display:none" onchange="subirFotos(this)"></label>
 
-      <button class="btn-save" onclick="saveCreator()">Guardar y enviar a revisión →</button>
+      <div class="sec-title" style="margin-top:2rem">Videos de muestra</div>
+      <p style="font-size:.76rem;color:var(--muted2);line-height:1.5;margin-bottom:.9rem">Subí videos de tu contenido (hasta ${MAX_VIDEOS}, máx. ${MAX_VIDEO_MB} MB c/u). Se reproducen en tu perfil <strong>sin mostrar tus redes</strong> — las marcas ven tu contenido real, pero tu contacto sigue protegido hasta que lo compran.</p>
+      <div id="videosGrid" class="videos-grid"></div>
+      <label class="foto-add">🎬 Agregar videos<input type="file" accept="video/*" multiple style="display:none" onchange="subirVideos(this)"></label>
+
+      <button class="btn-save" style="margin-top:1.5rem" onclick="saveCreator()">Guardar y enviar a revisión →</button>
 
       ${pwdBlockHTML()}
     </div>`;
     renderFotos();
+    renderVideos();
   }
   else if(i===5){
     el.innerHTML=`<div class="tab-content active" id="contactosWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
@@ -1495,11 +1506,13 @@ async function loadContactosCreator(){
 function waLink(tel){ let d=(tel||'').replace(/\D/g,''); if(!d)return ''; if(!d.startsWith('54')) d='54'+d; return 'https://wa.me/'+d; }
 function igHandle(u){ return (u||'').trim().replace(/^@/,'').replace(/^https?:\/\//,'').replace(/^(www\.)?instagram\.com\//i,'').replace(/\/.*$/,''); }
 function ttHandle(u){ return (u||'').trim().replace(/^@/,'').replace(/^https?:\/\//,'').replace(/^(www\.)?tiktok\.com\/@?/i,'').replace(/\/.*$/,''); }
+function ytLink(u){ u=(u||'').trim(); if(!u)return ''; if(/^https?:\/\//i.test(u))return u; const h=u.replace(/^@/,''); return /\s/.test(h)?('https://www.youtube.com/results?search_query='+encodeURIComponent(h)):('https://www.youtube.com/@'+h); }
 function contactoLinks(c){
   const p=[];
   if(c.email) p.push(`<a href="mailto:${c.email}" class="cx-link">✉ ${c.email}</a>`);
   if(c.ig_user){ const h=igHandle(c.ig_user); p.push(h?`<a href="https://instagram.com/${h}" target="_blank" rel="noopener" class="cx-link">📸 @${h}</a>`:`📸 ${c.ig_user}`); }
   if(c.tt_user){ const h=ttHandle(c.tt_user); p.push(h?`<a href="https://tiktok.com/@${h}" target="_blank" rel="noopener" class="cx-link">🎵 @${h}</a>`:`🎵 ${c.tt_user}`); }
+  if(c.yt_user){ const y=ytLink(c.yt_user); p.push(y?`<a href="${y}" target="_blank" rel="noopener" class="cx-link">▶️ ${c.yt_user}</a>`:`▶️ ${c.yt_user}`); }
   if(c.tel){ const w=waLink(c.tel); p.push(w?`<a href="${w}" target="_blank" rel="noopener" class="cx-link">💬 ${c.tel}</a>`:`💬 ${c.tel}`); }
   return p.length?p.join(' · '):'Sin datos de contacto';
 }
@@ -1824,6 +1837,52 @@ async function borrarFoto(i){
   const ok=await sbPatch('creators',`id=eq.${userProfile.id}`,{fotos},getToken());
   if(ok){ userProfile.fotos=fotos; renderFotos(); }
   else showToast('Error al quitar la foto','err');
+}
+
+// ── VIDEOS (muestras del creador, subidos a TRAMA — sin exponer redes) ──
+function renderVideos(){
+  const g=document.getElementById('videosGrid'); if(!g)return;
+  const vids=(userProfile&&userProfile.videos)||[];
+  g.innerHTML = vids.length
+    ? vids.map((u,i)=>`<div class="video-item"><video src="${u}" controls preload="metadata" playsinline></video><button class="foto-del" title="Quitar" onclick="borrarVideo(${i})">✕</button></div>`).join('')
+    : `<div style="color:var(--muted);font-size:.76rem;padding:.4rem 0">Sin videos todavía.</div>`;
+}
+async function subirVideos(input){
+  const files=[...input.files]; input.value='';
+  if(!files.length)return;
+  const yaHay=((userProfile.videos)||[]).length;
+  if(yaHay>=MAX_VIDEOS){ showToast(`Máximo ${MAX_VIDEOS} videos`,'err'); return; }
+  const token=getToken();
+  const nuevas=[];
+  for(const f of files){
+    if(nuevas.length + yaHay >= MAX_VIDEOS){ showToast(`Máximo ${MAX_VIDEOS} videos — algunos no se subieron`,'err'); break; }
+    if(!f.type.startsWith('video/')){ showToast('Solo archivos de video','err'); continue; }
+    if(f.size > MAX_VIDEO_MB*1024*1024){ showToast(`"${f.name}" supera los ${MAX_VIDEO_MB} MB`,'err'); continue; }
+    showToast('Subiendo video… puede tardar','info');
+    const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'');
+    const path=`${userProfile.id}/video_${Date.now()}_${safe}`;
+    try{
+      const r=await fetch(`${SB_URL}/storage/v1/object/creator-fotos/${path}`,{
+        method:'POST',
+        headers:{'apikey':SB_ANON,'Authorization':'Bearer '+token},
+        body:f
+      });
+      if(r.ok) nuevas.push(`${SB_URL}/storage/v1/object/public/creator-fotos/${path}`);
+      else showToast('No se pudo subir un video','err');
+    }catch(_){ showToast('No se pudo subir un video','err'); }
+  }
+  if(!nuevas.length) return;
+  const videos=[...((userProfile.videos)||[]), ...nuevas];
+  const ok=await sbPatch('creators',`id=eq.${userProfile.id}`,{videos},getToken());
+  if(ok){ userProfile.videos=videos; renderVideos(); showToast('✓ Videos subidos','ok'); }
+  else showToast('Error al guardar los videos','err');
+}
+async function borrarVideo(i){
+  const videos=[...((userProfile.videos)||[])];
+  videos.splice(i,1);
+  const ok=await sbPatch('creators',`id=eq.${userProfile.id}`,{videos},getToken());
+  if(ok){ userProfile.videos=videos; renderVideos(); }
+  else showToast('Error al quitar el video','err');
 }
 
 // ── TOAST ──

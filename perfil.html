@@ -1338,11 +1338,11 @@ async function guardarResultado(){
   if(!creator_id){ showToast('Elegí el creador','err'); return; }
   const btn=document.getElementById('res-save'); btn.disabled=true; btn.textContent='Guardando...';
   try{
-    const r=await fetch('/api/resultado-crear',{
+    const r=await fetch('/api/campania-borrar',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
       body:JSON.stringify({
-        campania_id:cierreCampId, creator_id,
+        op:'resultado', campania_id:cierreCampId, creator_id,
         alcance:document.getElementById('res-alcance').value,
         interacciones:document.getElementById('res-inter').value,
         clics:document.getElementById('res-clics').value,

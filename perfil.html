@@ -774,6 +774,7 @@ function renderCreatorTab(i,el){
       {ok:!!(p.ig_user||p.tt_user||p.yt_user), txt:'Redes sociales', cta:2},
       {ok:!!(p.t_story||p.t_reel||p.t_post), txt:'Tarifas', cta:4},
       {ok:!!(p.links&&p.links[0]), txt:'Portfolio', cta:4},
+      {ok:!!(p.videos&&p.videos.length), txt:'Videos de muestra', cta:4},
       {ok:!!(p.disponibilidad&&p.disponibilidad.length), txt:'Disponibilidad', cta:4},
     ];
     const done=items.filter(x=>x.ok).length;
@@ -824,6 +825,11 @@ function renderCreatorTab(i,el){
       <div style="margin-bottom:2rem">${(p.links&&p.links[0])
         ? `<a href="${p.links[0]}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:.6rem;background:#0f1a00;border:1px solid #2a4000;border-radius:3px;padding:1rem 1.25rem;color:var(--green);font-weight:700;font-size:.82rem;text-decoration:none">🔗 Ver mi portfolio<span style="margin-left:auto;color:var(--muted)">↗</span></a>`
         : `<div style="background:#1a1200;border:1px solid #2a2000;border-radius:3px;padding:1rem 1.25rem;font-size:.8rem;color:var(--amber);line-height:1.5">📎 Todavía no cargaste tu portfolio. Las marcas lo ven antes de contactarte — <strong>cargalo en la pestaña Editar</strong> para destacarte.</div>`
+      }</div>
+      <div class="sec-title">Mis videos</div>
+      <div style="margin-bottom:2rem">${(p.videos&&p.videos.length)
+        ? `<div class="videos-grid">${p.videos.map(u=>`<div class="video-item"><video src="${u}" controls preload="metadata" playsinline></video></div>`).join('')}</div>`
+        : `<div style="background:#1a1200;border:1px solid #2a2000;border-radius:3px;padding:1rem 1.25rem;font-size:.8rem;color:var(--amber);line-height:1.5">🎬 Todavía no subiste videos. Las marcas ven tu contenido real (sin tus redes) antes de contactarte — <strong>subílos en la pestaña Editar</strong>.</div>`
       }</div>
       <div class="sec-title">Tarifas</div>
       <div class="info-grid">

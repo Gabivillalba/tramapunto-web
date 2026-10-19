@@ -303,6 +303,12 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
         </div>
         <button type="button" class="link-add" onclick="addLink()">+ Agregar link</button>
       </div>
+      <div class="fg">
+        <label>Videos de muestra</label>
+        <div id="regVideosList" style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:.5rem"></div>
+        <label class="link-add" style="display:block;cursor:pointer">🎬 Agregar videos<input type="file" accept="video/*" multiple style="display:none" onchange="addRegVideos(this)"></label>
+        <div class="hint">Opcional. Hasta 4 videos, máx. 50 MB c/u. Se suben a TRAMA y se reproducen en tu perfil <strong>sin mostrar tus redes</strong>: la marca ve tu contenido real, tu contacto queda protegido hasta que lo compran.</div>
+      </div>
       <div class="fg"><label>Colaboraciones anteriores</label><textarea id="f-colabs" placeholder="Marcas con las que ya trabajaste. Ej: Nike, Natura, Mercado Libre..."></textarea><div class="hint">Opcional, pero suma mucho para las marcas.</div></div>
     </div>
 
@@ -340,7 +346,39 @@ const SB_URL  = 'https://mcpmabvxmdepastmpzbi.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
 
 const NICHES = ['Lifestyle','Fitness','Gastronomía','Tech','Moda','Fotografía','Viajes','Gaming','Música','Humor','Educación','Belleza'];
-let regStep=0, selNiches=[], selDisp=[], avatarFile=null;
+let regStep=0, selNiches=[], selDisp=[], avatarFile=null, videoFiles=[];
+const MAX_VIDEOS=4, MAX_VIDEO_MB=50;
+function renderRegVideos(){
+  const box=document.getElementById('regVideosList'); if(!box)return;
+  box.innerHTML=videoFiles.map((f,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;background:#0d0d0d;border:1px solid #222;border-radius:2px;padding:.45rem .6rem;font-size:.74rem"><span style="color:var(--muted2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">🎬 ${f.name}</span><button type="button" onclick="rmRegVideo(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem">✕</button></div>`).join('');
+}
+function addRegVideos(input){
+  const files=[...input.files]; input.value='';
+  for(const f of files){
+    if(videoFiles.length>=MAX_VIDEOS){ showToast(`Máximo ${MAX_VIDEOS} videos`,'err'); break; }
+    if(!f.type.startsWith('video/')){ showToast('Solo archivos de video','err'); continue; }
+    if(f.size>MAX_VIDEO_MB*1024*1024){ showToast(`"${f.name}" supera los ${MAX_VIDEO_MB} MB`,'err'); continue; }
+    videoFiles.push(f);
+  }
+  renderRegVideos();
+}
+function rmRegVideo(i){ videoFiles.splice(i,1); renderRegVideos(); }
+async function uploadRegVideos(email, token){
+  const urls=[];
+  for(const f of videoFiles.slice(0,MAX_VIDEOS)){
+    const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'');
+    const path=`reg/${email.replace(/[@.]/g,'_')}_${Date.now()}_${safe}`;
+    try{
+      const r=await fetch(`${SB_URL}/storage/v1/object/creator-fotos/${path}`,{
+        method:'POST',
+        headers:{'apikey':SB_ANON,'Authorization':'Bearer '+(token||SB_ANON),'Content-Type':f.type,'x-upsert':'true'},
+        body:f
+      });
+      if(r.ok) urls.push(`${SB_URL}/storage/v1/object/public/creator-fotos/${path}`);
+    }catch(_){}
+  }
+  return urls;
+}
 const REG_STEPS=6;
 
 function safeInt(id){
@@ -486,6 +524,7 @@ function buildResumen(){
     ['Disponibilidad',selDisp.join(', ')||'—'],
     ['Tarifa story',document.getElementById('t-story').value?`$${document.getElementById('t-story').value} ${document.getElementById('f-moneda').value}`:'—'],
     ['Foto',avatarFile?'✓ '+avatarFile.name:'Sin foto'],
+    ['Videos',videoFiles.length?('✓ '+videoFiles.length+' video'+(videoFiles.length>1?'s':'')):'Sin videos'],
   ];
   document.getElementById('resumen').innerHTML=rows.map(([k,v])=>`<div class="res-row"><span class="res-key">${k}</span><span class="res-val">${v}</span></div>`).join('');
 }
@@ -528,6 +567,10 @@ async function submitForm(){
     let avatar_url=null;
     if(avatarFile){btn.textContent='Subiendo foto...';avatar_url=await uploadAvatar(email, token)}
 
+    // ── 2b) Videos de muestra (opcional) ──
+    let videos=[];
+    if(videoFiles.length){ btn.textContent='Subiendo videos...'; videos=await uploadRegVideos(email, token); }
+
     // ── 3) Guardar el perfil (vinculado por email a la cuenta) ──
     btn.textContent='Guardando perfil...';
     await sbPost('creators',{
@@ -565,6 +608,7 @@ async function submitForm(){
       links,
       colabs:document.getElementById('f-colabs').value.trim()||null,
       avatar_url,
+      videos,
       status:'pendiente',
       fuente:(localStorage.getItem('trama_fuente')||'directo'),
     }, token);

@@ -521,6 +521,26 @@ textarea.em-inp{resize:vertical;line-height:1.5}
         <div style="font-size:.9rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.9rem">Envíos programados</div>
         <div id="programadosList" style="font-size:.82rem;color:var(--muted)">Cargando…</div>
       </div>
+
+      <div class="cfg-card" style="padding:1.25rem;display:block;margin-top:1.5rem;border-color:#2a4000">
+        <div style="font-size:.9rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.4rem">📣 Notificación interna (sin límite)</div>
+        <div style="font-size:.78rem;color:var(--muted2);margin-bottom:.9rem;line-height:1.55">Aparece en la campanita dentro del perfil. No usa email, así que <strong>no tiene tope diario</strong>. Ideal para avisos de captación a muchos creadores de una.</div>
+        <label class="em-lbl">Destinatarios</label>
+        <select id="nf-seg" class="em-inp">
+          <option value="creators_aprobados">Creadores aprobados</option>
+          <option value="creators_todos">Creadores (todos, menos rechazados)</option>
+          <option value="marcas">Marcas</option>
+          <option value="todos">Todos (creadores + marcas)</option>
+        </select>
+        <label class="em-lbl">Título</label>
+        <input id="nf-titulo" class="em-inp" type="text" placeholder="Ej: Nueva campaña disponible 🔥" maxlength="120">
+        <label class="em-lbl">Mensaje (opcional)</label>
+        <textarea id="nf-cuerpo" class="em-inp" rows="4" placeholder="Texto que ven en la notificación."></textarea>
+        <label class="em-lbl">Link al tocar (opcional)</label>
+        <input id="nf-link" class="em-inp" type="text" placeholder="/perfil.html" value="/perfil.html">
+        <button class="btn-send" id="nf-btn" onclick="enviarNotifMasiva()" style="margin-top:.4rem">Notificar ahora 📣</button>
+        <div id="nf-result" style="margin-top:.9rem;font-size:.82rem"></div>
+      </div>
     </div>
   </div>
 
@@ -939,6 +959,22 @@ async function exportPostulacionesCSV(){
 }
 
 // ══════════ ENVÍO MASIVO ══════════
+async function enviarNotifMasiva(){
+  const segmento=document.getElementById('nf-seg').value;
+  const titulo=document.getElementById('nf-titulo').value.trim();
+  const cuerpo=document.getElementById('nf-cuerpo').value.trim();
+  const link=document.getElementById('nf-link').value.trim()||'/perfil.html';
+  if(!titulo){ showToast('Poné un título','err'); return; }
+  const seg={creators_aprobados:'creadores aprobados',creators_todos:'todos los creadores',marcas:'las marcas',todos:'creadores y marcas'}[segmento]||segmento;
+  if(!confirm(`¿Notificar dentro del perfil a ${seg}? Aparece en su campanita, sin usar email.`)) return;
+  const btn=document.getElementById('nf-btn'); btn.disabled=true; btn.textContent='Enviando...';
+  try{
+    const r=await adminCall('notif_masiva',{segmento,titulo,cuerpo,link});
+    document.getElementById('nf-result').innerHTML=`<span style="color:var(--green)">✓ Notificación enviada a ${r.enviados} ${r.enviados===1?'persona':'personas'}.</span>`;
+    document.getElementById('nf-titulo').value=''; document.getElementById('nf-cuerpo').value='';
+  }catch(e){ document.getElementById('nf-result').innerHTML=`<span style="color:#f87171">Error: ${e.message}</span>`; }
+  finally{ btn.disabled=false; btn.textContent='Notificar ahora 📣'; }
+}
 function abrirEnvioMasivo(){ document.getElementById('envioBg').classList.add('open'); }
 function cerrarEnvioMasivo(){ document.getElementById('envioBg').classList.remove('open'); }
 
@@ -1461,11 +1497,29 @@ function renderCards(){
           <button class="btn-ver" onclick="openModal('${c.id}')">Ver detalle</button>
           ${c.status!=='aprobado'?`<button class="btn-apro" onclick="setStatus('${c.id}','aprobado')">Aprobar</button>`:''}
           ${c.status!=='rechazado'?`<button class="btn-rech" onclick="setStatus('${c.id}','rechazado')">Rechazar</button>`:''}
+          ${leak.length?`<button class="btn-rech" style="border-color:#4a1a00;color:#ff6b4a" onclick="avisarContacto('${c.id}')">⚠️ Avisar contacto</button>`:''}
           <button class="btn-del" onclick="deleteCreator('${c.id}')">Eliminar</button>
         </div>
       </div>
     </div>`;
   }).join('');
+}
+
+// ── AVISAR CONTACTO EN CAMPOS PÚBLICOS ──
+async function avisarContacto(id){
+  const c=allCreators.find(x=>x.id===id); if(!c) return;
+  const señales=detectarContacto(c);
+  if(!señales.length){ showToast('Ese perfil ya no tiene señales de contacto','info'); return; }
+  const campos=[...new Set(señales.map(s=>s.split(':')[0].trim()))].join(', ');
+  if(!confirm(`¿Avisar a ${c.nombre||'este creador'} que quite sus datos de contacto de los campos públicos (${campos})?\n\nLe llega una notificación en su perfil.`)) return;
+  const titulo='⚠️ Quitá tus datos de contacto para ser aprobado';
+  const cuerpo=`Detectamos datos de contacto (teléfono, @usuario o links de redes) en campos públicos de tu perfil: ${campos}. `
+    +`En TRAMA. tu contacto se muestra recién cuando una marca lo compra — así protegemos tu trabajo y aseguramos que te paguen.`
+    +`Entrá a Editar, quitá esos datos de esos campos y guardá. Apenas lo hagas, revisamos y aprobamos tu perfil para que entres a la bolsa.`;
+  try{
+    await adminCall('notif_creator',{id, titulo, cuerpo, link:'/perfil.html'});
+    showToast('✓ Aviso enviado al creador','ok');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
 }
 
 // ── STATUS ──

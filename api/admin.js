@@ -236,7 +236,16 @@ export default async function handler(req, res) {
               cuerpo: 'Ya estás visible en la bolsa de TRAMA. Completá tu perfil y entrá a la Liga para ganar visibilidad.', link: '/perfil.html',
             }).catch(() => {});
           }
-          if (status === 'rechazado') await enviarEmail('creator_rechazado', c.email, { nombre: c.nombre, nota: nota || '' });
+          if (status === 'rechazado') {
+            await sb('notificaciones', 'POST', {
+              para_email: c.email, tipo: 'sistema', titulo: 'Novedades sobre tu perfil',
+              cuerpo: (nota && String(nota).trim())
+                ? ('Tu perfil necesita unos ajustes antes de entrar a la bolsa: ' + String(nota).trim())
+                : 'Tu perfil todavía no fue aprobado. Revisá que esté completo o escribinos a info.tramapunto@gmail.com.',
+              link: '/perfil.html',
+            }).catch(() => {});
+            await enviarEmail('creator_rechazado', c.email, { nombre: c.nombre, nota: nota || '' });
+          }
         }
         return res.status(200).json({ ok: true });
       }
@@ -760,6 +769,55 @@ export default async function handler(req, res) {
 
         const enviados = await enviarBatch(dests, asunto, htmlFn);
         return res.status(200).json({ ok: true, enviados, total: dests.length });
+      }
+
+      // — Notificación in-app masiva a un segmento (sin límite de emails) —
+      case 'notif_masiva': {
+        const { titulo, cuerpo, segmento, link } = payload;
+        if (!titulo) return res.status(400).json({ error: 'Falta el título' });
+        let emails = [];
+        const quiereCreators = segmento === 'creators_aprobados' || segmento === 'creators_todos' || segmento === 'todos';
+        const quiereMarcas = segmento === 'marcas' || segmento === 'todos';
+        if (quiereCreators) {
+          const c = await sb('creators?select=email,status');
+          let list = (c || []).filter(x => x.status !== 'rechazado');
+          if (segmento === 'creators_aprobados') list = list.filter(x => x.status === 'aprobado');
+          emails = emails.concat(list.map(x => x.email));
+        }
+        if (quiereMarcas) {
+          const m = await sb('marcas?select=email');
+          emails = emails.concat((m || []).map(x => x.email));
+        }
+        const seen = new Set();
+        emails = emails.filter(e => {
+          if (!e || !/@/.test(e)) return false;
+          const k = String(e).trim().toLowerCase();
+          if (seen.has(k)) return false;
+          seen.add(k); return true;
+        });
+        if (!emails.length) return res.status(200).json({ ok: true, enviados: 0, total: 0 });
+        const rows = emails.map(e => ({ para_email: e, tipo: 'sistema', titulo, cuerpo: cuerpo || null, link: link || '/perfil.html' }));
+        let enviados = 0;
+        for (let i = 0; i < rows.length; i += 500) {
+          const chunk = rows.slice(i, i + 500);
+          await sb('notificaciones', 'POST', chunk);
+          enviados += chunk.length;
+        }
+        return res.status(200).json({ ok: true, enviados, total: emails.length });
+      }
+
+      // — Notificación in-app a UN creador puntual (p. ej. aviso de contacto en campos públicos) —
+      case 'notif_creator': {
+        const { id, titulo, cuerpo, link } = payload;
+        if (!id || !titulo) return res.status(400).json({ error: 'Faltan id/titulo' });
+        const rows = await sb(`creators?id=eq.${id}&select=email`);
+        const c = rows && rows[0];
+        if (!c || !c.email) return res.status(400).json({ error: 'Creador sin email' });
+        await sb('notificaciones', 'POST', {
+          para_email: c.email, tipo: 'sistema', titulo,
+          cuerpo: cuerpo || null, link: link || '/perfil.html',
+        });
+        return res.status(200).json({ ok: true });
       }
 
       case 'list_notif': {

@@ -352,10 +352,7 @@ textarea.em-inp{resize:vertical;line-height:1.5}
       </div>
       <div class="dash-cols">
         <div class="dash-box"><h3>Fuentes de registro 📍</h3><div id="m-fuentes"><div class="dash-empty">Cargando…</div></div></div>
-        <div class="dash-box" style="display:flex;flex-direction:column;justify-content:center">
-          <h3>¿De dónde vienen?</h3>
-          <div style="font-size:.76rem;color:var(--muted);line-height:1.6">Se registra de dónde llegó cada usuario (campaña UTM o sitio de origen) al crear su cuenta. Usá links con <code style="color:var(--green)">?utm_source=instagram&utm_campaign=bio</code> para medir cada canal.</div>
-        </div>
+        <div class="dash-box"><h3>Campañas UTM 🎯</h3><div id="m-campanas"><div class="dash-empty">Cargando…</div></div></div>
       </div>
       <div class="dash-champ" id="m-campeon">—</div>
     </div>
@@ -1098,9 +1095,22 @@ async function loadMetrics(){
 
     const fu=document.getElementById('m-fuentes');
     if(fu){
-      fu.innerHTML=(m.fuentes&&m.fuentes.length)
-        ? m.fuentes.map(f=>`<div class="dash-row"><span class="dash-name">${f.fuente}</span><span class="dash-val">${f.n} ${f.n===1?'registro':'registros'}</span></div>`).join('')
+      // Fuente = "origen" o "origen / campaña"; en este panel mostramos el ORIGEN agrupado.
+      const porOrigen={};
+      (m.fuentes||[]).forEach(f=>{ const src=String(f.fuente).split(' / ')[0].trim()||'directo'; porOrigen[src]=(porOrigen[src]||0)+(f.n||0); });
+      const origenes=Object.entries(porOrigen).sort((a,b)=>b[1]-a[1]);
+      fu.innerHTML=origenes.length
+        ? origenes.map(([src,n])=>`<div class="dash-row"><span class="dash-name">${src}</span><span class="dash-val">${n} ${n===1?'registro':'registros'}</span></div>`).join('')
         : '<div class="dash-empty">Activá el seguimiento de fuentes (falta correr el SQL).</div>';
+    }
+
+    const camp=document.getElementById('m-campanas');
+    if(camp){
+      const conCamp=(m.fuentes||[]).filter(f=>String(f.fuente).includes(' / ')).sort((a,b)=>(b.n||0)-(a.n||0));
+      camp.innerHTML=conCamp.length
+        ? conCamp.map(f=>{ const p=String(f.fuente).split(' / '); const src=p.shift().trim(); const cmp=p.join(' / ').trim();
+            return `<div class="dash-row"><span class="dash-name">${src} · <strong style="color:var(--green)">${cmp}</strong></span><span class="dash-val">${f.n} ${f.n===1?'registro':'registros'}</span></div>`; }).join('')
+        : '<div class="dash-empty" style="text-align:left;line-height:1.65">Todavía ningún registro llegó con una campaña UTM.<br>Compartí links con <code style="color:var(--green)">?utm_source=instagram&utm_campaign=bio</code> y acá vas a ver cuántos registros trajo cada campaña.</div>';
     }
   }catch(e){ showToast('Error al cargar métricas: '+e.message,'err'); }
 }

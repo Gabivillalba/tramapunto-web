@@ -312,6 +312,15 @@ body.t-creator .spin{border-top-color:var(--purple)}
 .rsna-star{color:#333;transition:color .1s;line-height:1}
 .rsna-star.on{color:#f5b301}
 .rsna-box textarea{width:100%;background:#080808;border:1px solid #222;border-radius:2px;color:var(--white);padding:.7rem;font-size:.82rem;font-family:inherit;resize:vertical;min-height:80px;box-sizing:border-box}
+.res-fg{margin-bottom:.75rem}
+.res-fg label{display:block;font-size:.64rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
+.res-fg input,.res-fg select{width:100%;background:#080808;border:1px solid #222;border-radius:2px;color:var(--white);padding:.6rem;font-size:.82rem;font-family:inherit;box-sizing:border-box}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem}
+.res-full{grid-column:1/-1}
+.res-box{background:#0f1500;border:1px solid #2a4000;border-radius:4px;padding:.8rem 1rem;margin-top:.6rem}
+.res-metrics{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:.4rem}
+.res-metric{font-size:.72rem;color:var(--muted2)}
+.res-metric strong{display:block;font-size:1rem;color:var(--green);font-weight:900}
 .rsna-acts{display:flex;gap:.6rem;margin-top:1.1rem}
 .rsna-acts button{flex:1;padding:.7rem;border-radius:2px;font-weight:800;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
 .rsna-save{background:var(--green);color:#080808;border:none}
@@ -410,6 +419,26 @@ body.t-creator .spin{border-top-color:var(--purple)}
     <div class="rsna-acts">
       <button class="rsna-cancel" onclick="closeResena()">Cancelar</button>
       <button class="rsna-save" id="rsnaSave" onclick="submitResena()">Publicar</button>
+    </div>
+  </div>
+</div>
+
+<div class="rsna-ov" id="resOv">
+  <div class="rsna-box" style="max-width:460px">
+    <h3>Cerrar campaña con resultados</h3>
+    <p class="sub">Cargá las métricas de la colaboración. Las ven vos y el creador en su panel.</p>
+    <div class="res-fg"><label>Creador</label><select id="res-creator"></select></div>
+    <div class="res-grid">
+      <div class="res-fg"><label>Alcance / vistas</label><input type="number" id="res-alcance" min="0" placeholder="0"></div>
+      <div class="res-fg"><label>Interacciones</label><input type="number" id="res-inter" min="0" placeholder="0"></div>
+      <div class="res-fg"><label>Clics / visitas</label><input type="number" id="res-clics" min="0" placeholder="0"></div>
+      <div class="res-fg"><label>Piezas entregadas</label><input type="number" id="res-piezas" min="0" placeholder="0"></div>
+      <div class="res-fg res-full"><label>Ventas atribuidas (ARS)</label><input type="number" id="res-ventas" min="0" placeholder="0"></div>
+    </div>
+    <textarea id="res-nota" placeholder="Nota o resumen de la colaboración (opcional)..." maxlength="1000"></textarea>
+    <div class="rsna-acts">
+      <button class="rsna-cancel" onclick="cerrarCierre()">Cancelar</button>
+      <button class="rsna-save" id="res-save" onclick="guardarResultado()">Guardar resultados</button>
     </div>
   </div>
 </div>
@@ -788,7 +817,7 @@ function buildTabs(){
   // {l: etiqueta, i: índice de contenido} — el orden visual se desacopla del
   // índice interno (renderCreatorTab/renderMarcaTab siguen usando el mismo i).
   const tabs = userType==='creator'
-    ?[{l:'👤 Mi perfil',i:0},{l:'💼 Me compraron',i:5},{l:'📋 Campañas',i:7},{l:'🛒 Mis compras',i:6},{l:'🔥 Liga',i:1},{l:'🔗 Mis redes',i:2},{l:'✏️ Editar',i:4}]
+    ?[{l:'👤 Mi perfil',i:0},{l:'💼 Me compraron',i:5},{l:'📋 Campañas',i:7},{l:'📊 Resultados',i:8},{l:'🛒 Mis compras',i:6},{l:'🔥 Liga',i:1},{l:'🔗 Mis redes',i:2},{l:'✏️ Editar',i:4}]
     :[{l:'👤 Mi cuenta',i:0},{l:'🔗 Mis conexiones',i:2},{l:'📋 Mis campañas',i:4},{l:'☆ Guardados',i:1},{l:'✏️ Editar',i:3}];
   document.getElementById('dashTabs').innerHTML = tabs.map((t,pos)=>
     `<button class="tab${pos===0?' active':''}" data-i="${t.i}" onclick="switchTab(${t.i},this)">${t.l}</button>`
@@ -1032,6 +1061,47 @@ function renderCreatorTab(i,el){
     el.innerHTML=`<div class="tab-content active" id="campCreWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
     loadCampanasCreador('campCreWrap');
   }
+  else if(i===8){
+    el.innerHTML=`<div class="tab-content active" id="resCreWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadResultadosCreador('resCreWrap');
+  }
+}
+
+// ── RESULTADOS (vista del creador: métricas que cargaron las marcas) ──
+async function loadResultadosCreador(wrapId){
+  const wrap=document.getElementById(wrapId); if(!wrap)return;
+  const token=getToken();
+  const resu=await sbGet('resultados_campania',`creator_email=eq.${encodeURIComponent(currentUser.email)}&select=*&order=created_at.desc`,token);
+  if(!resu||!resu.length){
+    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Resultados de mis campañas</div><div class="empty-state"><div>📊</div>Todavía no hay resultados cargados.<br><span style="font-size:.78rem;color:var(--muted)">Cuando una marca cierre una campaña en la que trabajaste, vas a ver acá tus métricas.</span></div></div>`;
+    return;
+  }
+  // Totales
+  const sum=k=>resu.reduce((a,r)=>a+(Number(r[k])||0),0);
+  const tot={alcance:sum('alcance'),interacciones:sum('interacciones'),clics:sum('clics'),piezas:sum('piezas'),ventas:sum('ventas')};
+  const statCard=(n,l,money)=>`<div class="mc-stat"><div class="mc-n" style="color:var(--green)">${money?'$':''}${Number(n).toLocaleString('es-AR')}</div><div class="mc-l">${l}</div></div>`;
+  const bloques=resu.map(r=>{
+    const metric=(label,val,money)=>{ const v=fmtNumR(val); return v==null?'':`<div class="res-metric"><strong>${money?'$':''}${v}</strong>${label}</div>`; };
+    const ms=[metric('Alcance',r.alcance),metric('Interacciones',r.interacciones),metric('Clics',r.clics),metric('Piezas',r.piezas),metric('Ventas',r.ventas,true)].filter(Boolean).join('');
+    const f=r.created_at?new Date(r.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}):'';
+    return `<div class="res-box" style="background:var(--g1);border-color:#1a1a1a">
+      <div style="font-size:.85rem;font-weight:900">${r.campania_titulo||'Campaña'}</div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:.15rem">${r.marca_nombre||'Marca'} · ${f}</div>
+      ${ms?`<div class="res-metrics">${ms}</div>`:'<div style="font-size:.72rem;color:var(--muted);margin-top:.3rem">Sin métricas numéricas.</div>'}
+      ${r.nota?`<div style="font-size:.74rem;color:var(--muted2);margin-top:.5rem;line-height:1.5">“${r.nota}”</div>`:''}
+    </div>`;
+  }).join('');
+  wrap.innerHTML=`<div class="tab-content active">
+    <div class="sec-title" style="margin-top:0">Resultados de mis campañas</div>
+    <p style="font-size:.78rem;color:var(--muted2);line-height:1.5;margin-bottom:1.25rem">Métricas que las marcas cargaron al cerrar campañas en las que trabajaste. Son tu prueba social para conseguir más colaboraciones.</p>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.5rem">
+      ${statCard(resu.length,'Colaboraciones')}
+      ${tot.alcance?statCard(tot.alcance,'Alcance total'):''}
+      ${tot.interacciones?statCard(tot.interacciones,'Interacciones'):''}
+      ${tot.ventas?statCard(tot.ventas,'Ventas ($)',true):''}
+    </div>
+    ${bloques}
+  </div>`;
 }
 
 // ── CAMPAÑAS (vista del creador: campañas abiertas + mis postulaciones) ──
@@ -1131,6 +1201,7 @@ function presuTxt(c){
   if(c.presupuesto_max) return `Hasta ${f(c.presupuesto_max)}`;
   return 'A convenir';
 }
+let campPostulantes={};
 async function loadCampanasMarca(wrapId){
   const wrap=document.getElementById(wrapId); if(!wrap)return;
   const token=getToken();
@@ -1150,6 +1221,15 @@ async function loadCampanasMarca(wrapId){
   }
   const postsByCamp={};
   (posts||[]).forEach(p=>{ (postsByCamp[p.campania_id]=postsByCamp[p.campania_id]||[]).push(p); });
+  // Resultados ya cargados de estas campañas
+  const resu=await sbGet('resultados_campania',`campania_id=in.${inList}&select=*&order=created_at.desc`,token);
+  const resByCamp={}; (resu||[]).forEach(r=>{ (resByCamp[r.campania_id]=resByCamp[r.campania_id]||[]).push(r); });
+  // Postulantes por campaña para el selector de cierre
+  campPostulantes={};
+  Object.keys(postsByCamp).forEach(cid=>{
+    const seen=new Set();
+    campPostulantes[cid]=(postsByCamp[cid]||[]).map(p=>{ const cr=byCre[String(p.creador_id)]||{}; return {id:p.creador_id, nombre:`${cr.nombre||''} ${cr.apellido||''}`.trim()||'Creador'}; }).filter(x=>x.id && !seen.has(x.id) && seen.add(x.id));
+  });
   const fmtSegM=n=>!n?'—':n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':n;
   const estColor={pendiente:'var(--muted2)',preseleccionada:'#f5b301',aceptada:'var(--green)',rechazada:'#f87171',retirada:'var(--muted)'};
   // Resumen
@@ -1192,6 +1272,9 @@ async function loadCampanasMarca(wrapId){
       : c.estado==='rechazada'
       ? `<div style="font-size:.72rem;color:#f87171;margin-top:.5rem">Esta campaña fue rechazada. Escribinos si querés revisarla.</div>`
       : '';
+    const resList=resByCamp[c.id]||[];
+    const resHTML = resList.map(r=>resultadoBox(r)).join('');
+    const puedeCerrar = (campPostulantes[c.id]||[]).length>0;
     return `<div class="mc-card" style="border:1px solid #1a1a1a;border-radius:6px;padding:1.1rem 1.25rem;margin-bottom:1.25rem;background:var(--g1)">
       <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem;flex-wrap:wrap">
         <span style="font-size:1.02rem;font-weight:900">${c.titulo||'Campaña'}</span>
@@ -1204,6 +1287,11 @@ async function loadCampanasMarca(wrapId){
       </div>
       ${c.descripcion?`<div style="font-size:.78rem;color:#bbb;line-height:1.55;margin-bottom:.4rem">${c.descripcion.slice(0,260)}${c.descripcion.length>260?'…':''}</div>`:''}
       ${estadoNota}
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;margin:1rem 0 .6rem">
+        <span style="font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Resultados de la campaña</span>
+        <button onclick="abrirCierre('${c.id}')" ${puedeCerrar?'':'disabled'} title="${puedeCerrar?'':'Necesitás al menos un postulante para cerrar con resultados'}" style="background:${puedeCerrar?'var(--green)':'#161616'};color:${puedeCerrar?'#080808':'var(--muted)'};border:none;font-size:.68rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;padding:.4rem .8rem;border-radius:2px;cursor:${puedeCerrar?'pointer':'not-allowed'}">✅ Cerrar con resultados</button>
+      </div>
+      ${resHTML || `<div style="font-size:.74rem;color:var(--muted);background:#0d0d0d;border:1px solid #1a1a1a;border-radius:4px;padding:.7rem .9rem">Todavía no cargaste resultados. Al terminar con un creador, cerrá la campaña con sus métricas: las van a ver vos y el creador.</div>`}
       <div style="font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:1rem 0 .6rem">Postulantes</div>
       <div class="cx-list">${ps.length?items:'<div class="empty-state" style="padding:1.1rem"><div>📭</div>Sin postulantes todavía.</div>'}</div>
     </div>`;
@@ -1222,6 +1310,56 @@ async function loadCampanasMarca(wrapId){
     ${bloques}
   </div>`;
 }
+// ── CIERRE DE CAMPAÑA CON RESULTADOS ──
+function fmtNumR(n){ return (n==null||n==='')?null:Number(n).toLocaleString('es-AR'); }
+function resultadoBox(r){
+  const metric=(label,val,money)=>{ const v=fmtNumR(val); return v==null?'':`<div class="res-metric"><strong>${money?'$':''}${v}</strong>${label}</div>`; };
+  const ms=[metric('Alcance',r.alcance),metric('Interacciones',r.interacciones),metric('Clics',r.clics),metric('Piezas',r.piezas),metric('Ventas',r.ventas,true)].filter(Boolean).join('');
+  const f=r.created_at?new Date(r.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}):'';
+  return `<div class="res-box">
+    <div style="font-size:.78rem;font-weight:800;color:var(--green)">🎬 ${r.creator_nombre||'Creador'} <span style="color:var(--muted);font-weight:400;font-size:.7rem">· ${f}</span></div>
+    ${ms?`<div class="res-metrics">${ms}</div>`:'<div style="font-size:.72rem;color:var(--muted);margin-top:.3rem">Sin métricas numéricas cargadas.</div>'}
+    ${r.nota?`<div style="font-size:.74rem;color:var(--muted2);margin-top:.5rem;line-height:1.5">“${r.nota}”</div>`:''}
+  </div>`;
+}
+let cierreCampId=null;
+function abrirCierre(campId){
+  const opts=campPostulantes[campId]||[];
+  if(!opts.length){ showToast('Necesitás al menos un postulante para cerrar','err'); return; }
+  cierreCampId=campId;
+  document.getElementById('res-creator').innerHTML=opts.map(o=>`<option value="${o.id}">${o.nombre}</option>`).join('');
+  ['res-alcance','res-inter','res-clics','res-piezas','res-ventas','res-nota'].forEach(id=>{const e=document.getElementById(id); if(e)e.value='';});
+  document.getElementById('resOv').classList.add('open');
+}
+function cerrarCierre(){ document.getElementById('resOv').classList.remove('open'); cierreCampId=null; }
+async function guardarResultado(){
+  if(!cierreCampId) return;
+  const creator_id=document.getElementById('res-creator').value;
+  if(!creator_id){ showToast('Elegí el creador','err'); return; }
+  const btn=document.getElementById('res-save'); btn.disabled=true; btn.textContent='Guardando...';
+  try{
+    const r=await fetch('/api/resultado-crear',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
+      body:JSON.stringify({
+        campania_id:cierreCampId, creator_id,
+        alcance:document.getElementById('res-alcance').value,
+        interacciones:document.getElementById('res-inter').value,
+        clics:document.getElementById('res-clics').value,
+        piezas:document.getElementById('res-piezas').value,
+        ventas:document.getElementById('res-ventas').value,
+        nota:document.getElementById('res-nota').value,
+      })
+    });
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j.error||'No se pudo guardar');
+    showToast('✓ Resultados guardados','ok');
+    cerrarCierre();
+    loadCampanasMarca('campMarWrap');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+  finally{ btn.disabled=false; btn.textContent='Guardar resultados'; }
+}
+
 async function borrarMiCampania(campania_id, nPost){
   const aviso = nPost>0
     ? `Esta campaña tiene ${nPost} postulante${nPost===1?'':'s'}. Si la eliminás se borran también sus postulaciones. ¿Continuar?`

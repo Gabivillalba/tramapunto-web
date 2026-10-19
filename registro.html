@@ -215,6 +215,20 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
       </div>
       <div class="fg" id="fg-ciudad"><label>Ciudad</label><input type="text" id="f-ciudad" placeholder="Buenos Aires..."><div class="err-msg">Campo requerido</div></div>
       <div class="fg"><label>Bio corta</label><textarea id="f-bio" placeholder="Contá en 2-3 oraciones quién sos y qué tipo de contenido hacés..." maxlength="300"></textarea><div class="hint">Opcional. Máx. 300 caracteres. La podés completar después desde tu perfil.</div></div>
+
+      <div class="fg" style="background:#120a1a;border:1px solid #2a1a3a;border-radius:4px;padding:.9rem 1rem">
+        <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;margin:0">
+          <input type="checkbox" id="f-pet" onchange="togglePet()" style="width:16px;height:16px;accent-color:var(--purple)">
+          <span style="font-weight:800">🐾 Mi contenido lo protagoniza una mascota</span>
+        </label>
+        <div id="petFields" style="display:none;margin-top:.75rem">
+          <div class="fg-row" style="margin:0">
+            <div class="fg"><label>Nombre de la mascota</label><input type="text" id="f-pet-nombre" placeholder="Ej: Rocco"></div>
+            <div class="fg"><label>Tipo</label><select id="f-pet-tipo"><option value="">Elegí…</option><option>Perro</option><option>Gato</option><option>Ave</option><option>Conejo</option><option>Caballo</option><option>Otro</option></select></div>
+          </div>
+          <div class="hint" style="margin-top:-.3rem">Tu cuenta va a aparecer como <strong>🐾 Pet creator</strong> y las marcas pet-friendly te van a poder filtrar.</div>
+        </div>
+      </div>
     </div>
 
     <!-- PASO 2 -->
@@ -363,6 +377,7 @@ function addRegVideos(input){
   renderRegVideos();
 }
 function rmRegVideo(i){ videoFiles.splice(i,1); renderRegVideos(); }
+function togglePet(){ document.getElementById('petFields').style.display=document.getElementById('f-pet').checked?'block':'none'; }
 async function uploadRegVideos(email, token){
   const urls=[];
   for(const f of videoFiles.slice(0,MAX_VIDEOS)){
@@ -609,6 +624,9 @@ async function submitForm(){
       colabs:document.getElementById('f-colabs').value.trim()||null,
       avatar_url,
       videos,
+      es_pet:document.getElementById('f-pet').checked,
+      pet_nombre:document.getElementById('f-pet').checked?(document.getElementById('f-pet-nombre').value.trim()||null):null,
+      pet_tipo:document.getElementById('f-pet').checked?(document.getElementById('f-pet-tipo').value||null):null,
       status:'pendiente',
       fuente:(localStorage.getItem('trama_fuente')||'directo'),
     }, token);

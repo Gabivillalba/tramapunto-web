@@ -277,6 +277,7 @@ section{padding:5rem 1.5rem;border-top:1px solid #161616}
 .c-rep{font-size:.62rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:.25rem .55rem;border-radius:2px;display:inline-flex;align-items:center;gap:.25rem}
 .c-rep.camp{background:#2a2200;color:#f5d312;border:1px solid #5a4a00;box-shadow:0 0 0 1px #4a3c0055,0 2px 8px -2px #f5d31233}
 .c-rep.top{background:#2a1a00;color:#f5a301;border:1px solid #4a2e00}
+.c-rep.pet{background:#1a0a2a;color:#c084fc;border:1px solid #3a1a5a}
 .badge-new{background:#1a0a2a;color:var(--purple);border:1px solid #3a1a5a}
 .card-name{font-size:.92rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.2rem}
 .card-niche{font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:.875rem}
@@ -687,6 +688,14 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
           <option value="4">4★ o más</option>
         </select>
       </div>
+      <div class="adv-field">
+        <label>🐾 Mascotas</label>
+        <select id="fPet" onchange="renderBolsa()">
+          <option value="todos">Todos</option>
+          <option value="pet">Solo pet creators</option>
+          <option value="no">Sin mascotas</option>
+        </select>
+      </div>
       <button class="adv-clear" onclick="limpiarFiltros()">Limpiar filtros</button>
     </div>
     <div class="saved-row" id="savedRow">
@@ -1021,7 +1030,7 @@ async function loadCreators(){
     // viajaban al cliente, visibles en DevTools sin pagar.
     const COLS = 'id,nombre,pais,ciudad,bio,niches,nicho_esp,plats,audiencia,'
                + 'ig_seg,ig_er,ig_alc,tt_seg,tt_er,tt_vistas,yt_seg,yt_vistas,'
-               + 't_story,t_reel,t_post,canje,moneda,disponibilidad,avatar_url,fotos,videos,indice,racha,rating_prom,rating_count,es_campeon,campeon_label,created_at';
+               + 't_story,t_reel,t_post,canje,moneda,disponibilidad,avatar_url,fotos,videos,es_pet,pet_nombre,pet_tipo,indice,racha,rating_prom,rating_count,es_campeon,campeon_label,created_at';
     const r=await fetch(`${SB_URL}/rest/v1/creators?select=${COLS}&status=eq.aprobado&order=created_at.desc`,{
       headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
     });
@@ -1191,7 +1200,7 @@ async function borrarGuardada(){
 function limpiarFiltros(){
   bolsaNiche='todos'; bolsaPlats=[];
   const si=document.getElementById('searchInp'); if(si) si.value='';
-  ['fCity','fSeg','fEr','fTarifa','fRating'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=el.id==='fCity'?'todas':'0'; });
+  ['fCity','fSeg','fEr','fTarifa','fRating','fPet'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=(el.id==='fCity'?'todas':el.id==='fPet'?'todos':'0'); });
   document.querySelectorAll('#nicheFilters .f-btn').forEach((x,ix)=>x.classList.toggle('on',ix===0));
   document.querySelectorAll('#platFilters .p-btn').forEach(x=>x.classList.remove('on'));
   renderBolsa();
@@ -1213,6 +1222,7 @@ function badgesDe(c){
   const b=[];
   if(c.es_campeon) b.push(`<span class="c-rep camp">👑 Campeón</span>`);
   if((c.rating_count||0)>=3 && Number(c.rating_prom||0)>=4.5) b.push(`<span class="c-rep top">⭐ Top valorado</span>`);
+  if(c.es_pet) b.push(`<span class="c-rep pet">🐾 Pet creator${c.pet_nombre?' · '+c.pet_nombre:''}</span>`);
   return b.length?`<div class="card-reps">${b.join('')}</div>`:'';
 }
 
@@ -1223,6 +1233,7 @@ function renderBolsa(){
   const minEr=+(document.getElementById('fEr')?.value||0);
   const maxTar=+(document.getElementById('fTarifa')?.value||0);
   const minRat=+(document.getElementById('fRating')?.value||0);
+  const pet=document.getElementById('fPet')?.value||'todos';
   const segN=c=>Math.max(c.ig_seg||0,c.tt_seg||0,c.yt_seg||0);
   const erN=c=>Math.max(c.ig_er||0,c.tt_er||0);
   let list=allCreators.filter(c=>{
@@ -1234,7 +1245,8 @@ function renderBolsa(){
     const mEr=!minEr||erN(c)>=minEr;
     const mTar=!maxTar||((c.moneda||'ARS')!=='USD'&&c.t_reel&&c.t_reel<=maxTar);
     const mRat=!minRat||(minRat===1?((c.rating_count||0)>0):(Number(c.rating_prom||0)>=minRat));
-    return mN&&mP&&mQ&&mCity&&mSeg&&mEr&&mTar&&mRat;
+    const mPet=pet==='todos'||(pet==='pet'?!!c.es_pet:!c.es_pet);
+    return mN&&mP&&mQ&&mCity&&mSeg&&mEr&&mTar&&mRat&&mPet;
   });
   if(bolsaSort==='liga')list.sort((a,b)=>((b.indice||0)-(a.indice||0))||(segN(b)-segN(a)));
   else if(bolsaSort==='seg')list.sort((a,b)=>segN(b)-segN(a));

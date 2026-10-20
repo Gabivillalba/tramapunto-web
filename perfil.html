@@ -1407,6 +1407,7 @@ async function desbloquearPostulante(creator_id, campania_id, postulacion_id){
     const data=await res.json();
     if(!res.ok) throw new Error(data.error||'Error');
     if(data.gratis){ showToast('✓ Contacto desbloqueado (bonificado). Lo ves en “Mis conexiones”.','ok'); return; }
+    if(data.yaComprado){ showToast(data.mensaje||'Ya tenés acceso a este contacto.','ok'); return; }
     const url=data.init_point||data.sandbox_init_point;
     if(url){ window.location.href=url; } else { showToast('No se pudo iniciar el pago','err'); }
   }catch(e){ showToast('Error: '+e.message,'err'); }

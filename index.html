@@ -1446,6 +1446,12 @@ async function iniciarPago(){
     });
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||'Error al crear preferencia');
+    // Ya tenía acceso vigente: no se cobra de nuevo
+    if(data.yaComprado){
+      showToast(data.mensaje||'Ya tenés acceso a este contacto.','ok');
+      btn.disabled=false;btn.textContent=`Pagar ${PRECIO.label} con MercadoPago →`;
+      return;
+    }
     // Producción: usamos init_point (checkout real). sandbox_init_point solo
     // existe como fallback por si faltara el real.
     const url=data.init_point||data.sandbox_init_point;

@@ -15,6 +15,28 @@
 
 import { getPrecios } from './precios.js';
 
+const DIAS_ACCESO = 60;
+
+// ¿La marca YA tiene acceso vigente (≤60 días) a ESTE contacto? (cualquier origen)
+// Evita que se cobre dos veces el mismo contacto dentro del período de acceso.
+async function yaTieneAcceso(marcaEmail, creatorId) {
+  const desde = new Date(Date.now() - DIAS_ACCESO * 86400000).toISOString();
+  const url = `${process.env.SUPABASE_URL}/rest/v1/conexiones`
+    + `?marca_email=ilike.${encodeURIComponent(marcaEmail)}`
+    + `&creator_id=eq.${encodeURIComponent(creatorId)}`
+    + `&estado=eq.pagado&created_at=gte.${encodeURIComponent(desde)}`
+    + `&select=id&limit=1`;
+  const r = await fetch(url, {
+    headers: {
+      'apikey': process.env.SUPABASE_SERVICE_KEY,
+      'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`,
+    },
+  });
+  if (!r.ok) return false;              // ante la duda NO bloqueamos la compra
+  const rows = await r.json();
+  return rows.length > 0;
+}
+
 // ¿Esta marca ya desbloqueó algún contacto de campaña alguna vez?
 async function yaUsoElGratis(marcaEmail) {
   const url = `${process.env.SUPABASE_URL}/rest/v1/conexiones`
@@ -79,6 +101,14 @@ export default async function handler(req, res) {
   }
 
   try {
+    // ── Ya tiene acceso vigente a este contacto: no se cobra de nuevo ──
+    if (await yaTieneAcceso(marca_email, creator_id)) {
+      return res.status(200).json({
+        yaComprado: true,
+        mensaje: 'Ya tenés acceso a este contacto (vigente por 60 días). Lo ves en “Mis conexiones”.',
+      });
+    }
+
     // Precios actuales (de la tabla config, editable desde el admin)
     const PRECIOS = await getPrecios();
 

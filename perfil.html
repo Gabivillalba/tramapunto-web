@@ -880,6 +880,7 @@ function renderCreatorTab(i,el){
       <div class="sec-title" style="margin-top:0">Tu rendimiento</div>
       <div id="statsWrap" style="margin-bottom:2rem"></div>
       ${checklistHTML}
+      <div id="rankCard"></div>
       <div id="puntosCard"></div>
       <div class="sec-title">Información general</div>
       <div class="info-grid">
@@ -922,6 +923,7 @@ function renderCreatorTab(i,el){
     if(p.rating_count) loadResenasRecibidas(p.id);
     loadStatsCreador();
     loadReelEstado();
+    loadRankingCreador();
   }
   else if(i===1){
     // ── LIGA TRAMA. (gamificación diaria) ──
@@ -1219,10 +1221,25 @@ function presuTxt(c){
   return 'A convenir';
 }
 let campPostulantes={};
+function matchScoreMarca(cr, c){
+  if(!cr) return null;
+  let score=0;
+  const fmts=(c.formatos||[]).map(x=>String(x).toLowerCase());
+  const haceVideo=(cr.t_reel>0)||(cr.tt_seg>0)||(cr.yt_seg>0)||(cr.ig_seg>0);
+  const haceStory=(cr.t_story>0)||(cr.ig_seg>0);
+  const hacePost=(cr.t_post>0)||(cr.ig_seg>0);
+  const puede=f=>{ if(/reel|tiktok|video/.test(f))return haceVideo; if(/story|stories|historia/.test(f))return haceStory; if(/post|feed|foto/.test(f))return hacePost; return true; };
+  if(fmts.length){ const ok=fmts.filter(puede).length; score+=Math.round(45*ok/fmts.length); } else score+=45;
+  if(c.es_presencial){ const u=String(c.ubicacion||'').toLowerCase(), ci=String(cr.ciudad||'').toLowerCase(); const ciTok=ci.split(/[ ,]/)[0]||''; score+=(ci&&u&&(u.includes(ci)||(ciTok&&u.includes(ciTok))))?25:6; } else score+=25;
+  const texto=`${c.titulo||''} ${c.descripcion||''} ${c.requisitos||''}`.toLowerCase();
+  const nichos=(cr.niches||[]).map(n=>String(n).toLowerCase());
+  score+=nichos.some(n=>n&&texto.includes(n))?30:14;
+  return Math.min(99,Math.max(35,score));
+}
 async function loadCampanasMarca(wrapId){
   const wrap=document.getElementById(wrapId); if(!wrap)return;
   const token=getToken();
-  const camps=await sbGet('campanias',`marca_email=eq.${encodeURIComponent(currentUser.email)}&select=id,titulo,estado,created_at,cupos,fecha_limite,tipo,descripcion,presupuesto_min,presupuesto_max,moneda,formatos,es_canje,es_presencial,entregables&order=created_at.desc`,token);
+  const camps=await sbGet('campanias',`marca_email=eq.${encodeURIComponent(currentUser.email)}&select=id,titulo,estado,created_at,cupos,fecha_limite,tipo,descripcion,presupuesto_min,presupuesto_max,moneda,formatos,es_canje,es_presencial,entregables,ubicacion,requisitos&order=created_at.desc`,token);
   if(!camps||!camps.length){
     wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Mis campañas</div><div class="empty-state"><div>📋</div>Todavía no publicaste ninguna campaña.<br><a href="/campanas.html" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Publicar una campaña →</a></div></div>`;
     return;
@@ -1241,6 +1258,14 @@ async function loadCampanasMarca(wrapId){
   // Resultados ya cargados de estas campañas
   const resu=await sbGet('resultados_campania',`campania_id=in.${inList}&select=*&order=created_at.desc`,token);
   const resByCamp={}; (resu||[]).forEach(r=>{ (resByCamp[r.campania_id]=resByCamp[r.campania_id]||[]).push(r); });
+  // Desbloqueos (contactos comprados) por campaña, para el embudo
+  const cnx=await sbGet('conexiones',`marca_email=eq.${encodeURIComponent(currentUser.email)}&estado=eq.pagado&select=campania_id,creator_id`,token);
+  const desbByCamp={}; (cnx||[]).forEach(x=>{ if(x.campania_id){ (desbByCamp[x.campania_id]=desbByCamp[x.campania_id]||new Set()).add(String(x.creator_id)); } });
+  // Creadores aprobados para sugerir por match (solo si hay alguna campaña activa)
+  let aprob=[];
+  if(camps.some(c=>c.estado==='activa')){
+    aprob=await sbGet('creators','status=eq.aprobado&select=id,nombre,apellido,avatar_url,ciudad,niches,t_story,t_reel,t_post,ig_seg,tt_seg,yt_seg,reel_boost',token)||[];
+  }
   // Postulantes por campaña para el selector de cierre
   campPostulantes={};
   Object.keys(postsByCamp).forEach(cid=>{
@@ -1253,9 +1278,47 @@ async function loadCampanasMarca(wrapId){
   const nActivas=camps.filter(c=>c.estado==='activa').length;
   const nRevision=camps.filter(c=>c.estado==='en_revision').length;
   const totalPost=(posts||[]).length;
+  // Avisos accionables
+  const pendPorRevisar=(posts||[]).filter(p=>p.estado==='pendiente').length;
+  const hoyD=new Date(); const en3=new Date(Date.now()+3*86400000);
+  const porVencer=camps.filter(c=>c.estado==='activa'&&c.fecha_limite&&new Date(c.fecha_limite+'T23:59:59')>=hoyD&&new Date(c.fecha_limite+'T00:00:00')<=en3);
+  const avisos=[];
+  if(pendPorRevisar>0) avisos.push(`📥 Tenés <strong>${pendPorRevisar}</strong> postulante${pendPorRevisar===1?'':'s'} sin revisar.`);
+  porVencer.forEach(c=>avisos.push(`⏰ <strong>${c.titulo||'Una campaña'}</strong> cierra el ${new Date(c.fecha_limite+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'})}.`));
+  const avisosHTML = avisos.length
+    ? `<div style="background:#1a1200;border:1px solid #2a2000;border-radius:6px;padding:.9rem 1.1rem;margin-bottom:1.5rem">
+         <div style="font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:.4rem">Para revisar</div>
+         ${avisos.map(a=>`<div style="font-size:.82rem;color:var(--white);line-height:1.6">${a}</div>`).join('')}
+       </div>`
+    : '';
   const bloques=camps.map(c=>{
     // Los creadores destacados (reel con etiqueta a TRAMA) aparecen primero
     const ps=(postsByCamp[c.id]||[]).slice().sort((a,b)=>((byCre[String(b.creador_id)]||{}).reel_boost?1:0)-((byCre[String(a.creador_id)]||{}).reel_boost?1:0));
+    // Embudo de la campaña: postulantes → desbloqueados → cerrados
+    const nDesb=(desbByCamp[c.id]?desbByCamp[c.id].size:0);
+    const nCerr=(resByCamp[c.id]||[]).length;
+    const fstep=(lbl,n,col)=>`<div style="flex:1;min-width:70px;text-align:center"><div style="font-size:1.25rem;font-weight:900;color:${col}">${n}</div><div style="font-size:.58rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">${lbl}</div></div>`;
+    const arrow=`<div style="color:var(--muted);font-size:.9rem;align-self:center">→</div>`;
+    const embudoHTML=`<div style="display:flex;gap:.3rem;align-items:stretch;background:#0d0d0d;border:1px solid #1a1a1a;border-radius:4px;padding:.7rem .5rem;margin:.9rem 0">
+      ${fstep('Postulantes',ps.length,'var(--white)')}${arrow}${fstep('Desbloqueados',nDesb,'var(--green)')}${arrow}${fstep('Cerrados',nCerr,'var(--purple)')}
+    </div>`;
+    // Sugeridos por match (solo campañas activas, creadores que NO se postularon)
+    let sugHTML='';
+    if(c.estado==='activa' && aprob.length){
+      const appliedIds=new Set((postsByCamp[c.id]||[]).map(p=>String(p.creador_id)));
+      const sug=aprob.filter(cr=>!appliedIds.has(String(cr.id))).map(cr=>({cr,ms:matchScoreMarca(cr,c)})).sort((a,b)=>b.ms-a.ms).slice(0,3);
+      if(sug.length){
+        sugHTML=`<div style="font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--purple);margin:1rem 0 .6rem">Creadores sugeridos para esta campaña</div>
+          <div class="cx-list">`+sug.map(({cr,ms})=>{
+            const nom=`${cr.nombre||''} ${cr.apellido||''}`.trim()||'Creador';
+            const nich=(cr.niches||[]).slice(0,2).join(' · ')||'';
+            const seg=fmtSegM(cr.ig_seg||cr.tt_seg||cr.yt_seg);
+            const av=cr.avatar_url?`<img src="${cr.avatar_url}" style="width:100%;height:100%;object-fit:cover">`:'🎥';
+            return `<div class="cx-item"><div class="cx-ic">${av}</div><div class="cx-body"><div class="cx-name">${nom} <span style="font-size:.58rem;font-weight:900;color:var(--purple);background:#1a0a2a;border:1px solid #3a1a5a;border-radius:20px;padding:.1rem .4rem;margin-left:.3rem">${ms}% match</span></div><div class="cx-meta">${nich}${seg!=='—'?' · '+seg+' seg.':''}</div><button class="resena-btn" style="margin-top:.5rem" onclick="desbloquearPostulante('${cr.id}','${c.id}')">🔓 Desbloquear contacto</button></div></div>`;
+          }).join('')+`</div>
+          <div style="font-size:.68rem;color:var(--muted);margin-top:.4rem">No se postularon, pero encajan con tu brief. Desbloquear su contacto es una compra igual que la de un postulante.</div>`;
+      }
+    }
     const items=ps.map(p=>{
       const cr=byCre[String(p.creador_id)]||{};
       const nom=`${cr.nombre||''} ${cr.apellido||''}`.trim()||'Creador';
@@ -1306,6 +1369,7 @@ async function loadCampanasMarca(wrapId){
       </div>
       ${c.descripcion?`<div style="font-size:.78rem;color:#bbb;line-height:1.55;margin-bottom:.4rem">${c.descripcion.slice(0,260)}${c.descripcion.length>260?'…':''}</div>`:''}
       ${estadoNota}
+      ${embudoHTML}
       <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;margin:1rem 0 .6rem">
         <span style="font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Resultados de la campaña</span>
         <button onclick="abrirCierre('${c.id}')" ${puedeCerrar?'':'disabled'} title="${puedeCerrar?'':'Necesitás al menos un postulante para cerrar con resultados'}" style="background:${puedeCerrar?'var(--green)':'#161616'};color:${puedeCerrar?'#080808':'var(--muted)'};border:none;font-size:.68rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;padding:.4rem .8rem;border-radius:2px;cursor:${puedeCerrar?'pointer':'not-allowed'}">✅ Cerrar con resultados</button>
@@ -1313,6 +1377,7 @@ async function loadCampanasMarca(wrapId){
       ${resHTML || `<div style="font-size:.74rem;color:var(--muted);background:#0d0d0d;border:1px solid #1a1a1a;border-radius:4px;padding:.7rem .9rem">Todavía no cargaste resultados. Al terminar con un creador, cerrá la campaña con sus métricas: las van a ver vos y el creador.</div>`}
       <div style="font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:1rem 0 .6rem">Postulantes</div>
       <div class="cx-list">${ps.length?items:'<div class="empty-state" style="padding:1.1rem"><div>📭</div>Sin postulantes todavía.</div>'}</div>
+      ${sugHTML}
     </div>`;
   }).join('');
   wrap.innerHTML=`<div class="tab-content active">
@@ -1326,6 +1391,7 @@ async function loadCampanasMarca(wrapId){
       ${nRevision?`<div class="mc-stat"><div class="mc-n" style="color:var(--amber)">${nRevision}</div><div class="mc-l">En revisión</div></div>`:''}
       <div class="mc-stat"><div class="mc-n">${totalPost}</div><div class="mc-l">Postulantes</div></div>
     </div>
+    ${avisosHTML}
     ${bloques}
   </div>`;
 }
@@ -1669,6 +1735,25 @@ async function enviarCumplir(extra){
 
 // ── STATS DEL CREADOR (vistas, ventas, conversión) ──
 // ── PUNTOS: seguir a TRAMA (+50) y subir reel del mes (+100) ──
+async function loadRankingCreador(){
+  const box=document.getElementById('rankCard'); if(!box||userType!=='creator')return;
+  if(userProfile.status!=='aprobado'){ box.innerHTML=''; return; }
+  try{
+    const rows=await sbGet('creators','status=eq.aprobado&select=id,indice',getToken())||[];
+    const total=rows.length; if(!total){ box.innerHTML=''; return; }
+    const mine=rows.find(r=>String(r.id)===String(userProfile.id));
+    const mi=Number((mine&&mine.indice)||userProfile.indice||0);
+    const pos=rows.filter(r=>Number(r.indice||0)>mi).length+1;
+    const top=Math.round(pos/total*100)<=10;
+    box.innerHTML=`<div style="background:#0f0a1a;border:1px solid #2a1a40;border-radius:6px;padding:1.1rem 1.25rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem">
+      <div>
+        <div style="font-size:.6rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--purple)">Tu posición en la bolsa</div>
+        <div style="font-size:1.4rem;font-weight:900;margin-top:.2rem">#${pos} <span style="font-size:.8rem;color:var(--muted2);font-weight:700">de ${total}${top?' · top 10% 🔥':''}</span></div>
+      </div>
+      <div style="font-size:.76rem;color:var(--muted2);max-width:270px;line-height:1.5;text-align:right">Subí de puesto sumando puntos: reel del mes (+100) y seguir a @tramapunto (+50).</div>
+    </div>`;
+  }catch(_){ box.innerHTML=''; }
+}
 async function loadReelEstado(){
   const box=document.getElementById('puntosCard'); if(!box||userType!=='creator')return;
   const p=userProfile, token=getToken();

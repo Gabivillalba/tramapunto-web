@@ -3,7 +3,8 @@
     { "path": "/api/liga-cron", "schedule": "0 12 * * *" },
     { "path": "/api/emails-cron", "schedule": "0 13 * * *" }
   ],
-  "rewrites": [
-    { "source": "/mp/callback", "destination": "/api/mi-perfil?mp_oauth=callback" }
+   "rewrites": [
+    { "source": "/mp/callback", "destination": "/api/mi-perfil?mp_oauth=callback" },
+    { "source": "/api/mp/webhook", "destination": "/api/mp-webhook" }
   ]
 }

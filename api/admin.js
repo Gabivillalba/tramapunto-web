@@ -820,6 +820,29 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
+      // — Destacar un creador por hacer el reel etiquetando a TRAMA (ranking en postulaciones) —
+      case 'set_reel_boost': {
+        const { id, on } = payload;
+        if (!id) return res.status(400).json({ error: 'Falta id' });
+        const body = on
+          ? { reel_boost: true, reel_boost_at: new Date().toISOString() }
+          : { reel_boost: false, reel_boost_at: null };
+        await sb(`creators?id=eq.${id}`, 'PATCH', body);
+        if (on) {
+          const rows = await sb(`creators?id=eq.${id}&select=email`);
+          const c = rows && rows[0];
+          if (c && c.email) {
+            await sb('notificaciones', 'POST', {
+              para_email: c.email, tipo: 'sistema',
+              titulo: '⭐ ¡Quedaste destacado en TRAMA.!',
+              cuerpo: 'Gracias por tu reel etiquetando a TRAMA. A partir de ahora tus postulaciones aparecen primero para las marcas.',
+              link: '/perfil.html',
+            }).catch(() => {});
+          }
+        }
+        return res.status(200).json({ ok: true });
+      }
+
       case 'list_notif': {
         const data = await sb('notificaciones?para_admin=is.true&select=*&order=created_at.desc&limit=50');
         const noLeidas = (data || []).filter(n => !n.leida).length;

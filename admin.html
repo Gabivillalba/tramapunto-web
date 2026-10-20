@@ -1508,11 +1508,25 @@ function renderCards(){
           ${c.status!=='aprobado'?`<button class="btn-apro" onclick="setStatus('${c.id}','aprobado')">Aprobar</button>`:''}
           ${c.status!=='rechazado'?`<button class="btn-rech" onclick="setStatus('${c.id}','rechazado')">Rechazar</button>`:''}
           ${leak.length?`<button class="btn-rech" style="border-color:#4a1a00;color:#ff6b4a" onclick="avisarContacto('${c.id}')">⚠️ Avisar contacto</button>`:''}
+          <button class="btn-ver" style="${c.reel_boost?'background:#1a0a2a;border-color:#3a1a5a;color:#c084fc':''}" onclick="toggleReelBoost('${c.id}',${c.reel_boost?'false':'true'})" title="Destacar por reel con etiqueta a TRAMA">${c.reel_boost?'⭐ Destacado':'☆ Destacar reel'}</button>
           <button class="btn-del" onclick="deleteCreator('${c.id}')">Eliminar</button>
         </div>
       </div>
     </div>`;
   }).join('');
+}
+
+// ── DESTACAR POR REEL (ranking en postulaciones) ──
+async function toggleReelBoost(id, on){
+  on = (on===true || on==='true');
+  if(on && !confirm('¿Destacar a este creador por hacer el reel etiquetando a TRAMA?\n\nSus postulaciones van a aparecer primero para las marcas y se le avisa por notificación.')) return;
+  try{
+    await adminCall('set_reel_boost',{id, on});
+    const idx=allCreators.findIndex(c=>c.id===id);
+    if(idx>-1) allCreators[idx].reel_boost=on;
+    renderCards();
+    showToast(on?'⭐ Creador destacado':'Destacado quitado', on?'ok':'info');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
 }
 
 // ── AVISAR CONTACTO EN CAMPOS PÚBLICOS ──

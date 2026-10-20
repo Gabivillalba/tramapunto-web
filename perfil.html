@@ -1231,7 +1231,7 @@ async function loadCampanasMarca(wrapId){
   const creIds=[...new Set((posts||[]).map(p=>p.creador_id).filter(Boolean))];
   let byCre={};
   if(creIds.length){
-    const cre=await sbGet('creators',`id=in.(${creIds.map(encodeURIComponent).join(',')})&select=id,nombre,apellido,niches,ig_seg,tt_seg,yt_seg,avatar_url,rating_prom,rating_count`,token);
+    const cre=await sbGet('creators',`id=in.(${creIds.map(encodeURIComponent).join(',')})&select=id,nombre,apellido,niches,ig_seg,tt_seg,yt_seg,avatar_url,rating_prom,rating_count,reel_boost`,token);
     byCre=Object.fromEntries((cre||[]).map(c=>[String(c.id),c]));
   }
   const postsByCamp={};
@@ -1252,7 +1252,8 @@ async function loadCampanasMarca(wrapId){
   const nRevision=camps.filter(c=>c.estado==='en_revision').length;
   const totalPost=(posts||[]).length;
   const bloques=camps.map(c=>{
-    const ps=postsByCamp[c.id]||[];
+    // Los creadores destacados (reel con etiqueta a TRAMA) aparecen primero
+    const ps=(postsByCamp[c.id]||[]).slice().sort((a,b)=>((byCre[String(b.creador_id)]||{}).reel_boost?1:0)-((byCre[String(a.creador_id)]||{}).reel_boost?1:0));
     const items=ps.map(p=>{
       const cr=byCre[String(p.creador_id)]||{};
       const nom=`${cr.nombre||''} ${cr.apellido||''}`.trim()||'Creador';
@@ -1260,10 +1261,11 @@ async function loadCampanasMarca(wrapId){
       const nich=(cr.niches||[]).slice(0,2).join(' · ')||'';
       const av=cr.avatar_url?`<img src="${cr.avatar_url}" style="width:100%;height:100%;object-fit:cover">`:'🎥';
       const tarifa=p.tarifa_propuesta?('$'+Number(p.tarifa_propuesta).toLocaleString('es-AR')):'A convenir';
-      return `<div class="cx-item">
+      const boost=cr.reel_boost?`<span style="font-size:.58rem;font-weight:900;color:var(--purple);background:#1a0a2a;border:1px solid #3a1a5a;border-radius:20px;padding:.1rem .4rem;margin-left:.3rem">⭐ Destacado</span>`:'';
+      return `<div class="cx-item"${cr.reel_boost?' style="border-color:#3a1a5a"':''}>
         <div class="cx-ic">${av}</div>
         <div class="cx-body">
-          <div class="cx-name">${nom} <span style="font-size:.6rem;font-weight:800;color:${estColor[p.estado]||'var(--muted2)'};text-transform:uppercase;margin-left:.3rem">${EST_POST[p.estado]||p.estado}</span></div>
+          <div class="cx-name">${nom}${boost} <span style="font-size:.6rem;font-weight:800;color:${estColor[p.estado]||'var(--muted2)'};text-transform:uppercase;margin-left:.3rem">${EST_POST[p.estado]||p.estado}</span></div>
           <div class="cx-meta">${nich}${seg!=='—'?' · '+seg+' seg.':''} · pide ${tarifa}</div>
           ${p.mensaje?`<div style="font-size:.76rem;color:var(--muted2);margin-top:.35rem;line-height:1.5">“${p.mensaje.slice(0,180)}”</div>`:''}
           <button class="resena-btn" style="margin-top:.5rem" onclick="desbloquearPostulante('${p.creador_id}','${c.id}','${p.id}')">🔓 Desbloquear contacto</button>

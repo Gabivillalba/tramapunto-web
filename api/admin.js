@@ -843,6 +843,53 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
+      // — Reels / seguidores auto-reportados por creadores (a verificar) —
+      case 'list_reel_submissions': {
+        const subs = await sb('reel_submissions?select=*&order=created_at.desc&limit=200');
+        const ids = [...new Set((subs || []).map(s => s.creator_id).filter(Boolean))];
+        let byId = {};
+        if (ids.length) {
+          const cre = await sb(`creators?id=in.(${ids.map(encodeURIComponent).join(',')})&select=id,nombre,apellido,email,ig_user,puntos,reel_boost`);
+          byId = Object.fromEntries((cre || []).map(c => [String(c.id), c]));
+        }
+        const data = (subs || []).map(s => ({ ...s, creator: byId[String(s.creator_id)] || null }));
+        return res.status(200).json({ ok: true, data, pendientes: data.filter(s => s.estado === 'pendiente').length });
+      }
+
+      case 'moderar_reel_submission': {
+        const { id, accion } = payload;
+        if (!id || !['aprobar', 'rechazar'].includes(accion)) return res.status(400).json({ error: 'Faltan datos' });
+        const rows = await sb(`reel_submissions?id=eq.${id}&select=*`);
+        const s = rows && rows[0];
+        if (!s) return res.status(404).json({ error: 'No encontrada' });
+        if (s.estado !== 'pendiente') return res.status(409).json({ error: 'Ya fue moderada' });
+
+        if (accion === 'rechazar') {
+          await sb(`reel_submissions?id=eq.${id}`, 'PATCH', { estado: 'rechazado' });
+          return res.status(200).json({ ok: true });
+        }
+        // aprobar → suma puntos (reel 100 / follow 50) y destaca si es reel
+        const pts = s.tipo === 'follow' ? 50 : 100;
+        const cre = (await sb(`creators?id=eq.${s.creator_id}&select=id,email,nombre,puntos`))?.[0];
+        await sb(`reel_submissions?id=eq.${id}`, 'PATCH', { estado: 'aprobado', puntos: pts });
+        if (cre) {
+          const body = { puntos: (Number(cre.puntos) || 0) + pts };
+          if (s.tipo === 'reel') { body.reel_boost = true; body.reel_boost_at = new Date().toISOString(); }
+          await sb(`creators?id=eq.${s.creator_id}`, 'PATCH', body);
+          if (cre.email) {
+            await sb('notificaciones', 'POST', {
+              para_email: cre.email, tipo: 'sistema',
+              titulo: s.tipo === 'follow' ? '⭐ +50 puntos por seguirnos' : '⭐ +100 puntos por tu reel',
+              cuerpo: s.tipo === 'follow'
+                ? '¡Gracias por seguir a @tramapunto! Sumaste 50 puntos para destacar.'
+                : '¡Gracias por tu reel etiquetando a TRAMA! Sumaste 100 puntos y tus postulaciones aparecen primero.',
+              link: '/perfil.html',
+            }).catch(() => {});
+          }
+        }
+        return res.status(200).json({ ok: true, puntos: pts });
+      }
+
       case 'list_notif': {
         const data = await sb('notificaciones?para_admin=is.true&select=*&order=created_at.desc&limit=50');
         const noLeidas = (data || []).filter(n => !n.leida).length;

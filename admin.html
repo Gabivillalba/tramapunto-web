@@ -354,6 +354,7 @@ textarea.em-inp{resize:vertical;line-height:1.5}
         <div class="dash-box"><h3>Fuentes de registro 📍</h3><div id="m-fuentes"><div class="dash-empty">Cargando…</div></div></div>
         <div class="dash-box"><h3>Campañas UTM 🎯</h3><div id="m-campanas"><div class="dash-empty">Cargando…</div></div></div>
       </div>
+      <div class="dash-box" style="margin-top:1rem"><h3>🎬 Reels y seguidores a verificar</h3><div id="m-reels"><div class="dash-empty">Cargando…</div></div></div>
       <div class="dash-champ" id="m-campeon">—</div>
     </div>
   </div>
@@ -1112,7 +1113,41 @@ async function loadMetrics(){
             return `<div class="dash-row"><span class="dash-name">${src} · <strong style="color:var(--green)">${cmp}</strong></span><span class="dash-val">${f.n} ${f.n===1?'registro':'registros'}</span></div>`; }).join('')
         : '<div class="dash-empty" style="text-align:left;line-height:1.65">Todavía ningún registro llegó con una campaña UTM.<br>Compartí links con <code style="color:var(--green)">?utm_source=instagram&utm_campaign=bio</code> y acá vas a ver cuántos registros trajo cada campaña.</div>';
     }
+    loadReelSubs();
   }catch(e){ showToast('Error al cargar métricas: '+e.message,'err'); }
+}
+
+// ── REELS / SEGUIDORES A VERIFICAR ──
+async function loadReelSubs(){
+  const box=document.getElementById('m-reels'); if(!box)return;
+  try{
+    const r=await adminCall('list_reel_submissions');
+    const data=r.data||[];
+    const pend=data.filter(s=>s.estado==='pendiente');
+    const otras=data.filter(s=>s.estado!=='pendiente').slice(0,10);
+    if(!data.length){ box.innerHTML='<div class="dash-empty">Todavía nadie reportó reels ni seguidas. Cuando mandes la notificación y los creadores marquen que lo hicieron, aparecen acá para verificar.</div>'; return; }
+    const row=s=>{
+      const c=s.creator||{};
+      const nom=`${c.nombre||''} ${c.apellido||''}`.trim()||'Creador';
+      const f=s.created_at?new Date(s.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):'';
+      const tipo=s.tipo==='follow'?'📸 Siguió (+50)':'🎬 Reel (+100)';
+      const link=s.ig_url?`<a href="${escR(s.ig_url)}" target="_blank" rel="noopener" style="color:var(--green)">ver en Instagram ↗</a>`:(c.ig_user?`<a href="https://instagram.com/${escR(String(c.ig_user).replace(/^@/,''))}" target="_blank" rel="noopener" style="color:var(--green)">@${escR(String(c.ig_user).replace(/^@/,''))} ↗</a>`:'<span style="color:var(--muted)">sin link</span>');
+      const acts=s.estado==='pendiente'
+        ? `<button class="btn-sm" style="background:var(--green);color:#080808;border-color:var(--green)" onclick="moderarReel(${s.id},'aprobar')">✓ Aprobar</button> <button class="btn-sm" onclick="moderarReel(${s.id},'rechazar')">✕</button>`
+        : `<span style="font-size:.7rem;color:${s.estado==='aprobado'?'var(--green)':'#f87171'};text-transform:uppercase;font-weight:800">${s.estado}</span>`;
+      return `<div class="dash-row" style="align-items:center"><span class="dash-name">${escR(nom)} <span style="color:var(--muted);font-size:.72rem">· ${tipo} · ${f}</span><br>${link}</span><span class="dash-val" style="display:flex;gap:.4rem;align-items:center">${acts}</span></div>`;
+    };
+    box.innerHTML = (pend.length?`<div style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);margin-bottom:.5rem">Pendientes (${pend.length})</div>`+pend.map(row).join(''):'<div class="dash-empty" style="padding:.5rem 0">Nada pendiente de verificar 👍</div>')
+      + (otras.length?`<div style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:.8rem 0 .5rem">Últimas verificadas</div>`+otras.map(row).join(''):'');
+  }catch(e){ box.innerHTML='<div class="dash-empty" style="color:#f87171">Error: '+escR(e.message)+'</div>'; }
+}
+async function moderarReel(id, accion){
+  if(accion==='rechazar' && !confirm('¿Rechazar este reporte? No suma puntos.')) return;
+  try{
+    await adminCall('moderar_reel_submission',{id, accion});
+    showToast(accion==='aprobar'?'✓ Aprobado y puntos sumados':'Rechazado', accion==='aprobar'?'ok':'info');
+    loadReelSubs();
+  }catch(e){ showToast('Error: '+e.message,'err'); }
 }
 
 // ══════════ MARCAS ══════════

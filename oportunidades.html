@@ -490,15 +490,8 @@ async function enviarPostulacion(){
       estado:'pendiente',
     }, getToken());
 
-    // Aviso a la marca (best-effort)
-    fetch('/api/enviar-email',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        tipo:'nueva_postulacion',
-        to:campActual.marca_email,
-        data:{marca:campActual.marca_nombre,titulo:campActual.titulo,creator:creator.nombre}
-      })
-    }).catch(()=>{});
+    // El aviso a la marca va in-app (trigger notif_postulacion -> campanita 🔔),
+    // no por mail: las notificaciones de campaña son todas dentro del sitio.
 
     misPostulaciones.push(campActual.id);
     closeModal();

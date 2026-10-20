@@ -901,6 +901,7 @@ function renderCreatorTab(i,el){
         <div class="info-card"><div class="ic-label">Nombre</div><div class="ic-val">${p.nombre} ${p.apellido}</div></div>
         <div class="info-card"><div class="ic-label">Email</div><div class="ic-val">${p.email}</div></div>
         <div class="info-card"><div class="ic-label">Ciudad</div><div class="ic-val ${!p.ciudad?'muted':''}">${p.ciudad||'Sin completar'}</div></div>
+        <div class="info-card"><div class="ic-label">País</div><div class="ic-val ${!p.pais?'muted':''}">${({AR:'Argentina',UY:'Uruguay',CL:'Chile',MX:'México',otro:'Otro'}[p.pais])||p.pais||'Sin completar'}</div></div>
         <div class="info-card"><div class="ic-label">WhatsApp</div><div class="ic-val ${!p.tel?'muted':''}">${p.tel||'Sin completar'}</div></div>
         <div class="info-card"><div class="ic-label">Nicho</div><div class="ic-val ${!(p.niches?.length)?'muted':''}">${p.niches?.join(', ')||'Sin completar'}</div></div>
         <div class="info-card"><div class="ic-label">Disponibilidad</div><div class="ic-val ${!(p.disponibilidad?.length)?'muted':''}">${p.disponibilidad?.join(', ')||'—'}</div></div>
@@ -995,6 +996,10 @@ function renderCreatorTab(i,el){
         <div class="fg-edit"><label>Apellido</label><input type="text" id="e-apellido" value="${p.apellido||''}"></div>
         <div class="fg-edit"><label>WhatsApp</label><input type="tel" id="e-tel" value="${p.tel||''}" placeholder="+54 9 11 0000-0000"></div>
         <div class="fg-edit"><label>Ciudad</label><input type="text" id="e-ciudad" value="${p.ciudad||''}"></div>
+        <div class="fg-edit"><label>País</label><select id="e-pais">
+          ${(p.pais && !['AR','UY','CL','MX','otro'].includes(p.pais))?`<option value="${p.pais}" selected>${p.pais}</option>`:''}
+          ${[['AR','Argentina'],['UY','Uruguay'],['CL','Chile'],['MX','México'],['otro','Otro']].map(([v,l])=>`<option value="${v}"${(p.pais||'AR')===v?' selected':''}>${l}</option>`).join('')}
+        </select></div>
         <div class="fg-edit fg-full"><label>Bio</label><textarea id="e-bio" maxlength="300" placeholder="Contá en 2-3 oraciones quién sos y qué tipo de contenido hacés...">${p.bio||''}</textarea></div>
         <div class="fg-edit fg-full" style="background:#120a1a;border:1px solid #2a1a3a;border-radius:4px;padding:.8rem 1rem">
           <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;margin:0;font-size:.82rem">
@@ -1603,6 +1608,7 @@ async function saveCreator(){
     apellido:document.getElementById('e-apellido')?.value.trim(),
     tel:document.getElementById('e-tel')?.value.trim()||null,
     ciudad:document.getElementById('e-ciudad')?.value.trim()||null,
+    pais:document.getElementById('e-pais')?.value||null,
     bio:document.getElementById('e-bio')?.value.trim()||null,
     t_story:parseInt(document.getElementById('e-story')?.value)||null,
     t_reel:parseInt(document.getElementById('e-reel')?.value)||null,

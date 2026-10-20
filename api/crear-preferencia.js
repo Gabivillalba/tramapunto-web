@@ -14,7 +14,7 @@
 // con fallback a env vars si la base no responde.
 
 import { getPrecios } from './precios.js';
-
+import { decrypt } from '../lib/mp-crypto.js';
 const DIAS_ACCESO = 60;
 
 // ¿La marca YA tiene acceso vigente (≤60 días) a ESTE contacto? (cualquier origen)
@@ -131,9 +131,12 @@ export default async function handler(req, res) {
       const fee = Math.max(1, Math.round(monto * 0.10));            // comisión TRAMA 10%
       const extRef = ['trabajo', postulacion_id, p.creador_id, p.campania_id || ''].join('|');
 
+        const creatorToken = decrypt(cre.mp_access_token);            // tokens guardados cifrados (AES-256-GCM)
+      if (!creatorToken) return res.status(200).json({ error: 'No se pudo leer la conexión de MercadoPago del creador. Pedile que la reconecte desde su panel.' });
+
       const pref = await fetch('https://api.mercadopago.com/checkout/preferences', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${cre.mp_access_token}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${creatorToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: [{ id: `trabajo-${postulacion_id}`, title: `TRAMA. — ${camp.titulo || 'Campaña'} · trabajo de ${cre.nombre || 'creador'}`, quantity: 1, currency_id: 'ARS', unit_price: monto }],
           marketplace_fee: fee,

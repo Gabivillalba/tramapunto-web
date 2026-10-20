@@ -96,11 +96,64 @@ export default async function handler(req, res) {
   if (!creator_id || !marca_email) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
-  if (!['bolsa', 'campania'].includes(origen)) {
+  if (!['bolsa', 'campania', 'trabajo'].includes(origen)) {
     return res.status(400).json({ error: 'Origen inválido' });
   }
 
   try {
+    // ══ PAGO DEL TRABAJO DE CAMPAÑA (split 90/10 al creador) ══
+    if (origen === 'trabajo') {
+      const { postulacion_id } = req.body;
+      if (!postulacion_id) return res.status(400).json({ error: 'Falta la postulación' });
+      const SB = process.env.SUPABASE_URL, KEY = process.env.SUPABASE_SERVICE_KEY;
+      const q = async (p) => { const r = await fetch(`${SB}/rest/v1/${p}`, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } }); return r.ok ? r.json() : []; };
+
+      const ps = await q(`postulaciones?id=eq.${encodeURIComponent(postulacion_id)}&select=id,campania_id,creador_id,estado,monto_acordado,tarifa_propuesta,pago_estado`);
+      const p = ps && ps[0];
+      if (!p) return res.status(404).json({ error: 'Postulación no encontrada' });
+      if (p.pago_estado === 'pagado') return res.status(200).json({ yaComprado: true, mensaje: 'Este trabajo ya está pagado.' });
+      if (p.estado !== 'entregada') return res.status(400).json({ error: 'El creador todavía no entregó el video.' });
+
+      const camps = await q(`campanias?id=eq.${encodeURIComponent(p.campania_id)}&select=id,titulo,marca_email`);
+      const camp = camps && camps[0];
+      if (!camp || String(camp.marca_email || '').toLowerCase() !== String(marca_email || '').toLowerCase()) {
+        return res.status(403).json({ error: 'Esta campaña no es tuya' });
+      }
+
+      const cres = await q(`creators?id=eq.${encodeURIComponent(p.creador_id)}&select=id,nombre,mp_conectado,mp_access_token`);
+      const cre = cres && cres[0];
+      if (!cre || !cre.mp_conectado || !cre.mp_access_token) {
+        return res.status(200).json({ error: 'El creador todavía no conectó su MercadoPago. Avisale que lo conecte desde su panel así podés pagarle.' });
+      }
+
+      const monto = Number(p.monto_acordado || p.tarifa_propuesta || 0);
+      if (!monto || monto <= 0) return res.status(400).json({ error: 'Falta el monto acordado con el creador.' });
+      const fee = Math.max(1, Math.round(monto * 0.10));            // comisión TRAMA 10%
+      const extRef = ['trabajo', postulacion_id, p.creador_id, p.campania_id || ''].join('|');
+
+      const pref = await fetch('https://api.mercadopago.com/checkout/preferences', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${cre.mp_access_token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [{ id: `trabajo-${postulacion_id}`, title: `TRAMA. — ${camp.titulo || 'Campaña'} · trabajo de ${cre.nombre || 'creador'}`, quantity: 1, currency_id: 'ARS', unit_price: monto }],
+          marketplace_fee: fee,
+          payer: { email: marca_email },
+          back_urls: {
+            success: `${process.env.SITE_URL}/pago-exitoso.html?origen=trabajo`,
+            failure: `${process.env.SITE_URL}/pago-fallido.html`,
+            pending: `${process.env.SITE_URL}/pago-pendiente.html`,
+          },
+          auto_return: 'approved',
+          external_reference: extRef,
+          statement_descriptor: 'TRAMA.',
+          notification_url: `${process.env.SITE_URL}/api/mp-webhook`,
+        }),
+      });
+      const pd = await pref.json();
+      if (!pref.ok) throw new Error(pd.message || 'Error en MercadoPago (split)');
+      return res.status(200).json({ id: pd.id, init_point: pd.init_point, sandbox_init_point: pd.sandbox_init_point, monto });
+    }
+
     // ── Ya tiene acceso vigente a este contacto: no se cobra de nuevo ──
     if (await yaTieneAcceso(marca_email, creator_id)) {
       return res.status(200).json({

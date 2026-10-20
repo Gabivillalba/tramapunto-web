@@ -881,6 +881,13 @@ function renderCreatorTab(i,el){
       <div id="statsWrap" style="margin-bottom:2rem"></div>
       ${checklistHTML}
       <div id="rankCard"></div>
+      <div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:6px;padding:1.1rem 1.25rem;margin-bottom:2rem">
+        <div style="font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:.5rem">Cobros · MercadoPago</div>
+        ${p.mp_conectado
+          ? `<div style="font-size:.85rem;color:var(--green)">✓ MercadoPago conectado. Acá vas a cobrar los trabajos de campaña que la marca apruebe (te llega el 90% directo).</div>`
+          : `<div style="font-size:.82rem;color:var(--muted2);line-height:1.6">Conectá tu MercadoPago para cobrar los trabajos de campaña: cuando la marca aprueba tu video, el pago se divide solo y el 90% te llega a tu cuenta.</div>
+             <button class="btn-save" style="margin-top:.7rem" onclick="conectarMP()">Conectar con MercadoPago</button>`}
+      </div>
       <div id="puntosCard"></div>
       <div class="sec-title">Información general</div>
       <div class="info-grid">
@@ -1128,16 +1135,36 @@ async function loadCampanasCreador(wrapId){
   const wrap=document.getElementById(wrapId); if(!wrap)return;
   const token=getToken();
   const activas=await sbGet('campanias','estado=eq.activa&select=id,titulo,tipo,presupuesto_min,presupuesto_max,moneda,fecha_limite&order=created_at.desc',token);
-  const mis=await sbGet('postulaciones',`creador_id=eq.${userProfile.id}&select=campania_id,estado,created_at&order=created_at.desc`,token);
+  const mis=await sbGet('postulaciones',`creador_id=eq.${userProfile.id}&select=id,campania_id,estado,created_at,entrega_url,pago_estado,monto_acordado,tarifa_propuesta&order=created_at.desc`,token);
   const nActivas=(activas||[]).length;
-  const estadoTxt={pendiente:'En revisión',preseleccionada:'Preseleccionada ⭐',aceptada:'¡Aceptada! ✅',rechazada:'No seleccionada',retirada:'Retirada'};
-  const estadoCol={pendiente:'var(--muted2)',preseleccionada:'#f5b301',aceptada:'var(--green)',rechazada:'#f87171',retirada:'var(--muted)'};
-  // mapa de títulos
+  const estadoTxt={pendiente:'En revisión',preseleccionada:'Preseleccionada ⭐',aceptada:'¡Te seleccionaron! ✅',entregada:'Video enviado 🎬',aprobada:'Aprobada',pagada:'Pagada 💸',rechazada:'No seleccionada',retirada:'Retirada'};
+  const estadoCol={pendiente:'var(--muted2)',preseleccionada:'#f5b301',aceptada:'var(--green)',entregada:'#60a5fa',aprobada:'var(--green)',pagada:'var(--green)',rechazada:'#f87171',retirada:'var(--muted)'};
+  // mapa de títulos (de todas mis campañas, no solo las activas)
+  const misCampIds=[...new Set((mis||[]).map(p=>p.campania_id).filter(Boolean))];
   const titById={}; (activas||[]).forEach(c=>titById[c.id]=c.titulo);
+  if(misCampIds.length){
+    const falt=misCampIds.filter(id=>!(id in titById));
+    if(falt.length){ const extra=await sbGet('campanias',`id=in.(${falt.map(encodeURIComponent).join(',')})&select=id,titulo`,token); (extra||[]).forEach(c=>titById[c.id]=c.titulo); }
+  }
+  const mpConn=!!(userProfile&&userProfile.mp_conectado);
   const misHtml=(mis&&mis.length)? mis.map(p=>{
     const f=p.created_at?new Date(p.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):'';
     const tit=titById[p.campania_id]||'Campaña';
-    return `<div class="cx-item"><div class="cx-ic">📋</div><div class="cx-body"><div class="cx-name">${tit}</div><div class="cx-meta">Postulado el ${f}</div><div style="font-size:.74rem;font-weight:800;margin-top:.35rem;color:${estadoCol[p.estado]||'var(--muted2)'}">${estadoTxt[p.estado]||p.estado}</div></div></div>`;
+    const monto=Number(p.monto_acordado||p.tarifa_propuesta||0);
+    const montoTxt=monto?('$'+monto.toLocaleString('es-AR')):'';
+    let extra='';
+    if(p.estado==='aceptada'){
+      extra=`${mpConn?'':`<div style="font-size:.72rem;color:var(--amber);margin-top:.4rem">⚠️ Conectá tu MercadoPago (en “Mi perfil”) para poder cobrar este trabajo.</div>`}
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.5rem">
+          <input id="entrega-${p.id}" type="url" placeholder="Link de tu video (Drive, WeTransfer, IG...)" style="flex:1;min-width:200px;background:#080808;border:1px solid #222;border-radius:2px;color:var(--white);padding:.55rem;font-size:.8rem">
+          <button class="btn-save" style="margin:0" onclick="entregarVideo('${p.id}')">🎬 Enviar video</button>
+        </div>`;
+    } else if(p.estado==='entregada'){
+      extra=`<div style="font-size:.74rem;color:#60a5fa;margin-top:.4rem">🎬 Video enviado — la marca lo está revisando.${p.entrega_url?` <a href="${p.entrega_url}" target="_blank" rel="noopener" style="color:var(--purple)">ver</a>`:''}</div>`;
+    } else if(p.estado==='pagada'||p.pago_estado==='pagado'){
+      extra=`<div style="font-size:.74rem;color:var(--green);margin-top:.4rem">💸 Cobrado${montoTxt?' '+montoTxt:''} — ¡gracias por tu trabajo!</div>`;
+    }
+    return `<div class="cx-item"><div class="cx-ic">📋</div><div class="cx-body"><div class="cx-name">${tit}</div><div class="cx-meta">Postulado el ${f}${montoTxt&&['aceptada','entregada'].includes(p.estado)?' · acordado '+montoTxt:''}</div><div style="font-size:.74rem;font-weight:800;margin-top:.35rem;color:${estadoCol[p.estado]||'var(--muted2)'}">${estadoTxt[p.estado]||p.estado}</div>${extra}</div></div>`;
   }).join('') : `<div class="empty-state" style="padding:1.5rem"><div>📭</div>Todavía no te postulaste a ninguna campaña.</div>`;
   wrap.innerHTML=`<div class="tab-content active">
     <div style="background:#0f0a1a;border:1px solid #2a1a40;border-radius:6px;padding:1.4rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
@@ -1246,7 +1273,7 @@ async function loadCampanasMarca(wrapId){
   }
   const ids=camps.map(c=>c.id);
   const inList='('+ids.map(encodeURIComponent).join(',')+')';
-  const posts=await sbGet('postulaciones',`campania_id=in.${inList}&select=id,campania_id,creador_id,mensaje,tarifa_propuesta,estado,created_at&order=created_at.desc`,token);
+  const posts=await sbGet('postulaciones',`campania_id=in.${inList}&select=id,campania_id,creador_id,mensaje,tarifa_propuesta,estado,created_at,monto_acordado,entrega_url,pago_estado&order=created_at.desc`,token);
   const creIds=[...new Set((posts||[]).map(p=>p.creador_id).filter(Boolean))];
   let byCre={};
   if(creIds.length){
@@ -1327,13 +1354,36 @@ async function loadCampanasMarca(wrapId){
       const av=cr.avatar_url?`<img src="${cr.avatar_url}" style="width:100%;height:100%;object-fit:cover">`:'🎥';
       const tarifa=p.tarifa_propuesta?('$'+Number(p.tarifa_propuesta).toLocaleString('es-AR')):'A convenir';
       const boost=cr.reel_boost?`<span style="font-size:.58rem;font-weight:900;color:var(--purple);background:#1a0a2a;border:1px solid #3a1a5a;border-radius:20px;padding:.1rem .4rem;margin-left:.3rem">⭐ Destacado</span>`:'';
+      const monto=Number(p.monto_acordado||p.tarifa_propuesta||0);
+      const montoTxt=monto?('$'+monto.toLocaleString('es-AR')):'su tarifa';
+      const abierta=(c.estado==='activa'||c.estado==='cerrada');
+      let acciones='';
+      if(['pendiente','preseleccionada'].includes(p.estado) && abierta){
+        acciones=`<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem">
+          <button class="resena-btn" style="background:var(--green);color:#080808;border:none" onclick="selPostulante('${p.id}')">✅ Seleccionar</button>
+          <button class="resena-btn" onclick="rechazarPostulante('${p.id}')">✕ Descartar</button>
+          <button class="resena-btn" onclick="desbloquearPostulante('${p.creador_id}','${c.id}','${p.id}')">🔓 Contacto</button>
+        </div>`;
+      } else if(p.estado==='aceptada'){
+        acciones=`<div style="font-size:.76rem;color:var(--green);margin-top:.5rem">✅ Seleccionado · esperando que suba el video (${montoTxt})</div>
+          <button class="resena-btn" style="margin-top:.4rem" onclick="desbloquearPostulante('${p.creador_id}','${c.id}','${p.id}')">🔓 Contacto</button>`;
+      } else if(p.estado==='entregada'){
+        acciones=`<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem;align-items:center">
+          ${p.entrega_url?`<a class="resena-btn" href="${p.entrega_url}" target="_blank" rel="noopener">🎬 Ver video</a>`:''}
+          <button class="resena-btn" style="background:var(--green);color:#080808;border:none" onclick="aprobarYPagar('${p.creador_id}','${c.id}','${p.id}',${monto})">✅ Aprobar y pagar ${montoTxt}</button>
+        </div>`;
+      } else if(p.estado==='aprobada'||p.estado==='pagada'||p.pago_estado==='pagado'){
+        acciones=`<div style="font-size:.76rem;color:var(--green);margin-top:.5rem">💸 Pagado ${montoTxt} · trabajo cerrado</div>`;
+      } else if(p.estado==='rechazada'){
+        acciones=`<div style="font-size:.74rem;color:var(--muted);margin-top:.5rem">Descartado</div>`;
+      }
       return `<div class="cx-item"${cr.reel_boost?' style="border-color:#3a1a5a"':''}>
         <div class="cx-ic">${av}</div>
         <div class="cx-body">
           <div class="cx-name">${nom}${boost} <span style="font-size:.6rem;font-weight:800;color:${estColor[p.estado]||'var(--muted2)'};text-transform:uppercase;margin-left:.3rem">${EST_POST[p.estado]||p.estado}</span></div>
           <div class="cx-meta">${nich}${seg!=='—'?' · '+seg+' seg.':''} · pide ${tarifa}</div>
           ${p.mensaje?`<div style="font-size:.76rem;color:var(--muted2);margin-top:.35rem;line-height:1.5">“${p.mensaje.slice(0,180)}”</div>`:''}
-          <button class="resena-btn" style="margin-top:.5rem" onclick="desbloquearPostulante('${p.creador_id}','${c.id}','${p.id}')">🔓 Desbloquear contacto</button>
+          ${acciones}
         </div>
       </div>`;
     }).join('');
@@ -1362,7 +1412,10 @@ async function loadCampanasMarca(wrapId){
         <span style="font-size:1.02rem;font-weight:900">${c.titulo||'Campaña'}</span>
         <span class="cx-venc ${activa?'ok':'exp'}" style="border-radius:2px">${EST_CAMP[c.estado]||c.estado}</span>
         <span style="font-size:.7rem;color:var(--muted)">${ps.length} postulante${ps.length===1?'':'s'}${alta?' · publicada '+alta:''}</span>
-        <button onclick="borrarMiCampania('${c.id}',${ps.length})" title="Eliminar campaña" style="margin-left:auto;background:transparent;border:1px solid #2a2a2a;color:var(--muted2);font-size:.68rem;font-weight:700;padding:.3rem .6rem;border-radius:2px;cursor:pointer">🗑 Eliminar</button>
+        <span style="margin-left:auto;display:flex;gap:.4rem">
+          ${c.estado==='activa'?`<button onclick="cerrarCampania('${c.id}')" title="Cerrar: deja de aceptar postulantes" style="background:transparent;border:1px solid #3a2a00;color:var(--amber);font-size:.68rem;font-weight:700;padding:.3rem .6rem;border-radius:2px;cursor:pointer">🔒 Cerrar</button>`:''}
+          <button onclick="borrarMiCampania('${c.id}',${ps.length})" title="Eliminar campaña" style="background:transparent;border:1px solid #2a2a2a;color:var(--muted2);font-size:.68rem;font-weight:700;padding:.3rem .6rem;border-radius:2px;cursor:pointer">🗑 Eliminar</button>
+        </span>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.6rem">
         ${chips.map(ch=>`<span style="font-size:.68rem;font-weight:700;color:var(--muted2);background:#121212;border:1px solid #222;border-radius:20px;padding:.25rem .65rem">${ch}</span>`).join('')}
@@ -1481,6 +1534,57 @@ async function desbloquearPostulante(creator_id, campania_id, postulacion_id){
     const url=data.init_point||data.sandbox_init_point;
     if(url){ window.location.href=url; } else { showToast('No se pudo iniciar el pago','err'); }
   }catch(e){ showToast('Error: '+e.message,'err'); }
+}
+
+// Conexión con MercadoPago del creador (se activa cuando esté cargada la app de MP)
+async function conectarMP(){
+  try{
+    const r=await fetch('/api/mi-perfil?mp_oauth=start',{headers:{'Authorization':'Bearer '+getToken()}});
+    const d=await r.json().catch(()=>({}));
+    if(d&&d.url){ window.location.href=d.url; return; }
+    showToast(d&&d.mensaje?d.mensaje:'La conexión con MercadoPago se activa en breve (estamos terminando de configurar la app).','info');
+  }catch(e){ showToast('La conexión con MercadoPago se activa en breve.','info'); }
+}
+
+// ── ACCIONES DEL CIRCUITO DE CAMPAÑA ──
+async function campAccion(body){
+  const r=await fetch('/api/campania-borrar',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},body:JSON.stringify(body)});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(d.error||'Error');
+  return d;
+}
+async function selPostulante(postId){
+  try{ await campAccion({op:'seleccionar',postulacion_id:postId}); showToast('✓ Creador seleccionado. Le avisamos para que suba el video.','ok'); loadCampanasMarca('campMarWrap'); }
+  catch(e){ showToast('Error: '+e.message,'err'); }
+}
+async function rechazarPostulante(postId){
+  if(!confirm('¿Descartar este postulante?'))return;
+  try{ await campAccion({op:'rechazar',postulacion_id:postId}); showToast('Postulante descartado.','ok'); loadCampanasMarca('campMarWrap'); }
+  catch(e){ showToast('Error: '+e.message,'err'); }
+}
+async function cerrarCampania(campId){
+  if(!confirm('¿Cerrar la campaña? Deja de aparecer para nuevos postulantes. Los ya seleccionados siguen su curso.'))return;
+  try{ await campAccion({op:'cerrar',campania_id:campId}); showToast('✓ Campaña cerrada.','ok'); loadCampanasMarca('campMarWrap'); }
+  catch(e){ showToast('Error: '+e.message,'err'); }
+}
+async function aprobarYPagar(creatorId,campId,postId,monto){
+  if(!confirm(`Vas a aprobar el video y pagarle al creador${monto?' $'+Number(monto).toLocaleString('es-AR'):''}. ¿Seguimos?`))return;
+  try{
+    const buyer=userProfile||{};
+    const r=await fetch('/api/crear-preferencia',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({creator_id:creatorId,origen:'trabajo',campania_id:campId,postulacion_id:postId,marca_email:currentUser.email,marca_nombre:(buyer.nombre_marca||buyer.razon_social||buyer.nombre||'Marca')})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(d.error||'Error');
+    const url=d.init_point||d.sandbox_init_point;
+    if(url){ window.location.href=url; } else { showToast(d.mensaje||'No se pudo iniciar el pago','err'); }
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+}
+// Entregar video (creador)
+async function entregarVideo(postId){
+  const inp=document.getElementById('entrega-'+postId); const url=(inp&&inp.value||'').trim();
+  if(!/^https?:\/\//i.test(url)){ showToast('Pegá el link de tu video (http...)','err'); return; }
+  try{ await campAccion({op:'entregar',postulacion_id:postId,entrega_url:url}); showToast('✓ Video enviado. La marca lo revisa y libera el pago.','ok'); irATab(7); }
+  catch(e){ showToast('Error: '+e.message,'err'); }
 }
 
 // ── GUARDAR ──

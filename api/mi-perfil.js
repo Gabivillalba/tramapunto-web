@@ -43,7 +43,13 @@ export default async function handler(req, res) {
   const enc = encodeURIComponent(email);
   try {
     const cre = await sb(`creators?email=ilike.${enc}&limit=1&select=*`);
-    if (cre && cre[0]) return res.status(200).json({ type: 'creator', profile: cre[0] });
+    if (cre && cre[0]) {
+      const prof = cre[0];
+      // Nunca mandar los tokens de MercadoPago al navegador (solo si está conectado)
+      delete prof.mp_access_token;
+      delete prof.mp_refresh_token;
+      return res.status(200).json({ type: 'creator', profile: prof });
+    }
 
     const mar = await sb(`marcas?email=ilike.${enc}&limit=1&select=*`);
     if (mar && mar[0]) return res.status(200).json({ type: 'marca', profile: mar[0] });

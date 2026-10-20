@@ -27,8 +27,50 @@ export default async function handler(req, res) {
       return res.status(200).json({ received: true, status: payment.status });
     }
 
-    // Parsear external_reference (formato nuevo y viejo)
     const parts = (payment.external_reference || '').split('|');
+
+    // ══ Pago del TRABAJO de campaña (split): trabajo|postulacion_id|creator_id|campania_id ══
+    if (parts[0] === 'trabajo') {
+      const postulacion_id = parts[1];
+      const trabajo_creator = parts[2] || null;
+      const trabajo_campania = parts[3] || null;
+      if (!postulacion_id) return res.status(400).json({ error: 'Referencia de trabajo inválida' });
+
+      const H = {
+        apikey: process.env.SUPABASE_SERVICE_KEY,
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}`,
+        'Content-Type': 'application/json',
+      };
+      // Marcar la postulación como pagada
+      await fetch(`${process.env.SUPABASE_URL}/rest/v1/postulaciones?id=eq.${encodeURIComponent(postulacion_id)}`, {
+        method: 'PATCH', headers: { ...H, Prefer: 'return=minimal' },
+        body: JSON.stringify({ estado: 'pagada', pago_estado: 'pagado', pago_id: String(payment.id), aprobado_at: new Date().toISOString() }),
+      });
+      // Registrar la conexión (ledger de dinero)
+      await fetch(`${process.env.SUPABASE_URL}/rest/v1/conexiones`, {
+        method: 'POST', headers: { ...H, Prefer: 'return=minimal,resolution=ignore-duplicates' },
+        body: JSON.stringify({
+          creator_id: trabajo_creator, marca_email: payment.payer?.email || '',
+          marca_nombre: payment.payer?.name || '', monto: payment.transaction_amount,
+          metodo: payment.payment_type_id, voucher_id: String(payment.id),
+          estado: 'pagado', origen: 'trabajo', campania_id: trabajo_campania, postulacion_id,
+        }),
+      }).catch(() => {});
+      // Avisar al creador que cobró
+      if (trabajo_creator) {
+        const cr = await fetch(`${process.env.SUPABASE_URL}/rest/v1/creators?id=eq.${encodeURIComponent(trabajo_creator)}&select=email`, { headers: H }).then(r => r.ok ? r.json() : []).catch(() => []);
+        const cemail = cr && cr[0] && cr[0].email;
+        if (cemail) {
+          await fetch(`${process.env.SUPABASE_URL}/rest/v1/notificaciones`, {
+            method: 'POST', headers: { ...H, Prefer: 'return=minimal' },
+            body: JSON.stringify({ para_email: cemail, tipo: 'sistema', titulo: '💸 ¡Cobraste un trabajo!', cuerpo: 'La marca aprobó tu video y el pago ya salió a tu MercadoPago.', link: '/perfil.html' }),
+          }).catch(() => {});
+        }
+      }
+      return res.status(200).json({ received: true, recorded: true, origen: 'trabajo' });
+    }
+
+    // Parsear external_reference (formato nuevo y viejo)
     const creator_id     = parts[0];
     const marca_email    = parts[1];
     const origen         = parts[2] || 'bolsa';         // default: compatibilidad

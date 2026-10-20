@@ -501,6 +501,13 @@ async function sbPatch(table, filter, body, token){
   if(!ok){ clearSession(); showLogin(); return; }
   currentUser = data;
   await loadProfile(token);
+  // Aviso al volver de conectar MercadoPago
+  try{
+    const mp=new URLSearchParams(location.search).get('mp');
+    if(mp==='ok') showToast('✓ MercadoPago conectado. Ya podés cobrar los trabajos de campaña.','ok');
+    else if(mp==='err') showToast('No se pudo conectar MercadoPago. Probá de nuevo.','err');
+    if(mp){ history.replaceState(null,'',location.pathname); }
+  }catch(_){}
 })();
 
 // ── LOGIN TABS ──

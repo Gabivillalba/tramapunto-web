@@ -331,6 +331,9 @@ textarea.em-inp{resize:vertical;line-height:1.5}
       <div class="stat"><div class="stat-n" id="m-jugando">—</div><div class="stat-l">Jugando la Liga 🔥</div></div>
       <div class="stat"><div class="stat-n" id="m-campanias">—</div><div class="stat-l">Campañas activas</div></div>
     </div>
+    <div class="dash-section" style="padding-bottom:0">
+      <div class="dash-box"><h3>Embudo del negocio</h3><div id="m-embudo"><div class="dash-empty">Cargando…</div></div></div>
+    </div>
     <div class="dash-section">
       <div class="dash-cols">
         <div class="dash-box"><h3>Acciones pendientes</h3><div id="m-acciones"><div class="dash-empty">Cargando…</div></div></div>
@@ -355,6 +358,7 @@ textarea.em-inp{resize:vertical;line-height:1.5}
         <div class="dash-box"><h3>Campañas UTM 🎯</h3><div id="m-campanas"><div class="dash-empty">Cargando…</div></div></div>
       </div>
       <div class="dash-box" style="margin-top:1rem"><h3>🎬 Reels y seguidores a verificar</h3><div id="m-reels"><div class="dash-empty">Cargando…</div></div></div>
+      <div class="dash-box" style="margin-top:1rem"><h3>🔎 Integridad — puntos/destacados sin respaldo</h3><div id="m-anomalias"><div class="dash-empty">Cargando…</div></div></div>
       <div class="dash-champ" id="m-campeon">—</div>
     </div>
   </div>
@@ -1048,6 +1052,29 @@ function renderChart(){
     + dias.map(d=>{const h=d.n?Math.max(Math.round(d.n/maxN*100),8):2;return `<div title="${lbl(d.dia)}: ${d.n} ${d.n===1?'venta':'ventas'} · ${money(d.monto)}" style="flex:1;background:${d.n?'var(--green)':'#1a1a1a'};height:${h}%;border-radius:2px 2px 0 0"></div>`;}).join('')
     + `</div><div style="font-size:.7rem;color:var(--muted);display:flex;justify-content:space-between"><span>${dias.length?lbl(dias[0].dia):''}</span><span style="color:var(--white)">${totalN} ${totalN===1?'venta':'ventas'} · ${money(totalM)}</span><span>hoy</span></div>`;
 }
+function renderEmbudo(m){
+  const el=document.getElementById('m-embudo'); if(!el)return;
+  const reg=m.creadores?.total||0, apr=m.creadores?.aprobados||0;
+  const post=m.postulaciones?.total||0, ven=m.ventas||0;
+  const pct=(a,b)=>b>0?Math.round(a/b*100):0;
+  const pasos=[
+    {lbl:'Registros', n:reg, sub:'creadores + marcas que entraron', conv:null},
+    {lbl:'Aprobados', n:apr, sub:`${pct(apr,reg)}% de los registros`, conv:pct(apr,reg)},
+    {lbl:'Postulaciones', n:post, sub:'creadores que se postularon a campañas', conv:null},
+    {lbl:'Ventas', n:ven, sub:`${pct(ven,post)}% de las postulaciones cerraron`, conv:pct(ven,post)},
+  ];
+  const maxN=Math.max(1,...pasos.map(p=>p.n));
+  el.innerHTML=`<div style="display:flex;flex-direction:column;gap:.55rem">`+pasos.map(p=>{
+    const w=Math.max(p.n?p.n/maxN*100:0, p.n?6:0);
+    return `<div>
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.2rem">
+        <span style="font-weight:800">${p.lbl}</span>
+        <span style="color:var(--muted2)">${p.n.toLocaleString('es-AR')}${p.sub?` · <span style="font-size:.72rem">${p.sub}</span>`:''}</span>
+      </div>
+      <div style="height:10px;background:#1a1a1a;border-radius:3px;overflow:hidden"><div style="height:100%;width:${w}%;background:var(--green);border-radius:3px"></div></div>
+    </div>`;
+  }).join('')+`</div>`;
+}
 async function loadMetrics(){
   try{
     const {data:m}=await adminCall('metrics');
@@ -1070,6 +1097,8 @@ async function loadMetrics(){
       const acc=[];
       if(m.creadores.pendientes>0) acc.push({txt:`${m.creadores.pendientes} creador${m.creadores.pendientes===1?'':'es'} pendiente${m.creadores.pendientes===1?'':'s'} de revisar`, tab:'creators', btn:'Revisar'});
       if(m.campanias.en_revision>0) acc.push({txt:`${m.campanias.en_revision} campaña${m.campanias.en_revision===1?'':'s'} en revisión`, tab:'campanias', btn:'Ver'});
+      if(m.reelsPend>0) acc.push({txt:`🎬 ${m.reelsPend} reel${m.reelsPend===1?'':'s'}/seguida${m.reelsPend===1?'':'s'} por verificar`, tab:'dashboard', btn:'Ver', accion:`document.getElementById('m-reels')?.scrollIntoView({behavior:'smooth'})`});
+      if(m.anomaliasTotal>0) acc.push({txt:`🔎 ${m.anomaliasTotal} alerta${m.anomaliasTotal===1?'':'s'} de integridad (puntos/boost sin respaldo)`, tab:'dashboard', btn:'Ver', accion:`document.getElementById('m-anomalias')?.scrollIntoView({behavior:'smooth'})`});
       if(m.resenas&&m.resenas.recientes>0) acc.push({txt:`${m.resenas.recientes} reseña${m.resenas.recientes===1?'':'s'} nueva${m.resenas.recientes===1?'':'s'} (últimos 7 días)`, tab:'resenas', btn:'Moderar'});
       const conContacto=(allCreators||[]).filter(c=>detectarContacto(c).length).length;
       if(conContacto>0) acc.push({txt:`⚠️ ${conContacto} creador${conContacto===1?'':'es'} con posible contacto en campos públicos`, tab:'creators', btn:'Revisar', accion:'revisarContacto()'});
@@ -1079,6 +1108,15 @@ async function loadMetrics(){
     }
 
     renderChart();
+    renderEmbudo(m);
+
+    const anom=document.getElementById('m-anomalias');
+    if(anom){
+      anom.innerHTML=(m.anomalias&&m.anomalias.length)
+        ? m.anomalias.map(a=>`<div class="dash-row"><span class="dash-name">${a.nombre}</span><span class="dash-val" style="color:var(--amber)">${a.motivo}</span></div>`).join('')
+          + (m.anomaliasTotal>m.anomalias.length?`<div class="dash-empty" style="text-align:left">…y ${m.anomaliasTotal-m.anomalias.length} más</div>`:'')
+        : '<div class="dash-empty">Sin anomalías — todo puntaje tiene un reporte aprobado detrás ✅</div>';
+    }
 
     const top=document.getElementById('m-top');
     top.innerHTML=(m.top&&m.top.length)

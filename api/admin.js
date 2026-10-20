@@ -628,14 +628,15 @@ export default async function handler(req, res) {
 
       // — Métricas del negocio para el dashboard —
       case 'metrics': {
-        const [conexiones, creators, campanias, marcas, resenas, postulaciones, vistas] = await Promise.all([
+        const [conexiones, creators, campanias, marcas, resenas, postulaciones, vistas, reelSubs] = await Promise.all([
           sb('conexiones?select=monto,origen,estado,creator_id,created_at,marca_email').catch(() => []),
-          sb('creators?select=id,nombre,status,racha,es_campeon,ig_user').catch(() => []),
+          sb('creators?select=id,nombre,status,racha,es_campeon,ig_user,puntos,reel_boost,rating_prom,rating_count').catch(() => []),
           sb('campanias?select=estado').catch(() => []),
           sb('marcas?select=email').catch(() => []),
           sb('resenas?select=rating,oculta,created_at').catch(() => []),
           sb('postulaciones?select=estado').catch(() => []),
           sb('vistas_perfil?select=id').catch(() => []),
+          sb('reel_submissions?select=creator_id,estado,tipo').catch(() => []),
         ]);
         const num = v => Number(v || 0);
         const pagadas = (conexiones || []).filter(c => (c.estado || 'pagado') === 'pagado');
@@ -708,6 +709,26 @@ export default async function handler(req, res) {
           fuentes = Object.entries(map).map(([fuente, n]) => ({ fuente, n })).sort((a, b) => b.n - a.n).slice(0, 10);
         } catch (_) { fuentes = null; }  // columna 'fuente' aún no creada
 
+        // Reels / seguidores pendientes de verificar
+        const reelsPend = (reelSubs || []).filter(s => (s.estado || 'pendiente') === 'pendiente').length;
+
+        // Chequeo de integridad: puntos/boost que no tengan un reporte aprobado detrás
+        const aprobadoPorCreador = new Set(
+          (reelSubs || []).filter(s => s.estado === 'aprobado').map(s => String(s.creator_id))
+        );
+        const anomalias = [];
+        for (const c of (cr || [])) {
+          const idc = String(c.id);
+          const tienePuntos = num(c.puntos) > 0;
+          const tieneBoost = c.reel_boost === true;
+          if ((tienePuntos || tieneBoost) && !aprobadoPorCreador.has(idc)) {
+            anomalias.push({
+              nombre: c.ig_user || c.nombre || '—',
+              motivo: tieneBoost ? 'destacado sin reel aprobado' : `${num(c.puntos)} pts sin reporte aprobado`,
+            });
+          }
+        }
+
         return res.status(200).json({
           ok: true,
           data: {
@@ -716,6 +737,7 @@ export default async function handler(req, res) {
             origen, creadores, top, ultimas, fuentes,
             vistas: vistasTotal, conversion, ticket,
             resenas: resenasStat, marcas: marcasStat, postulaciones: postStat, ventasPorDia,
+            reelsPend, anomalias: anomalias.slice(0, 12), anomaliasTotal: anomalias.length,
             campeon: champ ? (champ.ig_user || champ.nombre) : null,
             campanias: { total: cp.length, activas: cp.filter(c => c.estado === 'activa').length, en_revision: cp.filter(c => c.estado === 'en_revision').length },
           },

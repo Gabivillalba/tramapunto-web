@@ -325,8 +325,42 @@ function diasRestantes(f){
   return d;
 }
 
+// Afinidad creador ↔ campaña (0-99): formatos (45) + ubicación (25) + nicho (30)
+function matchScore(cr, c){
+  if(!cr) return null;
+  let score=0;
+  const fmts=(c.formatos||[]).map(x=>String(x).toLowerCase());
+  const haceVideo=(cr.t_reel>0)||(cr.tt_seg>0)||(cr.yt_seg>0)||(cr.ig_seg>0);
+  const haceStory=(cr.t_story>0)||(cr.ig_seg>0);
+  const hacePost=(cr.t_post>0)||(cr.ig_seg>0);
+  const puede=f=>{
+    if(/reel|tiktok|video/.test(f)) return haceVideo;
+    if(/story|stories|historia/.test(f)) return haceStory;
+    if(/post|feed|foto/.test(f)) return hacePost;
+    return true;
+  };
+  if(fmts.length){ const ok=fmts.filter(puede).length; score+=Math.round(45*ok/fmts.length); }
+  else score+=45;
+  if(c.es_presencial){
+    const u=String(c.ubicacion||'').toLowerCase(), ci=String(cr.ciudad||'').toLowerCase();
+    const ciTok=ci.split(/[ ,]/)[0]||'';
+    score+=(ci&&u&&(u.includes(ci)||(ciTok&&u.includes(ciTok))))?25:6;
+  } else score+=25;
+  const texto=`${c.titulo||''} ${c.descripcion||''} ${c.requisitos||''}`.toLowerCase();
+  const nichos=(cr.niches||[]).map(n=>String(n).toLowerCase());
+  score+=nichos.some(n=>n&&texto.includes(n))?30:14;
+  return Math.max(35, Math.min(99, score));
+}
+function matchChipHtml(ms){
+  if(ms==null) return '';
+  const col=ms>=85?{bg:'#0f1a00',c:'var(--green)',b:'#2a4000'}:ms>=70?{bg:'#1a1200',c:'#f59e0b',b:'#2a2000'}:{bg:'#141414',c:'var(--muted2)',b:'#222'};
+  return `<span class="b" style="background:${col.bg};color:${col.c};border:1px solid ${col.b}">${ms}% match</span>`;
+}
+
 function render(){
-  const list=filtro==='todas'?campanias:campanias.filter(c=>c.tipo===filtro);
+  let list=filtro==='todas'?campanias:campanias.filter(c=>c.tipo===filtro);
+  const puedeMatch = creator && creator.status==='aprobado';
+  if(puedeMatch) list=list.slice().sort((a,b)=>(matchScore(creator,b)-matchScore(creator,a)));
   const g=document.getElementById('grid');
 
   if(!list.length){
@@ -341,6 +375,7 @@ function render(){
     const yaPostulado=misPostulaciones.includes(c.id);
     const puedePostular = creator && creator.status==='aprobado';
 
+    const ms=(creator&&creator.status==='aprobado')?matchScore(creator,c):null;
     let btn;
     if(yaPostulado) btn=`<button class="btn-post done" disabled>✓ Postulado</button>`;
     else if(puedePostular) btn=`<button class="btn-post" onclick="abrirModal('${c.id}')">Postularme →</button>`;
@@ -354,6 +389,7 @@ function render(){
           <div class="c-title">${c.titulo||''}</div>
         </div>
         <div class="badges">
+          ${matchChipHtml(ms)}
           <span class="b b-tipo">${TIPO_LBL[c.tipo]||c.tipo}</span>
           ${c.es_canje?'<span class="b b-canje">+ Canje</span>':''}
           ${c.es_presencial?'<span class="b b-pres">Presencial</span>':''}

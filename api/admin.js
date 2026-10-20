@@ -666,6 +666,16 @@ export default async function handler(req, res) {
           .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || '')).slice(0, 6)
           .map(c => ({ nombre: byId[String(c.creator_id)] || '—', monto: num(c.monto), origen: c.origen || 'bolsa', fecha: c.created_at }));
 
+        // Devoluciones / contracargos
+        const devueltas = (conexiones || []).filter(c => c.estado === 'devuelto');
+        const devoluciones = {
+          n: devueltas.length,
+          monto: devueltas.reduce((a, c) => a + num(c.monto), 0),
+          list: [...devueltas]
+            .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || '')).slice(0, 8)
+            .map(c => ({ nombre: byId[String(c.creator_id)] || '—', monto: num(c.monto), origen: c.origen || 'bolsa', fecha: c.created_at })),
+        };
+
         const cr = creators || [];
         const creadores = {
           total: cr.length,
@@ -738,6 +748,7 @@ export default async function handler(req, res) {
             vistas: vistasTotal, conversion, ticket,
             resenas: resenasStat, marcas: marcasStat, postulaciones: postStat, ventasPorDia,
             reelsPend, anomalias: anomalias.slice(0, 12), anomaliasTotal: anomalias.length,
+            devoluciones,
             campeon: champ ? (champ.ig_user || champ.nombre) : null,
             campanias: { total: cp.length, activas: cp.filter(c => c.estado === 'activa').length, en_revision: cp.filter(c => c.estado === 'en_revision').length },
           },

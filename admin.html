@@ -359,6 +359,7 @@ textarea.em-inp{resize:vertical;line-height:1.5}
       </div>
       <div class="dash-box" style="margin-top:1rem"><h3>🎬 Reels y seguidores a verificar</h3><div id="m-reels"><div class="dash-empty">Cargando…</div></div></div>
       <div class="dash-box" style="margin-top:1rem"><h3>🔎 Integridad — puntos/destacados sin respaldo</h3><div id="m-anomalias"><div class="dash-empty">Cargando…</div></div></div>
+      <div class="dash-box" style="margin-top:1rem"><h3>↩️ Devoluciones de pago</h3><div id="m-devoluciones"><div class="dash-empty">Cargando…</div></div></div>
       <div class="dash-champ" id="m-campeon">—</div>
     </div>
   </div>
@@ -1099,6 +1100,7 @@ async function loadMetrics(){
       if(m.campanias.en_revision>0) acc.push({txt:`${m.campanias.en_revision} campaña${m.campanias.en_revision===1?'':'s'} en revisión`, tab:'campanias', btn:'Ver'});
       if(m.reelsPend>0) acc.push({txt:`🎬 ${m.reelsPend} reel${m.reelsPend===1?'':'s'}/seguida${m.reelsPend===1?'':'s'} por verificar`, tab:'dashboard', btn:'Ver', accion:`document.getElementById('m-reels')?.scrollIntoView({behavior:'smooth'})`});
       if(m.anomaliasTotal>0) acc.push({txt:`🔎 ${m.anomaliasTotal} alerta${m.anomaliasTotal===1?'':'s'} de integridad (puntos/boost sin respaldo)`, tab:'dashboard', btn:'Ver', accion:`document.getElementById('m-anomalias')?.scrollIntoView({behavior:'smooth'})`});
+      if(m.devoluciones&&m.devoluciones.n>0) acc.push({txt:`↩️ ${m.devoluciones.n} devolución${m.devoluciones.n===1?'':'es'} de pago (${money(m.devoluciones.monto)})`, tab:'dashboard', btn:'Ver', accion:`document.getElementById('m-devoluciones')?.scrollIntoView({behavior:'smooth'})`});
       if(m.resenas&&m.resenas.recientes>0) acc.push({txt:`${m.resenas.recientes} reseña${m.resenas.recientes===1?'':'s'} nueva${m.resenas.recientes===1?'':'s'} (últimos 7 días)`, tab:'resenas', btn:'Moderar'});
       const conContacto=(allCreators||[]).filter(c=>detectarContacto(c).length).length;
       if(conContacto>0) acc.push({txt:`⚠️ ${conContacto} creador${conContacto===1?'':'es'} con posible contacto en campos públicos`, tab:'creators', btn:'Revisar', accion:'revisarContacto()'});
@@ -1116,6 +1118,15 @@ async function loadMetrics(){
         ? m.anomalias.map(a=>`<div class="dash-row"><span class="dash-name">${a.nombre}</span><span class="dash-val" style="color:var(--amber)">${a.motivo}</span></div>`).join('')
           + (m.anomaliasTotal>m.anomalias.length?`<div class="dash-empty" style="text-align:left">…y ${m.anomaliasTotal-m.anomalias.length} más</div>`:'')
         : '<div class="dash-empty">Sin anomalías — todo puntaje tiene un reporte aprobado detrás ✅</div>';
+    }
+
+    const dev=document.getElementById('m-devoluciones');
+    if(dev){
+      const D=m.devoluciones||{n:0,list:[]};
+      dev.innerHTML=(D.n>0)
+        ? `<div style="font-size:.78rem;color:var(--amber);margin-bottom:.5rem">${D.n} ${D.n===1?'devolución':'devoluciones'} · ${money(D.monto)} total</div>`
+          + (D.list||[]).map(x=>{const f=x.fecha?new Date(x.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):'';return `<div class="dash-row"><span class="dash-name">${x.nombre}</span><span class="dash-val">${money(x.monto)} · ${x.origen==='trabajo'?'trabajo':x.origen==='campania'?'campaña':'bolsa'} · ${f}</span></div>`;}).join('')
+        : '<div class="dash-empty">Sin devoluciones ✅</div>';
     }
 
     const top=document.getElementById('m-top');

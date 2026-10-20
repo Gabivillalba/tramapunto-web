@@ -23,11 +23,44 @@ export default async function handler(req, res) {
     });
     const payment = await mpRes.json();
 
-    if (payment.status !== 'approved') {
+    const esDevolucion = (payment.status === 'refunded' || payment.status === 'charged_back');
+    if (payment.status !== 'approved' && !esDevolucion) {
       return res.status(200).json({ received: true, status: payment.status });
     }
 
     const parts = (payment.external_reference || '').split('|');
+    const H = {
+      apikey: process.env.SUPABASE_SERVICE_KEY,
+      Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}`,
+      'Content-Type': 'application/json',
+    };
+
+    // ══ DEVOLUCIÓN / contracargo de un pago ══
+    if (esDevolucion) {
+      // Marcar la conexión (ledger) como devuelta
+      await fetch(`${process.env.SUPABASE_URL}/rest/v1/conexiones?voucher_id=eq.${encodeURIComponent(String(payment.id))}`, {
+        method: 'PATCH', headers: { ...H, Prefer: 'return=minimal' },
+        body: JSON.stringify({ estado: 'devuelto' }),
+      }).catch(() => {});
+      // Si era un trabajo de campaña, revertir la postulación y avisar a ambas partes
+      if (parts[0] === 'trabajo') {
+        const postulacion_id = parts[1];
+        const creator_id = parts[2];
+        if (postulacion_id) {
+          await fetch(`${process.env.SUPABASE_URL}/rest/v1/postulaciones?id=eq.${encodeURIComponent(postulacion_id)}`, {
+            method: 'PATCH', headers: { ...H, Prefer: 'return=minimal' },
+            body: JSON.stringify({ pago_estado: 'devuelto', estado: 'entregada' }),
+          }).catch(() => {});
+        }
+        const cr = creator_id ? await fetch(`${process.env.SUPABASE_URL}/rest/v1/creators?id=eq.${encodeURIComponent(creator_id)}&select=email`, { headers: H }).then(r => r.ok ? r.json() : []).catch(() => []) : [];
+        const cemail = cr && cr[0] && cr[0].email;
+        if (cemail) await fetch(`${process.env.SUPABASE_URL}/rest/v1/notificaciones`, {
+          method: 'POST', headers: { ...H, Prefer: 'return=minimal' },
+          body: JSON.stringify({ para_email: cemail, tipo: 'sistema', titulo: '↩️ Se devolvió un pago', cuerpo: 'Se procesó una devolución del pago de un trabajo de campaña. Si tenés dudas, escribinos.', link: '/perfil.html' }),
+        }).catch(() => {});
+      }
+      return res.status(200).json({ received: true, refunded: true });
+    }
 
     // ══ Pago del TRABAJO de campaña (split): trabajo|postulacion_id|creator_id|campania_id ══
     if (parts[0] === 'trabajo') {
@@ -36,11 +69,6 @@ export default async function handler(req, res) {
       const trabajo_campania = parts[3] || null;
       if (!postulacion_id) return res.status(400).json({ error: 'Referencia de trabajo inválida' });
 
-      const H = {
-        apikey: process.env.SUPABASE_SERVICE_KEY,
-        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}`,
-        'Content-Type': 'application/json',
-      };
       // Marcar la postulación como pagada
       await fetch(`${process.env.SUPABASE_URL}/rest/v1/postulaciones?id=eq.${encodeURIComponent(postulacion_id)}`, {
         method: 'PATCH', headers: { ...H, Prefer: 'return=minimal' },

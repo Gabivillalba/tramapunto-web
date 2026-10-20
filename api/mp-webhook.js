@@ -6,9 +6,71 @@
 // (las versiones viejas solo traían creator_id|marca_email — se siguen
 //  soportando para no romper pagos en vuelo).
 
+import crypto from 'node:crypto';
+import { decrypt } from '../lib/mp-crypto.js';
+
+// Valida la firma HMAC-SHA256 que MercadoPago envía en el header x-signature.
+// Requiere MP_WEBHOOK_SECRET (la "clave secreta" del webhook, desde el panel de MP).
+// Si no está configurada NO bloquea, para no romper notificaciones durante el rollout:
+// apenas cargás el secret, la validación queda activa.
+function firmaMpValida(req) {
+  const secret = process.env.MP_WEBHOOK_SECRET;
+  if (!secret) return true;                 // sin secret configurado todavía: no bloquea
+  const sig = String(req.headers['x-signature'] || '');
+  const reqId = String(req.headers['x-request-id'] || '');
+  const parts = {};
+  for (const kv of sig.split(',')) {
+    const i = kv.indexOf('=');
+    if (i !== -1) parts[kv.slice(0, i).trim()] = kv.slice(i + 1).trim();
+  }
+  const ts = parts.ts, v1 = parts.v1;
+  if (!ts || !v1) return false;
+  const q = req.query || {};
+  let dataId = q['data.id'] ?? q.id ?? (req.body && req.body.data && req.body.data.id);
+  dataId = dataId != null ? String(dataId) : '';
+  if (/[a-zA-Z]/.test(dataId)) dataId = dataId.toLowerCase();
+  const manifest = `id:${dataId};request-id:${reqId};ts:${ts};`;
+  const esperado = crypto.createHmac('sha256', secret).update(manifest).digest('hex');
+  const a = Buffer.from(esperado), b = Buffer.from(v1);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+// Lee el pago desde MercadoPago. Primero con el token de TRAMA (marketplace); si
+// falla (p. ej. un pago split cobrado por el creador que el token de TRAMA no puede
+// leer), reintenta con los tokens de los creadores conectados hasta dar con el dueño.
+async function obtenerPago(paymentId) {
+  const trama = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+    headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` },
+  });
+  if (trama.ok) return trama.json();
+  try {
+    const H = { apikey: process.env.SUPABASE_SERVICE_KEY, Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}` };
+    const cres = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/creators?mp_conectado=eq.true&mp_access_token=not.is.null&select=mp_access_token&limit=200`,
+      { headers: H }
+    ).then(r => (r.ok ? r.json() : [])).catch(() => []);
+    for (const c of cres) {
+      let tok;
+      try { tok = decrypt(c.mp_access_token); } catch { continue; }
+      if (!tok) continue;
+      const rr = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+        headers: { Authorization: `Bearer ${tok}` },
+      });
+      if (rr.ok) return rr.json();
+    }
+  } catch (e) {
+    console.error('obtenerPago fallback error:', e);
+  }
+  return trama.json().catch(() => ({}));    // nada funcionó: devolvemos el intento original (no-ok)
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
+  }
+
+  if (!firmaMpValida(req)) {
+    return res.status(401).json({ error: 'Firma inválida' });
   }
 
   const { type, data } = req.body;
@@ -17,11 +79,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Verificar el pago con MercadoPago
-    const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${data.id}`, {
-      headers: { 'Authorization': `Bearer ${process.env.MP_ACCESS_TOKEN}` }
-    });
-    const payment = await mpRes.json();
+    // Verificar el pago con MercadoPago (token de TRAMA, con fallback al del creador)
+    const payment = await obtenerPago(data.id);
 
     const esDevolucion = (payment.status === 'refunded' || payment.status === 'charged_back');
     if (payment.status !== 'approved' && !esDevolucion) {

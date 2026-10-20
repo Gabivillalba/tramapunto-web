@@ -6,6 +6,7 @@
 // El contacto de los creadores dejó de ser legible con la clave pública, así que
 // el propio perfil se busca por email acá, en el servidor (service_role + JWT).
 // El OAuth vive acá (y no en un archivo nuevo) para no pasar el límite de 12 funciones.
+import { encrypt } from '../lib/mp-crypto.js';
 
 const SB_URL     = process.env.SUPABASE_URL;
 const SB_SERVICE = process.env.SUPABASE_SERVICE_KEY;
@@ -100,8 +101,8 @@ export default async function handler(req, res) {
       const expira = t.expires_in ? new Date(Date.now() + Number(t.expires_in) * 1000).toISOString() : null;
       await sbPatch(`creators?id=eq.${encodeURIComponent(cre[0].id)}`, {
         mp_user_id: t.user_id ? String(t.user_id) : null,
-        mp_access_token: t.access_token,
-        mp_refresh_token: t.refresh_token || null,
+        mp_access_token: encrypt(t.access_token),
+        mp_refresh_token: encrypt(t.refresh_token || null),
         mp_token_expira: expira,
         mp_conectado: true,
         mp_oauth_state: null,

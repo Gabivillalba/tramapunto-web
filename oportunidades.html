@@ -207,6 +207,17 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
   </div>
 </div>
 
+<div class="modal-bg" id="detalleBg" onclick="if(event.target===this)closeDetalle()">
+  <div class="modal">
+    <div class="m-head">
+      <div class="m-tag">Campaña</div>
+      <div class="m-title" id="dTitle">—</div>
+      <div class="m-marca" id="dMarca">—</div>
+    </div>
+    <div class="m-body" id="dBody"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -357,6 +368,44 @@ function matchChipHtml(ms){
   return `<span class="b" style="background:${col.bg};color:${col.c};border:1px solid ${col.b}">${ms}% match</span>`;
 }
 
+function truncar(t,n){ t=String(t||''); return t.length>n ? t.slice(0,n).trim()+'…' : t; }
+
+// ── MODAL DE DETALLE (Ver más) ──
+function verDetalle(id){
+  const c=campanias.find(x=>x.id===id); if(!c) return;
+  document.getElementById('dTitle').textContent=c.titulo||'Campaña';
+  document.getElementById('dMarca').textContent=(c.marca_nombre||'Marca')+' · '+presupuesto(c);
+  const dias=diasRestantes(c.fecha_limite);
+  const cierreTxt = dias===null?'Sin fecha límite':dias<0?'Cerrada':dias===0?'Cierra hoy':dias===1?'Cierra mañana':`Cierra en ${dias} días`;
+  const yaPostulado=misPostulaciones.includes(c.id);
+  const puedePostular = creator && creator.status==='aprobado';
+  let btn;
+  if(yaPostulado) btn=`<button class="btn-send" disabled style="width:100%">✓ Ya te postulaste</button>`;
+  else if(puedePostular) btn=`<button class="btn-send" style="width:100%" onclick="closeDetalle();abrirModal('${c.id}')">Postularme →</button>`;
+  else if(!creator) btn=`<a class="btn-send" href="/registro.html" style="width:100%;display:block;text-align:center;text-decoration:none">Registrate para postularte</a>`;
+  else btn=`<button class="btn-send" disabled style="width:100%">Perfil en revisión</button>`;
+  const row=(k,v)=>v?`<div class="m-row"><span class="m-k">${k}</span><span class="m-v">${v}</span></div>`:'';
+  document.getElementById('dBody').innerHTML=`
+    <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem">
+      <span class="b b-tipo">${TIPO_LBL[c.tipo]||c.tipo}</span>
+      ${c.es_canje?'<span class="b b-canje">+ Canje</span>':''}
+      ${c.es_presencial?'<span class="b b-pres">Presencial</span>':''}
+    </div>
+    ${c.descripcion?`<div class="c-desc" style="margin-bottom:1rem">${c.descripcion}</div>`:''}
+    ${c.formatos&&c.formatos.length?`<div class="c-formats" style="margin-bottom:1rem">${c.formatos.map(f=>`<span class="fmt">${f}</span>`).join('')}</div>`:''}
+    <div class="c-meta" style="margin-bottom:1.25rem">
+      <div class="m-row"><span class="m-k">Presupuesto</span><span class="m-v money">${presupuesto(c)}</span></div>
+      ${row('Entregables',c.entregables)}
+      ${row('Requisitos',c.requisitos)}
+      ${c.es_presencial?row('Dónde',c.ubicacion):''}
+      <div class="m-row"><span class="m-k">Cupos</span><span class="m-v">${c.cupos||1}</span></div>
+      <div class="m-row"><span class="m-k">Cierre</span><span class="m-v">${cierreTxt}</span></div>
+    </div>
+    ${btn}`;
+  document.getElementById('detalleBg').classList.add('show');
+}
+function closeDetalle(){ document.getElementById('detalleBg').classList.remove('show'); }
+
 function render(){
   let list=filtro==='todas'?campanias:campanias.filter(c=>c.tipo===filtro);
   const puedeMatch = creator && creator.status==='aprobado';
@@ -396,15 +445,12 @@ function render(){
         </div>
       </div>
 
-      <div class="c-desc">${c.descripcion||''}</div>
+      <div class="c-desc">${truncar(c.descripcion||'', 130)} <a onclick="verDetalle('${c.id}')" style="color:var(--green);cursor:pointer;font-weight:700;white-space:nowrap">Ver más</a></div>
 
       ${c.formatos&&c.formatos.length?`<div class="c-formats">${c.formatos.map(f=>`<span class="fmt">${f}</span>`).join('')}</div>`:''}
 
       <div class="c-meta">
         <div class="m-row"><span class="m-k">Presupuesto</span><span class="m-v money">${presupuesto(c)}</span></div>
-        ${c.entregables?`<div class="m-row"><span class="m-k">Entregables</span><span class="m-v">${c.entregables}</span></div>`:''}
-        ${c.requisitos?`<div class="m-row"><span class="m-k">Requisitos</span><span class="m-v">${c.requisitos}</span></div>`:''}
-        ${c.es_presencial&&c.ubicacion?`<div class="m-row"><span class="m-k">Dónde</span><span class="m-v">${c.ubicacion}</span></div>`:''}
         <div class="m-row"><span class="m-k">Cupos</span><span class="m-v">${c.cupos||1}</span></div>
       </div>
 

@@ -149,6 +149,22 @@ export default async function handler(req, res) {
     }
   }
 
+  // ══ Bonus por seguir a @tramapunto: +50 puntos, una sola vez ══
+  if (req.body && req.body.accion === 'follow_bonus') {
+    try {
+      const cre = await sbGet(`creators?email=eq.${enc}&limit=1&select=id,puntos,ig_follow_at`);
+      if (!cre || !cre[0]) return res.status(404).json({ error: 'Perfil de creador no encontrado' });
+      const c = cre[0];
+      if (c.ig_follow_at) return res.status(200).json({ ok: true, yaReclamado: true, puntos: c.puntos });
+      const nuevos = (Number(c.puntos) || 0) + 50;
+      await sbPatch(`creators?id=eq.${encodeURIComponent(c.id)}`, { puntos: nuevos, ig_follow_at: new Date().toISOString() });
+      return res.status(200).json({ ok: true, puntos: nuevos, sumado: 50 });
+    } catch (err) {
+      console.error('follow_bonus error:', err);
+      return res.status(500).json({ error: 'No se pudo sumar los puntos' });
+    }
+  }
+
   try {
     const cre = await sbGet(`creators?email=ilike.${enc}&limit=1&select=*`);
     if (cre && cre[0]) {

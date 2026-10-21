@@ -356,6 +356,14 @@ section{padding:5rem 1.5rem;border-top:1px solid #161616}
 .cf-thumb{position:relative;aspect-ratio:1;border-radius:3px;overflow:hidden;background:#111;border:1px solid #222}
 .cf-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .cf-more{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff;font-weight:800}
+
+.cart-btn{background:none;border:1px solid #2a2a2a;border-radius:3px;color:var(--muted);cursor:pointer;font-size:.85rem;padding:2px 5px;line-height:1}
+.cart-btn.on{border-color:var(--green);background:#0a1a0a}
+.cart-fab{position:fixed;bottom:1.2rem;right:1.2rem;z-index:350;background:var(--green);color:#080808;border:none;border-radius:40px;padding:.8rem 1.2rem;font-weight:800;font-size:.9rem;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.5);align-items:center;gap:.4rem}
+.cart-row{display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px solid #1a1a1a;font-size:.88rem}
+.cart-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;font-weight:800}
+     
+     
 /* GATE MODAL */
 .gate-modal{background:var(--g1);border:1px solid #222;padding:2rem;width:100%;max-width:420px;position:relative;border-radius:3px;text-align:center}
 .gate-icon{font-size:2rem;margin-bottom:1rem}
@@ -811,6 +819,19 @@ footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-dire
 
 <div class="toast" id="toast"></div>
 
+<!-- CARRITO (desbloqueo múltiple de la bolsa) -->
+<button id="cartFab" class="cart-fab" onclick="abrirCarrito()" style="display:none">🛒 <span id="cartFabN">0</span></button>
+<div class="modal-bg" id="cartModal">
+  <div class="modal">
+    <button class="modal-x" onclick="cerrarCarrito()">✕</button>
+    <div class="m-tag">TRAMA.</div>
+    <h3 class="m-title" style="margin-bottom:.9rem">Tu carrito</h3>
+    <div id="cartList"></div>
+    <div id="cartTotal" style="margin:.9rem 0;font-weight:800;color:var(--green)"></div>
+    <button class="card-btn" id="cartPayBtn" onclick="pagarCarrito()">Pagar todo con MercadoPago →</button>
+  </div>
+</div>
+
 <script>
 const SB_URL  = 'https://mcpmabvxmdepastmpzbi.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
@@ -1230,7 +1251,46 @@ function badgesDe(c){
   if(c.es_pet) b.push(`<span class="c-rep pet">🐾 Pet creator${c.pet_nombre?' · '+c.pet_nombre:''}</span>`);
   return b.length?`<div class="card-reps">${b.join('')}</div>`:'';
 }
-
+// ── CARRITO (desbloqueo múltiple de la bolsa) ──
+let cart=[];
+try{ cart=JSON.parse(localStorage.getItem('trama_cart')||'[]'); if(!Array.isArray(cart)) cart=[]; }catch(_){ cart=[]; }
+function cartSave(){ try{ localStorage.setItem('trama_cart', JSON.stringify(cart)); }catch(_){}}
+function cartHas(id){ return cart.some(x=>x&&x.id===id); }
+function toggleCart(id, ev){ if(ev) ev.stopPropagation();
+  if(cartHas(id)){ cart=cart.filter(x=>x.id!==id); }
+  else{ const c=(allCreators||[]).find(x=>x.id===id); cart.push({id, nombre:(c&&c.nombre)||'Creador'}); }
+  cartSave(); renderBolsa();
+}
+function cartMoney(n){ return '$'+Number(n||0).toLocaleString('es-AR')+' ARS'; }
+function renderCartUI(){
+  const n=cart.length;
+  const fab=document.getElementById('cartFab');
+  if(fab){ fab.style.display=n?'flex':'none'; const fn=document.getElementById('cartFabN'); if(fn) fn.textContent=n; }
+  const list=document.getElementById('cartList');
+  if(list) list.innerHTML = n ? cart.map(it=>`<div class="cart-row"><span>${it.nombre}</span><button class="cart-del" title="Quitar" onclick="toggleCart('${it.id}')">✕</button></div>`).join('') : '<div style="color:var(--muted);font-size:.85rem;padding:.5rem 0">El carrito está vacío.</div>';
+  const tot=document.getElementById('cartTotal');
+  if(tot) tot.textContent = n ? `${n} contacto${n>1?'s':''} · ${cartMoney((PRECIO.monto||0)*n)}` : '';
+  const payb=document.getElementById('cartPayBtn');
+  if(payb) payb.style.display = n ? 'block':'none';
+}
+function abrirCarrito(){ renderCartUI(); document.getElementById('cartModal').classList.add('open'); document.body.style.overflow='hidden'; }
+function cerrarCarrito(){ document.getElementById('cartModal').classList.remove('open'); document.body.style.overflow=''; }
+document.getElementById('cartModal')?.addEventListener('click',e=>{ if(e.target===document.getElementById('cartModal')) cerrarCarrito(); });
+async function pagarCarrito(){
+  if(!cart.length) return;
+  const session=localStorage.getItem('trama_marca')||localStorage.getItem('trama_creator');
+  if(!session){ cerrarCarrito(); document.getElementById('gateModal').classList.add('open'); document.body.style.overflow='hidden'; return; }
+  const buyer=JSON.parse(session);
+  const btn=document.getElementById('cartPayBtn'); if(btn){ btn.disabled=true; btn.textContent='Conectando con MercadoPago...'; }
+  try{
+    const res=await fetch('/api/crear-preferencia',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({origen:'carrito', creator_ids:cart.map(x=>x.id), marca_email:buyer.email||'anonimo@trama.com', marca_nombre:buyer.nombre||'Comprador TRAMA.'})});
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error||'Error al crear preferencia');
+    if(data.yaComprado){ showToast(data.mensaje||'Ya tenés acceso a esos contactos.','ok'); if(btn){ btn.disabled=false; btn.textContent='Pagar todo con MercadoPago →'; } return; }
+    cart=[]; cartSave();
+    window.location.href=data.init_point||data.sandbox_init_point;
+  }catch(e){ showToast('Error: '+e.message,'err'); if(btn){ btn.disabled=false; btn.textContent='Pagar todo con MercadoPago →'; } }
+}
 function renderBolsa(){
   const q=(document.getElementById('searchInp')?.value||'').toLowerCase().trim();
   const city=document.getElementById('fCity')?.value||'todas';
@@ -1285,6 +1345,7 @@ function renderBolsa(){
           ${c.racha>0?`<span class="card-badge badge-top">🔥 ${c.racha}</span>`:''}
           <button class="cmp-btn${compareSet.has(c.id)?' on':''}" title="Comparar" onclick="toggleCompare('${c.id}',event)">⚖</button>
           <button class="fav-btn${favSet.has(c.id)?' on':''}" title="Guardar" onclick="toggleFav('${c.id}',event)">${favSet.has(c.id)?'★':'☆'}</button>
+          <button class="cart-btn${cartHas(c.id)?' on':''}" title="${cartHas(c.id)?'Quitar del carrito':'Agregar al carrito'}" onclick="toggleCart('${c.id}',event)">🛒</button>
         </div>
       </div>
       <div class="card-name">${c.nombre}</div>
@@ -1302,6 +1363,7 @@ function renderBolsa(){
       <button class="card-btn" onclick="openModal('${c.id}',${i})">Conectar · ${PRECIO.label} →</button>
     </div>`;
   }).join('');
+  renderCartUI();
 }
 
 // ── MODAL CONTACTO ──

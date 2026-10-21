@@ -1335,7 +1335,7 @@ function renderBolsa(){
     const er=c.ig_er||c.tt_er||0;
     const plats=c.plats||[];
     const niches=(c.niches||[]).join(' · ')||'—';
-    const avHtml=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre}">`:`<span>${init}</span>`;
+    const avHtml=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre}" onerror="this.onerror=null;this.outerHTML='<span>${init}</span>'">`:`<span>${init}</span>`;
     const fotos=Array.isArray(c.fotos)?c.fotos.filter(Boolean):[];
     const fotosStrip=fotos.length?`<div class="card-fotos" onclick="openModal('${c.id}',${i})" title="Ver fotos de ${c.nombre}">${fotos.slice(0,3).map((u,fx)=>`<div class="cf-thumb"><img src="${u}" alt="" loading="lazy">${(fx===2&&fotos.length>3)?`<span class="cf-more">+${fotos.length-3}</span>`:''}</div>`).join('')}</div>`:'';
     return`<div class="c-card">

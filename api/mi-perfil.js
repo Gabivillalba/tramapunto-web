@@ -123,6 +123,32 @@ export default async function handler(req, res) {
   if (!email) return res.status(401).json({ error: 'Sesión no válida' });
 
   const enc = encodeURIComponent(email);
+
+  // ══ Auto-borrado de la propia cuenta (creator o marca): libera el email para re-registro ══
+  if (req.body && req.body.eliminar === true) {
+    const H = { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}` };
+    const del = (path) => fetch(`${SB_URL}/rest/v1/${path}`, { method: 'DELETE', headers: H });
+    try {
+      // Match exacto (eq), NO ilike: el '_' es comodín en SQL y borraría la cuenta equivocada.
+      const cre = await sbGet(`creators?email=eq.${enc}&limit=1&select=id`);
+      const mar = (cre && cre[0]) ? null : await sbGet(`marcas?email=eq.${enc}&limit=1&select=id`);
+      if (cre && cre[0]) {
+        await del(`conexiones?creator_id=eq.${encodeURIComponent(cre[0].id)}`).catch(() => {});
+        await del(`creators?id=eq.${encodeURIComponent(cre[0].id)}`);
+      } else if (mar && mar[0]) {
+        await del(`marcas?id=eq.${encodeURIComponent(mar[0].id)}`);
+      }
+      // Borrar la cuenta de Auth (lo que libera el email)
+      const u = await fetch(`${SB_URL}/auth/v1/admin/users?email=${encodeURIComponent(email)}`, { headers: H }).then(r => r.ok ? r.json() : null).catch(() => null);
+      const authId = u?.users?.[0]?.id || u?.[0]?.id || null;
+      if (authId) await fetch(`${SB_URL}/auth/v1/admin/users/${authId}`, { method: 'DELETE', headers: H }).catch(() => {});
+      return res.status(200).json({ ok: true, eliminado: true });
+    } catch (err) {
+      console.error('eliminar perfil error:', err);
+      return res.status(500).json({ error: 'No se pudo eliminar la cuenta' });
+    }
+  }
+
   try {
     const cre = await sbGet(`creators?email=ilike.${enc}&limit=1&select=*`);
     if (cre && cre[0]) {

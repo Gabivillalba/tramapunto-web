@@ -457,6 +457,34 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
+      // — Eliminar una marca DEFINITIVAMENTE (fila + cuenta de Auth) —
+      case 'delete_marca': {
+        const { id } = payload;
+        if (!id) return res.status(400).json({ error: 'Falta id' });
+        let email = null;
+        try {
+          const rows = await sb(`marcas?id=eq.${id}&select=email`);
+          email = rows?.[0]?.email || null;
+        } catch (_) { /* seguimos igual */ }
+        await sb(`marcas?id=eq.${id}`, 'DELETE');
+        if (email) {
+          try {
+            const u = await fetch(
+              `${SB_URL}/auth/v1/admin/users?email=${encodeURIComponent(email)}`,
+              { headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}` } }
+            ).then(r => r.ok ? r.json() : null);
+            const authId = u?.users?.[0]?.id || u?.[0]?.id || null;
+            if (authId) {
+              await fetch(`${SB_URL}/auth/v1/admin/users/${authId}`, {
+                method: 'DELETE',
+                headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}` },
+              });
+            }
+          } catch (_) { /* best-effort */ }
+        }
+        return res.status(200).json({ ok: true });
+      }
+
       // — Crear cuentas de acceso para creators que no la tienen (backfill) —
       case 'backfill_cuentas': {
         const LOTE = Math.min(Number(payload.limit) || 20, 40);

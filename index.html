@@ -352,6 +352,10 @@ section{padding:5rem 1.5rem;border-top:1px solid #161616}
 .c-key{color:var(--muted);width:70px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 .c-val{color:var(--white);font-weight:600;font-size:.8rem;word-break:break-all}
 
+.card-fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem;margin:.55rem 0 .15rem;cursor:pointer}
+.cf-thumb{position:relative;aspect-ratio:1;border-radius:3px;overflow:hidden;background:#111;border:1px solid #222}
+.cf-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.cf-more{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff;font-weight:800}
 /* GATE MODAL */
 .gate-modal{background:var(--g1);border:1px solid #222;padding:2rem;width:100%;max-width:420px;position:relative;border-radius:3px;text-align:center}
 .gate-icon{font-size:2rem;margin-bottom:1rem}
@@ -1272,6 +1276,8 @@ function renderBolsa(){
     const plats=c.plats||[];
     const niches=(c.niches||[]).join(' · ')||'—';
     const avHtml=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre}">`:`<span>${init}</span>`;
+    const fotos=Array.isArray(c.fotos)?c.fotos.filter(Boolean):[];
+    const fotosStrip=fotos.length?`<div class="card-fotos" onclick="openModal('${c.id}',${i})" title="Ver fotos de ${c.nombre}">${fotos.slice(0,3).map((u,fx)=>`<div class="cf-thumb"><img src="${u}" alt="" loading="lazy">${(fx===2&&fotos.length>3)?`<span class="cf-more">+${fotos.length-3}</span>`:''}</div>`).join('')}</div>`:'';
     return`<div class="c-card">
       <div class="card-top">
         <div class="card-av" style="background:${bg};border-color:${col}33;color:${col}">${avHtml}</div>
@@ -1292,6 +1298,7 @@ function renderBolsa(){
       </div>
       <div class="card-tags">${(c.niches||[]).map(n=>`<span class="c-tag">${n}</span>`).join('')}</div>
       <div class="card-plats">${plats.map(p=>`<span class="plat">${p}</span>`).join('')}</div>
+      ${fotosStrip}
       <button class="card-btn" onclick="openModal('${c.id}',${i})">Conectar · ${PRECIO.label} →</button>
     </div>`;
   }).join('');

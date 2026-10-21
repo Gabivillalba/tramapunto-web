@@ -138,6 +138,12 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .toast.err{background:#1a0000;border:1px solid #2a0000;color:var(--red)}
 .toast.info{background:#0a1020;border:1px solid #1a2a40;color:var(--blue)}
 </style>
+<style>
+.pw{position:relative;display:block}
+.pw>input{width:100%;padding-right:2.3rem!important;box-sizing:border-box}
+.pw-eye{position:absolute;right:.45rem;top:0;bottom:0;margin:auto 0;height:1.4rem;background:none;border:none;color:inherit;opacity:.55;cursor:pointer;font-size:1rem;line-height:1;padding:0}
+.pw-eye:hover{opacity:1}
+</style>
 </head>
 <body>
 <nav>
@@ -171,7 +177,8 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
       <div class="fs-sub">Creás tu cuenta de marca para seguir las postulaciones desde tu panel. Es gratis.</div>
       <div class="fg" id="fg-marca"><label>Nombre de la marca<span class="req">*</span></label><input type="text" id="c-marca" placeholder="¿Cómo se llama tu marca?"><div class="err-msg">Campo requerido</div></div>
       <div class="fg" id="fg-email"><label>Email de contacto<span class="req">*</span></label><input type="email" id="c-email" placeholder="tu@marca.com"><div class="err-msg">Email inválido</div></div>
-      <div class="fg" id="fg-pass"><label>Contraseña<span class="req">*</span></label><input type="password" id="c-pass" placeholder="Mínimo 8 caracteres"><div class="hint">Con este email y contraseña entrás a tu panel a ver las postulaciones.</div><div class="err-msg">Mínimo 8 caracteres</div></div>
+      <div class="fg" id="fg-pass"><label>Contraseña<span class="req">*</span></label><span class="pw"><input type="password" id="c-pass" placeholder="Mínimo 8 caracteres"><button type="button" class="pw-eye" onclick="togglePass(this)" tabindex="-1">👁</button></span><div class="hint">Con este email y contraseña entrás a tu panel a ver las postulaciones.</div><div class="err-msg">Mínimo 8 caracteres</div></div>
+      <div class="fg" id="fg-pass2"><label>Repetir contraseña<span class="req">*</span></label><span class="pw"><input type="password" id="c-pass2" placeholder="Repetí la contraseña"><button type="button" class="pw-eye" onclick="togglePass(this)" tabindex="-1">👁</button></span><div class="err-msg">Las contraseñas no coinciden</div></div>
       <div class="fg-row">
         <div class="fg"><label>WhatsApp</label><input type="tel" id="c-tel" placeholder="+54 9 11 0000-0000"></div>
         <div class="fg"><label>Instagram de la marca</label><input type="text" id="c-ig" placeholder="@tumarca"></div>
@@ -350,6 +357,7 @@ function validate(s){
     const email=document.getElementById('c-email').value.trim();
     bad = markErr('fg-email', !/\S+@\S+\.\S+/.test(email)) || bad;
     bad = markErr('fg-pass', document.getElementById('c-pass').value.length<8) || bad;
+    bad = markErr('fg-pass2', document.getElementById('c-pass').value !== document.getElementById('c-pass2').value) || bad;
   }
   if(s===1){
     if(!selTipo){document.getElementById('err-tipo').style.display='block';bad=true;}
@@ -486,5 +494,6 @@ async function submitCampania(){
   }
 }
 </script>
+<script>function togglePass(b){var i=b.parentNode.querySelector('input');if(!i)return;var s=i.type==='password';i.type=s?'text':'password';b.textContent=s?'🙈':'👁';}</script>
 </body>
 </html>

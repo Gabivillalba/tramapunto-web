@@ -204,6 +204,12 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .toast.err{background:#1a0000;border:1px solid #2a0000;color:var(--red)}
 .toast.info{background:#0a1020;border:1px solid #1a2a40;color:var(--blue)}
 </style>
+<style>
+.pw{position:relative;display:block}
+.pw>input{width:100%;padding-right:2.3rem!important;box-sizing:border-box}
+.pw-eye{position:absolute;right:.45rem;top:0;bottom:0;margin:auto 0;height:1.4rem;background:none;border:none;color:inherit;opacity:.55;cursor:pointer;font-size:1rem;line-height:1;padding:0}
+.pw-eye:hover{opacity:1}
+</style>
 </head>
 <body>
 
@@ -287,8 +293,8 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 
         <!-- NUEVO: contraseña de acceso -->
         <div class="fg-row">
-          <div class="fg" id="ffg-pass"><label>Contraseña<span class="req">*</span></label><input type="password" id="ff-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password"><div class="err-msg">Mínimo 8 caracteres</div></div>
-          <div class="fg" id="ffg-pass2"><label>Repetir contraseña<span class="req">*</span></label><input type="password" id="ff-pass2" placeholder="Repetí la contraseña" autocomplete="new-password"><div class="err-msg">No coinciden</div></div>
+          <div class="fg" id="ffg-pass"><label>Contraseña<span class="req">*</span></label><span class="pw"><input type="password" id="ff-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password"><button type="button" class="pw-eye" onclick="togglePass(this)" tabindex="-1">👁</button></span><div class="err-msg">Mínimo 8 caracteres</div></div>
+          <div class="fg" id="ffg-pass2"><label>Repetir contraseña<span class="req">*</span></label><span class="pw"><input type="password" id="ff-pass2" placeholder="Repetí la contraseña" autocomplete="new-password"><button type="button" class="pw-eye" onclick="togglePass(this)" tabindex="-1">👁</button></span><div class="err-msg">No coinciden</div></div>
         </div>
 
         <div class="fg"><label>WhatsApp</label><input type="tel" id="ff-tel" placeholder="+54 9 11 0000-0000"></div>
@@ -447,8 +453,8 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 
         <!-- NUEVO: contraseña de acceso -->
         <div class="fg-row">
-          <div class="fg" id="cfg-pass"><label>Contraseña<span class="req">*</span></label><input type="password" id="cf-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password"><div class="err-msg">Mínimo 8 caracteres</div></div>
-          <div class="fg" id="cfg-pass2"><label>Repetir contraseña<span class="req">*</span></label><input type="password" id="cf-pass2" placeholder="Repetí la contraseña" autocomplete="new-password"><div class="err-msg">No coinciden</div></div>
+          <div class="fg" id="cfg-pass"><label>Contraseña<span class="req">*</span></label><span class="pw"><input type="password" id="cf-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password"><button type="button" class="pw-eye" onclick="togglePass(this)" tabindex="-1">👁</button></span><div class="err-msg">Mínimo 8 caracteres</div></div>
+          <div class="fg" id="cfg-pass2"><label>Repetir contraseña<span class="req">*</span></label><span class="pw"><input type="password" id="cf-pass2" placeholder="Repetí la contraseña" autocomplete="new-password"><button type="button" class="pw-eye" onclick="togglePass(this)" tabindex="-1">👁</button></span><div class="err-msg">No coinciden</div></div>
         </div>
 
         <div class="fg"><label>Teléfono / WhatsApp</label><input type="tel" id="cf-tel" placeholder="+54 11 0000-0000"></div>
@@ -922,5 +928,6 @@ function showToast(msg,type='ok'){
   clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3200);
 }
 </script>
+<script>function togglePass(b){var i=b.parentNode.querySelector('input');if(!i)return;var s=i.type==='password';i.type=s?'text':'password';b.textContent=s?'🙈':'👁';}</script>
 </body>
 </html>

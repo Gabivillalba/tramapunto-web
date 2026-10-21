@@ -35,6 +35,12 @@ nav{height:56px;padding:0 1.5rem;display:flex;align-items:center;background:rgba
 .link-ghost{display:inline-block;margin-top:1rem;color:var(--muted2);font-size:.75rem;text-decoration:none}
 .link-ghost:hover{color:var(--white)}
 </style>
+<style>
+.pw{position:relative;display:block}
+.pw>input{width:100%;padding-right:2.3rem!important;box-sizing:border-box}
+.pw-eye{position:absolute;right:.45rem;top:0;bottom:0;margin:auto 0;height:1.4rem;background:none;border:none;color:inherit;opacity:.55;cursor:pointer;font-size:1rem;line-height:1;padding:0}
+.pw-eye:hover{opacity:1}
+</style>
 </head>
 <body>
 <nav><a class="logo" href="/">TRAMA.</a></nav>
@@ -80,8 +86,8 @@ function renderForm(){
     <div class="h">Definí tu contraseña</div>
     <div class="sub">Elegí una contraseña nueva para entrar a tu perfil.</div>
     <div class="msg" id="msg"></div>
-    <div class="fg"><label>Contraseña nueva</label><input type="password" id="p1" placeholder="Mínimo 8 caracteres" autocomplete="new-password"></div>
-    <div class="fg"><label>Repetir contraseña</label><input type="password" id="p2" placeholder="Repetí la contraseña" autocomplete="new-password"></div>
+    <div class="fg"><label>Contraseña nueva</label><span class="pw"><input type="password" id="p1" placeholder="Mínimo 8 caracteres" autocomplete="new-password"><button type="button" class="pw-eye" onclick="togglePass(this)" tabindex="-1">👁</button></span></div>
+    <div class="fg"><label>Repetir contraseña</label><span class="pw"><input type="password" id="p2" placeholder="Repetí la contraseña" autocomplete="new-password"><button type="button" class="pw-eye" onclick="togglePass(this)" tabindex="-1">👁</button></span></div>
     <button class="btn" id="btn" onclick="guardar()">Guardar y entrar →</button>`;
   document.getElementById('p2').addEventListener('keydown',e=>{if(e.key==='Enter')guardar()});
 }
@@ -149,5 +155,6 @@ async function guardar(){
   renderForm();
 })();
 </script>
+<script>function togglePass(b){var i=b.parentNode.querySelector('input');if(!i)return;var s=i.type==='password';i.type=s?'text':'password';b.textContent=s?'🙈':'👁';}</script>
 </body>
 </html>

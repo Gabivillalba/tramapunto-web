@@ -1877,37 +1877,31 @@ async function loadReelEstado(){
   const aprobado=p.status==='aprobado';
   const subs=(await sbGet('reel_submissions',`creator_id=eq.${encodeURIComponent(p.id)}&select=id,tipo,ig_url,estado,created_at&order=created_at.desc`,token))||[];
   const mes=new Date().toISOString().slice(0,7);
-  const reelMes=subs.find(s=>s.tipo==='reel' && String(s.created_at||'').slice(0,7)===mes);
-  const follow=subs.find(s=>s.tipo==='follow');
+  const reelMes=subs.find(s=>s.tipo==='reel' && s.estado!=='rechazado' && String(s.created_at||'').slice(0,7)===mes);
   const estadoTxt=s=>s? (s.estado==='pendiente'?'<span style="color:var(--amber)">en revisión</span>':s.estado==='aprobado'?'<span style="color:var(--green)">✓ aprobado</span>':'<span style="color:#f87171">rechazado</span>') : '';
-  const followBtn = !aprobado
-    ? ''
-    : follow
-      ? `<div style="font-size:.78rem;color:var(--muted2)">📸 Seguir a @tramapunto — ${estadoTxt(follow)}</div>`
-      : `<button class="btn-save" style="margin:0" onclick="enviarFollow()">📸 Ya sigo a @tramapunto (+50 pts)</button>`;
   const reelBlock = !aprobado
     ? ''
     : reelMes
       ? `<div style="font-size:.78rem;color:var(--muted2)">🎬 Reel de este mes — ${estadoTxt(reelMes)}${reelMes.ig_url?` · <a href="${reelMes.ig_url}" target="_blank" rel="noopener" style="color:var(--purple)">ver</a>`:''}</div>`
-      : `<div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
-           <input id="reelUrl" type="url" placeholder="Link de tu reel de Instagram" style="flex:1;min-width:200px;background:#080808;border:1px solid #222;border-radius:2px;color:var(--white);padding:.6rem;font-size:.82rem">
-           <button class="btn-save" style="margin:0" onclick="enviarReel()">🎬 Enviar mi reel (+100 pts)</button>
+           : `<div style="display:flex;flex-direction:column;gap:.4rem">
+           <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+             <input id="reelUrl" type="url" placeholder="Link de tu reel (instagram.com/reel/...)" style="flex:1;min-width:200px;background:#080808;border:1px solid #222;border-radius:2px;color:var(--white);padding:.6rem;font-size:.82rem">
+             <button class="btn-save" style="margin:0" onclick="enviarReel()">🎬 Enviar mi reel (+100 pts)</button>
+           </div>
+           <div style="font-size:.72rem;color:var(--muted2);opacity:.85">¿No sabés qué subir? Mirá este <a href="https://www.instagram.com/reel/DeiafluPFsh/" target="_blank" rel="noopener" style="color:var(--purple)">reel de referencia ↗</a> y pegá el link de TU reel etiquetando a @tramapunto (no el de tu perfil).</div>
          </div>`;
   box.innerHTML=`<div style="background:#160a22;border:1px solid #3a1a5a;border-radius:6px;padding:1.1rem 1.25rem;margin-bottom:2rem">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.6rem">
       <div style="font-size:.95rem;font-weight:900;color:var(--purple)">⭐ Puntos para destacar</div>
       <div style="font-size:1.3rem;font-weight:900;color:var(--purple)">${p.puntos||0} <span style="font-size:.7rem;color:var(--muted);font-weight:700">pts</span></div>
     </div>
-    <p style="font-size:.78rem;color:var(--muted2);line-height:1.5;margin-bottom:.9rem">Seguí a <strong>@tramapunto</strong> y subí un reel por mes mostrando TRAMA. (etiquetándonos) para sumar puntos: tus postulaciones aparecen <strong>primero</strong> para las marcas.</p>
-    ${aprobado?`<div style="display:flex;flex-direction:column;gap:.6rem">${followBtn}${reelBlock}</div>`:`<div style="font-size:.76rem;color:var(--amber)">Vas a poder sumar puntos cuando aprobemos tu perfil.</div>`}
+    <p style="font-size:.78rem;color:var(--muted2);line-height:1.5;margin-bottom:.9rem">Subí un reel <strong>cada mes</strong> etiquetando a <strong>@tramapunto</strong> para ganar <strong>100 puntos mensuales</strong> y destacar: tus postulaciones aparecen <strong>primero</strong> para las marcas.</p>
+    ${aprobado?`<div style="display:flex;flex-direction:column;gap:.6rem">${reelBlock}</div>`:`<div style="font-size:.76rem;color:var(--amber)">Vas a poder sumar puntos cuando aprobemos tu perfil.</div>`}
   </div>`;
 }
-async function enviarFollow(){
-  try{
-    const r=await fetch(`${SB_URL}/rest/v1/reel_submissions`,{method:'POST',headers:{apikey:SB_ANON,Authorization:'Bearer '+getToken(),'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({creator_id:userProfile.id, tipo:'follow'})});
-    if(!r.ok) throw new Error('No se pudo enviar');
-    showToast('✓ Enviado. Lo verificamos y sumás 50 pts.','ok'); loadReelEstado();
-  }catch(e){ showToast('Error: '+e.message,'err'); }
+async function enviarReel(){
+  const url=((document.getElementById('reelUrl')||{}).value||'').trim();
+  if(!/instagram\.com\/(reel|reels|p|tv)\/[A-Za-z0-9_-]+/i.test(url)){ showToast('Pegá el link del reel puntual (ej: instagram.com/reel/...). El link de tu perfil no sirve.','err'); return; }
 }
 async function enviarReel(){
   const url=((document.getElementById('reelUrl')||{}).value||'').trim();

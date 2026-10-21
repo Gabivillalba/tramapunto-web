@@ -341,7 +341,6 @@ body.t-creator .spin{border-top-color:var(--purple)}
   <div class="nav-r">
     <a class="nav-back" href="/">← Inicio</a>
     <button class="btn-logout" id="btnLogout" style="display:none" onclick="doLogout()">Cerrar sesión</button>
-    <button class="btn-logout" id="btnDelete" style="display:none;border-color:#3a1a1a;color:#f87171" onclick="eliminarMiCuenta()" title="Eliminar mi cuenta y liberar el email">Eliminar cuenta</button>
   </div>
 </nav>
 
@@ -409,6 +408,9 @@ body.t-creator .spin{border-top-color:var(--purple)}
   <div id="welcomeBanner"></div>
   <div class="dash-tabs" id="dashTabs"></div>
   <div id="dashContent"></div>
+  <div style="max-width:1100px;margin:2.5rem auto 1.5rem;padding-top:1.25rem;border-top:1px solid #1a1a1a;text-align:center">
+    <span onclick="eliminarMiCuenta()" style="color:var(--muted);font-size:.72rem;cursor:pointer;border-bottom:1px dotted #444;padding-bottom:1px" title="Borra tu perfil y libera tu email">Eliminar mi cuenta y liberar mi email</span>
+  </div>
 </div>
 
 <!-- Modal reseña -->
@@ -730,7 +732,6 @@ function showDash(){
   document.getElementById('vDash').style.display='block';
   document.getElementById('vDash').classList.add('active');
   document.getElementById('btnLogout').style.display='inline-block';
-  { const _bd=document.getElementById('btnDelete'); if(_bd) _bd.style.display='inline-block'; }
 
   const p = userProfile;
   const av = document.getElementById('dashAv');

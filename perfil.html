@@ -335,6 +335,7 @@ body.t-creator .spin{border-top-color:var(--purple)}
   <div class="nav-r">
     <a class="nav-back" href="/">← Inicio</a>
     <button class="btn-logout" id="btnLogout" style="display:none" onclick="doLogout()">Cerrar sesión</button>
+    <button class="btn-logout" id="btnDelete" style="display:none;border-color:#3a1a1a;color:#f87171" onclick="eliminarMiCuenta()" title="Eliminar mi cuenta y liberar el email">Eliminar cuenta</button>
   </div>
 </nav>
 
@@ -631,6 +632,19 @@ async function doLogout(){
   location.reload();
 }
 
+// ── ELIMINAR MI CUENTA (borra el perfil + libera el email) ──
+async function eliminarMiCuenta(){
+  if(!confirm('¿Eliminar tu cuenta definitivamente?\n\nSe borra tu perfil y se libera tu email para que puedas registrarte de nuevo. Esta acción no se puede deshacer.')) return;
+  try{
+    const r=await fetch('/api/mi-perfil',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},body:JSON.stringify({eliminar:true})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.ok) throw new Error(d.error||'No se pudo eliminar la cuenta');
+    clearSession();
+    alert('Tu cuenta fue eliminada. Ya podés registrarte de nuevo con ese email.');
+    location.href='/';
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+}
+
 // ── CARGAR PERFIL ──
 // Trae el contacto (tel, @usuarios) de creadores desde el endpoint seguro
 // (solo devuelve el de compras pagadas vigentes, o el propio).
@@ -707,6 +721,7 @@ function showDash(){
   document.getElementById('vDash').style.display='block';
   document.getElementById('vDash').classList.add('active');
   document.getElementById('btnLogout').style.display='inline-block';
+  { const _bd=document.getElementById('btnDelete'); if(_bd) _bd.style.display='inline-block'; }
 
   const p = userProfile;
   const av = document.getElementById('dashAv');

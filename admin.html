@@ -1244,6 +1244,7 @@ async function loadMarcas(){
             <button class="btn-sm" onclick="crearCampaniaDesdeMarca('${m.id}',${m.brief?'true':'false'})">📋 ${m.brief?'Crear campaña con este brief':'Crear campaña'}</button>
             <button class="btn-sm" onclick="darAccesoMarca('${m.id}','${nombreMarca||persona||escR(m.email)}')">🔑 Dar acceso</button>
             <button class="btn-sm" onclick="abrirEmailMarca('${m.id}','${nombreMarca||persona||escR(m.email)}','${escR(m.email)}')">✉️ Email</button>
+            <button class="btn-sm" style="border-color:#3a1a1a;color:#f87171" onclick="eliminarMarca('${m.id}','${escR(m.email)}')">🗑 Eliminar</button>
           </div>
         </div>`;
       }).join('');
@@ -1647,6 +1648,16 @@ async function setStatus(id,st){
     showToast('Error: '+e.message,'err');
     renderCards();
   }
+}
+
+// ── ELIMINAR MARCA (borra perfil + libera el email) ──
+async function eliminarMarca(id, email){
+  if(!confirm(`¿Eliminar DEFINITIVAMENTE la marca ${email||''}?\n\nSe borra el perfil y se libera el email para que pueda registrarse de nuevo. Esta acción no se puede deshacer.`)) return;
+  try{
+    await adminCall('delete_marca',{id});
+    showToast('🗑 Marca eliminada y email liberado','ok');
+    loadMarcas();
+  }catch(e){ showToast('Error al eliminar: '+e.message,'err'); }
 }
 
 // ── ELIMINAR DEFINITIVAMENTE ──

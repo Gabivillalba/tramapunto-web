@@ -145,6 +145,33 @@ export default async function handler(req, res) {
       return res.status(200).json({ received: true, recorded: ids.length, origen: 'carrito' });
     }
 
+      return res.status(200).json({ received: true, refunded: true });
+    }
+
+    // ══ CARRITO: varios contactos de la bolsa desbloqueados en un solo pago ══
+    if (parts[0] === 'carrito') {
+      const cart_id = parts[1];
+      if (!cart_id) return res.status(400).json({ error: 'Carrito inválido' });
+      const carts = await fetch(`${process.env.SUPABASE_URL}/rest/v1/mp_carritos?id=eq.${encodeURIComponent(cart_id)}&select=marca_email,marca_nombre,creator_ids`, { headers: H }).then(r => r.ok ? r.json() : []).catch(() => []);
+      const cart = carts && carts[0];
+      if (!cart) return res.status(200).json({ received: true, cart: 'no encontrado' });
+      const ids = Array.isArray(cart.creator_ids) ? cart.creator_ids : [];
+      const marca_email = cart.marca_email || payment.payer?.email || '';
+      const marca_nombre = cart.marca_nombre || payment.payer?.name || '';
+      const montoUnit = ids.length ? Math.round(Number(payment.transaction_amount || 0) / ids.length) : Number(payment.transaction_amount || 0);
+      for (const cid of ids) {
+        await fetch(`${process.env.SUPABASE_URL}/rest/v1/conexiones`, {
+          method: 'POST', headers: { ...H, Prefer: 'return=minimal,resolution=ignore-duplicates' },
+          body: JSON.stringify({
+            creator_id: cid, marca_email, marca_nombre,
+            monto: montoUnit, metodo: payment.payment_type_id,
+            voucher_id: String(payment.id), estado: 'pagado', origen: 'bolsa',
+          }),
+        }).catch(() => {});
+      }
+      return res.status(200).json({ received: true, recorded: ids.length, origen: 'carrito' });
+    }
+
     // ══ Pago del TRABAJO de campaña (split): trabajo|postulacion_id|creator_id|campania_id ══
     if (parts[0] === 'trabajo') {
       const postulacion_id = parts[1];

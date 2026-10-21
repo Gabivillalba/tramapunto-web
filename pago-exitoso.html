@@ -89,6 +89,18 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
     return;
   }
 
+  // Carrito: se desbloquearon varios contactos. No los revelamos acá; aparecen
+  // en "Contactos que compraste" apenas el webhook los registra.
+  if(params.get('origen')==='carrito'){
+    el.innerHTML = `<div style="text-align:center;padding:1.5rem 1rem">
+      <div style="font-size:2.4rem;margin-bottom:.6rem">✅</div>
+      <div class="contact-title" style="margin-bottom:.5rem">¡Pago confirmado!</div>
+      <p style="color:#999;line-height:1.6;margin-bottom:1.3rem">Desbloqueaste los contactos de tu carrito. Ya los tenés en tu cuenta.</p>
+      <a class="c-link" href="/perfil.html" style="color:var(--green);font-weight:700">Ver mis contactos →</a>
+    </div>`;
+    return;
+  }
+
   if(!creatorId || !marcaEmail){
     showError('No se encontraron los datos de la transacción.');
     return;

@@ -1923,7 +1923,10 @@ async function loadReelEstado(){
   const yaSigue = !!p.ig_follow_at;
   const followBonus = !aprobado ? '' : (yaSigue
     ? `<div style="font-size:.78rem;color:var(--muted2)">📸 Seguís a @tramapunto — <span style="color:var(--green)">✓ +50 pts</span></div>`
-    : `<button class="btn-save" style="margin:0" onclick="seguirTramapunto()">📸 Seguir a @tramapunto (+50 pts)</button>`);
+    : `<div style="display:flex;flex-direction:column;gap:.45rem">
+         <a href="https://www.instagram.com/tramapunto/" target="_blank" rel="noopener" class="btn-save" style="margin:0;align-self:flex-start;background:transparent;border:1px solid var(--purple);color:var(--purple);text-decoration:none">📸 Seguir a @tramapunto ↗</a>
+         <button class="btn-save" style="margin:0;align-self:flex-start" onclick="seguirTramapunto()">Ya te seguí — sumame los 50 pts</button>
+       </div>`);
   const reelBlock = !aprobado
     ? ''
     : reelMes
@@ -1934,14 +1937,14 @@ async function loadReelEstado(){
              <input id="reelFile" type="file" accept="video/mp4,video/quicktime" style="font-size:.78rem;color:var(--muted2)">
            </label>
            <button class="btn-save" style="margin:0;align-self:flex-start" onclick="enviarReel()">🎬 Enviar mi reel (+100 pts)</button>
-           <div style="font-size:.72rem;color:var(--muted2);opacity:.85;line-height:1.5"><strong>Qué grabar:</strong> un reel corto (15–30 s) donde cuentes tu experiencia con TRAMA o invites a otros creadores a sumarse. Etiquetá a <strong>@tramapunto</strong> en el video, pegá acá el link de TU reel (no el de tu perfil) y subí el archivo para que lo republiquemos en nuestra cuenta.</div>
+           <div style="font-size:.72rem;color:var(--muted2);opacity:.85;line-height:1.5"><strong>Qué grabar:</strong> un reel corto (15–30 s) donde cuentes tu experiencia con TRAMA o invites a otros creadores a sumarse. Etiquetá a <a href="https://www.instagram.com/tramapunto/" target="_blank" rel="noopener" style="color:var(--purple);font-weight:700">@tramapunto</a> en el video, pegá acá el link de TU reel (no el de tu perfil) y subí el archivo para que lo republiquemos en nuestra cuenta.</div>
          </div>`;
   box.innerHTML=`<div style="background:#160a22;border:1px solid #3a1a5a;border-radius:6px;padding:1.1rem 1.25rem;margin-bottom:2rem">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.6rem">
       <div style="font-size:.95rem;font-weight:900;color:var(--purple)">⭐ Puntos para destacar</div>
       <div style="font-size:1.3rem;font-weight:900;color:var(--purple)">${p.puntos||0} <span style="font-size:.7rem;color:var(--muted);font-weight:700">pts</span></div>
     </div>
-    <p style="font-size:.78rem;color:var(--muted2);line-height:1.5;margin-bottom:.9rem">Subí un reel <strong>cada mes</strong> etiquetando a <strong>@tramapunto</strong> para ganar <strong>100 puntos mensuales</strong> y destacar: tus postulaciones aparecen <strong>primero</strong> para las marcas.</p>
+    <p style="font-size:.78rem;color:var(--muted2);line-height:1.5;margin-bottom:.9rem">Subí un reel <strong>cada mes</strong> etiquetando a <a href="https://www.instagram.com/tramapunto/" target="_blank" rel="noopener" style="color:var(--purple);font-weight:700">@tramapunto</a> para ganar <strong>100 puntos mensuales</strong> y destacar: tus postulaciones aparecen <strong>primero</strong> para las marcas.</p>
     ${aprobado?`<div style="display:flex;flex-direction:column;gap:.6rem">${followBonus}${reelBlock}</div>`:`<div style="font-size:.76rem;color:var(--amber)">Vas a poder sumar puntos cuando aprobemos tu perfil.</div>`}
   </div>`;
 }

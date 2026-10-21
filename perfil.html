@@ -116,6 +116,8 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .notif-item .nt{font-weight:800;color:var(--white,#f4f4ef);margin-bottom:.15rem}
 .notif-item .nc{color:var(--muted2,#aaa)}
 .notif-item .nf{color:var(--muted);font-size:.66rem;margin-top:.25rem}
+.notif-item .nt-cta{display:inline-block;margin-top:.5rem;font-size:.68rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--green);border:1px solid #2a4000;background:#0f1a00;border-radius:2px;padding:.3rem .6rem}
+body.t-creator .notif-item .nt-cta{color:var(--purple);border-color:#3a1a5a;background:#160a22}
 .notif-empty{padding:1.5rem 1rem;text-align:center;color:var(--muted);font-size:.8rem}
 .welcome-banner{position:relative;border:1px solid #2a4000;border-radius:6px;padding:1.1rem 1.25rem;margin:1.25rem 1.5rem 0}
 @media(min-width:768px){.welcome-banner{margin:1.5rem 4rem 0}}
@@ -818,12 +820,26 @@ function renderNotifs(){
   if(!notifItems||!notifItems.length){ list.innerHTML='<div class="notif-empty">No tenés notificaciones todavía.</div>'; return; }
   list.innerHTML=notifItems.map(n=>{
     const f=n.created_at?new Date(n.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
-    return `<div class="notif-item${n.leida?'':' unread'}" style="cursor:pointer" onclick="irNotif('${n.tipo||''}')"><div class="nt">${n.titulo||''}</div>${n.cuerpo?`<div class="nc">${n.cuerpo}</div>`:''}<div class="nf">${f}</div></div>`;
+    const link=(n.link||'').trim();
+    const cta=link?`<div class="nt-cta">${/^https?:\/\//i.test(link)?'Abrir ↗':'Ir →'}</div>`:'';
+    return `<div class="notif-item${n.leida?'':' unread'}" style="cursor:pointer" onclick="irNotif(${JSON.stringify(String(n.id))})"><div class="nt">${n.titulo||''}</div>${n.cuerpo?`<div class="nc">${n.cuerpo}</div>`:''}<div class="nf">${f}</div>${cta}</div>`;
   }).join('');
 }
-// Al tocar una notificación, llevar al tab que corresponde según el tipo
-function irNotif(tipo){
+// Al tocar una notificación: si trae link, ir ahí; si no, al tab según el tipo
+function irNotif(id){
   const p=document.getElementById('notifPanel'); if(p) p.classList.remove('open');
+  const n=(notifItems||[]).find(x=>String(x.id)===String(id));
+  const link=n&&n.link?String(n.link).trim():'';
+  if(link){
+    if(/^https?:\/\//i.test(link)){ window.open(link,'_blank','noopener'); return; }
+    if(link==='/perfil.html'||link.indexOf('/perfil.html')===0){
+      irATab(0);
+      setTimeout(()=>{ const c=document.getElementById('puntosCard'); if(c&&userType==='creator') c.scrollIntoView({behavior:'smooth',block:'center'}); },250);
+      return;
+    }
+    location.href=link; return;
+  }
+  const tipo=(n&&n.tipo)||'';
   let idx;
   if(userType==='creator') idx={venta:5, resena:0, sistema:0, postulacion:7}[tipo];
   else idx={postulacion:4, sistema:0, venta:2}[tipo];

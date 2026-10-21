@@ -1911,12 +1911,13 @@ async function loadReelEstado(){
     ? ''
     : reelMes
       ? `<div style="font-size:.78rem;color:var(--muted2)">🎬 Reel de este mes — ${estadoTxt(reelMes)}${reelMes.ig_url?` · <a href="${reelMes.ig_url}" target="_blank" rel="noopener" style="color:var(--purple)">ver</a>`:''}</div>`
-           : `<div style="display:flex;flex-direction:column;gap:.4rem">
-           <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
-             <input id="reelUrl" type="url" placeholder="Link de tu reel (instagram.com/reel/...)" style="flex:1;min-width:200px;background:#080808;border:1px solid #222;border-radius:2px;color:var(--white);padding:.6rem;font-size:.82rem">
-             <button class="btn-save" style="margin:0" onclick="enviarReel()">🎬 Enviar mi reel (+100 pts)</button>
-           </div>
-           <div style="font-size:.72rem;color:var(--muted2);opacity:.85">¿No sabés qué subir? Mirá este <a href="https://www.instagram.com/reel/DeiafluPFsh/" target="_blank" rel="noopener" style="color:var(--purple)">reel de referencia ↗</a> y pegá el link de TU reel etiquetando a @tramapunto (no el de tu perfil).</div>
+           : `<div style="display:flex;flex-direction:column;gap:.55rem">
+           <input id="reelUrl" type="url" placeholder="Link de tu reel (instagram.com/reel/...)" style="background:#080808;border:1px solid #222;border-radius:2px;color:var(--white);padding:.6rem;font-size:.82rem">
+           <label style="font-size:.74rem;color:var(--muted2);display:flex;flex-direction:column;gap:.3rem">Subí el video (MP4) para que @tramapunto lo republique:
+             <input id="reelFile" type="file" accept="video/mp4,video/quicktime" style="font-size:.78rem;color:var(--muted2)">
+           </label>
+           <button class="btn-save" style="margin:0;align-self:flex-start" onclick="enviarReel()">🎬 Enviar mi reel (+100 pts)</button>
+           <div style="font-size:.72rem;color:var(--muted2);opacity:.85;line-height:1.5"><strong>Qué grabar:</strong> un reel corto (15–30 s) donde cuentes tu experiencia con TRAMA o invites a otros creadores a sumarse. Etiquetá a <strong>@tramapunto</strong> en el video, pegá acá el link de TU reel (no el de tu perfil) y subí el archivo para que lo republiquemos en nuestra cuenta.</div>
          </div>`;
   box.innerHTML=`<div style="background:#160a22;border:1px solid #3a1a5a;border-radius:6px;padding:1.1rem 1.25rem;margin-bottom:2rem">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.6rem">
@@ -1930,9 +1931,21 @@ async function loadReelEstado(){
 async function enviarReel(){
   const url=((document.getElementById('reelUrl')||{}).value||'').trim();
   if(!/instagram\.com\/(reel|reels|p|tv)\/[A-Za-z0-9_-]+/i.test(url)){ showToast('Pegá el link del reel puntual (ej: instagram.com/reel/...). El link de tu perfil no sirve.','err'); return; }
+  const fi=document.getElementById('reelFile');
+  const f=fi&&fi.files&&fi.files[0];
+  if(!f){ showToast('Subí el archivo de video (MP4) para poder republicarlo.','err'); return; }
+  if(!/^video\//.test(f.type)){ showToast('El archivo tiene que ser un video (MP4 o MOV).','err'); return; }
+  if(f.size>95*1024*1024){ showToast('El video es muy pesado (máx 95 MB). Recortalo o bajá la calidad.','err'); return; }
   const mes=new Date().toISOString().slice(0,7);
+  const token=getToken();
   try{
-    const r=await fetch(`${SB_URL}/rest/v1/reel_submissions`,{method:'POST',headers:{apikey:SB_ANON,Authorization:'Bearer '+getToken(),'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({creator_id:userProfile.id, tipo:'reel', ig_url:url, periodo:mes})});
+    showToast('Subiendo tu reel...','info');
+    const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'');
+    const path=`reels/${userProfile.id}/${Date.now()}_${safe}`;
+    const up=await fetch(`${SB_URL}/storage/v1/object/creator-fotos/${path}`,{method:'POST',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+token},body:f});
+    if(!up.ok) throw new Error('No se pudo subir el video');
+    const video_url=`${SB_URL}/storage/v1/object/public/creator-fotos/${path}`;
+    const r=await fetch(`${SB_URL}/rest/v1/reel_submissions`,{method:'POST',headers:{apikey:SB_ANON,Authorization:'Bearer '+token,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({creator_id:userProfile.id, tipo:'reel', ig_url:url, video_url, periodo:mes})});
     if(!r.ok) throw new Error('No se pudo enviar');
     showToast('✓ Reel enviado. Lo verificamos y sumás 100 pts.','ok'); loadReelEstado();
   }catch(e){ showToast('Error: '+e.message,'err'); }

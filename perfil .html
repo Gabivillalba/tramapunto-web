@@ -1,0 +1,2411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRAMA. — Mi perfil</title>
+<meta name="robots" content="noindex, nofollow">
+<!-- TRAMA. — captura de fuente de registro (first-touch). NO BORRAR -->
+<script>(function(){try{if(localStorage.getItem('trama_fuente'))return;var p=new URLSearchParams(location.search);var f=p.get('utm_source')||p.get('ref')||'';var camp=p.get('utm_campaign')||'';if(!f){var r=document.referrer||'';if(r){try{var h=new URL(r).hostname.replace(/^www\./,'');if(h&&location.hostname.indexOf(h)===-1)f=h;}catch(e){}}}if(!f)f='directo';localStorage.setItem('trama_fuente',(camp?f+' / '+camp:f).slice(0,120));}catch(e){}})();</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --black:#080808;--green:#C8FF1A;--white:#F4F4EF;
+  --g1:#111;--g2:#1C1C1C;--g3:#2A2A2A;
+  --muted:#8a8a8a;--muted2:#aaa;--purple:#c084fc;
+  --red:#ff4444;--amber:#f59e0b;--blue:#60a5fa;
+}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+body{background:var(--black);color:var(--white);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,.96);backdrop-filter:blur(12px);border-bottom:1px solid #1a1a1a}
+.logo{font-size:1.2rem;font-weight:900;letter-spacing:.18em;color:var(--green);text-decoration:none}
+.nav-r{display:flex;align-items:center;gap:.75rem}
+.nav-back{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--white)}
+.btn-logout{background:none;border:1px solid #2a2a2a;color:var(--muted);padding:.38rem .875rem;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s}
+.btn-logout:hover{border-color:var(--red);color:var(--red)}
+
+.view{display:none;padding-top:56px;min-height:100vh}
+.view.active{display:block}
+
+/* LOGIN */
+#vLogin{display:flex;align-items:center;justify-content:center;padding:2rem 1.5rem;min-height:100vh}
+.login-box{background:var(--g1);border:1px solid #222;padding:2.25rem;width:100%;max-width:400px;border-radius:3px}
+.login-logo{font-size:1.3rem;font-weight:900;letter-spacing:.18em;color:var(--green);margin-bottom:1.75rem;text-align:center}
+
+/* TABS LOGIN */
+.login-tabs{display:flex;border-bottom:1px solid #222;margin-bottom:1.75rem}
+.ltab{flex:1;padding:.7rem;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;text-align:center}
+.ltab.active{color:var(--green);border-bottom-color:var(--green)}
+
+.ltab-content{display:none}
+.ltab-content.active{display:block}
+
+/* SELECTOR DE ROL (login diferenciado) */
+.role-switch{display:flex;gap:.5rem;margin-bottom:.75rem}
+.role-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.7rem .5rem;border-radius:3px;font-size:.7rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;background:#141414;border:1.5px solid #222;color:var(--muted);transition:all .18s}
+.role-btn span{font-size:.95rem}
+.role-btn:hover{border-color:#444}
+.role-tag{font-size:.72rem;color:var(--muted2);text-align:center;margin-bottom:1.5rem;min-height:1.05em;line-height:1.4}
+/* Tema creator (lila) */
+.lb-creator .role-btn.active{border-color:var(--purple);color:var(--purple);background:#160a22}
+.lb-creator .ltab.active{color:var(--purple);border-bottom-color:var(--purple)}
+.lb-creator .btn-primary{background:var(--purple);color:var(--black)}
+/* Tema marca (lima) */
+.lb-marca .role-btn.active{border-color:var(--green);color:var(--green);background:#0f1400}
+.lb-marca .ltab.active{color:var(--green);border-bottom-color:var(--green)}
+.lb-marca .btn-primary{background:var(--green);color:var(--black)}
+/* Chooser de recuperación */
+.np-btn{display:block;padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;border-radius:2px;text-decoration:none}
+.np-primary.np-green{background:var(--green);color:var(--black)}
+.np-primary.np-purple{background:var(--purple);color:var(--black)}
+.np-ghost{background:transparent;border:1px solid #2a2a2a;color:var(--muted2)}
+.np-ghost:hover{border-color:#444;color:var(--white)}
+
+/* REGISTRO TIPO */
+.tipo-opts{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.25rem}
+.tipo-opt{display:flex;align-items:center;gap:.75rem;padding:.875rem 1rem;border-radius:2px;cursor:pointer;transition:all .2s;border:1.5px solid #222}
+.tipo-opt.selected-creator{border-color:var(--purple);background:#1a0a2a}
+.tipo-opt.selected-marca{border-color:var(--green);background:#0f1a00}
+.tipo-opt:hover{border-color:#444}
+.tipo-icon{font-size:1.25rem;flex-shrink:0}
+.tipo-label{font-size:.8rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.tipo-desc{font-size:.68rem;color:var(--muted2);margin-top:.15rem}
+
+.fg{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.875rem}
+.fg label{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.fg input{background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.65rem .875rem;font-size:.86rem;font-family:inherit;outline:none;border-radius:2px;transition:border-color .2s;width:100%}
+.fg input:focus{border-color:var(--green)}
+.fg input.err{border-color:var(--red)!important}
+.fg input::placeholder{color:#444}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+
+.btn-primary{width:100%;border:none;padding:.85rem;font-weight:900;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s;margin-top:.5rem}
+.btn-primary:hover{opacity:.87}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed}
+.btn-green{background:var(--green);color:var(--black)}
+.btn-purple{background:var(--purple);color:var(--black)}
+
+.form-err{font-size:.72rem;color:var(--red);background:#1a0000;border:1px solid #2a0000;padding:.55rem .875rem;border-radius:2px;margin-bottom:.875rem;display:none}
+.form-err.show{display:block}
+
+.hint-link{font-size:.72rem;color:var(--muted);text-align:center;margin-top:1rem}
+.hint-link a{color:var(--green);cursor:pointer}
+
+/* SPINNER */
+.spin{width:28px;height:28px;border:2px solid #222;border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* DASHBOARD */
+#vDash{padding-top:56px}
+.notif-bell{position:relative;background:var(--g1);border:1px solid #2a2a2a;color:var(--white,#f4f4ef);width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.1rem;line-height:1;display:flex;align-items:center;justify-content:center}
+.notif-bell:hover{border-color:var(--green)}
+.notif-dot{position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;padding:0 4px;background:#f43f5e;color:#fff;border-radius:8px;font-size:.58rem;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #000}
+.notif-panel{display:none;position:absolute;right:0;top:48px;width:320px;max-width:86vw;max-height:70vh;overflow-y:auto;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:4px;box-shadow:0 12px 40px -8px #000;z-index:200}
+.notif-panel.open{display:block}
+.notif-head{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1rem;border-bottom:1px solid #1a1a1a;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted2,#aaa);position:sticky;top:0;background:#0d0d0d}
+.notif-head button{background:none;border:none;color:var(--green);font-size:.64rem;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.05em}
+.notif-item{padding:.75rem 1rem;border-bottom:1px solid #141414;font-size:.8rem;line-height:1.45;display:block;color:inherit;text-decoration:none}
+.notif-item:hover{background:#111}
+.notif-item.unread{background:#0f1500}
+.notif-item .nt{font-weight:800;color:var(--white,#f4f4ef);margin-bottom:.15rem}
+.notif-item .nc{color:var(--muted2,#aaa)}
+.notif-item .nf{color:var(--muted);font-size:.66rem;margin-top:.25rem}
+.notif-empty{padding:1.5rem 1rem;text-align:center;color:var(--muted);font-size:.8rem}
+.welcome-banner{position:relative;border:1px solid #2a4000;border-radius:6px;padding:1.1rem 1.25rem;margin:1.25rem 1.5rem 0}
+@media(min-width:768px){.welcome-banner{margin:1.5rem 4rem 0}}
+.wb-x{position:absolute;top:.6rem;right:.7rem;background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem}
+.wb-title{font-size:1rem;font-weight:900;margin-bottom:.35rem;padding-right:1.5rem}
+.wb-text{font-size:.82rem;color:var(--muted2);line-height:1.55;margin-bottom:.9rem}
+.wb-ctas{display:flex;gap:.5rem;flex-wrap:wrap}
+.wb-cta{display:inline-block;color:#080808;font-size:.74rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;padding:.55rem 1rem;border-radius:3px;border:none;cursor:pointer;text-decoration:none}
+.wb-cta.ghost{background:transparent !important}
+.dash-header{background:var(--g1);border-bottom:1px solid #1a1a1a;padding:2rem 1.5rem}
+@media(min-width:768px){.dash-header{padding:2.5rem 4rem}}
+.dash-header-inner{display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap}
+.dash-av{width:56px;height:56px;min-width:56px;border-radius:50%;border:2px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;flex-shrink:0;overflow:hidden}
+.dash-av img{width:100%;height:100%;object-fit:cover}
+.dash-av-wrap{position:relative;flex-shrink:0;width:56px;height:56px}
+.av-cam{position:absolute;right:-4px;bottom:-4px;width:24px;height:24px;border-radius:50%;background:var(--green);color:#080808;display:flex;align-items:center;justify-content:center;font-size:.72rem;cursor:pointer;border:2px solid var(--g1);line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.4);transition:transform .12s,filter .12s;z-index:2}
+.av-cam:hover{filter:brightness(1.1);transform:scale(1.1)}
+.dash-name{font-size:1.1rem;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
+.dash-email{font-size:.75rem;color:var(--muted);margin-top:.2rem}
+.dash-badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.6rem;font-weight:900;letter-spacing:.15em;text-transform:uppercase;padding:.25rem .625rem;border-radius:20px;margin-top:.4rem}
+.badge-creator{background:#1a0a2a;color:var(--purple);border:1px solid #3a1a5a}
+.badge-marca{background:#0f1a00;color:var(--green);border:1px solid #1a3000}
+.badge-corp{background:#0a1020;color:var(--blue);border:1px solid #1a2a40}
+.s-pend{background:#1a1200;color:var(--amber);border:1px solid #2a2000;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
+.s-apro{background:#0f1a00;color:var(--green);border:1px solid #1a3000;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
+.s-rech{background:#1a0000;color:var(--red);border:1px solid #2a0000;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
+
+.dash-tabs{display:flex;border-bottom:1px solid #161616;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:sticky;top:0;z-index:20;background:var(--black)}
+.dash-tabs::-webkit-scrollbar{height:0}
+.tab{padding:.875rem 1.25rem;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none}
+.tab:hover{color:var(--white)}
+.tab.active{color:var(--green);border-bottom-color:var(--green)}
+/* Identidad LILA para el perfil de creador (la marca usa el verde lima por defecto) */
+body.t-creator .tab.active{color:var(--purple);border-bottom-color:var(--purple)}
+body.t-creator .sec-title{color:var(--purple)}
+body.t-creator .sec-title::before{background:var(--purple)}
+body.t-creator .notif-bell:hover{border-color:var(--purple)}
+body.t-creator .notif-head button{color:var(--purple)}
+body.t-creator .notif-item.unread{background:#140a1f}
+body.t-creator .dash-av{border-color:#3a1a5a}
+body.t-creator .spin{border-top-color:var(--purple)}
+
+.tab-content{display:none;padding:2rem 1.5rem}
+@media(min-width:768px){.tab-content{padding:2.5rem 4rem}}
+.tab-content.active{display:block}
+
+.sec-title{font-size:.62rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--green);margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem}
+.sec-title::before{content:'';width:16px;height:1px;background:var(--green)}
+
+.info-grid{display:grid;grid-template-columns:1fr;gap:1px;background:#161616;margin-bottom:2rem}
+@media(min-width:600px){.info-grid{grid-template-columns:1fr 1fr}}
+.info-card{background:var(--black);padding:1.25rem}
+.ic-label{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem}
+.ic-val{font-size:.9rem;font-weight:700}
+.ic-val.muted{color:var(--muted2);font-weight:400}
+.mc-stat{flex:1;min-width:92px;background:var(--g1);border:1px solid #1a1a1a;border-radius:6px;padding:.8rem 1rem;text-align:center}
+.mc-n{font-size:1.5rem;font-weight:900;line-height:1}
+.mc-l{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:.35rem}
+
+.redes-grid{display:grid;grid-template-columns:1fr;gap:1px;background:#161616;margin-bottom:2rem}
+@media(min-width:600px){.redes-grid{grid-template-columns:1fr 1fr}}
+.red-card{background:var(--black);padding:1.25rem;display:flex;align-items:center;gap:.875rem}
+.red-icon{font-size:1.25rem}
+.red-name{font-size:.78rem;font-weight:700}
+.red-user{font-size:.72rem;color:var(--muted2);margin-top:.1rem}
+.red-stat{font-size:.72rem;color:var(--muted);margin-top:.1rem}
+.red-empty{color:var(--muted);font-style:italic;font-size:.75rem}
+
+.estado-box{background:var(--g1);border:1px solid #222;border-radius:3px;padding:1.5rem;margin-bottom:2rem;display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap}
+.estado-title{font-size:.88rem;font-weight:900;text-transform:uppercase;margin-bottom:.35rem}
+.estado-desc{font-size:.78rem;color:var(--muted2);line-height:1.6}
+
+.empty-state{padding:2.5rem;text-align:center;color:var(--muted);font-size:.82rem}
+.empty-state div{font-size:1.75rem;margin-bottom:.75rem}
+
+.edit-grid{display:grid;grid-template-columns:1fr;gap:.875rem;margin-bottom:1.5rem}
+@media(min-width:600px){.edit-grid{grid-template-columns:1fr 1fr}}
+.fg-edit{display:flex;flex-direction:column;gap:.3rem}
+.fg-edit label{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.fg-edit input,.fg-edit textarea,.fg-edit select{background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.65rem .875rem;font-size:.86rem;font-family:inherit;outline:none;border-radius:2px;transition:border-color .2s;width:100%}
+.fg-edit input:focus,.fg-edit textarea:focus,.fg-edit select:focus{border-color:var(--green)}
+.fg-edit textarea{resize:vertical;min-height:80px}
+.fg-edit select option{background:#1a1a1a}
+.fg-edit input::placeholder,.fg-edit textarea::placeholder{color:#444}
+.fg-full{grid-column:1/-1}
+.porto-callout{background:#0f1a00;border:1px solid #2a4000;border-radius:3px;padding:.9rem 1.1rem;margin-bottom:1.1rem}
+.porto-callout-t{font-size:.8rem;font-weight:900;color:var(--green);margin-bottom:.3rem}
+.porto-callout-d{font-size:.74rem;color:var(--muted2);line-height:1.5}
+.fotos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:.5rem;margin-bottom:.75rem}
+.foto-item{position:relative;aspect-ratio:1;border-radius:2px;overflow:hidden;border:1px solid #222}
+.foto-item img{width:100%;height:100%;object-fit:cover;display:block}
+.foto-del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.72);color:#fff;border:none;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:.68rem;line-height:1;display:flex;align-items:center;justify-content:center}
+.foto-add{display:inline-block;background:#0d0d0d;border:1px dashed #333;color:var(--green);padding:.7rem 1.1rem;font-size:.78rem;font-weight:700;border-radius:2px;cursor:pointer;margin-bottom:1.5rem;transition:border-color .2s}
+.foto-add:hover{border-color:var(--green)}
+.videos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.6rem;margin-bottom:.75rem}
+.video-item{position:relative;border-radius:3px;overflow:hidden;border:1px solid #222;background:#000}
+.video-item video{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;background:#000}
+.btn-save{background:var(--green);color:var(--black);border:none;padding:.75rem 1.75rem;font-weight:900;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s}
+.btn-save:hover{opacity:.85}
+.btn-save:disabled{opacity:.5;cursor:not-allowed}
+
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:600;padding:.7rem 1rem;border-radius:3px;font-size:.73rem;font-weight:700;display:none;align-items:center;gap:.5rem;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:300px}
+.toast.show{display:flex}
+.toast.ok{background:#0f1a00;border:1px solid #2a4000;color:var(--green)}
+.toast.err{background:#1a0000;border:1px solid #2a0000;color:var(--red)}
+.toast.info{background:#0a1020;border:1px solid #1a2a40;color:var(--blue)}
+
+/* ── LIGA TRAMA. ── */
+.liga-hero{background:linear-gradient(135deg,#0f1a00,#0d0d0d);border:1px solid #2a4000;border-radius:4px;padding:1.5rem;margin-bottom:1.25rem}
+.liga-pos{font-size:2.1rem;font-weight:900;color:var(--green);line-height:1;letter-spacing:-.02em}
+.liga-pos small{font-size:.85rem;color:var(--muted2);font-weight:700}
+.liga-streak{font-size:.95rem;font-weight:900;color:var(--amber);margin-top:.5rem}
+.liga-stats{display:flex;gap:2rem;margin-top:1.1rem}
+.liga-stat .n{font-size:1.3rem;font-weight:900}
+.liga-stat .l{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:.15rem}
+.mission-card{background:var(--g1);border:1px solid #222;border-radius:4px;padding:1.5rem;margin-bottom:1.25rem}
+.mission-badge{display:inline-block;font-size:.6rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;padding:.3rem .7rem;border-radius:20px;margin-bottom:.9rem}
+.mission-text{font-size:1rem;line-height:1.65;margin-bottom:1.25rem;color:var(--white)}
+.btn-mission{background:var(--green);color:var(--black);border:none;padding:.9rem 1.5rem;font-weight:900;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;cursor:pointer;width:100%;transition:opacity .2s}
+.btn-mission:hover{opacity:.87}
+.btn-mission:disabled{opacity:.5;cursor:not-allowed}
+.agenda{display:flex;gap:.4rem;margin-bottom:1.25rem}
+.agenda-day{flex:1;text-align:center;background:#0d0d0d;border:1px solid #1a1a1a;border-radius:3px;padding:.5rem .15rem}
+.agenda-day.today{border-color:var(--green);background:#0f1a00}
+.agenda-day .d{font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.agenda-day.today .d{color:var(--green)}
+.agenda-day .i{font-size:1.05rem;margin-top:.25rem}
+.champ{background:#1a1200;border:1px solid #2a2000;border-radius:3px;padding:.75rem 1rem;font-size:.8rem;color:var(--amber);display:flex;align-items:center;gap:.5rem;margin-bottom:1.25rem}
+.trivia-opts{display:flex;flex-direction:column;gap:.5rem}
+.trivia-opt{background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.8rem 1rem;font-size:.86rem;font-family:inherit;text-align:left;border-radius:2px;cursor:pointer;transition:all .2s}
+.trivia-opt:hover{border-color:var(--green);background:#0f1a00}
+.trivia-opt:disabled{opacity:.5;cursor:not-allowed}
+.liga-lbl{display:block;font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.liga-input{width:100%;background:#0d0d0d;border:1px solid #222;color:var(--white);padding:.7rem .875rem;font-size:.86rem;font-family:inherit;outline:none;border-radius:2px;margin-bottom:.75rem}
+.liga-input:focus{border-color:var(--green)}
+.entregas-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.5rem}
+.entrega-item{display:flex;align-items:center;gap:.6rem;background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:.6rem .8rem;text-decoration:none;transition:border-color .2s}
+.entrega-item:hover{border-color:var(--green)}
+.entrega-tipo{font-size:.56rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--green);background:#0f1a00;border:1px solid #2a4000;padding:.2rem .45rem;border-radius:20px;flex-shrink:0}
+.entrega-cons{font-size:.74rem;color:var(--muted2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.entrega-link{font-size:.68rem;color:var(--green);font-weight:700;flex-shrink:0}
+.semana-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.5rem}
+.semana-day{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:3px;padding:.75rem .9rem}
+.semana-day.today{border-color:var(--green);background:#0f1a00}
+.semana-d{font-size:.6rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.45rem}
+.semana-day.today .semana-d{color:var(--green)}
+.semana-badge{display:inline-block;font-size:.54rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .5rem;border-radius:20px;margin-bottom:.45rem}
+.semana-text{font-size:.82rem;color:var(--white);line-height:1.5}
+.cx-count{display:flex;align-items:baseline;gap:.6rem;margin-bottom:1.5rem}
+.cx-count-n{font-size:2.2rem;font-weight:900;color:var(--green);line-height:1}
+.cx-count-l{font-size:.8rem;color:var(--muted2);font-weight:700}
+.cx-list{display:flex;flex-direction:column;gap:.5rem}
+.cx-item{display:flex;align-items:center;gap:.875rem;background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:.9rem 1rem}
+.cx-ic{width:40px;height:40px;min-width:40px;border-radius:50%;background:#0d0d0d;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-size:1.1rem;overflow:hidden}
+.cx-body{flex:1;min-width:0}
+.cx-name{font-size:.88rem;font-weight:700}
+.cx-meta{font-size:.68rem;color:var(--muted);margin-top:.1rem}
+.cx-contact{font-size:.74rem;color:var(--green);margin-top:.35rem;word-break:break-word}
+.cx-link{color:var(--green);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .15s}
+.cx-link:hover{border-bottom-color:var(--green)}
+.cx-venc{display:inline-block;font-size:.56rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:.15rem .4rem;border-radius:2px;vertical-align:middle;margin-left:.3rem}
+.cx-venc.ok{background:#0f1a00;color:var(--green);border:1px solid #2a4000}
+.cx-venc.exp{background:#2a0f00;color:#f87171;border:1px solid #4a1a00}
+.cx-item.cx-exp{opacity:.72}
+.resena-btn{margin-top:.6rem;background:none;border:1px solid #2a2a2a;color:var(--muted2,#aaa);font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.4rem .7rem;border-radius:2px;cursor:pointer;transition:border-color .15s,color .15s}
+.resena-btn:hover{border-color:var(--green);color:var(--green)}
+.resena-btn.done{color:#f5b301;border-color:#3a2e00}
+.comp-btn{margin-top:.6rem;margin-left:.5rem;background:none;border:1px solid #2a2a2a;color:var(--muted2,#aaa);font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.4rem .7rem;border-radius:2px;cursor:pointer;transition:border-color .15s,color .15s}
+.comp-btn:hover{border-color:var(--green);color:var(--green)}
+.rep-badge{font-size:.6rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:.3rem .55rem;border-radius:2px}
+.rep-badge.camp{background:#2a2200;color:#f5d312;border:1px solid #4a3c00}
+.rep-badge.top{background:#2a1a00;color:#f5a301;border:1px solid #4a2e00}
+/* Checklist de perfil */
+.checklist{background:var(--g1);border:1px solid #1a1a1a;border-radius:4px;padding:1.1rem 1.25rem;margin-bottom:2rem}
+.checklist.done{display:flex;align-items:center;gap:.6rem;font-size:.82rem;color:var(--green);font-weight:700;border-color:#2a4000;background:#0f1a00}
+.cl-check{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--green);color:#080808;font-size:.7rem;font-weight:900}
+.cl-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.75rem}
+.cl-title{font-size:.95rem;font-weight:900}
+.cl-sub{font-size:.74rem;color:var(--muted);margin-top:.15rem}
+.cl-pct{font-size:1.3rem;font-weight:900;color:var(--green);white-space:nowrap}
+.cl-bar{height:7px;background:#0d0d0d;border:1px solid #1a1a1a;border-radius:10px;overflow:hidden;margin-bottom:.9rem}
+.cl-bar-fill{height:100%;background:linear-gradient(90deg,#4ade80,var(--green));border-radius:10px;transition:width .5s ease}
+.cl-items{display:flex;flex-wrap:wrap;gap:.5rem}
+.cl-item{background:#0d0d0d;border:1px solid #2a2a2a;color:var(--muted2,#aaa);font-size:.72rem;font-weight:700;padding:.45rem .7rem;border-radius:2px;cursor:pointer;transition:border-color .15s,color .15s}
+.cl-item:hover{border-color:var(--green);color:var(--green)}
+.cl-item span{color:var(--muted);margin-left:.2rem}
+/* Modal reseña */
+.rsna-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:999;align-items:center;justify-content:center;padding:1.25rem}
+.rsna-ov.open{display:flex}
+.rsna-box{background:#0d0d0d;border:1px solid #222;border-radius:4px;max-width:420px;width:100%;padding:1.75rem}
+.rsna-box h3{margin:0 0 .35rem;font-size:1.05rem;font-weight:900}
+.rsna-box .sub{font-size:.76rem;color:var(--muted);margin:0 0 1.25rem}
+.rsna-stars{display:flex;gap:.3rem;margin-bottom:1.1rem;font-size:2rem;cursor:pointer}
+.rsna-star{color:#333;transition:color .1s;line-height:1}
+.rsna-star.on{color:#f5b301}
+.rsna-box textarea{width:100%;background:#080808;border:1px solid #222;border-radius:2px;color:var(--white);padding:.7rem;font-size:.82rem;font-family:inherit;resize:vertical;min-height:80px;box-sizing:border-box}
+.res-fg{margin-bottom:.75rem}
+.res-fg label{display:block;font-size:.64rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
+.res-fg input,.res-fg select{width:100%;background:#080808;border:1px solid #222;border-radius:2px;color:var(--white);padding:.6rem;font-size:.82rem;font-family:inherit;box-sizing:border-box}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem}
+.res-full{grid-column:1/-1}
+.res-box{background:#0f1500;border:1px solid #2a4000;border-radius:4px;padding:.8rem 1rem;margin-top:.6rem}
+.res-metrics{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:.4rem}
+.res-metric{font-size:.72rem;color:var(--muted2)}
+.res-metric strong{display:block;font-size:1rem;color:var(--green);font-weight:900}
+.rsna-acts{display:flex;gap:.6rem;margin-top:1.1rem}
+.rsna-acts button{flex:1;padding:.7rem;border-radius:2px;font-weight:800;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.rsna-save{background:var(--green);color:#080808;border:none}
+.rsna-save:disabled{opacity:.5;cursor:not-allowed}
+.rsna-cancel{background:none;border:1px solid #2a2a2a;color:var(--muted)}
+</style>
+<style>
+.pw{position:relative;display:block}
+.pw>input{width:100%;padding-right:2.3rem!important;box-sizing:border-box}
+.pw-eye{position:absolute;right:.45rem;top:0;bottom:0;margin:auto 0;height:1.4rem;background:none;border:none;color:inherit;opacity:.55;cursor:pointer;font-size:1rem;line-height:1;padding:0}
+.pw-eye:hover{opacity:1}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="/">TRAMA.</a>
+  <div class="nav-r">
+    <a class="nav-back" href="/">← Inicio</a>
+    <button class="btn-logout" id="btnLogout" style="display:none" onclick="doLogout()">Cerrar sesión</button>
+  </div>
+</nav>
+
+<!-- ══ LOGIN ══ -->
+<div class="view active" id="vLogin">
+  <div class="login-box lb-creator" id="loginBox">
+    <div class="login-logo">TRAMA</div>
+
+    <!-- Selector de rol — diferencia el ingreso de creator y de marca -->
+    <div class="role-switch">
+      <button class="role-btn active" id="role-creator" onclick="setRole('creator')"><span>🎥</span>Soy creator</button>
+      <button class="role-btn" id="role-marca" onclick="setRole('marca')"><span>🏢</span>Soy marca</button>
+    </div>
+    <p class="role-tag" id="roleTag">Subí tu perfil y recibí propuestas de marcas.</p>
+
+    <div class="login-tabs">
+      <button class="ltab active" onclick="switchLTab(0,this)">Ingresar</button>
+      <button class="ltab" onclick="switchLTab(1,this)">Crear cuenta</button>
+    </div>
+
+    <!-- INGRESAR -->
+    <div class="ltab-content active" id="lt0">
+      <div class="form-err" id="loginErr"></div>
+      <div class="fg"><label>Email</label><input type="email" id="l-email" placeholder="tu@email.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="fg"><label>Contraseña</label><span class="pw"><input type="password" id="l-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"><button type="button" class="pw-eye" onclick="togglePass(this)" tabindex="-1">👁</button></span></div>
+      <button class="btn-primary btn-green" id="btnLogin" onclick="doLogin()">Ingresar →</button>
+      <div class="hint-link"><a onclick="showForgot()">Olvidé mi contraseña</a></div>
+    </div>
+
+    <!-- CREAR CUENTA (corto) -->
+    <div class="ltab-content" id="lt1">
+      <div class="form-err" id="regErr"></div>
+      <div class="fg"><label id="lblNombre">Nombre y apellido</label><input type="text" id="r-nombre" placeholder="Ej: Martina Gómez"></div>
+      <div class="fg"><label>Email</label><input type="email" id="r-email" placeholder="tu@email.com"></div>
+      <div class="fg"><label>Contraseña</label><span class="pw"><input type="password" id="r-pass" placeholder="Mínimo 8 caracteres" onkeydown="if(event.key==='Enter')doRegister()"><button type="button" class="pw-eye" onclick="togglePass(this)" tabindex="-1">👁</button></span></div>
+      <div class="fg"><label>Repetir contraseña</label><span class="pw"><input type="password" id="r-pass2" placeholder="Repetí la contraseña" onkeydown="if(event.key==='Enter')doRegister()"><button type="button" class="pw-eye" onclick="togglePass(this)" tabindex="-1">👁</button></span></div>
+      <button class="btn-primary btn-green" id="btnReg" onclick="doRegister()">Crear cuenta →</button>
+      <div class="hint-link" style="margin-top:.75rem;font-size:.68rem;color:var(--muted)">Al crear tu cuenta aceptás los <a href="./terminos.html" target="_blank">Términos y privacidad</a> de TRAMA.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div class="view" id="vDash">
+  <div class="dash-header">
+    <div class="dash-header-inner">
+      <div class="dash-av-wrap" id="dashAvWrap">
+        <div class="dash-av" id="dashAv">?</div>
+      </div>
+      <div>
+        <div class="dash-name" id="dashName">—</div>
+        <div class="dash-email" id="dashEmail">—</div>
+        <div id="dashBadge" style="margin-top:.4rem"></div>
+      </div>
+      <div class="notif-wrap" style="margin-left:auto;position:relative">
+        <button class="notif-bell" id="notifBell" onclick="toggleNotifPanel()" aria-label="Notificaciones">🔔<span class="notif-dot" id="notifDot" style="display:none"></span></button>
+        <div class="notif-panel" id="notifPanel">
+          <div class="notif-head"><span>Notificaciones</span><button onclick="marcarNotifLeidas()">Marcar leídas</button></div>
+          <div id="notifList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="welcomeBanner"></div>
+  <div class="dash-tabs" id="dashTabs"></div>
+  <div id="dashContent"></div>
+  <div style="max-width:1100px;margin:2.5rem auto 1.5rem;padding-top:1.25rem;border-top:1px solid #1a1a1a;text-align:center">
+    <span onclick="eliminarMiCuenta()" style="color:var(--muted);font-size:.72rem;cursor:pointer;border-bottom:1px dotted #444;padding-bottom:1px" title="Borra tu perfil y libera tu email">Eliminar mi cuenta y liberar mi email</span>
+  </div>
+</div>
+
+<!-- Modal reseña -->
+<div class="rsna-ov" id="rsnaOv">
+  <div class="rsna-box">
+    <h3 id="rsnaTitle">Reseñar</h3>
+    <p class="sub">¿Cómo fue tu experiencia trabajando con este creador?</p>
+    <div class="rsna-stars" id="rsnaStars">
+      <span class="rsna-star" data-v="1" onclick="setStars(1)">★</span>
+      <span class="rsna-star" data-v="2" onclick="setStars(2)">★</span>
+      <span class="rsna-star" data-v="3" onclick="setStars(3)">★</span>
+      <span class="rsna-star" data-v="4" onclick="setStars(4)">★</span>
+      <span class="rsna-star" data-v="5" onclick="setStars(5)">★</span>
+    </div>
+    <textarea id="rsnaText" placeholder="Contá algo sobre la colaboración (opcional)..." maxlength="500"></textarea>
+    <div class="rsna-acts">
+      <button class="rsna-cancel" onclick="closeResena()">Cancelar</button>
+      <button class="rsna-save" id="rsnaSave" onclick="submitResena()">Publicar</button>
+    </div>
+  </div>
+</div>
+
+<div class="rsna-ov" id="resOv">
+  <div class="rsna-box" style="max-width:460px">
+    <h3>Cerrar campaña con resultados</h3>
+    <p class="sub">Cargá las métricas de la colaboración. Las ven vos y el creador en su panel.</p>
+    <div class="res-fg"><label>Creador</label><select id="res-creator"></select></div>
+    <div class="res-grid">
+      <div class="res-fg"><label>Alcance / vistas</label><input type="number" id="res-alcance" min="0" placeholder="0"></div>
+      <div class="res-fg"><label>Interacciones</label><input type="number" id="res-inter" min="0" placeholder="0"></div>
+      <div class="res-fg"><label>Clics / visitas</label><input type="number" id="res-clics" min="0" placeholder="0"></div>
+      <div class="res-fg"><label>Piezas entregadas</label><input type="number" id="res-piezas" min="0" placeholder="0"></div>
+      <div class="res-fg res-full"><label>Ventas atribuidas (ARS)</label><input type="number" id="res-ventas" min="0" placeholder="0"></div>
+    </div>
+    <textarea id="res-nota" placeholder="Nota o resumen de la colaboración (opcional)..." maxlength="1000"></textarea>
+    <div class="rsna-acts">
+      <button class="rsna-cancel" onclick="cerrarCierre()">Cancelar</button>
+      <button class="rsna-save" id="res-save" onclick="guardarResultado()">Guardar resultados</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const MAX_VIDEOS = 4;
+const MAX_VIDEO_MB = 50;
+const SB_URL  = 'https://mcpmabvxmdepastmpzbi.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
+
+let currentUser = null;
+let userProfile = null;
+let userType    = null;
+let regTipo     = 'creator';
+let ligaData    = null;
+
+// ── HELPERS ──
+function getToken(){ return localStorage.getItem('sb_token') }
+function saveSession(access, refresh){
+  localStorage.setItem('sb_token', access);
+  if(refresh) localStorage.setItem('sb_refresh', refresh);
+}
+function clearSession(){
+  ['sb_token','sb_refresh','trama_creator','trama_marca'].forEach(k=>localStorage.removeItem(k));
+}
+
+async function sbFetch(path, method='GET', body=null, token=null){
+  const headers = {'apikey':SB_ANON,'Authorization':`Bearer ${token||SB_ANON}`,'Content-Type':'application/json'};
+  const opts = {method, headers};
+  if(body) opts.body = JSON.stringify(body);
+  const r = await fetch(`${SB_URL}${path}`, opts);
+  const data = await r.json().catch(()=>({}));
+  return {ok:r.ok, data, status:r.status};
+}
+
+async function sbGet(table, filter='', token=null){
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?${filter}`,{
+    headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token||SB_ANON}`}
+  });
+  return r.ok ? r.json() : [];
+}
+
+async function sbPatch(table, filter, body, token){
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?${filter}`,{
+    method:'PATCH',
+    headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body: JSON.stringify(body)
+  });
+  return r.ok;
+}
+
+// ── INIT ──
+(async function init(){
+  try{ setRole(localStorage.getItem('trama_rol_pref')||'creator'); }catch(_){}
+  const token = getToken();
+  if(!token){ showLogin(); return; }
+  const {ok, data} = await sbFetch('/auth/v1/user','GET',null,token);
+  if(!ok){ clearSession(); showLogin(); return; }
+  currentUser = data;
+  await loadProfile(token);
+  // Aviso al volver de conectar MercadoPago
+  try{
+    const mp=new URLSearchParams(location.search).get('mp');
+    if(mp==='ok') showToast('✓ MercadoPago conectado. Ya podés cobrar los trabajos de campaña.','ok');
+    else if(mp==='err') showToast('No se pudo conectar MercadoPago. Probá de nuevo.','err');
+    if(mp){ history.replaceState(null,'',location.pathname); }
+  }catch(_){}
+})();
+
+// ── LOGIN TABS ──
+function switchLTab(i, btn){
+  document.querySelectorAll('.ltab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.ltab-content').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('lt'+i).classList.add('active');
+}
+
+// ── SELECTOR DE ROL (login/registro diferenciado) ──
+function setRole(t){
+  regTipo = t;
+  document.getElementById('loginBox').className = 'login-box lb-'+t;
+  document.getElementById('role-creator').classList.toggle('active', t==='creator');
+  document.getElementById('role-marca').classList.toggle('active', t==='marca');
+  document.getElementById('roleTag').textContent = t==='creator'
+    ? 'Subí tu perfil y recibí propuestas de marcas.'
+    : 'Encontrá creators y gestioná tus campañas.';
+  document.getElementById('lblNombre').textContent = t==='creator' ? 'Nombre y apellido' : 'Nombre de la marca';
+  document.getElementById('r-nombre').placeholder  = t==='creator' ? 'Ej: Martina Gómez'  : 'Ej: Estudio Trama';
+  try{ localStorage.setItem('trama_rol_pref', t); }catch(_){}
+}
+
+// ── REGISTRO ──
+async function doRegister(){
+  const err = document.getElementById('regErr');
+  err.classList.remove('show');
+
+  const tipo  = regTipo || 'creator';
+  const full  = document.getElementById('r-nombre').value.trim();
+  const email = document.getElementById('r-email').value.trim();
+  const pass  = document.getElementById('r-pass').value;
+
+  if(!full){ err.textContent = tipo==='creator' ? 'Ingresá tu nombre y apellido.' : 'Ingresá el nombre de la marca.'; err.classList.add('show'); return; }
+  if(!email||!/\S+@\S+\.\S+/.test(email)){ err.textContent='Email inválido.'; err.classList.add('show'); return; }
+  if(pass.length<8){ err.textContent='La contraseña debe tener al menos 8 caracteres.'; err.classList.add('show'); return; }
+  const pass2=(document.getElementById('r-pass2')||{}).value||'';
+  if(pass!==pass2){ err.textContent='Las contraseñas no coinciden.'; err.classList.add('show'); return; }
+
+  // Partir el nombre completo (para creators). En marcas va todo como nombre.
+  let nombre = full, apellido = '';
+  if(tipo==='creator'){ const sp = full.split(/\s+/); nombre = sp.shift(); apellido = sp.join(' '); }
+
+  const btn = document.getElementById('btnReg');
+  btn.disabled=true; btn.textContent='Creando cuenta...';
+
+  // Crear usuario en Supabase Auth
+  const {ok, data} = await sbFetch('/auth/v1/signup','POST',{email, password:pass});
+  if(!ok){
+    err.textContent = data.msg||data.message||'Error al crear la cuenta. El email puede estar en uso.';
+    err.classList.add('show');
+    btn.disabled=false; btn.textContent='Crear cuenta →';
+    return;
+  }
+
+  const token   = data.access_token;
+  const refresh = data.refresh_token;
+  const authId  = data.user?.id;
+  saveSession(token, refresh);
+
+  // Insertar perfil en la tabla correspondiente — verificando que no falle
+  // (si el auth se crea pero la fila no, queda una cuenta huérfana que luego
+  //  dispara el cartel "Cuenta creada" al ingresar).
+  const fuente = (localStorage.getItem('trama_fuente')||'directo');
+  // Nota: el vínculo con la cuenta de Auth es por email (las tablas no tienen auth_id).
+  const perfil = {nombre, apellido, email, fuente, status: tipo==='creator'?'pendiente':'activa'};
+  const tabla  = tipo==='creator' ? 'creators' : 'marcas';
+  const body   = tipo==='creator' ? perfil : {...perfil, tipo:'fisica'};
+
+  let insOk=false;
+  try{
+    const ri = await fetch(`${SB_URL}/rest/v1/${tabla}`,{
+      method:'POST',
+      headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body: JSON.stringify(body)
+    });
+    insOk = ri.ok;
+    if(!insOk) console.warn('insert perfil fallo', ri.status, await ri.text().catch(()=>''));
+  }catch(e){ console.warn('insert perfil error', e); }
+
+  if(!insOk){
+    err.textContent='Tu cuenta se creó pero no pudimos guardar el perfil. Reintentá en unos segundos.';
+    err.classList.add('show');
+    btn.disabled=false; btn.textContent='Crear cuenta →';
+    return;
+  }
+
+  localStorage.setItem(tipo==='creator'?'trama_creator':'trama_marca', JSON.stringify({nombre, email}));
+  currentUser = data.user;
+  await loadProfile(token, tipo);
+}
+
+// ── LOGIN ──
+async function doLogin(){
+  const err = document.getElementById('loginErr');
+  err.classList.remove('show');
+  const email = document.getElementById('l-email').value.trim();
+  const pass  = document.getElementById('l-pass').value;
+  if(!email||!pass){ err.textContent='Completá email y contraseña.'; err.classList.add('show'); return; }
+
+  const btn = document.getElementById('btnLogin');
+  btn.disabled=true; btn.textContent='Ingresando...';
+
+  const {ok, data} = await sbFetch('/auth/v1/token?grant_type=password','POST',{email, password:pass});
+  if(!ok){
+    err.textContent = 'Email o contraseña incorrectos.';
+    err.classList.add('show');
+    btn.disabled=false; btn.textContent='Ingresar →';
+    return;
+  }
+
+  saveSession(data.access_token, data.refresh_token);
+  currentUser = data.user;
+  await loadProfile(data.access_token);
+}
+
+// ── LOGOUT ──
+async function doLogout(){
+  const token = getToken();
+  await sbFetch('/auth/v1/logout','POST',null,token).catch(()=>{});
+  clearSession();
+  location.reload();
+}
+
+// ── ELIMINAR MI CUENTA (borra el perfil + libera el email) ──
+async function eliminarMiCuenta(){
+  if(!confirm('¿Eliminar tu cuenta definitivamente?\n\nSe borra tu perfil y se libera tu email para que puedas registrarte de nuevo. Esta acción no se puede deshacer.')) return;
+  try{
+    const r=await fetch('/api/mi-perfil',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},body:JSON.stringify({eliminar:true})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.ok) throw new Error(d.error||'No se pudo eliminar la cuenta');
+    clearSession();
+    alert('Tu cuenta fue eliminada. Ya podés registrarte de nuevo con ese email.');
+    location.href='/';
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+}
+
+// ── CARGAR PERFIL ──
+// Trae el contacto (tel, @usuarios) de creadores desde el endpoint seguro
+// (solo devuelve el de compras pagadas vigentes, o el propio).
+async function fetchContacto(ids){
+  try{
+    const r=await fetch('/api/contacto',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},body:JSON.stringify({creator_ids:Array.isArray(ids)?ids:[ids]})});
+    if(!r.ok) return {};
+    const j=await r.json(); return j.contactos||{};
+  }catch(_){ return {}; }
+}
+// El perfil propio se trae del servidor (ya no se busca por email desde el cliente)
+async function loadProfile(token, knownType){
+  const email = currentUser.email;
+  let data=null;
+  try{
+    const r=await fetch('/api/mi-perfil',{method:'POST',headers:{'Authorization':'Bearer '+token}});
+    if(r.ok) data=await r.json();
+  }catch(_){}
+  if(data && data.type==='creator'){
+    userProfile=data.profile; userType='creator';
+    localStorage.setItem('trama_creator', JSON.stringify({nombre:userProfile.nombre, email}));
+    showDash(); return;
+  }
+  if(data && data.type==='marca'){
+    userProfile=data.profile; userType='marca';
+    localStorage.setItem('trama_marca', JSON.stringify({nombre:userProfile.nombre, email}));
+    showDash(); return;
+  }
+  // Perfil recién creado que aún no aparece (latencia): reintentar una vez.
+  if(knownType && !loadProfile._retried){
+    loadProfile._retried = true;
+    await new Promise(r=>setTimeout(r,1200));
+    return loadProfile(token, knownType);
+  }
+  // Sin perfil — recuperación (cuenta huérfana)
+  showNoPerfil();
+}
+
+function showLogin(){
+  document.getElementById('vLogin').classList.add('active');
+  document.getElementById('vLogin').style.display='flex';
+  document.getElementById('vDash').style.display='none';
+}
+
+function showNoPerfil(){
+  const pref = (function(){ try{ return localStorage.getItem('trama_rol_pref'); }catch(_){ return null; } })() || regTipo || 'creator';
+  const btnCreator = `<a href="./registro.html" class="np-btn ${pref==='creator'?'np-primary np-purple':'np-ghost'}">Completar perfil creator →</a>`;
+  const btnMarca   = `<a href="./marcas.html" class="np-btn ${pref==='marca'?'np-primary np-green':'np-ghost'}">Completar perfil marca →</a>`;
+  document.getElementById('vLogin').innerHTML=`
+    <div class="login-box" style="text-align:center">
+      <div class="login-logo">TRAMA</div>
+      <div style="font-size:2rem;margin-bottom:1rem">👋</div>
+      <h2 style="font-size:1.1rem;font-weight:900;text-transform:uppercase;margin-bottom:.5rem">Un paso más</h2>
+      <p style="font-size:.82rem;color:var(--muted2);line-height:1.6;margin-bottom:1.75rem">Tu cuenta está activa pero todavía no tiene perfil. Completá el tuyo para entrar.</p>
+      <div style="display:flex;flex-direction:column;gap:.625rem">
+        ${pref==='marca' ? btnMarca+btnCreator : btnCreator+btnMarca}
+        <button onclick="doLogout()" style="background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;margin-top:.5rem">Cerrar sesión</button>
+      </div>
+    </div>`;
+}
+
+function showForgot(){
+  const email = document.getElementById('l-email').value.trim();
+  if(!email){ showToast('Ingresá tu email primero','err'); return; }
+  sbFetch('/auth/v1/recover','POST',{email}).then(({ok})=>{
+    if(ok) showToast('✓ Revisá tu email para resetear la contraseña','ok');
+    else showToast('Error al enviar el email','err');
+  });
+}
+
+// ── DASHBOARD ──
+function showDash(){
+  document.getElementById('vLogin').style.display='none';
+  document.getElementById('vDash').style.display='block';
+  document.getElementById('vDash').classList.add('active');
+  document.getElementById('btnLogout').style.display='inline-block';
+
+  const p = userProfile;
+  const av = document.getElementById('dashAv');
+  if(p.avatar_url){ av.innerHTML=`<img src="${p.avatar_url}" alt="avatar">`; }
+  else {
+    const init=((p.nombre||'?')[0]+(p.apellido||'?')[0]).toUpperCase();
+    av.style.background = userType==='creator'?'#1a0a2a':'#0f1a00';
+    av.style.color = userType==='creator'?'var(--purple)':'var(--green)';
+    av.textContent=init;
+  }
+  // Los creadores pueden subir/cambiar su foto de perfil desde el avatar
+  if(userType==='creator') montarCamaraAvatar();
+
+  document.getElementById('dashName').textContent=`${p.nombre||''} ${p.apellido||''}`.trim()||'—';
+  document.getElementById('dashEmail').textContent=currentUser.email;
+
+  const badge = document.getElementById('dashBadge');
+  if(userType==='creator'){
+    const st=p.status;
+    const petB=p.es_pet?` <span class="dash-badge" style="background:#1a0a2a;color:var(--purple);border:1px solid #3a1a5a">🐾 Pet${p.pet_nombre?' · '+p.pet_nombre:''}</span>`:'';
+    badge.innerHTML=`<span class="dash-badge badge-creator">Creator</span>${petB} <span class="${st==='aprobado'?'s-apro':st==='rechazado'?'s-rech':'s-pend'}">${st||'pendiente'}</span>`;
+  } else {
+    const tipo=p.tipo;
+    badge.innerHTML=`<span class="dash-badge ${tipo==='corporativa'?'badge-corp':'badge-marca'}">${tipo==='corporativa'?'Empresa corporativa':'Marca'}</span>`;
+  }
+  // Identidad visual lila para creadores, verde lima para marcas
+  document.body.classList.toggle('t-creator', userType==='creator');
+
+  renderWelcomeBanner();
+  buildTabs();
+  loadNotifs();
+}
+
+// ── BANNER DE BIENVENIDA (onboarding, se puede cerrar) ──
+function renderWelcomeBanner(){
+  const box=document.getElementById('welcomeBanner'); if(!box)return;
+  const p=userProfile, email=(currentUser&&currentUser.email)||'';
+  const key='trama_welcome_off_'+email;
+  let off=false; try{ off=localStorage.getItem(key)==='1'; }catch(_){}
+  // Solo para cuentas nuevas (≤30 días) y que no lo hayan cerrado
+  const dias = p.created_at ? (Date.now()-new Date(p.created_at).getTime())/86400000 : 0;
+  if(off || dias>30){ box.innerHTML=''; return; }
+  const nombre = (p.nombre||'').split(' ')[0] || (userType==='marca'?'equipo':'crack');
+  const acc = userType==='creator' ? 'var(--purple)' : 'var(--green)';
+  const bg  = userType==='creator' ? '#160a22' : '#0f1500';
+  const bd  = userType==='creator' ? '#3a1a5a' : '#2a4000';
+  let titulo, texto, ctas;
+  if(userType==='creator'){
+    titulo=`¡Bienvenido/a a TRAMA, ${nombre}! 🎬`;
+    texto = p.status==='aprobado'
+      ? 'Ya estás en la bolsa. Completá tu perfil y subí tus <strong>videos de muestra</strong> para recibir más propuestas de marcas.'
+      : 'Tu perfil está <strong>en revisión</strong>. Mientras tanto, completalo y subí tus videos: cuanto más completo, mejor posicionado aparecés cuando te aprobemos.';
+    ctas=`<button class="wb-cta" style="background:${acc}" onclick="irATab(4)">Completar mi perfil →</button>
+          <button class="wb-cta ghost" style="border-color:${bd};color:${acc}" onclick="irATab(4)">Subir videos</button>`;
+  } else {
+    titulo=`¡Bienvenida/o a TRAMA, ${nombre}! 🏢`;
+    texto='Publicá tu primera campaña y recibí postulaciones de creadores verificados, o explorá la bolsa para contactarlos directo.';
+    ctas=`<a class="wb-cta" style="background:${acc}" href="/campanas.html">Publicar campaña →</a>
+          <a class="wb-cta ghost" style="border-color:${bd};color:${acc}" href="/#bolsa">Explorar la bolsa</a>`;
+  }
+  box.innerHTML=`<div class="welcome-banner" style="background:${bg};border-color:${bd}">
+    <button class="wb-x" onclick="cerrarWelcome('${key}')" aria-label="Cerrar">✕</button>
+    <div class="wb-title" style="color:${acc}">${titulo}</div>
+    <div class="wb-text">${texto}</div>
+    <div class="wb-ctas">${ctas}</div>
+  </div>`;
+}
+function cerrarWelcome(key){
+  try{ localStorage.setItem(key,'1'); }catch(_){}
+  const box=document.getElementById('welcomeBanner'); if(box) box.innerHTML='';
+}
+
+// ── NOTIFICACIONES IN-APP ──
+let notifItems=[];
+async function loadNotifs(){
+  const email=currentUser&&currentUser.email; if(!email)return;
+  notifItems=await sbGet('notificaciones',`para_email=eq.${encodeURIComponent(email)}&select=id,tipo,titulo,cuerpo,link,leida,created_at&order=created_at.desc&limit=30`,getToken());
+  renderNotifs();
+}
+function renderNotifs(){
+  const dot=document.getElementById('notifDot'); const list=document.getElementById('notifList'); if(!list)return;
+  const noLeidas=(notifItems||[]).filter(n=>!n.leida).length;
+  if(dot){ if(noLeidas>0){ dot.textContent=noLeidas>9?'9+':noLeidas; dot.style.display='flex'; } else dot.style.display='none'; }
+  if(!notifItems||!notifItems.length){ list.innerHTML='<div class="notif-empty">No tenés notificaciones todavía.</div>'; return; }
+  list.innerHTML=notifItems.map(n=>{
+    const f=n.created_at?new Date(n.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+    return `<div class="notif-item${n.leida?'':' unread'}" style="cursor:pointer" onclick="irNotif('${n.tipo||''}')"><div class="nt">${n.titulo||''}</div>${n.cuerpo?`<div class="nc">${n.cuerpo}</div>`:''}<div class="nf">${f}</div></div>`;
+  }).join('');
+}
+// Al tocar una notificación, llevar al tab que corresponde según el tipo
+function irNotif(tipo){
+  const p=document.getElementById('notifPanel'); if(p) p.classList.remove('open');
+  let idx;
+  if(userType==='creator') idx={venta:5, resena:0, sistema:0, postulacion:7}[tipo];
+  else idx={postulacion:4, sistema:0, venta:2}[tipo];
+  if(idx==null) idx=0;
+  irATab(idx);
+}
+function toggleNotifPanel(){
+  const p=document.getElementById('notifPanel'); if(!p)return;
+  const abierto=p.classList.toggle('open');
+  if(abierto && (notifItems||[]).some(n=>!n.leida)) marcarNotifLeidas();
+}
+async function marcarNotifLeidas(){
+  const email=currentUser&&currentUser.email; if(!email)return;
+  if(!(notifItems||[]).some(n=>!n.leida)) return;
+  await sbPatch('notificaciones',`para_email=eq.${encodeURIComponent(email)}&leida=eq.false`,{leida:true},getToken());
+  notifItems.forEach(n=>n.leida=true); renderNotifs();
+}
+document.addEventListener('click',e=>{
+  const w=document.querySelector('.notif-wrap'); const p=document.getElementById('notifPanel');
+  if(w&&p&&p.classList.contains('open')&&!w.contains(e.target)) p.classList.remove('open');
+});
+
+function buildTabs(){
+  // {l: etiqueta, i: índice de contenido} — el orden visual se desacopla del
+  // índice interno (renderCreatorTab/renderMarcaTab siguen usando el mismo i).
+  const tabs = userType==='creator'
+    ?[{l:'👤 Mi perfil',i:0},{l:'💼 Me compraron',i:5},{l:'📋 Campañas',i:7},{l:'📊 Resultados',i:8},{l:'🛒 Mis compras',i:6},{l:'🔥 Liga',i:1},{l:'🔗 Mis redes',i:2},{l:'✏️ Editar',i:4}]
+    :[{l:'👤 Mi cuenta',i:0},{l:'🔗 Mis conexiones',i:2},{l:'📋 Mis campañas',i:4},{l:'☆ Guardados',i:1},{l:'✏️ Editar',i:3}];
+  document.getElementById('dashTabs').innerHTML = tabs.map((t,pos)=>
+    `<button class="tab${pos===0?' active':''}" data-i="${t.i}" onclick="switchTab(${t.i},this)">${t.l}</button>`
+  ).join('');
+  renderTab(tabs[0].i);
+}
+
+function switchTab(i,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderTab(i);
+}
+// Va a un tab por su ÍNDICE DE CONTENIDO (no por posición visual)
+function irATab(i){ const t=document.querySelector(`#dashTabs .tab[data-i="${i}"]`); if(t){ t.click(); t.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}); } }
+
+function renderTab(i){
+  const el=document.getElementById('dashContent');
+  userType==='creator'?renderCreatorTab(i,el):renderMarcaTab(i,el);
+}
+
+// ── CREATOR TABS ──
+function renderCreatorTab(i,el){
+  const p=userProfile;
+  const fmtSeg=n=>n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':(n||'—');
+
+  if(i===0){
+    // ── Checklist de completitud del perfil ──
+    const items=[
+      {ok:!!p.avatar_url, txt:'Foto de perfil', cta:'foto'},
+      {ok:!!(p.bio&&p.bio.trim()), txt:'Bio', cta:4},
+      {ok:!!(p.niches&&p.niches.length), txt:'Nicho', cta:4},
+      {ok:!!(p.ig_user||p.tt_user||p.yt_user), txt:'Redes sociales', cta:2},
+      {ok:!!(p.t_story||p.t_reel||p.t_post), txt:'Tarifas', cta:4},
+      {ok:!!(p.links&&p.links[0]), txt:'Portfolio', cta:4},
+      {ok:!!(p.videos&&p.videos.length), txt:'Videos de muestra', cta:4},
+      {ok:!!(p.disponibilidad&&p.disponibilidad.length), txt:'Disponibilidad', cta:4},
+    ];
+    const done=items.filter(x=>x.ok).length;
+    const pct=Math.round(done/items.length*100);
+    const pend=items.filter(x=>!x.ok);
+    const checklistHTML = done===items.length
+      ? `<div class="checklist done"><span class="cl-check">✓</span> Perfil completo (100%) — aparecés mejor posicionado en la bolsa.</div>`
+      : `<div class="checklist">
+          <div class="cl-head">
+            <div><div class="cl-title">Completá tu perfil</div><div class="cl-sub">Un perfil completo recibe más contactos de marcas.</div></div>
+            <div class="cl-pct">${pct}%</div>
+          </div>
+          <div class="cl-bar"><div class="cl-bar-fill" style="width:${pct}%"></div></div>
+          <div class="cl-items">${pend.map(x=>`<button class="cl-item" onclick="${x.cta==='foto'?`showToast('Tocá el 📷 sobre tu foto de perfil, arriba','info')`:`irATab(${x.cta})`}">○ ${x.txt} <span>→</span></button>`).join('')}</div>
+        </div>`;
+    const estMap={
+      pendiente:{bg:'#1a1200',bd:'#2a2000',col:'#f59e0b',ic:'⏳',txt:'<strong>Perfil en revisión.</strong> El equipo TRAMA. lo está revisando — en 48-72hs te confirmamos si quedás en la bolsa.'},
+      rechazado:{bg:'#1a0a0a',bd:'#3a1a1a',col:'#f87171',ic:'❌',txt:'<strong>Perfil no aprobado.</strong> Escribinos a info.tramapunto@gmail.com si querés que lo revisemos de nuevo.'},
+    };
+    const est=estMap[p.status];
+    const estadoBanner = est?`<div style="background:${est.bg};border:1px solid ${est.bd};border-radius:3px;padding:.9rem 1.1rem;margin-bottom:1.5rem;font-size:.8rem;color:${est.col};line-height:1.5;display:flex;gap:.6rem;align-items:flex-start"><span style="font-size:1.1rem;line-height:1">${est.ic}</span><span>${est.txt}</span></div>`:'';
+    el.innerHTML=`<div class="tab-content active">
+      ${estadoBanner}
+      <div class="sec-title" style="margin-top:0">Tu rendimiento</div>
+      <div id="statsWrap" style="margin-bottom:2rem"></div>
+      ${checklistHTML}
+      <div id="rankCard"></div>
+      <div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:6px;padding:1.1rem 1.25rem;margin-bottom:2rem">
+        <div style="font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:.5rem">Cobros · MercadoPago</div>
+        ${p.mp_conectado
+          ? `<div style="font-size:.85rem;color:var(--green)">✓ MercadoPago conectado. Acá vas a cobrar los trabajos de campaña que la marca apruebe (te llega el 90% directo).</div>`
+          : `<div style="font-size:.82rem;color:var(--muted2);line-height:1.6">Conectá tu MercadoPago para cobrar los trabajos de campaña: cuando la marca aprueba tu video, el pago se divide solo y el 90% te llega a tu cuenta.</div>
+             <button class="btn-save" style="margin-top:.7rem" onclick="conectarMP()">Conectar con MercadoPago</button>`}
+      </div>
+      <div id="puntosCard"></div>
+      <div class="sec-title">Información general</div>
+      <div class="info-grid">
+        <div class="info-card"><div class="ic-label">Nombre</div><div class="ic-val">${p.nombre} ${p.apellido}</div></div>
+        <div class="info-card"><div class="ic-label">Email</div><div class="ic-val">${p.email}</div></div>
+        <div class="info-card"><div class="ic-label">Ciudad</div><div class="ic-val ${!p.ciudad?'muted':''}">${p.ciudad||'Sin completar'}</div></div>
+        <div class="info-card"><div class="ic-label">País</div><div class="ic-val ${!p.pais?'muted':''}">${({AR:'Argentina',UY:'Uruguay',CL:'Chile',MX:'México',otro:'Otro'}[p.pais])||p.pais||'Sin completar'}</div></div>
+        <div class="info-card"><div class="ic-label">WhatsApp</div><div class="ic-val ${!p.tel?'muted':''}">${p.tel||'Sin completar'}</div></div>
+        <div class="info-card"><div class="ic-label">Nicho</div><div class="ic-val ${!(p.niches?.length)?'muted':''}">${p.niches?.join(', ')||'Sin completar'}</div></div>
+        <div class="info-card"><div class="ic-label">Disponibilidad</div><div class="ic-val ${!(p.disponibilidad?.length)?'muted':''}">${p.disponibilidad?.join(', ')||'—'}</div></div>
+      </div>
+      <div class="sec-title">Reputación</div>
+      <div style="margin-bottom:2rem">
+        ${(p.es_campeon || ((p.rating_count||0)>=3 && Number(p.rating_prom||0)>=4.5)) ? `<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.6rem">${p.es_campeon?`<span class="rep-badge camp">👑 ${p.campeon_label||'Campeón'}</span>`:''}${((p.rating_count||0)>=3&&Number(p.rating_prom||0)>=4.5)?`<span class="rep-badge top">⭐ Top valorado</span>`:''}</div>`:''}
+        <div style="display:flex;align-items:center;gap:.6rem;background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1rem 1.25rem;margin-bottom:.75rem">
+          <span style="font-size:1.4rem;font-weight:900;color:#f5b301">${(p.rating_count||0)?('★ '+Number(p.rating_prom||0).toFixed(1)):'—'}</span>
+          <span style="font-size:.78rem;color:var(--muted)">${(p.rating_count||0)?`${p.rating_count} ${p.rating_count==1?'reseña':'reseñas'} de marcas`:'Todavía no recibiste reseñas. Se habilitan cuando una marca compra tu contacto.'}</span>
+        </div>
+        <div id="repWrap"></div>
+      </div>
+      <div class="sec-title">Bio</div>
+      <div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1.25rem;font-size:.85rem;color:${p.bio?'var(--white)':'var(--muted)'};line-height:1.7;margin-bottom:2rem">${p.bio||'Sin bio. Completá tu perfil para aparecer en la bolsa.'}</div>
+      <div class="sec-title">Portfolio</div>
+      <div style="margin-bottom:2rem">${(p.links&&p.links[0])
+        ? `<a href="${p.links[0]}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:.6rem;background:#0f1a00;border:1px solid #2a4000;border-radius:3px;padding:1rem 1.25rem;color:var(--green);font-weight:700;font-size:.82rem;text-decoration:none">🔗 Ver mi portfolio<span style="margin-left:auto;color:var(--muted)">↗</span></a>`
+        : `<div style="background:#1a1200;border:1px solid #2a2000;border-radius:3px;padding:1rem 1.25rem;font-size:.8rem;color:var(--amber);line-height:1.5">📎 Todavía no cargaste tu portfolio. Las marcas lo ven antes de contactarte — <strong>cargalo en la pestaña Editar</strong> para destacarte.</div>`
+      }</div>
+      <div class="sec-title">Mis videos</div>
+      <div style="margin-bottom:2rem">${(p.videos&&p.videos.length)
+        ? `<div class="videos-grid">${p.videos.map(u=>`<div class="video-item"><video src="${u}" controls preload="metadata" playsinline></video></div>`).join('')}</div>`
+        : `<div style="background:#1a1200;border:1px solid #2a2000;border-radius:3px;padding:1rem 1.25rem;font-size:.8rem;color:var(--amber);line-height:1.5">🎬 Todavía no subiste videos. Las marcas ven tu contenido real (sin tus redes) antes de contactarte — <strong>subílos en la pestaña Editar</strong>.</div>`
+      }</div>
+      <div class="sec-title">Tarifas</div>
+      <div class="info-grid">
+        <div class="info-card"><div class="ic-label">Story</div><div class="ic-val">${p.t_story?'$'+p.t_story.toLocaleString()+' '+(p.moneda||'ARS'):'—'}</div></div>
+        <div class="info-card"><div class="ic-label">Reel</div><div class="ic-val">${p.t_reel?'$'+p.t_reel.toLocaleString()+' '+(p.moneda||'ARS'):'—'}</div></div>
+        <div class="info-card"><div class="ic-label">Post</div><div class="ic-val">${p.t_post?'$'+p.t_post.toLocaleString()+' '+(p.moneda||'ARS'):'—'}</div></div>
+        <div class="info-card"><div class="ic-label">Canje</div><div class="ic-val ${!p.canje?'muted':''}">${p.canje||'—'}</div></div>
+      </div>
+    </div>`;
+    if(p.rating_count) loadResenasRecibidas(p.id);
+    loadStatsCreador();
+    loadReelEstado();
+    loadRankingCreador();
+  }
+  else if(i===1){
+    // ── LIGA TRAMA. (gamificación diaria) ──
+    el.innerHTML=`<div class="tab-content active" id="ligaWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadLiga();
+  }
+  else if(i===2){
+    const redes=[
+      {icon:'📸',name:'Instagram',user:p.ig_user,seg:fmtSeg(p.ig_seg),er:p.ig_er},
+      {icon:'🎵',name:'TikTok',user:p.tt_user,seg:fmtSeg(p.tt_seg),er:p.tt_er},
+      {icon:'▶️',name:'YouTube',user:p.yt_user,seg:fmtSeg(p.yt_seg),er:null},
+      {icon:'🐦',name:'X / Twitter',user:p.tw_user,seg:fmtSeg(p.tw_seg),er:null},
+    ];
+    el.innerHTML=`<div class="tab-content active">
+      <div class="sec-title">Plataformas</div>
+      <div class="redes-grid">${redes.map(r=>`
+        <div class="red-card">
+          <div class="red-icon">${r.icon}</div>
+          <div>
+            <div class="red-name">${r.name}</div>
+            ${r.user?`<div class="red-user">${r.user}</div><div class="red-stat">${r.seg} seg${r.er?' · '+r.er+'% ER':''}</div>`
+            :`<div class="red-empty">No conectado</div>`}
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }
+  else if(i===3){
+    const st=p.status;
+    const map={
+      pendiente:{icon:'⏳',color:'var(--amber)',title:'Perfil en revisión',desc:'El equipo TRAMA. está revisando tu perfil. En 48-72hs te confirmamos si quedás en la bolsa.'},
+      aprobado:{icon:'✅',color:'var(--green)',title:'Perfil aprobado',desc:'Tu perfil está activo y visible en la bolsa de TRAMA. Las marcas ya pueden encontrarte.'},
+      rechazado:{icon:'❌',color:'var(--red)',title:'Perfil no aprobado',desc:'Por el momento tu perfil no cumple con los requisitos de TRAMA. Escribinos a info.tramapunto@gmail.com.'},
+    };
+    const e=map[st]||map.pendiente;
+    el.innerHTML=`<div class="tab-content active">
+      <div class="sec-title">Estado del perfil</div>
+      <div class="estado-box" style="border-color:${e.color}33">
+        <div style="font-size:1.75rem">${e.icon}</div>
+        <div><div class="estado-title" style="color:${e.color}">${e.title}</div><div class="estado-desc">${e.desc}</div></div>
+      </div>
+      ${st==='aprobado'?`<div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem"><div style="font-size:.82rem;color:var(--muted2)">Tu perfil está visible para todas las marcas registradas en TRAMA.</div><a href="/" style="background:var(--green);color:var(--black);padding:.6rem 1.25rem;font-weight:900;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;border-radius:2px;text-decoration:none">Ver bolsa →</a></div>`:''}
+    </div>`;
+  }
+  else if(i===4){
+    el.innerHTML=`<div class="tab-content active">
+      <div class="sec-title">Editar perfil</div>
+      <div style="background:#1a1200;border:1px solid #2a2000;border-radius:3px;padding:.875rem 1.1rem;margin-bottom:1.5rem;font-size:.76rem;color:#f59e0b;line-height:1.5">
+        ⚠️ <strong>Al guardar cambios, tu perfil vuelve a revisión.</strong> El equipo TRAMA. lo va a revisar antes de publicarlo nuevamente en la bolsa.
+      </div>
+
+      <div class="sec-title" style="margin-top:0">Datos personales</div>
+      <div class="edit-grid" style="margin-bottom:1.75rem">
+        <div class="fg-edit"><label>Nombre</label><input type="text" id="e-nombre" value="${p.nombre||''}"></div>
+        <div class="fg-edit"><label>Apellido</label><input type="text" id="e-apellido" value="${p.apellido||''}"></div>
+        <div class="fg-edit"><label>WhatsApp</label><input type="tel" id="e-tel" value="${p.tel||''}" placeholder="+54 9 11 0000-0000"></div>
+        <div class="fg-edit"><label>Ciudad</label><input type="text" id="e-ciudad" value="${p.ciudad||''}"></div>
+        <div class="fg-edit"><label>País</label><select id="e-pais">
+          ${(p.pais && !['AR','UY','CL','MX','otro'].includes(p.pais))?`<option value="${p.pais}" selected>${p.pais}</option>`:''}
+          ${[['AR','Argentina'],['UY','Uruguay'],['CL','Chile'],['MX','México'],['otro','Otro']].map(([v,l])=>`<option value="${v}"${(p.pais||'AR')===v?' selected':''}>${l}</option>`).join('')}
+        </select></div>
+        <div class="fg-edit fg-full"><label>Bio</label><textarea id="e-bio" maxlength="300" placeholder="Contá en 2-3 oraciones quién sos y qué tipo de contenido hacés...">${p.bio||''}</textarea></div>
+        <div class="fg-edit fg-full" style="background:#120a1a;border:1px solid #2a1a3a;border-radius:4px;padding:.8rem 1rem">
+          <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;margin:0;font-size:.82rem">
+            <input type="checkbox" id="e-pet" ${p.es_pet?'checked':''} onchange="document.getElementById('ePetFields').style.display=this.checked?'grid':'none'" style="width:16px;height:16px;accent-color:var(--purple)">
+            <span style="font-weight:800">🐾 Mi contenido lo protagoniza una mascota (Pet creator)</span>
+          </label>
+          <div id="ePetFields" class="edit-grid" style="display:${p.es_pet?'grid':'none'};margin-top:.7rem">
+            <div class="fg-edit"><label>Nombre de la mascota</label><input type="text" id="e-pet-nombre" value="${p.pet_nombre||''}" placeholder="Ej: Rocco"></div>
+            <div class="fg-edit"><label>Tipo</label>
+              <select id="e-pet-tipo">
+                ${['','Perro','Gato','Ave','Conejo','Caballo','Otro'].map(t=>`<option value="${t}" ${(p.pet_tipo||'')===t?'selected':''}>${t||'Elegí…'}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-title">Redes sociales</div>
+      <div class="edit-grid" style="margin-bottom:1.75rem">
+        <div class="fg-edit"><label>Usuario Instagram</label><input type="text" id="e-ig" value="${p.ig_user||''}" placeholder="@tuusuario"></div>
+        <div class="fg-edit"><label>Seguidores IG</label><input type="number" id="e-ig-seg" value="${p.ig_seg||''}" placeholder="0"></div>
+        <div class="fg-edit"><label>Engagement Rate IG %</label><input type="number" id="e-ig-er" step="0.1" value="${p.ig_er||''}" placeholder="0.0"></div>
+        <div class="fg-edit"><label>Alcance promedio IG</label><input type="number" id="e-ig-alc" value="${p.ig_alc||''}" placeholder="por post"></div>
+        <div class="fg-edit"><label>Usuario TikTok</label><input type="text" id="e-tt" value="${p.tt_user||''}" placeholder="@tuusuario"></div>
+        <div class="fg-edit"><label>Seguidores TikTok</label><input type="number" id="e-tt-seg" value="${p.tt_seg||''}" placeholder="0"></div>
+        <div class="fg-edit"><label>Canal YouTube</label><input type="text" id="e-yt" value="${p.yt_user||''}" placeholder="Nombre del canal"></div>
+        <div class="fg-edit"><label>Suscriptores YouTube</label><input type="number" id="e-yt-seg" value="${p.yt_seg||''}" placeholder="0"></div>
+      </div>
+
+      <div class="sec-title">Tarifas</div>
+      <div class="edit-grid" style="margin-bottom:1.75rem">
+        <div class="fg-edit"><label>Moneda</label>
+          <select id="e-moneda">
+            <option value="ARS" ${p.moneda==='ARS'?'selected':''}>ARS – Pesos argentinos</option>
+            <option value="USD" ${p.moneda==='USD'?'selected':''}>USD – Dólares</option>
+          </select>
+        </div>
+        <div class="fg-edit"><label>Tarifa Story</label><input type="number" min="0" id="e-story" value="${p.t_story||''}" placeholder="0"></div>
+        <div class="fg-edit"><label>Tarifa Reel / TikTok</label><input type="number" min="0" id="e-reel" value="${p.t_reel||''}" placeholder="0"></div>
+        <div class="fg-edit"><label>Tarifa Post feed</label><input type="number" min="0" id="e-post" value="${p.t_post||''}" placeholder="0"></div>
+        <div style="grid-column:1/-1;font-size:.7rem;color:var(--muted);line-height:1.5">💡 Poné el valor en la moneda elegida. Referencia: en ARS, de $1.000 a $5.000.000; en USD, de US$5 a US$50.000. El precio que se arregla con la marca es aparte; TRAMA. solo cobra el contacto.</div>
+        <div class="fg-edit"><label>Canje</label>
+          <select id="e-canje">
+            <option value="">Seleccioná</option>
+            <option ${p.canje==='Sí, acepto canje'?'selected':''}>Sí, acepto canje</option>
+            <option ${p.canje==='Solo canje + fee'?'selected':''}>Solo canje + fee</option>
+            <option ${p.canje==='No, solo pago'?'selected':''}>No, solo pago</option>
+          </select>
+        </div>
+        <div class="fg-edit"><label>Disponibilidad</label>
+          <select id="e-disp">
+            <option value="">Seleccioná</option>
+            <option ${(p.disponibilidad||[]).includes('Inmediata')?'selected':''}>Inmediata</option>
+            <option ${(p.disponibilidad||[]).includes('En 2 semanas')?'selected':''}>En 2 semanas</option>
+            <option ${(p.disponibilidad||[]).includes('En 1 mes')?'selected':''}>En 1 mes</option>
+            <option ${(p.disponibilidad||[]).includes('Consultar')?'selected':''}>Consultar</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sec-title">Portfolio</div>
+      <div class="porto-callout">
+        <div class="porto-callout-t">📎 Tu portfolio lo ven las marcas antes de contactarte</div>
+        <div class="porto-callout-d">Pegá el link a tu mejor contenido — un reel, un carrusel, una carpeta de Drive, tu Behance. Es tu carta de presentación.</div>
+      </div>
+      <div class="edit-grid" style="margin-bottom:1.75rem">
+        <div class="fg-edit fg-full"><label>🔗 Link de portfolio</label><input type="url" id="e-link" value="${(p.links||[])[0]||''}" placeholder="https://instagram.com/p/...  ·  o link de Drive / Behance"></div>
+        <div class="fg-edit fg-full"><label>Colaboraciones anteriores</label><textarea id="e-colabs" placeholder="Marcas con las que ya trabajaste...">${p.colabs||''}</textarea></div>
+      </div>
+
+      <div class="sec-title">Fotos de muestra</div>
+      <p style="font-size:.76rem;color:var(--muted2);line-height:1.5;margin-bottom:.9rem">Subí fotos de tu contenido. Las marcas las ven como preview antes de contactarte. (Se guardan al toque, no vuelven a revisión.)</p>
+      <div id="fotosGrid" class="fotos-grid"></div>
+      <label class="foto-add">📷 Agregar fotos<input type="file" accept="image/*" multiple style="display:none" onchange="subirFotos(this)"></label>
+
+      <div class="sec-title" style="margin-top:2rem">Videos de muestra</div>
+      <p style="font-size:.76rem;color:var(--muted2);line-height:1.5;margin-bottom:.9rem">Subí videos de tu contenido (hasta ${MAX_VIDEOS}, máx. ${MAX_VIDEO_MB} MB c/u). Se reproducen en tu perfil <strong>sin mostrar tus redes</strong> — las marcas ven tu contenido real, pero tu contacto sigue protegido hasta que lo compran.</p>
+      <div id="videosGrid" class="videos-grid"></div>
+      <label class="foto-add">🎬 Agregar videos<input type="file" accept="video/*" multiple style="display:none" onchange="subirVideos(this)"></label>
+
+      <button class="btn-save" style="margin-top:1.5rem" onclick="saveCreator()">Guardar y enviar a revisión →</button>
+
+      ${pwdBlockHTML()}
+    </div>`;
+    renderFotos();
+    renderVideos();
+  }
+  else if(i===5){
+    el.innerHTML=`<div class="tab-content active" id="contactosWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadContactosCreator();
+  }
+  else if(i===6){
+    el.innerHTML=`<div class="tab-content active" id="compradosWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadComprados('compradosWrap');
+  }
+  else if(i===7){
+    el.innerHTML=`<div class="tab-content active" id="campCreWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadCampanasCreador('campCreWrap');
+  }
+  else if(i===8){
+    el.innerHTML=`<div class="tab-content active" id="resCreWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadResultadosCreador('resCreWrap');
+  }
+}
+
+// ── RESULTADOS (vista del creador: métricas que cargaron las marcas) ──
+async function loadResultadosCreador(wrapId){
+  const wrap=document.getElementById(wrapId); if(!wrap)return;
+  const token=getToken();
+  const resu=await sbGet('resultados_campania',`creator_email=eq.${encodeURIComponent(currentUser.email)}&select=*&order=created_at.desc`,token);
+  if(!resu||!resu.length){
+    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Resultados de mis campañas</div><div class="empty-state"><div>📊</div>Todavía no hay resultados cargados.<br><span style="font-size:.78rem;color:var(--muted)">Cuando una marca cierre una campaña en la que trabajaste, vas a ver acá tus métricas.</span></div></div>`;
+    return;
+  }
+  // Totales
+  const sum=k=>resu.reduce((a,r)=>a+(Number(r[k])||0),0);
+  const tot={alcance:sum('alcance'),interacciones:sum('interacciones'),clics:sum('clics'),piezas:sum('piezas'),ventas:sum('ventas')};
+  const statCard=(n,l,money)=>`<div class="mc-stat"><div class="mc-n" style="color:var(--green)">${money?'$':''}${Number(n).toLocaleString('es-AR')}</div><div class="mc-l">${l}</div></div>`;
+  const bloques=resu.map(r=>{
+    const metric=(label,val,money)=>{ const v=fmtNumR(val); return v==null?'':`<div class="res-metric"><strong>${money?'$':''}${v}</strong>${label}</div>`; };
+    const ms=[metric('Alcance',r.alcance),metric('Interacciones',r.interacciones),metric('Clics',r.clics),metric('Piezas',r.piezas),metric('Ventas',r.ventas,true)].filter(Boolean).join('');
+    const f=r.created_at?new Date(r.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}):'';
+    return `<div class="res-box" style="background:var(--g1);border-color:#1a1a1a">
+      <div style="font-size:.85rem;font-weight:900">${r.campania_titulo||'Campaña'}</div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:.15rem">${r.marca_nombre||'Marca'} · ${f}</div>
+      ${ms?`<div class="res-metrics">${ms}</div>`:'<div style="font-size:.72rem;color:var(--muted);margin-top:.3rem">Sin métricas numéricas.</div>'}
+      ${r.nota?`<div style="font-size:.74rem;color:var(--muted2);margin-top:.5rem;line-height:1.5">“${r.nota}”</div>`:''}
+    </div>`;
+  }).join('');
+  wrap.innerHTML=`<div class="tab-content active">
+    <div class="sec-title" style="margin-top:0">Resultados de mis campañas</div>
+    <p style="font-size:.78rem;color:var(--muted2);line-height:1.5;margin-bottom:1.25rem">Métricas que las marcas cargaron al cerrar campañas en las que trabajaste. Son tu prueba social para conseguir más colaboraciones.</p>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.5rem">
+      ${statCard(resu.length,'Colaboraciones')}
+      ${tot.alcance?statCard(tot.alcance,'Alcance total'):''}
+      ${tot.interacciones?statCard(tot.interacciones,'Interacciones'):''}
+      ${tot.ventas?statCard(tot.ventas,'Ventas ($)',true):''}
+    </div>
+    ${bloques}
+  </div>`;
+}
+
+// ── CAMPAÑAS (vista del creador: campañas abiertas + mis postulaciones) ──
+async function loadCampanasCreador(wrapId){
+  const wrap=document.getElementById(wrapId); if(!wrap)return;
+  const token=getToken();
+  const activas=await sbGet('campanias','estado=eq.activa&select=id,titulo,tipo,presupuesto_min,presupuesto_max,moneda,fecha_limite&order=created_at.desc',token);
+  const mis=await sbGet('postulaciones',`creador_id=eq.${userProfile.id}&select=id,campania_id,estado,created_at,entrega_url,pago_estado,monto_acordado,tarifa_propuesta&order=created_at.desc`,token);
+  const nActivas=(activas||[]).length;
+  const estadoTxt={pendiente:'En revisión',preseleccionada:'Preseleccionada ⭐',aceptada:'¡Te seleccionaron! ✅',entregada:'Video enviado 🎬',aprobada:'Aprobada',pagada:'Pagada 💸',rechazada:'No seleccionada',retirada:'Retirada'};
+  const estadoCol={pendiente:'var(--muted2)',preseleccionada:'#f5b301',aceptada:'var(--green)',entregada:'#60a5fa',aprobada:'var(--green)',pagada:'var(--green)',rechazada:'#f87171',retirada:'var(--muted)'};
+  // mapa de títulos (de todas mis campañas, no solo las activas)
+  const misCampIds=[...new Set((mis||[]).map(p=>p.campania_id).filter(Boolean))];
+  const titById={}; (activas||[]).forEach(c=>titById[c.id]=c.titulo);
+  if(misCampIds.length){
+    const falt=misCampIds.filter(id=>!(id in titById));
+    if(falt.length){ const extra=await sbGet('campanias',`id=in.(${falt.map(encodeURIComponent).join(',')})&select=id,titulo`,token); (extra||[]).forEach(c=>titById[c.id]=c.titulo); }
+  }
+  const mpConn=!!(userProfile&&userProfile.mp_conectado);
+  const misHtml=(mis&&mis.length)? mis.map(p=>{
+    const f=p.created_at?new Date(p.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):'';
+    const tit=titById[p.campania_id]||'Campaña';
+    const monto=Number(p.monto_acordado||p.tarifa_propuesta||0);
+    const montoTxt=monto?('$'+monto.toLocaleString('es-AR')):'';
+    let extra='';
+    if(p.estado==='aceptada'){
+      extra=`${mpConn?'':`<div style="font-size:.72rem;color:var(--amber);margin-top:.4rem">⚠️ Conectá tu MercadoPago (en “Mi perfil”) para poder cobrar este trabajo.</div>`}
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.5rem">
+          <input id="entrega-${p.id}" type="url" placeholder="Link de tu video (Drive, WeTransfer, IG...)" style="flex:1;min-width:200px;background:#080808;border:1px solid #222;border-radius:2px;color:var(--white);padding:.55rem;font-size:.8rem">
+          <button class="btn-save" style="margin:0" onclick="entregarVideo('${p.id}')">🎬 Enviar video</button>
+        </div>`;
+    } else if(p.estado==='entregada'){
+      extra=`<div style="font-size:.74rem;color:#60a5fa;margin-top:.4rem">🎬 Video enviado — la marca lo está revisando.${p.entrega_url?` <a href="${p.entrega_url}" target="_blank" rel="noopener" style="color:var(--purple)">ver</a>`:''}</div>`;
+    } else if(p.estado==='pagada'||p.pago_estado==='pagado'){
+      extra=`<div style="font-size:.74rem;color:var(--green);margin-top:.4rem">💸 Cobrado${montoTxt?' '+montoTxt:''} — ¡gracias por tu trabajo!</div>`;
+    }
+    return `<div class="cx-item"><div class="cx-ic">📋</div><div class="cx-body"><div class="cx-name">${tit}</div><div class="cx-meta">Postulado el ${f}${montoTxt&&['aceptada','entregada'].includes(p.estado)?' · acordado '+montoTxt:''}</div><div style="font-size:.74rem;font-weight:800;margin-top:.35rem;color:${estadoCol[p.estado]||'var(--muted2)'}">${estadoTxt[p.estado]||p.estado}</div>${extra}</div></div>`;
+  }).join('') : `<div class="empty-state" style="padding:1.5rem"><div>📭</div>Todavía no te postulaste a ninguna campaña.</div>`;
+  wrap.innerHTML=`<div class="tab-content active">
+    <div style="background:#0f0a1a;border:1px solid #2a1a40;border-radius:6px;padding:1.4rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+      <div>
+        <div style="font-size:1.5rem;font-weight:900;color:var(--purple)">${nActivas} ${nActivas===1?'campaña abierta':'campañas abiertas'}</div>
+        <div style="font-size:.82rem;color:var(--muted2);margin-top:.2rem">Las marcas publican su brief y vos te postulás a las que te cierran.</div>
+      </div>
+      <a href="/oportunidades.html" style="background:var(--purple);color:#fff;font-size:.8rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;padding:.7rem 1.2rem;border-radius:2px;white-space:nowrap">Ver campañas →</a>
+    </div>
+    <div class="sec-title">Mis postulaciones (${(mis||[]).length})</div>
+    <div class="cx-list">${misHtml}</div>
+  </div>`;
+}
+
+// ── MARCA TABS ──
+function renderMarcaTab(i,el){
+  const p=userProfile;
+  if(i===0){
+    el.innerHTML=`<div class="tab-content active">
+      <div class="sec-title">Datos de la cuenta</div>
+      <div class="info-grid">
+        <div class="info-card"><div class="ic-label">Nombre</div><div class="ic-val">${p.nombre} ${p.apellido}</div></div>
+        <div class="info-card"><div class="ic-label">Email</div><div class="ic-val">${p.email}</div></div>
+        <div class="info-card"><div class="ic-label">${p.tipo==='corporativa'?'Razón social':'Marca'}</div><div class="ic-val ${!(p.razon_social||p.nombre_marca)?'muted':''}">${p.razon_social||p.nombre_marca||'Sin completar'}</div></div>
+        <div class="info-card"><div class="ic-label">Rubro</div><div class="ic-val ${!p.rubro?'muted':''}">${p.rubro||'Sin completar'}</div></div>
+        ${p.tel?`<div class="info-card"><div class="ic-label">Teléfono</div><div class="ic-val">${p.tel}</div></div>`:''}
+      </div>
+      ${(p.objetivos?.length)?`<div class="sec-title">Objetivos</div><div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:2rem">${p.objetivos.map(o=>`<span style="background:#0f1a00;color:var(--green);border:1px solid #2a4000;padding:.3rem .75rem;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:2px">${o}</span>`).join('')}</div>`:''}
+      <div style="display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem">
+        <a href="/campanas.html" style="flex:1;min-width:200px;background:#0f1a00;border:1px solid #2a4000;border-radius:4px;padding:1.1rem 1.25rem;text-decoration:none">
+          <div style="font-size:.9rem;font-weight:800;color:var(--green)">📋 Publicá una campaña</div>
+          <div style="font-size:.76rem;color:var(--muted2);margin-top:.25rem;line-height:1.5">Dejá tu brief y recibí postulaciones de creadores que encajan.</div>
+        </a>
+        <a href="/#bolsa" style="flex:1;min-width:200px;background:#0a1020;border:1px solid #1a2a40;border-radius:4px;padding:1.1rem 1.25rem;text-decoration:none">
+          <div style="font-size:.9rem;font-weight:800;color:var(--white)">🔍 Encontrá tu creador</div>
+          <div style="font-size:.76rem;color:var(--muted2);margin-top:.25rem;line-height:1.5">Buscá y conectá con creadores verificados por nicho.</div>
+        </a>
+      </div>
+    </div>`;
+  }
+  else if(i===1){
+    el.innerHTML=`<div class="tab-content active" id="guardadosWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadGuardados('guardadosWrap');
+  }
+  else if(i===2){
+    el.innerHTML=`<div class="tab-content active" id="cxMarcaWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadComprados('cxMarcaWrap');
+  }
+  else if(i===3){
+    el.innerHTML=`<div class="tab-content active">
+      <div class="sec-title">Editar cuenta</div>
+      <div class="edit-grid">
+        <div class="fg-edit"><label>Nombre</label><input type="text" id="em-nombre" value="${p.nombre||''}"></div>
+        <div class="fg-edit"><label>Apellido</label><input type="text" id="em-apellido" value="${p.apellido||''}"></div>
+        <div class="fg-edit"><label>Teléfono</label><input type="tel" id="em-tel" value="${p.tel||''}" placeholder="+54 11 0000-0000"></div>
+        <div class="fg-edit"><label>${p.tipo==='corporativa'?'Razón social':'Nombre de marca'}</label><input type="text" id="em-marca" value="${p.razon_social||p.nombre_marca||''}"></div>
+        ${p.tipo==='corporativa'?`<div class="fg-edit"><label>CUIT</label><input type="text" id="em-cuit" value="${p.cuit||''}"></div>`:''}
+        <div class="fg-edit fg-full"><label>Descripción</label><textarea id="em-desc">${p.descripcion||''}</textarea></div>
+      </div>
+      <button class="btn-save" onclick="saveMarca()">Guardar cambios</button>
+
+      ${pwdBlockHTML()}
+    </div>`;
+  }
+  else if(i===4){
+    el.innerHTML=`<div class="tab-content active" id="campMarWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadCampanasMarca('campMarWrap');
+  }
+}
+
+// ── MIS CAMPAÑAS (vista de la marca: sus campañas + postulantes) ──
+const EST_POST={pendiente:'Nuevo',preseleccionada:'Preseleccionado ⭐',aceptada:'Aceptado ✅',rechazada:'Descartado',retirada:'Retirada'};
+const EST_CAMP={en_revision:'En revisión',activa:'Activa',cerrada:'Cerrada',rechazada:'Rechazada',cancelada:'Cancelada'};
+const TIPO_CAMP={ugc:'UGC',influencer:'Influencer',combo:'Combo',activacion:'Activación'};
+function presuTxt(c){
+  const mon=c.moneda||'ARS';
+  const f=n=>'$'+Number(n).toLocaleString('es-AR')+(mon==='USD'?' USD':'');
+  if(c.presupuesto_min&&c.presupuesto_max) return `${f(c.presupuesto_min)} – ${f(c.presupuesto_max)}`;
+  if(c.presupuesto_min) return `Desde ${f(c.presupuesto_min)}`;
+  if(c.presupuesto_max) return `Hasta ${f(c.presupuesto_max)}`;
+  return 'A convenir';
+}
+let campPostulantes={};
+function matchScoreMarca(cr, c){
+  if(!cr) return null;
+  let score=0;
+  const fmts=(c.formatos||[]).map(x=>String(x).toLowerCase());
+  const haceVideo=(cr.t_reel>0)||(cr.tt_seg>0)||(cr.yt_seg>0)||(cr.ig_seg>0);
+  const haceStory=(cr.t_story>0)||(cr.ig_seg>0);
+  const hacePost=(cr.t_post>0)||(cr.ig_seg>0);
+  const puede=f=>{ if(/reel|tiktok|video/.test(f))return haceVideo; if(/story|stories|historia/.test(f))return haceStory; if(/post|feed|foto/.test(f))return hacePost; return true; };
+  if(fmts.length){ const ok=fmts.filter(puede).length; score+=Math.round(45*ok/fmts.length); } else score+=45;
+  if(c.es_presencial){ const u=String(c.ubicacion||'').toLowerCase(), ci=String(cr.ciudad||'').toLowerCase(); const ciTok=ci.split(/[ ,]/)[0]||''; score+=(ci&&u&&(u.includes(ci)||(ciTok&&u.includes(ciTok))))?25:6; } else score+=25;
+  const texto=`${c.titulo||''} ${c.descripcion||''} ${c.requisitos||''}`.toLowerCase();
+  const nichos=(cr.niches||[]).map(n=>String(n).toLowerCase());
+  score+=nichos.some(n=>n&&texto.includes(n))?30:14;
+  return Math.min(99,Math.max(35,score));
+}
+async function loadCampanasMarca(wrapId){
+  const wrap=document.getElementById(wrapId); if(!wrap)return;
+  const token=getToken();
+  const camps=await sbGet('campanias',`marca_email=eq.${encodeURIComponent(currentUser.email)}&select=id,titulo,estado,created_at,cupos,fecha_limite,tipo,descripcion,presupuesto_min,presupuesto_max,moneda,formatos,es_canje,es_presencial,entregables,ubicacion,requisitos&order=created_at.desc`,token);
+  if(!camps||!camps.length){
+    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Mis campañas</div><div class="empty-state"><div>📋</div>Todavía no publicaste ninguna campaña.<br><a href="/campanas.html" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Publicar una campaña →</a></div></div>`;
+    return;
+  }
+  const ids=camps.map(c=>c.id);
+  const inList='('+ids.map(encodeURIComponent).join(',')+')';
+  const posts=await sbGet('postulaciones',`campania_id=in.${inList}&select=id,campania_id,creador_id,mensaje,tarifa_propuesta,estado,created_at,monto_acordado,entrega_url,pago_estado&order=created_at.desc`,token);
+  const creIds=[...new Set((posts||[]).map(p=>p.creador_id).filter(Boolean))];
+  let byCre={};
+  if(creIds.length){
+    const cre=await sbGet('creators',`id=in.(${creIds.map(encodeURIComponent).join(',')})&select=id,nombre,apellido,niches,ig_seg,tt_seg,yt_seg,avatar_url,rating_prom,rating_count,reel_boost`,token);
+    byCre=Object.fromEntries((cre||[]).map(c=>[String(c.id),c]));
+  }
+  const postsByCamp={};
+  (posts||[]).forEach(p=>{ (postsByCamp[p.campania_id]=postsByCamp[p.campania_id]||[]).push(p); });
+  // Resultados ya cargados de estas campañas
+  const resu=await sbGet('resultados_campania',`campania_id=in.${inList}&select=*&order=created_at.desc`,token);
+  const resByCamp={}; (resu||[]).forEach(r=>{ (resByCamp[r.campania_id]=resByCamp[r.campania_id]||[]).push(r); });
+  // Desbloqueos (contactos comprados) por campaña, para el embudo
+  const cnx=await sbGet('conexiones',`marca_email=eq.${encodeURIComponent(currentUser.email)}&estado=eq.pagado&select=campania_id,creator_id`,token);
+  const desbByCamp={}; (cnx||[]).forEach(x=>{ if(x.campania_id){ (desbByCamp[x.campania_id]=desbByCamp[x.campania_id]||new Set()).add(String(x.creator_id)); } });
+  // Creadores aprobados para sugerir por match (solo si hay alguna campaña activa)
+  let aprob=[];
+  if(camps.some(c=>c.estado==='activa')){
+    aprob=await sbGet('creators','status=eq.aprobado&select=id,nombre,apellido,avatar_url,ciudad,niches,t_story,t_reel,t_post,ig_seg,tt_seg,yt_seg,reel_boost',token)||[];
+  }
+  // Postulantes por campaña para el selector de cierre
+  campPostulantes={};
+  Object.keys(postsByCamp).forEach(cid=>{
+    const seen=new Set();
+    campPostulantes[cid]=(postsByCamp[cid]||[]).map(p=>{ const cr=byCre[String(p.creador_id)]||{}; return {id:p.creador_id, nombre:`${cr.nombre||''} ${cr.apellido||''}`.trim()||'Creador'}; }).filter(x=>x.id && !seen.has(x.id) && seen.add(x.id));
+  });
+  const fmtSegM=n=>!n?'—':n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':n;
+  const estColor={pendiente:'var(--muted2)',preseleccionada:'#f5b301',aceptada:'var(--green)',rechazada:'#f87171',retirada:'var(--muted)'};
+  // Resumen
+  const nActivas=camps.filter(c=>c.estado==='activa').length;
+  const nRevision=camps.filter(c=>c.estado==='en_revision').length;
+  const totalPost=(posts||[]).length;
+  // Avisos accionables
+  const pendPorRevisar=(posts||[]).filter(p=>p.estado==='pendiente').length;
+  const hoyD=new Date(); const en3=new Date(Date.now()+3*86400000);
+  const porVencer=camps.filter(c=>c.estado==='activa'&&c.fecha_limite&&new Date(c.fecha_limite+'T23:59:59')>=hoyD&&new Date(c.fecha_limite+'T00:00:00')<=en3);
+  const avisos=[];
+  if(pendPorRevisar>0) avisos.push(`📥 Tenés <strong>${pendPorRevisar}</strong> postulante${pendPorRevisar===1?'':'s'} sin revisar.`);
+  porVencer.forEach(c=>avisos.push(`⏰ <strong>${c.titulo||'Una campaña'}</strong> cierra el ${new Date(c.fecha_limite+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'})}.`));
+  const avisosHTML = avisos.length
+    ? `<div style="background:#1a1200;border:1px solid #2a2000;border-radius:6px;padding:.9rem 1.1rem;margin-bottom:1.5rem">
+         <div style="font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:.4rem">Para revisar</div>
+         ${avisos.map(a=>`<div style="font-size:.82rem;color:var(--white);line-height:1.6">${a}</div>`).join('')}
+       </div>`
+    : '';
+  const bloques=camps.map(c=>{
+    // Los creadores destacados (reel con etiqueta a TRAMA) aparecen primero
+    const ps=(postsByCamp[c.id]||[]).slice().sort((a,b)=>((byCre[String(b.creador_id)]||{}).reel_boost?1:0)-((byCre[String(a.creador_id)]||{}).reel_boost?1:0));
+    // Embudo de la campaña: postulantes → desbloqueados → cerrados
+    const nDesb=(desbByCamp[c.id]?desbByCamp[c.id].size:0);
+    const nCerr=(resByCamp[c.id]||[]).length;
+    const fstep=(lbl,n,col)=>`<div style="flex:1;min-width:70px;text-align:center"><div style="font-size:1.25rem;font-weight:900;color:${col}">${n}</div><div style="font-size:.58rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">${lbl}</div></div>`;
+    const arrow=`<div style="color:var(--muted);font-size:.9rem;align-self:center">→</div>`;
+    const embudoHTML=`<div style="display:flex;gap:.3rem;align-items:stretch;background:#0d0d0d;border:1px solid #1a1a1a;border-radius:4px;padding:.7rem .5rem;margin:.9rem 0">
+      ${fstep('Postulantes',ps.length,'var(--white)')}${arrow}${fstep('Desbloqueados',nDesb,'var(--green)')}${arrow}${fstep('Cerrados',nCerr,'var(--purple)')}
+    </div>`;
+    // Sugeridos por match (solo campañas activas, creadores que NO se postularon)
+    let sugHTML='';
+    if(c.estado==='activa' && aprob.length){
+      const appliedIds=new Set((postsByCamp[c.id]||[]).map(p=>String(p.creador_id)));
+      const sug=aprob.filter(cr=>!appliedIds.has(String(cr.id))).map(cr=>({cr,ms:matchScoreMarca(cr,c)})).sort((a,b)=>b.ms-a.ms).slice(0,3);
+      if(sug.length){
+        sugHTML=`<div style="font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--purple);margin:1rem 0 .6rem">Creadores sugeridos para esta campaña</div>
+          <div class="cx-list">`+sug.map(({cr,ms})=>{
+            const nom=`${cr.nombre||''} ${cr.apellido||''}`.trim()||'Creador';
+            const nich=(cr.niches||[]).slice(0,2).join(' · ')||'';
+            const seg=fmtSegM(cr.ig_seg||cr.tt_seg||cr.yt_seg);
+            const av=cr.avatar_url?`<img src="${cr.avatar_url}" style="width:100%;height:100%;object-fit:cover">`:'🎥';
+            return `<div class="cx-item"><div class="cx-ic">${av}</div><div class="cx-body"><div class="cx-name">${nom} <span style="font-size:.58rem;font-weight:900;color:var(--purple);background:#1a0a2a;border:1px solid #3a1a5a;border-radius:20px;padding:.1rem .4rem;margin-left:.3rem">${ms}% match</span></div><div class="cx-meta">${nich}${seg!=='—'?' · '+seg+' seg.':''}</div><button class="resena-btn" style="margin-top:.5rem" onclick="desbloquearPostulante('${cr.id}','${c.id}')">🔓 Desbloquear contacto</button></div></div>`;
+          }).join('')+`</div>
+          <div style="font-size:.68rem;color:var(--muted);margin-top:.4rem">No se postularon, pero encajan con tu brief. Desbloquear su contacto es una compra igual que la de un postulante.</div>`;
+      }
+    }
+    const items=ps.map(p=>{
+      const cr=byCre[String(p.creador_id)]||{};
+      const nom=`${cr.nombre||''} ${cr.apellido||''}`.trim()||'Creador';
+      const seg=fmtSegM(cr.ig_seg||cr.tt_seg||cr.yt_seg);
+      const nich=(cr.niches||[]).slice(0,2).join(' · ')||'';
+      const av=cr.avatar_url?`<img src="${cr.avatar_url}" style="width:100%;height:100%;object-fit:cover">`:'🎥';
+      const tarifa=p.tarifa_propuesta?('$'+Number(p.tarifa_propuesta).toLocaleString('es-AR')):'A convenir';
+      const boost=cr.reel_boost?`<span style="font-size:.58rem;font-weight:900;color:var(--purple);background:#1a0a2a;border:1px solid #3a1a5a;border-radius:20px;padding:.1rem .4rem;margin-left:.3rem">⭐ Destacado</span>`:'';
+      const monto=Number(p.monto_acordado||p.tarifa_propuesta||0);
+      const montoTxt=monto?('$'+monto.toLocaleString('es-AR')):'su tarifa';
+      const abierta=(c.estado==='activa'||c.estado==='cerrada');
+      let acciones='';
+      if(['pendiente','preseleccionada'].includes(p.estado) && abierta){
+        acciones=`<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem">
+          <button class="resena-btn" style="background:var(--green);color:#080808;border:none" onclick="selPostulante('${p.id}')">✅ Seleccionar</button>
+          <button class="resena-btn" onclick="rechazarPostulante('${p.id}')">✕ Descartar</button>
+          <button class="resena-btn" onclick="desbloquearPostulante('${p.creador_id}','${c.id}','${p.id}')">🔓 Contacto</button>
+        </div>`;
+      } else if(p.estado==='aceptada'){
+        acciones=`<div style="font-size:.76rem;color:var(--green);margin-top:.5rem">✅ Seleccionado · esperando que suba el video (${montoTxt})</div>
+          <button class="resena-btn" style="margin-top:.4rem" onclick="desbloquearPostulante('${p.creador_id}','${c.id}','${p.id}')">🔓 Contacto</button>`;
+      } else if(p.estado==='entregada'){
+        acciones=`<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem;align-items:center">
+          ${p.entrega_url?`<a class="resena-btn" href="${p.entrega_url}" target="_blank" rel="noopener">🎬 Ver video</a>`:''}
+          <button class="resena-btn" style="background:var(--green);color:#080808;border:none" onclick="aprobarYPagar('${p.creador_id}','${c.id}','${p.id}',${monto})">✅ Aprobar y pagar ${montoTxt}</button>
+        </div>`;
+      } else if(p.estado==='aprobada'||p.estado==='pagada'||p.pago_estado==='pagado'){
+        acciones=`<div style="font-size:.76rem;color:var(--green);margin-top:.5rem">💸 Pagado ${montoTxt} · trabajo cerrado</div>`;
+      } else if(p.estado==='rechazada'){
+        acciones=`<div style="font-size:.74rem;color:var(--muted);margin-top:.5rem">Descartado</div>`;
+      }
+      return `<div class="cx-item"${cr.reel_boost?' style="border-color:#3a1a5a"':''}>
+        <div class="cx-ic">${av}</div>
+        <div class="cx-body">
+          <div class="cx-name">${nom}${boost} <span style="font-size:.6rem;font-weight:800;color:${estColor[p.estado]||'var(--muted2)'};text-transform:uppercase;margin-left:.3rem">${EST_POST[p.estado]||p.estado}</span></div>
+          <div class="cx-meta">${nich}${seg!=='—'?' · '+seg+' seg.':''} · pide ${tarifa}</div>
+          ${p.mensaje?`<div style="font-size:.76rem;color:var(--muted2);margin-top:.35rem;line-height:1.5">“${p.mensaje.slice(0,180)}”</div>`:''}
+          ${acciones}
+        </div>
+      </div>`;
+    }).join('');
+    const f=c.fecha_limite?new Date(c.fecha_limite+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):null;
+    const alta=c.created_at?new Date(c.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}):'';
+    const activa=c.estado==='activa';
+    const chips=[
+      `🎬 ${TIPO_CAMP[c.tipo]||c.tipo||'UGC'}`,
+      `💰 ${presuTxt(c)}`,
+      `👥 ${c.cupos||1} cupo${(c.cupos||1)>1?'s':''}`,
+      (c.formatos&&c.formatos.length)?`🎞 ${c.formatos.join(', ')}`:'',
+      c.es_canje?'🎁 Canje':'',
+      c.es_presencial?'📍 Presencial':'',
+      f?`📅 Cierra ${f}`:'',
+    ].filter(Boolean);
+    const estadoNota = c.estado==='en_revision'
+      ? `<div style="font-size:.72rem;color:var(--amber);margin-top:.5rem">⏳ En revisión por el equipo TRAMA. Cuando la aprueben, los creadores la ven y se pueden postular.</div>`
+      : c.estado==='rechazada'
+      ? `<div style="font-size:.72rem;color:#f87171;margin-top:.5rem">Esta campaña fue rechazada. Escribinos si querés revisarla.</div>`
+      : '';
+    const resList=resByCamp[c.id]||[];
+    const resHTML = resList.map(r=>resultadoBox(r)).join('');
+    const puedeCerrar = (campPostulantes[c.id]||[]).length>0;
+    return `<div class="mc-card" style="border:1px solid #1a1a1a;border-radius:6px;padding:1.1rem 1.25rem;margin-bottom:1.25rem;background:var(--g1)">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem;flex-wrap:wrap">
+        <span style="font-size:1.02rem;font-weight:900">${c.titulo||'Campaña'}</span>
+        <span class="cx-venc ${activa?'ok':'exp'}" style="border-radius:2px">${EST_CAMP[c.estado]||c.estado}</span>
+        <span style="font-size:.7rem;color:var(--muted)">${ps.length} postulante${ps.length===1?'':'s'}${alta?' · publicada '+alta:''}</span>
+        <span style="margin-left:auto;display:flex;gap:.4rem">
+          ${c.estado==='activa'?`<button onclick="cerrarCampania('${c.id}')" title="Cerrar: deja de aceptar postulantes" style="background:transparent;border:1px solid #3a2a00;color:var(--amber);font-size:.68rem;font-weight:700;padding:.3rem .6rem;border-radius:2px;cursor:pointer">🔒 Cerrar</button>`:''}
+          <button onclick="borrarMiCampania('${c.id}',${ps.length})" title="Eliminar campaña" style="background:transparent;border:1px solid #2a2a2a;color:var(--muted2);font-size:.68rem;font-weight:700;padding:.3rem .6rem;border-radius:2px;cursor:pointer">🗑 Eliminar</button>
+        </span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.6rem">
+        ${chips.map(ch=>`<span style="font-size:.68rem;font-weight:700;color:var(--muted2);background:#121212;border:1px solid #222;border-radius:20px;padding:.25rem .65rem">${ch}</span>`).join('')}
+      </div>
+      ${c.descripcion?`<div style="font-size:.78rem;color:#bbb;line-height:1.55;margin-bottom:.4rem">${c.descripcion.slice(0,260)}${c.descripcion.length>260?'…':''}</div>`:''}
+      ${estadoNota}
+      ${embudoHTML}
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;margin:1rem 0 .6rem">
+        <span style="font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Resultados de la campaña</span>
+        <button onclick="abrirCierre('${c.id}')" ${puedeCerrar?'':'disabled'} title="${puedeCerrar?'':'Necesitás al menos un postulante para cerrar con resultados'}" style="background:${puedeCerrar?'var(--green)':'#161616'};color:${puedeCerrar?'#080808':'var(--muted)'};border:none;font-size:.68rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;padding:.4rem .8rem;border-radius:2px;cursor:${puedeCerrar?'pointer':'not-allowed'}">✅ Cerrar con resultados</button>
+      </div>
+      ${resHTML || `<div style="font-size:.74rem;color:var(--muted);background:#0d0d0d;border:1px solid #1a1a1a;border-radius:4px;padding:.7rem .9rem">Todavía no cargaste resultados. Al terminar con un creador, cerrá la campaña con sus métricas: las van a ver vos y el creador.</div>`}
+      <div style="font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:1rem 0 .6rem">Postulantes</div>
+      <div class="cx-list">${ps.length?items:'<div class="empty-state" style="padding:1.1rem"><div>📭</div>Sin postulantes todavía.</div>'}</div>
+      ${sugHTML}
+    </div>`;
+  }).join('');
+  wrap.innerHTML=`<div class="tab-content active">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem">
+      <div class="sec-title" style="margin:0">Mis campañas</div>
+      <a href="/campanas.html" style="background:var(--green);color:#080808;font-size:.74rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;padding:.55rem 1rem;border-radius:2px">+ Nueva campaña</a>
+    </div>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.5rem">
+      <div class="mc-stat"><div class="mc-n">${camps.length}</div><div class="mc-l">Campañas</div></div>
+      <div class="mc-stat"><div class="mc-n" style="color:var(--green)">${nActivas}</div><div class="mc-l">Activas</div></div>
+      ${nRevision?`<div class="mc-stat"><div class="mc-n" style="color:var(--amber)">${nRevision}</div><div class="mc-l">En revisión</div></div>`:''}
+      <div class="mc-stat"><div class="mc-n">${totalPost}</div><div class="mc-l">Postulantes</div></div>
+    </div>
+    ${avisosHTML}
+    ${bloques}
+  </div>`;
+}
+// ── CIERRE DE CAMPAÑA CON RESULTADOS ──
+function fmtNumR(n){ return (n==null||n==='')?null:Number(n).toLocaleString('es-AR'); }
+function resultadoBox(r){
+  const metric=(label,val,money)=>{ const v=fmtNumR(val); return v==null?'':`<div class="res-metric"><strong>${money?'$':''}${v}</strong>${label}</div>`; };
+  const ms=[metric('Alcance',r.alcance),metric('Interacciones',r.interacciones),metric('Clics',r.clics),metric('Piezas',r.piezas),metric('Ventas',r.ventas,true)].filter(Boolean).join('');
+  const f=r.created_at?new Date(r.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}):'';
+  return `<div class="res-box">
+    <div style="font-size:.78rem;font-weight:800;color:var(--green)">🎬 ${r.creator_nombre||'Creador'} <span style="color:var(--muted);font-weight:400;font-size:.7rem">· ${f}</span></div>
+    ${ms?`<div class="res-metrics">${ms}</div>`:'<div style="font-size:.72rem;color:var(--muted);margin-top:.3rem">Sin métricas numéricas cargadas.</div>'}
+    ${r.nota?`<div style="font-size:.74rem;color:var(--muted2);margin-top:.5rem;line-height:1.5">“${r.nota}”</div>`:''}
+  </div>`;
+}
+let cierreCampId=null;
+function abrirCierre(campId){
+  const opts=campPostulantes[campId]||[];
+  if(!opts.length){ showToast('Necesitás al menos un postulante para cerrar','err'); return; }
+  cierreCampId=campId;
+  document.getElementById('res-creator').innerHTML=opts.map(o=>`<option value="${o.id}">${o.nombre}</option>`).join('');
+  ['res-alcance','res-inter','res-clics','res-piezas','res-ventas','res-nota'].forEach(id=>{const e=document.getElementById(id); if(e)e.value='';});
+  document.getElementById('resOv').classList.add('open');
+}
+function cerrarCierre(){ document.getElementById('resOv').classList.remove('open'); cierreCampId=null; }
+async function guardarResultado(){
+  if(!cierreCampId) return;
+  const creator_id=document.getElementById('res-creator').value;
+  if(!creator_id){ showToast('Elegí el creador','err'); return; }
+  const btn=document.getElementById('res-save'); btn.disabled=true; btn.textContent='Guardando...';
+  try{
+    const r=await fetch('/api/campania-borrar',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
+      body:JSON.stringify({
+        op:'resultado', campania_id:cierreCampId, creator_id,
+        alcance:document.getElementById('res-alcance').value,
+        interacciones:document.getElementById('res-inter').value,
+        clics:document.getElementById('res-clics').value,
+        piezas:document.getElementById('res-piezas').value,
+        ventas:document.getElementById('res-ventas').value,
+        nota:document.getElementById('res-nota').value,
+      })
+    });
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j.error||'No se pudo guardar');
+    showToast('✓ Resultados guardados','ok');
+    cerrarCierre();
+    loadCampanasMarca('campMarWrap');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+  finally{ btn.disabled=false; btn.textContent='Guardar resultados'; }
+}
+
+async function borrarMiCampania(campania_id, nPost){
+  const aviso = nPost>0
+    ? `Esta campaña tiene ${nPost} postulante${nPost===1?'':'s'}. Si la eliminás se borran también sus postulaciones. ¿Continuar?`
+    : '¿Eliminar esta campaña? No se puede deshacer.';
+  if(!confirm(aviso)) return;
+  try{
+    const r=await fetch('/api/campania-borrar',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
+      body:JSON.stringify({campania_id})
+    });
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j.error||'No se pudo eliminar');
+    showToast('🗑 Campaña eliminada','ok');
+    loadCampanasMarca('campMarWrap');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+}
+
+async function desbloquearPostulante(creator_id, campania_id, postulacion_id){
+  try{
+    const buyer=userProfile||{};
+    const res=await fetch('/api/crear-preferencia',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        creator_id, origen:'campania', campania_id, postulacion_id,
+        marca_email:currentUser.email,
+        marca_nombre:(buyer.nombre_marca||buyer.razon_social||buyer.nombre||'Marca'),
+      })
+    });
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error||'Error');
+    if(data.gratis){ showToast('✓ Contacto desbloqueado (bonificado). Lo ves en “Mis conexiones”.','ok'); return; }
+    if(data.yaComprado){ showToast(data.mensaje||'Ya tenés acceso a este contacto.','ok'); return; }
+    const url=data.init_point||data.sandbox_init_point;
+    if(url){ window.location.href=url; } else { showToast('No se pudo iniciar el pago','err'); }
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+}
+
+// Conexión con MercadoPago del creador (se activa cuando esté cargada la app de MP)
+async function conectarMP(){
+  try{
+    const r=await fetch('/api/mi-perfil?mp_oauth=start',{headers:{'Authorization':'Bearer '+getToken()}});
+    const d=await r.json().catch(()=>({}));
+    if(d&&d.url){ window.location.href=d.url; return; }
+    showToast(d&&d.mensaje?d.mensaje:'La conexión con MercadoPago se activa en breve (estamos terminando de configurar la app).','info');
+  }catch(e){ showToast('La conexión con MercadoPago se activa en breve.','info'); }
+}
+
+// ── ACCIONES DEL CIRCUITO DE CAMPAÑA ──
+async function campAccion(body){
+  const r=await fetch('/api/campania-borrar',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},body:JSON.stringify(body)});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(d.error||'Error');
+  return d;
+}
+async function selPostulante(postId){
+  try{ await campAccion({op:'seleccionar',postulacion_id:postId}); showToast('✓ Creador seleccionado. Le avisamos para que suba el video.','ok'); loadCampanasMarca('campMarWrap'); }
+  catch(e){ showToast('Error: '+e.message,'err'); }
+}
+async function rechazarPostulante(postId){
+  if(!confirm('¿Descartar este postulante?'))return;
+  try{ await campAccion({op:'rechazar',postulacion_id:postId}); showToast('Postulante descartado.','ok'); loadCampanasMarca('campMarWrap'); }
+  catch(e){ showToast('Error: '+e.message,'err'); }
+}
+async function cerrarCampania(campId){
+  if(!confirm('¿Cerrar la campaña? Deja de aparecer para nuevos postulantes. Los ya seleccionados siguen su curso.'))return;
+  try{ await campAccion({op:'cerrar',campania_id:campId}); showToast('✓ Campaña cerrada.','ok'); loadCampanasMarca('campMarWrap'); }
+  catch(e){ showToast('Error: '+e.message,'err'); }
+}
+async function aprobarYPagar(creatorId,campId,postId,monto){
+  if(!confirm(`Vas a aprobar el video y pagarle al creador${monto?' $'+Number(monto).toLocaleString('es-AR'):''}. ¿Seguimos?`))return;
+  try{
+    const buyer=userProfile||{};
+    const r=await fetch('/api/crear-preferencia',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({creator_id:creatorId,origen:'trabajo',campania_id:campId,postulacion_id:postId,marca_email:currentUser.email,marca_nombre:(buyer.nombre_marca||buyer.razon_social||buyer.nombre||'Marca')})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(d.error||'Error');
+    const url=d.init_point||d.sandbox_init_point;
+    if(url){ window.location.href=url; } else { showToast(d.mensaje||'No se pudo iniciar el pago','err'); }
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+}
+// Entregar video (creador)
+async function entregarVideo(postId){
+  const inp=document.getElementById('entrega-'+postId); const url=(inp&&inp.value||'').trim();
+  if(!/^https?:\/\//i.test(url)){ showToast('Pegá el link de tu video (http...)','err'); return; }
+  try{ await campAccion({op:'entregar',postulacion_id:postId,entrega_url:url}); showToast('✓ Video enviado. La marca lo revisa y libera el pago.','ok'); irATab(7); }
+  catch(e){ showToast('Error: '+e.message,'err'); }
+}
+
+// ── GUARDAR ──
+async function saveCreator(){
+  const btn=document.querySelector('.btn-save');
+  btn.disabled=true; btn.textContent='Guardando...';
+  const body={
+    nombre:document.getElementById('e-nombre')?.value.trim(),
+    apellido:document.getElementById('e-apellido')?.value.trim(),
+    tel:document.getElementById('e-tel')?.value.trim()||null,
+    ciudad:document.getElementById('e-ciudad')?.value.trim()||null,
+    pais:document.getElementById('e-pais')?.value||null,
+    bio:document.getElementById('e-bio')?.value.trim()||null,
+    t_story:parseInt(document.getElementById('e-story')?.value)||null,
+    t_reel:parseInt(document.getElementById('e-reel')?.value)||null,
+    t_post:parseInt(document.getElementById('e-post')?.value)||null,
+    moneda:document.getElementById('e-moneda')?.value||'ARS',
+    canje:document.getElementById('e-canje')?.value||null,
+    disponibilidad:document.getElementById('e-disp')?.value?[document.getElementById('e-disp').value]:null,
+    ig_user:document.getElementById('e-ig')?.value.trim()||null,
+    ig_seg:parseInt(document.getElementById('e-ig-seg')?.value)||null,
+    ig_er:parseFloat(document.getElementById('e-ig-er')?.value)||null,
+    ig_alc:parseInt(document.getElementById('e-ig-alc')?.value)||null,
+    tt_user:document.getElementById('e-tt')?.value.trim()||null,
+    tt_seg:parseInt(document.getElementById('e-tt-seg')?.value)||null,
+    yt_user:document.getElementById('e-yt')?.value.trim()||null,
+    yt_seg:parseInt(document.getElementById('e-yt-seg')?.value)||null,
+    colabs:document.getElementById('e-colabs')?.value.trim()||null,
+    links:document.getElementById('e-link')?.value.trim()?[document.getElementById('e-link').value.trim()]:null,
+    es_pet:!!document.getElementById('e-pet')?.checked,
+    pet_nombre:document.getElementById('e-pet')?.checked?(document.getElementById('e-pet-nombre')?.value.trim()||null):null,
+    pet_tipo:document.getElementById('e-pet')?.checked?(document.getElementById('e-pet-tipo')?.value||null):null,
+    // Vuelve a revisión al editar
+    status:'pendiente',
+  };
+  // Validación de tarifas según la moneda (evita valores absurdos: un reel de $10, etc.)
+  const rangos = body.moneda==='USD' ? {min:5, max:50000, lbl:'US$'} : {min:1000, max:5000000, lbl:'$'};
+  for(const [n,v] of [['Story',body.t_story],['Reel',body.t_reel],['Post',body.t_post]]){
+    if(v!=null && (v<rangos.min || v>rangos.max)){
+      showToast(`Tarifa ${n} fuera de rango para ${body.moneda}: poné un valor entre ${rangos.lbl}${rangos.min.toLocaleString('es-AR')} y ${rangos.lbl}${rangos.max.toLocaleString('es-AR')}.`,'err');
+      btn.disabled=false; btn.textContent='Guardar cambios';
+      return;
+    }
+  }
+  const ok=await sbPatch('creators',`id=eq.${userProfile.id}`,body,getToken());
+  if(ok){
+    Object.assign(userProfile,body);
+    // Actualizar badge de estado en el header
+    const badge=document.getElementById('dashBadge');
+    badge.innerHTML=`<span class="dash-badge badge-creator">Creator</span> <span class="s-pend">pendiente</span>`;
+    showToast('✓ Perfil actualizado — vuelve a revisión en 48hs','ok');
+    // Mostrar aviso en el tab
+    document.getElementById('dashContent').insertAdjacentHTML('afterbegin',`
+      <div style="background:#1a1200;border:1px solid #2a2000;border-radius:3px;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.78rem;color:#f59e0b;display:flex;align-items:center;gap:.625rem">
+        ⏳ <span><strong>Cambios guardados.</strong> Tu perfil volvió a revisión. El equipo TRAMA. lo va a revisar en las próximas 48-72hs.</span>
+      </div>`);
+  } else {
+    showToast('Error al guardar','err');
+  }
+  btn.disabled=false; btn.textContent='Guardar cambios';
+}
+
+async function saveMarca(){
+  const btn=document.querySelector('.btn-save');
+  btn.disabled=true; btn.textContent='Guardando...';
+  const isCorp=userProfile.tipo==='corporativa';
+  const body={
+    nombre:document.getElementById('em-nombre')?.value.trim(),
+    apellido:document.getElementById('em-apellido')?.value.trim(),
+    tel:document.getElementById('em-tel')?.value.trim()||null,
+    descripcion:document.getElementById('em-desc')?.value.trim()||null,
+    ...(isCorp
+      ?{razon_social:document.getElementById('em-marca')?.value.trim(),cuit:document.getElementById('em-cuit')?.value.trim()||null}
+      :{nombre_marca:document.getElementById('em-marca')?.value.trim()}
+    ),
+  };
+  const ok=await sbPatch('marcas',`id=eq.${userProfile.id}`,body,getToken());
+  if(ok){Object.assign(userProfile,body);showToast('✓ Cuenta actualizada','ok')}
+  else showToast('Error al guardar','err');
+  btn.disabled=false; btn.textContent='Guardar cambios';
+}
+
+// ── CAMBIO DE CONTRASEÑA (dentro del panel, creator y marca) ──
+function pwdBlockHTML(){
+  return `
+    <div class="sec-title" style="margin-top:2.5rem">Seguridad</div>
+    <p style="font-size:.76rem;color:var(--muted2);line-height:1.5;margin-bottom:.9rem">Cambiá tu contraseña. Si entraste con una contraseña temporal, elegí una propia acá.</p>
+    <div class="edit-grid" style="margin-bottom:1rem">
+      <div class="fg-edit"><label>Nueva contraseña</label><span class="pw"><input type="password" id="pw-new" placeholder="Mínimo 8 caracteres"><button type="button" class="pw-eye" onclick="togglePass(this)" tabindex="-1">👁</button></span></div>
+      <div class="fg-edit"><label>Repetir contraseña</label><span class="pw"><input type="password" id="pw-new2" placeholder="Repetí la contraseña"><button type="button" class="pw-eye" onclick="togglePass(this)" tabindex="-1">👁</button></span></div>
+    </div>
+    <button class="btn-save" onclick="cambiarPassword(this)">Cambiar contraseña</button>`;
+}
+async function cambiarPassword(btn){
+  const p1=(document.getElementById('pw-new')||{}).value||'';
+  const p2=(document.getElementById('pw-new2')||{}).value||'';
+  if(p1.length<8){ showToast('La contraseña debe tener al menos 8 caracteres','err'); return; }
+  if(p1!==p2){ showToast('Las contraseñas no coinciden','err'); return; }
+  btn.disabled=true; const prev=btn.textContent; btn.textContent='Guardando...';
+  try{
+    const r=await fetch(`${SB_URL}/auth/v1/user`,{
+      method:'PUT',
+      headers:{apikey:SB_ANON,Authorization:'Bearer '+getToken(),'Content-Type':'application/json'},
+      body:JSON.stringify({password:p1})
+    });
+    if(!r.ok){ const j=await r.json().catch(()=>({})); throw new Error(j.msg||j.message||'No se pudo cambiar la contraseña'); }
+    document.getElementById('pw-new').value=''; document.getElementById('pw-new2').value='';
+    showToast('✓ Contraseña actualizada','ok');
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+  btn.disabled=false; btn.textContent=prev;
+}
+
+// ── LIGA TRAMA. ──
+const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const AGENDA_UI=[
+  {d:'Lun',i:'🧠'},{d:'Mar',i:'📈'},{d:'Mié',i:'🧠'},
+  {d:'Jue',i:'📈'},{d:'Vie',i:'🎬'},{d:'Sáb',i:'📈'},{d:'Dom',i:'🌙'}
+];
+const TIPO_UI={
+  reto:{label:'Reto creativo',icon:'🎬',color:'var(--green)',bg:'#0f1a00',bd:'#2a4000'},
+  trivia:{label:'Trivia',icon:'🧠',color:'var(--purple)',bg:'#1a0a2a',bd:'#3a1a5a'},
+  tendencia:{label:'Tendencia',icon:'📈',color:'var(--amber)',bg:'#1a1200',bd:'#2a2000'},
+  libre:{label:'Día libre',icon:'🌙',color:'var(--muted2)',bg:'#0d0d0d',bd:'#222'}
+};
+
+async function ligaCall(action,extra){
+  const r=await fetch('/api/liga',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(Object.assign({action,token:getToken()}, extra||{}))
+  });
+  return r.json().catch(()=>({ok:false,error:'Respuesta inválida del servidor'}));
+}
+
+async function loadLiga(){
+  const wrap=document.getElementById('ligaWrap'); if(!wrap)return;
+  const res=await ligaCall('estado');
+  if(!res.ok){
+    wrap.innerHTML=`<div class="tab-content active"><div class="empty-state"><div>⚠️</div>${res.error||'No se pudo cargar la Liga.'}</div></div>`;
+    return;
+  }
+  ligaData=res.data; renderLiga();
+}
+
+const DIAS_FULL={Mon:'Lunes',Tue:'Martes',Wed:'Miércoles',Thu:'Jueves',Fri:'Viernes',Sat:'Sábado',Sun:'Domingo'};
+function semanaList(){
+  const sem=(ligaData&&ligaData.semana)||[];
+  if(!sem.length) return '';
+  return `<div class="sec-title">Desafíos de la semana</div>
+    <div class="semana-list">${sem.map(s=>{
+      const t=TIPO_UI[s.tipo]||TIPO_UI.libre;
+      return `<div class="semana-day${s.es_hoy?' today':''}">
+        <div class="semana-d">${DIAS_FULL[s.wd]||s.wd}${s.es_hoy?' · hoy':''}</div>
+        <span class="semana-badge" style="color:${t.color};background:${t.bg};border:1px solid ${t.bd}">${t.icon} ${t.label}</span>
+        <div class="semana-text">${s.contenido||'Descanso — sin misión'}</div>
+      </div>`;
+    }).join('')}</div>`;
+}
+
+function renderLiga(){
+  const wrap=document.getElementById('ligaWrap'); if(!wrap||!ligaData)return;
+  const d=ligaData;
+  const t=TIPO_UI[d.mision&&d.mision.tipo]||TIPO_UI.tendencia;
+  const mes=MESES[new Date().getMonth()];
+
+  const champ=d.campeon
+    ? `<div class="champ">👑 <span>Campeón del mes: <strong>${d.campeon.handle||d.campeon.nombre}</strong></span></div>`
+    : '';
+
+  // Acción según el tipo de misión
+  let accion='';
+  if(d.es_libre){
+    accion=`<button class="btn-mission" disabled>Hoy es día libre 🌙</button>`;
+  } else if(d.ya_cumplida){
+    accion=`<button class="btn-mission" disabled>✓ Ya cumpliste la misión de hoy</button>`;
+  } else if(d.mision&&d.mision.opciones&&d.mision.opciones.length){
+    accion=`<div class="trivia-opts">${d.mision.opciones.map((o,ix)=>
+      `<button class="trivia-opt" onclick="responderTrivia(${ix})">${o}</button>`).join('')}</div>`;
+  } else if(d.mision&&d.mision.requiere_material){
+    accion=`<label class="liga-lbl">Pegá el link de tu publicación</label>
+      <input class="liga-input" id="ligaLink" type="url" placeholder="https://instagram.com/p/...">
+      <button class="btn-mission" id="ligaBtn" onclick="cumplirMision()">Entregar reto (+${d.base_hoy}) 🔥</button>`;
+  } else {
+    accion=`<button class="btn-mission" id="ligaBtn" onclick="cumplirMision()">Ya participé (+${d.base_hoy}) 🔥</button>`;
+  }
+
+  const misionCard = d.es_libre
+    ? `<div class="mission-card"><div class="mission-badge" style="color:${t.color};background:${t.bg};border:1px solid ${t.bd}">${t.icon} ${t.label}</div><div class="mission-text">Hoy no hay misión. Aprovechá para descansar o preparar contenido para mañana. 🌙</div>${accion}</div>`
+    : `<div class="mission-card"><div class="mission-badge" style="color:${t.color};background:${t.bg};border:1px solid ${t.bd}">${t.icon} Misión de hoy · ${t.label}</div><div class="mission-text">${(d.mision&&d.mision.contenido)||''}</div>${accion}</div>`;
+
+  // Mis entregas (material subido por el creador)
+  const ents=(d.entregas||[]);
+  const entregasHtml = ents.length
+    ? `<div class="sec-title" style="margin-top:.5rem">Mi material entregado</div>
+       <div class="entregas-list">${ents.map(e=>
+         `<a class="entrega-item" href="${e.link}" target="_blank" rel="noopener"><span class="entrega-tipo">${e.tipo||'reto'}</span><span class="entrega-cons">${e.consigna||''}</span><span class="entrega-link">ver ↗</span></a>`
+       ).join('')}</div>`
+    : '';
+
+  wrap.innerHTML=`<div class="tab-content active">
+    <div class="sec-title">Liga TRAMA. · Temporada de ${mes}</div>
+    ${d.es_campeon?`<div class="champ" style="color:var(--green);background:#0f1a00;border-color:#2a4000">👑 <span>¡Sos el campeón vigente! Tenés <strong>×2 puntos</strong> este mes.</span></div>`:''}
+    <div class="liga-hero">
+      <div class="liga-pos">#${d.posicion} <small>de ${d.total}</small></div>
+      <div class="liga-streak">🔥 Racha de ${d.racha} día${d.racha===1?'':'s'}</div>
+      <div class="liga-stats">
+        <div class="liga-stat"><div class="n">${d.puntos_mes}</div><div class="l">Puntos del mes</div></div>
+        <div class="liga-stat"><div class="n">${d.indice}</div><div class="l">Índice</div></div>
+      </div>
+    </div>
+    ${semanaList()}
+    ${champ}
+    ${misionCard}
+    ${entregasHtml}
+    <p style="font-size:.72rem;color:var(--muted);line-height:1.6">Entrá todos los días y cumplí la misión para subir en la bolsa. Si cortás la racha, bajás. A fin de mes se corona al #1 y arranca una liga nueva.</p>
+  </div>`;
+}
+
+async function cumplirMision(){
+  const b=document.getElementById('ligaBtn');
+  const linkEl=document.getElementById('ligaLink');
+  const extra={};
+  if(linkEl){
+    const url=(linkEl.value||'').trim();
+    if(!/^https?:\/\/.+/i.test(url)){ showToast('Pegá un link válido de tu publicación','err'); return; }
+    extra.link=url;
+  }
+  if(b){ b.disabled=true; b.textContent='Enviando...'; }
+  await enviarCumplir(extra);
+}
+
+async function responderTrivia(ix){
+  document.querySelectorAll('.trivia-opt').forEach(el=>el.disabled=true);
+  await enviarCumplir({respuesta:ix});
+}
+
+async function enviarCumplir(extra){
+  const res=await ligaCall('cumplir',extra);
+  if(res.ok){
+    if(res.libre){ showToast(res.msg||'Hoy es día libre 🌙','info'); return; }
+    if(res.ya){ showToast('Ya cumpliste hoy 😉','info'); }
+    else if(res.data){ showToast('+'+res.data.sumado+' puntos 🔥','ok'); }
+    if(res.data){
+      userProfile.indice=res.data.indice;
+      userProfile.racha=res.data.racha;
+      userProfile.puntos_mes=res.data.puntos_mes;
+    }
+    await loadLiga();
+  } else {
+    showToast(res.error||'No se pudo registrar la misión','err');
+    await loadLiga();   // re-habilita los botones (trivia errada / falta link)
+  }
+}
+
+// ── STATS DEL CREADOR (vistas, ventas, conversión) ──
+// ── PUNTOS: seguir a TRAMA (+50) y subir reel del mes (+100) ──
+async function loadRankingCreador(){
+  const box=document.getElementById('rankCard'); if(!box||userType!=='creator')return;
+  if(userProfile.status!=='aprobado'){ box.innerHTML=''; return; }
+  try{
+    const rows=await sbGet('creators','status=eq.aprobado&select=id,indice',getToken())||[];
+    const total=rows.length; if(!total){ box.innerHTML=''; return; }
+    const mine=rows.find(r=>String(r.id)===String(userProfile.id));
+    const mi=Number((mine&&mine.indice)||userProfile.indice||0);
+    const pos=rows.filter(r=>Number(r.indice||0)>mi).length+1;
+    const top=Math.round(pos/total*100)<=10;
+    box.innerHTML=`<div style="background:#0f0a1a;border:1px solid #2a1a40;border-radius:6px;padding:1.1rem 1.25rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem">
+      <div>
+        <div style="font-size:.6rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--purple)">Tu posición en la bolsa</div>
+        <div style="font-size:1.4rem;font-weight:900;margin-top:.2rem">#${pos} <span style="font-size:.8rem;color:var(--muted2);font-weight:700">de ${total}${top?' · top 10% 🔥':''}</span></div>
+      </div>
+      <div style="font-size:.76rem;color:var(--muted2);max-width:270px;line-height:1.5;text-align:right">Subí de puesto sumando puntos: reel del mes (+100) y seguir a @tramapunto (+50).</div>
+    </div>`;
+  }catch(_){ box.innerHTML=''; }
+}
+async function loadReelEstado(){
+  const box=document.getElementById('puntosCard'); if(!box||userType!=='creator')return;
+  const p=userProfile, token=getToken();
+  const aprobado=p.status==='aprobado';
+  const subs=(await sbGet('reel_submissions',`creator_id=eq.${encodeURIComponent(p.id)}&select=id,tipo,ig_url,estado,created_at&order=created_at.desc`,token))||[];
+  const mes=new Date().toISOString().slice(0,7);
+  const reelMes=subs.find(s=>s.tipo==='reel' && s.estado!=='rechazado' && String(s.created_at||'').slice(0,7)===mes);
+  const estadoTxt=s=>s? (s.estado==='pendiente'?'<span style="color:var(--amber)">en revisión</span>':s.estado==='aprobado'?'<span style="color:var(--green)">✓ aprobado</span>':'<span style="color:#f87171">rechazado</span>') : '';
+  const yaSigue = !!p.ig_follow_at;
+  const followBonus = !aprobado ? '' : (yaSigue
+    ? `<div style="font-size:.78rem;color:var(--muted2)">📸 Seguís a @tramapunto — <span style="color:var(--green)">✓ +50 pts</span></div>`
+    : `<button class="btn-save" style="margin:0" onclick="seguirTramapunto()">📸 Seguir a @tramapunto (+50 pts)</button>`);
+  const reelBlock = !aprobado
+    ? ''
+    : reelMes
+      ? `<div style="font-size:.78rem;color:var(--muted2)">🎬 Reel de este mes — ${estadoTxt(reelMes)}${reelMes.ig_url?` · <a href="${reelMes.ig_url}" target="_blank" rel="noopener" style="color:var(--purple)">ver</a>`:''}</div>`
+           : `<div style="display:flex;flex-direction:column;gap:.55rem">
+           <input id="reelUrl" type="url" placeholder="Link de tu reel (instagram.com/reel/...)" style="background:#080808;border:1px solid #222;border-radius:2px;color:var(--white);padding:.6rem;font-size:.82rem">
+           <label style="font-size:.74rem;color:var(--muted2);display:flex;flex-direction:column;gap:.3rem">Subí el video (MP4) para que @tramapunto lo republique:
+             <input id="reelFile" type="file" accept="video/mp4,video/quicktime" style="font-size:.78rem;color:var(--muted2)">
+           </label>
+           <button class="btn-save" style="margin:0;align-self:flex-start" onclick="enviarReel()">🎬 Enviar mi reel (+100 pts)</button>
+           <div style="font-size:.72rem;color:var(--muted2);opacity:.85;line-height:1.5"><strong>Qué grabar:</strong> un reel corto (15–30 s) donde cuentes tu experiencia con TRAMA o invites a otros creadores a sumarse. Etiquetá a <strong>@tramapunto</strong> en el video, pegá acá el link de TU reel (no el de tu perfil) y subí el archivo para que lo republiquemos en nuestra cuenta.</div>
+         </div>`;
+  box.innerHTML=`<div style="background:#160a22;border:1px solid #3a1a5a;border-radius:6px;padding:1.1rem 1.25rem;margin-bottom:2rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.6rem">
+      <div style="font-size:.95rem;font-weight:900;color:var(--purple)">⭐ Puntos para destacar</div>
+      <div style="font-size:1.3rem;font-weight:900;color:var(--purple)">${p.puntos||0} <span style="font-size:.7rem;color:var(--muted);font-weight:700">pts</span></div>
+    </div>
+    <p style="font-size:.78rem;color:var(--muted2);line-height:1.5;margin-bottom:.9rem">Subí un reel <strong>cada mes</strong> etiquetando a <strong>@tramapunto</strong> para ganar <strong>100 puntos mensuales</strong> y destacar: tus postulaciones aparecen <strong>primero</strong> para las marcas.</p>
+    ${aprobado?`<div style="display:flex;flex-direction:column;gap:.6rem">${followBonus}${reelBlock}</div>`:`<div style="font-size:.76rem;color:var(--amber)">Vas a poder sumar puntos cuando aprobemos tu perfil.</div>`}
+  </div>`;
+}
+async function enviarReel(){
+  const url=((document.getElementById('reelUrl')||{}).value||'').trim();
+  if(!/instagram\.com\/(reel|reels|p|tv)\/[A-Za-z0-9_-]+/i.test(url)){ showToast('Pegá el link del reel puntual (ej: instagram.com/reel/...). El link de tu perfil no sirve.','err'); return; }
+  const fi=document.getElementById('reelFile');
+  const f=fi&&fi.files&&fi.files[0];
+  if(!f){ showToast('Subí el archivo de video (MP4) para poder republicarlo.','err'); return; }
+  if(!/^video\//.test(f.type)){ showToast('El archivo tiene que ser un video (MP4 o MOV).','err'); return; }
+  if(f.size>95*1024*1024){ showToast('El video es muy pesado (máx 95 MB). Recortalo o bajá la calidad.','err'); return; }
+  const mes=new Date().toISOString().slice(0,7);
+  const token=getToken();
+  try{
+    showToast('Subiendo tu reel...','info');
+    const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'');
+    const path=`reels/${userProfile.id}/${Date.now()}_${safe}`;
+    const up=await fetch(`${SB_URL}/storage/v1/object/creator-fotos/${path}`,{method:'POST',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+token},body:f});
+    if(!up.ok) throw new Error('No se pudo subir el video');
+    const video_url=`${SB_URL}/storage/v1/object/public/creator-fotos/${path}`;
+    const r=await fetch(`${SB_URL}/rest/v1/reel_submissions`,{method:'POST',headers:{apikey:SB_ANON,Authorization:'Bearer '+token,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({creator_id:userProfile.id, tipo:'reel', ig_url:url, video_url, periodo:mes})});
+    if(!r.ok) throw new Error('No se pudo enviar');
+    showToast('✓ Reel enviado. Lo verificamos y sumás 100 pts.','ok'); loadReelEstado();
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+}
+// ── SEGUIR A @tramapunto (+50 pts, una sola vez) ──
+async function seguirTramapunto(){
+  window.open('https://www.instagram.com/tramapunto/','_blank','noopener');
+  try{
+    const r=await fetch('/api/mi-perfil',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},body:JSON.stringify({accion:'follow_bonus'})});
+    const d=await r.json().catch(()=>({}));
+    if(d&&d.ok){
+      if(userProfile){ userProfile.ig_follow_at=new Date().toISOString(); if(typeof d.puntos==='number') userProfile.puntos=d.puntos; }
+      if(!d.yaReclamado) showToast('✓ +50 puntos por seguirnos. ¡Gracias!','ok');
+      loadReelEstado();
+    }
+  }catch(_){}
+}
+
+async function loadStatsCreador(){
+  const wrap=document.getElementById('statsWrap'); if(!wrap)return;
+  const id=userProfile.id, token=getToken();
+  const desde30=Date.now()-30*86400000;
+  const [vistas,ventas]=await Promise.all([
+    sbGet('vistas_perfil',`creator_id=eq.${encodeURIComponent(id)}&select=created_at`,token),
+    sbGet('conexiones',`creator_id=eq.${encodeURIComponent(id)}&estado=eq.pagado&select=created_at`,token),
+  ]);
+  const en30=x=>{const t=Date.parse(x.created_at);return !isNaN(t)&&t>=desde30;};
+  const v30=(vistas||[]).filter(en30).length;
+  const c30=(ventas||[]).filter(en30).length;
+  const vT=(vistas||[]).length, cT=(ventas||[]).length;
+  const conv=vT?Math.round(cT/vT*100):0;
+  const p=userProfile;
+  const rating=(p.rating_count||0)?('★ '+Number(p.rating_prom||0).toFixed(1)):'—';
+  const ratingSub=(p.rating_count||0)?`${p.rating_count} ${p.rating_count==1?'reseña':'reseñas'}`:'sin reseñas';
+  const tile=(num,label,sub,accent)=>`
+    <div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1.1rem 1rem">
+      <div style="font-size:1.7rem;font-weight:900;color:${accent||'var(--white)'};line-height:1">${num}</div>
+      <div style="font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted2,#aaa);margin-top:.5rem">${label}</div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:.15rem">${sub}</div>
+    </div>`;
+  wrap.innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.6rem">
+      ${tile(vT,'Vistas de perfil', v30?`+${v30} en 30 días`:'últimos 30 días: 0', 'var(--green)')}
+      ${tile(cT,'Contactos vendidos', c30?`+${c30} en 30 días`:'últimos 30 días: 0', 'var(--green)')}
+      ${tile(conv+'%','Conversión','de vista a venta')}
+      ${tile(rating,'Reputación',ratingSub,'#f5b301')}
+    </div>
+    ${vT===0?`<div style="font-size:.76rem;color:var(--muted);margin-top:.7rem;line-height:1.5">Todavía no registramos vistas. A medida que las marcas abran tu perfil en la bolsa, vas a ver acá cuántas te miraron y cuántas te contactaron.</div>`:''}`;
+}
+
+// ── CONEXIONES (contactos comprados / vendidos) ──
+// Vista del VENDIDO (creador): quién compró su contacto, sea marca o creador (+ recuento)
+async function loadContactosCreator(){
+  const wrap=document.getElementById('contactosWrap'); if(!wrap)return;
+  const rows=await sbGet('conexiones',`creator_id=eq.${encodeURIComponent(userProfile.id)}&estado=eq.pagado&select=marca_email,marca_nombre,origen,created_at&order=created_at.desc`,getToken());
+  const n=rows.length;
+  const items = n ? rows.map(r=>{
+    const f=r.created_at?new Date(r.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
+    const quien=r.marca_nombre||r.marca_email||'Comprador';
+    return `<div class="cx-item"><div class="cx-ic">👤</div><div class="cx-body"><div class="cx-name">${quien}</div><div class="cx-meta">${f}${r.origen==='campania'?' · campaña':''}</div></div></div>`;
+  }).join('') : `<div class="empty-state"><div>📭</div>Todavía nadie compró tu contacto.<br>Completá tu perfil y entrá a la Liga para ganar visibilidad.</div>`;
+  wrap.innerHTML=`<div class="tab-content active">
+    <div class="sec-title">Quién compró tu contacto</div>
+    <div class="cx-count"><span class="cx-count-n">${n}</span><span class="cx-count-l">${n===1?'compra de tu contacto':'compras de tu contacto'}</span></div>
+    <div class="cx-list">${items}</div>
+  </div>`;
+}
+
+// Convierte los datos de contacto en hipervínculos clickeables
+function waLink(tel){ let d=(tel||'').replace(/\D/g,''); if(!d)return ''; if(!d.startsWith('54')) d='54'+d; return 'https://wa.me/'+d; }
+function igHandle(u){ return (u||'').trim().replace(/^@/,'').replace(/^https?:\/\//,'').replace(/^(www\.)?instagram\.com\//i,'').replace(/\/.*$/,''); }
+function ttHandle(u){ return (u||'').trim().replace(/^@/,'').replace(/^https?:\/\//,'').replace(/^(www\.)?tiktok\.com\/@?/i,'').replace(/\/.*$/,''); }
+function ytLink(u){ u=(u||'').trim(); if(!u)return ''; if(/^https?:\/\//i.test(u))return u; const h=u.replace(/^@/,''); return /\s/.test(h)?('https://www.youtube.com/results?search_query='+encodeURIComponent(h)):('https://www.youtube.com/@'+h); }
+function contactoLinks(c){
+  const p=[];
+  if(c.email) p.push(`<a href="mailto:${c.email}" class="cx-link">✉ ${c.email}</a>`);
+  if(c.ig_user){ const h=igHandle(c.ig_user); p.push(h?`<a href="https://instagram.com/${h}" target="_blank" rel="noopener" class="cx-link">📸 @${h}</a>`:`📸 ${c.ig_user}`); }
+  if(c.tt_user){ const h=ttHandle(c.tt_user); p.push(h?`<a href="https://tiktok.com/@${h}" target="_blank" rel="noopener" class="cx-link">🎵 @${h}</a>`:`🎵 ${c.tt_user}`); }
+  if(c.yt_user){ const y=ytLink(c.yt_user); p.push(y?`<a href="${y}" target="_blank" rel="noopener" class="cx-link">▶️ ${c.yt_user}</a>`:`▶️ ${c.yt_user}`); }
+  if(c.tel){ const w=waLink(c.tel); p.push(w?`<a href="${w}" target="_blank" rel="noopener" class="cx-link">💬 ${c.tel}</a>`:`💬 ${c.tel}`); }
+  return p.length?p.join(' · '):'Sin datos de contacto';
+}
+
+// Vista del COMPRADOR (marca o creador): contactos que YA compró, con los datos a mano
+// Comprobante de compra: abre una ventana imprimible (guardar como PDF)
+let compradosData={};
+function fmtMetodoPago(m){
+  const map={account_money:'Dinero en cuenta',credit_card:'Tarjeta de crédito',debit_card:'Tarjeta de débito',ticket:'Efectivo (ticket)',bank_transfer:'Transferencia',digital_currency:'Dinero digital',prepaid_card:'Tarjeta prepaga'};
+  return map[m]||(m?m:'Mercado Pago');
+}
+function descargarComprobante(cxId){
+  const d=compradosData[cxId]; if(!d){ showToast('No se encontró la compra','err'); return; }
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const fecha=d.fecha?new Date(d.fecha).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+  const nro=d.voucher?esc(d.voucher):esc(String(d.id).slice(0,8).toUpperCase());
+  const monto=(d.monto&&Number(d.monto)>0)?('$ '+Number(d.monto).toLocaleString('es-AR')+' ARS'):'Bonificado';
+  const compradorNom=esc((userProfile&&userProfile.nombre)||'—');
+  const compradorMail=esc(currentUser.email||'');
+  const detalle='Acceso a datos de contacto de creador — '+esc(d.creador)+(d.origen==='campania'?' (vía campaña)':'');
+  const html=`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Comprobante TRAMA. ${nro}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#111;background:#f4f4f4;padding:24px}
+    .doc{max-width:620px;margin:0 auto;background:#fff;border:1px solid #e3e3e3;border-radius:6px;overflow:hidden}
+    .top{background:#0d0d0d;color:#fff;padding:22px 28px;display:flex;justify-content:space-between;align-items:flex-end}
+    .brand{font-size:1.5rem;font-weight:900;letter-spacing:.02em}
+    .brand span{color:#C8FF1A}
+    .ctype{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;opacity:.8}
+    .body{padding:28px}
+    .nro{font-size:.8rem;color:#666;margin-bottom:18px}
+    .nro b{color:#111}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;margin-bottom:22px}
+    .f{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:#999;font-weight:700;margin-bottom:3px}
+    .v{font-size:.9rem;color:#111;font-weight:600}
+    .detalle{border-top:1px solid #eee;border-bottom:1px solid #eee;padding:16px 0;margin-bottom:18px}
+    .tot{display:flex;justify-content:space-between;align-items:center;font-size:1.15rem;font-weight:900}
+    .tot .lbl{font-size:.8rem;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.06em}
+    .note{font-size:.68rem;color:#999;line-height:1.6;margin-top:22px;border-top:1px dashed #ddd;padding-top:14px}
+    .pay{display:inline-block;background:#eafbd0;color:#3a5a00;font-size:.7rem;font-weight:800;padding:3px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:.05em}
+    @media print{body{background:#fff;padding:0}.doc{border:none}}
+  </style></head><body>
+  <div class="doc">
+    <div class="top"><div class="brand">TRAMA<span>.</span></div><div class="ctype">Comprobante de compra</div></div>
+    <div class="body">
+      <div class="nro">Comprobante N.º <b>${nro}</b> · <span class="pay">Pagado</span></div>
+      <div class="grid">
+        <div><div class="f">Fecha</div><div class="v">${fecha}</div></div>
+        <div><div class="f">Medio de pago</div><div class="v">${esc(fmtMetodoPago(d.metodo))}</div></div>
+        <div><div class="f">Comprador</div><div class="v">${compradorNom}</div></div>
+        <div><div class="f">Email</div><div class="v">${compradorMail}</div></div>
+      </div>
+      <div class="detalle"><div class="f">Detalle</div><div class="v" style="font-weight:600;margin-top:4px">${detalle}</div></div>
+      <div class="tot"><span class="lbl">Total</span><span>${monto}</span></div>
+      <div class="note">Este es un comprobante de compra emitido por TRAMA. por el servicio de acceso a datos de contacto. No constituye factura fiscal (AFIP). El pago fue procesado por Mercado Pago. Ante cualquier consulta escribinos a info.tramapunto@gmail.com · tramapunto.com</div>
+    </div>
+  </div>
+  <script>window.onload=function(){setTimeout(function(){window.print();},250);};<\/script>
+  </body></html>`;
+  const w=window.open('','_blank');
+  if(!w){ showToast('Permití las ventanas emergentes para descargar el comprobante','info'); return; }
+  w.document.write(html); w.document.close(); w.focus();
+}
+
+async function loadComprados(wrapId){
+  const wrap=document.getElementById(wrapId); if(!wrap)return;
+  const email=currentUser.email;
+  const cxs=await sbGet('conexiones',`marca_email=eq.${encodeURIComponent(email)}&estado=eq.pagado&select=id,creator_id,origen,created_at,monto,metodo,voucher_id&order=created_at.desc`,getToken());
+  compradosData={};
+  if(!cxs.length){
+    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Contactos que compraste</div><div class="empty-state"><div>📭</div>Todavía no desbloqueaste ningún contacto.<br><a href="/" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
+    return;
+  }
+  const ids=[...new Set(cxs.map(c=>c.creator_id).filter(Boolean))];
+  const inList='('+ids.map(encodeURIComponent).join(',')+')';
+  const creators=await sbGet('creators',`id=in.${inList}&select=id,nombre,apellido,avatar_url`,getToken());
+  const byId=Object.fromEntries((creators||[]).map(c=>[String(c.id),c]));
+  // El contacto se trae del endpoint seguro (solo devuelve el de las compras pagadas vigentes)
+  const contactos=await fetchContacto(ids);
+  Object.keys(byId).forEach(id=>Object.assign(byId[id], contactos[id]||{}));
+  // Reseñas que esta cuenta ya dejó (para mostrar estado / permitir editar)
+  const misResenas=await sbGet('resenas',`marca_email=eq.${encodeURIComponent(email)}&select=creator_id,rating`,getToken());
+  const ratingByCreator=Object.fromEntries((misResenas||[]).map(x=>[String(x.creator_id),x.rating]));
+  const DIAS_ACCESO=60;
+  const vistos=new Set();
+  const items=cxs.map(cx=>{
+    const c=byId[String(cx.creator_id)]; if(!c)return '';
+    if(vistos.has(String(cx.creator_id)))return ''; vistos.add(String(cx.creator_id));
+    const f=cx.created_at?new Date(cx.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
+    const nom=`${c.nombre||''} ${c.apellido||''}`.trim()||'Creador';
+    const av=c.avatar_url?`<img src="${c.avatar_url}" style="width:100%;height:100%;object-fit:cover">`:'🎥';
+    // Vigencia del acceso al dato: 60 días desde la compra
+    const diasPasados=cx.created_at?Math.floor((Date.now()-new Date(cx.created_at).getTime())/86400000):0;
+    const diasRest=DIAS_ACCESO-diasPasados;
+    const activo=diasRest>0;
+    const vence=new Date(new Date(cx.created_at).getTime()+DIAS_ACCESO*86400000).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const venceBadge=activo
+      ? `<span class="cx-venc ok">${diasRest<=7?(diasRest===1?'Vence mañana':`Vence en ${diasRest} días`):`Vigente hasta ${vence}`}</span>`
+      : `<span class="cx-venc exp">Acceso vencido</span>`;
+    let cuerpo;
+    if(activo){
+      const contacto=contactoLinks(c);
+      const miRating=ratingByCreator[String(c.id)];
+      const btnResena=miRating
+        ? `<button class="resena-btn done" onclick="openResena('${c.id}',${JSON.stringify(nom).replace(/"/g,'&quot;')},${miRating})">${'★'.repeat(miRating)} · Editar</button>`
+        : `<button class="resena-btn" onclick="openResena('${c.id}',${JSON.stringify(nom).replace(/"/g,'&quot;')},0)">⭐ Dejar reseña</button>`;
+      cuerpo=`<div class="cx-contact">${contacto||'Sin datos de contacto'}</div>${btnResena}`;
+    } else {
+      cuerpo=`<div class="cx-contact" style="color:var(--muted)">El acceso al contacto venció (60 días). <a href="/" style="color:var(--green)">Volver a comprar →</a></div>`;
+    }
+    // Comprobante de compra (disponible siempre, vigente o no)
+    compradosData[cx.id]={ id:cx.id, creador:nom, fecha:cx.created_at, monto:cx.monto, metodo:cx.metodo, voucher:cx.voucher_id, origen:cx.origen };
+    cuerpo+=`<button class="comp-btn" onclick="descargarComprobante('${cx.id}')">🧾 Comprobante</button>`;
+    return `<div class="cx-item${activo?'':' cx-exp'}"><div class="cx-ic">${av}</div><div class="cx-body"><div class="cx-name">${nom} ${venceBadge}</div><div class="cx-meta">Comprado el ${f}${cx.origen==='campania'?' · campaña':''}</div>${cuerpo}</div></div>`;
+  }).join('');
+  wrap.innerHTML=`<div class="tab-content active">
+    <div class="sec-title">Contactos que compraste (${cxs.length})</div>
+    <div style="font-size:.72rem;color:var(--muted);margin:-.75rem 0 1rem">El acceso a cada contacto queda disponible por <strong style="color:var(--muted2)">60 días</strong> desde la compra.</div>
+    <div class="cx-list">${items}</div>
+  </div>`;
+}
+
+// Reseñas recibidas por el creador (se muestran en su propio perfil)
+async function loadResenasRecibidas(creatorId){
+  const box=document.getElementById('repWrap'); if(!box)return;
+  const rows=await sbGet('resenas',`creator_id=eq.${creatorId}&select=rating,comentario,marca_nombre,created_at,respuesta&oculta=not.is.true&order=created_at.desc&limit=10`,getToken());
+  const conTexto=(rows||[]).filter(x=>x.comentario&&x.comentario.trim());
+  if(!conTexto.length)return;
+  box.innerHTML=conTexto.map(x=>{
+    const estrellas='★'.repeat(x.rating)+'☆'.repeat(5-x.rating);
+    const quien=x.marca_nombre||'Marca';
+    const f=x.created_at?new Date(x.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
+    const resp=x.respuesta?`<div style="margin-top:.45rem;padding:.45rem .65rem;background:#0f1a00;border-left:2px solid var(--green);font-size:.76rem;color:#cde8a0;line-height:1.5"><strong>Respuesta de TRAMA.:</strong> ${x.respuesta}</div>`:'';
+    return `<div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:.8rem 1rem;margin-bottom:.5rem">
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem"><span style="color:#f5b301;font-size:.85rem">${estrellas}</span><span style="font-size:.72rem;font-weight:700;color:var(--muted2,#aaa)">${quien}</span><span style="font-size:.66rem;color:var(--muted);margin-left:auto">${f}</span></div>
+      <p style="margin:0;font-size:.8rem;color:var(--muted2,#aaa);line-height:1.5">${x.comentario}</p>${resp}
+    </div>`;
+  }).join('');
+}
+
+// ── RESEÑAS (la marca/comprador reseña al creador que compró) ──
+let rsnaCreatorId=null, rsnaVal=0;
+function openResena(id,nombre,current){
+  rsnaCreatorId=id; rsnaVal=current||0;
+  document.getElementById('rsnaTitle').textContent='Reseñar a '+(nombre||'creador');
+  document.getElementById('rsnaText').value='';
+  paintStars();
+  if(current) fetchMiResena(id);
+  document.getElementById('rsnaOv').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function paintStars(){
+  document.querySelectorAll('#rsnaStars .rsna-star').forEach(s=>{
+    s.classList.toggle('on', Number(s.dataset.v)<=rsnaVal);
+  });
+  const sv=document.getElementById('rsnaSave'); if(sv) sv.disabled = rsnaVal<1;
+}
+function setStars(v){ rsnaVal=v; paintStars(); }
+function closeResena(){ document.getElementById('rsnaOv').classList.remove('open'); document.body.style.overflow=''; }
+// Cerrar overlays con Esc
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  const ov=document.getElementById('rsnaOv'); if(ov&&ov.classList.contains('open')) closeResena();
+  const np=document.getElementById('notifPanel'); if(np&&np.classList.contains('open')) np.classList.remove('open');
+});
+async function fetchMiResena(id){
+  const rows=await sbGet('resenas',`marca_email=eq.${encodeURIComponent(currentUser.email)}&creator_id=eq.${id}&select=comentario,rating`,getToken());
+  if(rows&&rows[0]){ document.getElementById('rsnaText').value=rows[0].comentario||''; rsnaVal=rows[0].rating||rsnaVal; paintStars(); }
+}
+async function submitResena(){
+  if(rsnaVal<1)return;
+  const save=document.getElementById('rsnaSave'); save.disabled=true; save.textContent='Publicando...';
+  const email=currentUser.email;
+  const nombre=(userProfile&&(userProfile.nombre_marca||userProfile.razon_social||userProfile.nombre))||'Marca';
+  const body={
+    creator_id:rsnaCreatorId, marca_email:email, marca_nombre:nombre,
+    rating:rsnaVal, comentario:(document.getElementById('rsnaText').value||'').trim()||null,
+    updated_at:new Date().toISOString()
+  };
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/resenas?on_conflict=marca_email,creator_id`,{
+      method:'POST',
+      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+getToken(),'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify(body)
+    });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    closeResena();
+    showToast('✓ ¡Gracias por tu reseña!','ok');
+    if(document.getElementById('compradosWrap')) loadComprados('compradosWrap');
+    else if(document.getElementById('cxMarcaWrap')) loadComprados('cxMarcaWrap');
+  }catch(e){
+    showToast('No se pudo publicar la reseña','err');
+  }finally{ save.disabled=false; save.textContent='Publicar'; }
+}
+
+// ── CREATORS GUARDADOS (favoritos de la marca) ──
+function fmtSegP(n){if(!n)return'—';return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':n}
+async function loadGuardados(wrapId){
+  const wrap=document.getElementById(wrapId); if(!wrap)return;
+  const email=currentUser.email;
+  const favs=await sbGet('favoritos',`marca_email=eq.${encodeURIComponent(email)}&select=creator_id,created_at&order=created_at.desc`,getToken());
+  if(!favs||!favs.length){
+    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Creators guardados</div><div class="empty-state"><div>🔖</div>Todavía no guardaste ningún creator.<br><a href="/" style="color:var(--purple);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
+    return;
+  }
+  const ids=[...new Set(favs.map(f=>f.creator_id).filter(Boolean))];
+  const inList='('+ids.map(encodeURIComponent).join(',')+')';
+  // Solo columnas públicas (sin email/tel): guardar no revela el contacto.
+  const creators=await sbGet('creators',`id=in.${inList}&status=eq.aprobado&select=id,nombre,niches,pais,ciudad,ig_seg,tt_seg,yt_seg,ig_er,avatar_url`,getToken());
+  const byId=Object.fromEntries((creators||[]).map(c=>[String(c.id),c]));
+  const items=favs.map(f=>{
+    const c=byId[String(f.creator_id)]; if(!c)return '';
+    const nom=c.nombre||'Creador';
+    const seg=fmtSegP(c.ig_seg||c.tt_seg||c.yt_seg);
+    const niches=(c.niches||[]).join(' · ')||'—';
+    const av=c.avatar_url?`<img src="${c.avatar_url}" style="width:100%;height:100%;object-fit:cover">`:'🎥';
+    return `<div class="cx-item" id="fav-${c.id}">
+      <div class="cx-ic">${av}</div>
+      <div class="cx-body">
+        <div class="cx-name">${nom}</div>
+        <div class="cx-meta">${niches}</div>
+        <div class="cx-contact">${seg} seguidores${c.ig_er?` · ${c.ig_er}% eng.`:''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.4rem;align-items:flex-end">
+        <a href="/" style="background:var(--green);color:#080808;font-size:.64rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:.4rem .7rem;border-radius:2px;text-decoration:none;white-space:nowrap">Conectar →</a>
+        <button onclick="quitarGuardado('${c.id}')" style="background:none;border:1px solid #2a2a2a;color:var(--muted);font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.35rem .6rem;border-radius:2px;cursor:pointer;white-space:nowrap">Quitar</button>
+      </div>
+    </div>`;
+  }).join('');
+  wrap.innerHTML=`<div class="tab-content active">
+    <div class="sec-title">Creators guardados (${ids.length})</div>
+    <div class="cx-list">${items}</div>
+  </div>`;
+}
+async function quitarGuardado(id){
+  const email=currentUser.email;
+  const el=document.getElementById('fav-'+id);
+  if(el){ el.style.opacity='.4'; }
+  try{
+    await fetch(`${SB_URL}/rest/v1/favoritos?marca_email=eq.${encodeURIComponent(email)}&creator_id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+getToken()}
+    });
+    if(el) el.remove();
+    // Si quedó vacío, recargamos el estado vacío
+    const list=document.querySelector('#guardadosWrap .cx-list');
+    if(list && !list.children.length) loadGuardados('guardadosWrap');
+  }catch(_){ if(el) el.style.opacity='1'; showToast('No se pudo quitar','err'); }
+}
+
+// ── FOTO DE PERFIL / AVATAR ──
+function montarCamaraAvatar(){
+  const wrap=document.getElementById('dashAvWrap');
+  if(!wrap)return;
+  if(document.getElementById('avCam'))return;   // ya está
+  const lbl=document.createElement('label');
+  lbl.id='avCam'; lbl.className='av-cam'; lbl.title='Cambiar foto de perfil';
+  lbl.innerHTML='📷<input type="file" accept="image/*" style="display:none" onchange="subirAvatar(this)">';
+  wrap.appendChild(lbl);
+}
+async function subirAvatar(input){
+  const f=input.files&&input.files[0]; input.value='';
+  if(!f)return;
+  if(!f.type.startsWith('image/')){ showToast('Elegí una imagen','err'); return; }
+  showToast('Subiendo foto...','info');
+  const token=getToken();
+  const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'');
+  const path=`avatars/${userProfile.id}/${Date.now()}_${safe}`;
+  try{
+    const r=await fetch(`${SB_URL}/storage/v1/object/creator-fotos/${path}`,{
+      method:'POST',
+      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+token},
+      body:f
+    });
+    if(!r.ok) throw new Error('upload');
+    const url=`${SB_URL}/storage/v1/object/public/creator-fotos/${path}`;
+    const ok=await sbPatch('creators',`id=eq.${userProfile.id}`,{avatar_url:url},token);
+    if(!ok) throw new Error('save');
+    userProfile.avatar_url=url;
+    const av=document.getElementById('dashAv');
+    if(av){ av.innerHTML=`<img src="${url}" alt="avatar">`; montarCamaraAvatar(); }
+    showToast('✓ Foto de perfil actualizada. Ya se ve en la bolsa.','ok');
+  }catch(e){ showToast('No se pudo subir la foto','err'); }
+}
+
+// ── FOTOS (muestras del creador, se guardan en Supabase Storage) ──
+function renderFotos(){
+  const g=document.getElementById('fotosGrid'); if(!g)return;
+  const fotos=(userProfile&&userProfile.fotos)||[];
+  g.innerHTML = fotos.length
+    ? fotos.map((u,i)=>`<div class="foto-item"><img src="${u}" alt=""><button class="foto-del" title="Quitar" onclick="borrarFoto(${i})">✕</button></div>`).join('')
+    : `<div style="color:var(--muted);font-size:.76rem;padding:.4rem 0">Sin fotos todavía.</div>`;
+}
+async function subirFotos(input){
+  const files=[...input.files]; input.value='';
+  if(!files.length)return;
+  showToast('Subiendo fotos...','info');
+  const token=getToken();
+  const nuevas=[];
+  for(const f of files){
+    if(!f.type.startsWith('image/')) continue;
+    const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'');
+    const path=`${userProfile.id}/${Date.now()}_${safe}`;
+    try{
+      const r=await fetch(`${SB_URL}/storage/v1/object/creator-fotos/${path}`,{
+        method:'POST',
+        headers:{'apikey':SB_ANON,'Authorization':'Bearer '+token},
+        body:f
+      });
+      if(r.ok) nuevas.push(`${SB_URL}/storage/v1/object/public/creator-fotos/${path}`);
+    }catch(_){}
+  }
+  if(!nuevas.length){ showToast('No se pudieron subir las fotos','err'); return; }
+  const fotos=[...((userProfile.fotos)||[]), ...nuevas];
+  const ok=await sbPatch('creators',`id=eq.${userProfile.id}`,{fotos},getToken());
+  if(ok){ userProfile.fotos=fotos; renderFotos(); showToast('✓ Fotos subidas','ok'); }
+  else showToast('Error al guardar las fotos','err');
+}
+async function borrarFoto(i){
+  const fotos=[...((userProfile.fotos)||[])];
+  fotos.splice(i,1);
+  const ok=await sbPatch('creators',`id=eq.${userProfile.id}`,{fotos},getToken());
+  if(ok){ userProfile.fotos=fotos; renderFotos(); }
+  else showToast('Error al quitar la foto','err');
+}
+
+// ── VIDEOS (muestras del creador, subidos a TRAMA — sin exponer redes) ──
+function renderVideos(){
+  const g=document.getElementById('videosGrid'); if(!g)return;
+  const vids=(userProfile&&userProfile.videos)||[];
+  g.innerHTML = vids.length
+    ? vids.map((u,i)=>`<div class="video-item"><video src="${u}" controls preload="metadata" playsinline></video><button class="foto-del" title="Quitar" onclick="borrarVideo(${i})">✕</button></div>`).join('')
+    : `<div style="color:var(--muted);font-size:.76rem;padding:.4rem 0">Sin videos todavía.</div>`;
+}
+async function subirVideos(input){
+  const files=[...input.files]; input.value='';
+  if(!files.length)return;
+  const yaHay=((userProfile.videos)||[]).length;
+  if(yaHay>=MAX_VIDEOS){ showToast(`Máximo ${MAX_VIDEOS} videos`,'err'); return; }
+  const token=getToken();
+  const nuevas=[];
+  for(const f of files){
+    if(nuevas.length + yaHay >= MAX_VIDEOS){ showToast(`Máximo ${MAX_VIDEOS} videos — algunos no se subieron`,'err'); break; }
+    if(!f.type.startsWith('video/')){ showToast('Solo archivos de video','err'); continue; }
+    if(f.size > MAX_VIDEO_MB*1024*1024){ showToast(`"${f.name}" supera los ${MAX_VIDEO_MB} MB`,'err'); continue; }
+    showToast('Subiendo video… puede tardar','info');
+    const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'');
+    const path=`${userProfile.id}/video_${Date.now()}_${safe}`;
+    try{
+      const r=await fetch(`${SB_URL}/storage/v1/object/creator-fotos/${path}`,{
+        method:'POST',
+        headers:{'apikey':SB_ANON,'Authorization':'Bearer '+token},
+        body:f
+      });
+      if(r.ok) nuevas.push(`${SB_URL}/storage/v1/object/public/creator-fotos/${path}`);
+      else showToast('No se pudo subir un video','err');
+    }catch(_){ showToast('No se pudo subir un video','err'); }
+  }
+  if(!nuevas.length) return;
+  const videos=[...((userProfile.videos)||[]), ...nuevas];
+  const ok=await sbPatch('creators',`id=eq.${userProfile.id}`,{videos},getToken());
+  if(ok){ userProfile.videos=videos; renderVideos(); showToast('✓ Videos subidos','ok'); }
+  else showToast('Error al guardar los videos','err');
+}
+async function borrarVideo(i){
+  const videos=[...((userProfile.videos)||[])];
+  videos.splice(i,1);
+  const ok=await sbPatch('creators',`id=eq.${userProfile.id}`,{videos},getToken());
+  if(ok){ userProfile.videos=videos; renderVideos(); }
+  else showToast('Error al quitar el video','err');
+}
+
+// ── TOAST ──
+let tt;
+function showToast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show '+type;
+  clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),3200);
+}
+</script>
+<script>function togglePass(b){var i=b.parentNode.querySelector('input');if(!i)return;var s=i.type==='password';i.type=s?'text':'password';b.textContent=s?'🙈':'👁';}</script>
+</body>
+</html>

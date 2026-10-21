@@ -93,14 +93,67 @@ export default async function handler(req, res) {
     campania_id, postulacion_id,
   } = req.body;
 
-  if (!creator_id || !marca_email) {
+  if (!marca_email || (origen !== 'carrito' && !creator_id)) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
-  if (!['bolsa', 'campania', 'trabajo'].includes(origen)) {
+  if (!['bolsa', 'campania', 'trabajo', 'carrito'].includes(origen)) {
     return res.status(400).json({ error: 'Origen inválido' });
   }
 
   try {
+    // ══ CARRITO: desbloqueo de varios contactos de la bolsa en un solo pago ══
+    if (origen === 'carrito') {
+      const SB = process.env.SUPABASE_URL, KEY = process.env.SUPABASE_SERVICE_KEY;
+      let ids = Array.isArray(req.body.creator_ids) ? req.body.creator_ids.filter(Boolean).map(String) : [];
+      ids = [...new Set(ids)];
+      if (!ids.length) return res.status(400).json({ error: 'El carrito está vacío' });
+
+      // Solo creadores aprobados existentes
+      const cres = await fetch(`${SB}/rest/v1/creators?id=in.(${ids.map(encodeURIComponent).join(',')})&status=eq.aprobado&select=id`, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } }).then(r => r.ok ? r.json() : []);
+      const validos = (cres || []).map(c => String(c.id));
+
+      // Quitar los que la marca ya tiene acceso vigente (no se cobran de nuevo)
+      const aCobrar = [];
+      for (const id of validos) { if (!(await yaTieneAcceso(marca_email, id))) aCobrar.push(id); }
+      if (!aCobrar.length) {
+        return res.status(200).json({ yaComprado: true, mensaje: 'Ya tenés acceso a todos los contactos del carrito.' });
+      }
+
+      const PRECIOS = await getPrecios();
+      const total = PRECIOS.precio_bolsa * aCobrar.length;
+
+      // Guardar el carrito para que el webhook registre todas las conexiones
+      const ins = await fetch(`${SB}/rest/v1/mp_carritos`, {
+        method: 'POST',
+        headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json', Prefer: 'return=representation' },
+        body: JSON.stringify({ marca_email, marca_nombre: marca_nombre || '', creator_ids: aCobrar, monto: total }),
+      });
+      const cartRows = await ins.json().catch(() => []);
+      const cart = Array.isArray(cartRows) ? cartRows[0] : cartRows;
+      if (!ins.ok || !cart || !cart.id) throw new Error('No se pudo crear el carrito');
+
+      const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${process.env.MP_ACCESS_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [{ id: `carrito-${cart.id}`, title: `TRAMA. — ${aCobrar.length} contacto${aCobrar.length > 1 ? 's' : ''} de creadores`, description: 'Acceso a datos de contacto verificados por TRAMA.', quantity: 1, currency_id: 'ARS', unit_price: total }],
+          payer: { email: marca_email, name: marca_nombre || '' },
+          back_urls: {
+            success: `${process.env.SITE_URL}/pago-exitoso.html?origen=carrito`,
+            failure: `${process.env.SITE_URL}/pago-fallido.html`,
+            pending: `${process.env.SITE_URL}/pago-pendiente.html`,
+          },
+          auto_return: 'approved',
+          external_reference: `carrito|${cart.id}`,
+          statement_descriptor: 'TRAMA.',
+          notification_url: `${process.env.SITE_URL}/api/mp-webhook`,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Error en MercadoPago');
+      return res.status(200).json({ id: data.id, init_point: data.init_point, sandbox_init_point: data.sandbox_init_point, monto: total, cantidad: aCobrar.length });
+    }
+
     // ══ PAGO DEL TRABAJO DE CAMPAÑA (split 90/10 al creador) ══
     if (origen === 'trabajo') {
       const { postulacion_id } = req.body;

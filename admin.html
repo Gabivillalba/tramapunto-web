@@ -1425,11 +1425,12 @@ function renderCampanias(){
 }
 
 async function notifCampania(id, btn){
-  if(!confirm('¿Avisar por email a TODOS los creadores aprobados sobre esta campaña?')) return;
+  if(!confirm('¿Avisar a TODOS los creadores aprobados sobre esta campaña?\n\nLes llega una notificación en la campanita del perfil (y un email si está configurado).')) return;
   const prev=btn.textContent; btn.disabled=true; btn.textContent='Enviando...';
   try{
     const r=await adminCall('notificar_campania',{id});
-    showToast(`✓ Aviso enviado a ${r.enviados}/${r.total} creadores`,'ok');
+    const extra=(r.enviados? ` · ${r.enviados} email${r.enviados>1?'s':''}`:'');
+    showToast(`✓ Notificados ${r.notificados}/${r.total} creadores${extra}`,'ok');
   }catch(e){ showToast('Error: '+e.message,'err'); }
   finally{ btn.disabled=false; btn.textContent=prev; }
 }

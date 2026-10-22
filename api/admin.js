@@ -330,7 +330,6 @@ export default async function handler(req, res) {
       case 'notificar_campania': {
         const { id } = payload;
         if (!id) return res.status(400).json({ error: 'Falta id' });
-        if (!process.env.RESEND_API_KEY) return res.status(500).json({ error: 'Falta RESEND_API_KEY' });
         const rows = await sb(`campanias?id=eq.${id}&select=titulo,descripcion,tipo`);
         const c = rows?.[0];
         if (!c) return res.status(404).json({ error: 'Campaña no encontrada' });
@@ -338,21 +337,41 @@ export default async function handler(req, res) {
         const dests = (creators || [])
           .filter(x => x.email && /@/.test(x.email))
           .map(x => ({ nombre: x.nombre, email: x.email }));
-        if (!dests.length) return res.status(200).json({ ok: true, enviados: 0, total: 0 });
+        if (!dests.length) return res.status(200).json({ ok: true, notificados: 0, enviados: 0, total: 0 });
         const desc = (c.descripcion || '').trim();
-        const htmlFn = (nombre) => emailWrap({
-          kicker: 'Nueva campaña 📋',
-          titulo: c.titulo,
-          cuerpoHtml:
-            `<p style="margin:0 0 16px">Hola <strong style="color:#F4F4EF">${escapeHtml(nombre) || 'crack'}</strong>,</p>` +
-            `<p style="margin:0 0 16px">Una marca publicó una nueva campaña en TRAMA. y ya podés postularte:</p>` +
-            `<p style="margin:0 0 6px;font-size:15px;color:#F4F4EF;font-weight:700">${escapeHtml(c.titulo)}</p>` +
-            `<p style="margin:0 0 16px;color:#999;line-height:1.6">${escapeHtml(desc.slice(0, 260))}${desc.length > 260 ? '…' : ''}</p>`,
-          ctaText: 'Ver y postularme →',
-          ctaHref: `${SITE_URL}/oportunidades.html`,
-        });
-        const enviados = await enviarBatch(dests, `Nueva campaña en TRAMA.: ${c.titulo}`, htmlFn);
-        return res.status(200).json({ ok: true, enviados, total: dests.length });
+        const cuerpoNotif = desc
+          ? desc.slice(0, 200) + (desc.length > 200 ? '…' : '')
+          : 'Una marca publicó una nueva campaña. Postulate desde Oportunidades.';
+        // 1) Notificación in-app (campanita del perfil) — SIEMPRE, no depende del email
+        const notifRows = dests.map(d => ({
+          para_email: d.email, tipo: 'sistema',
+          titulo: `📋 Nueva campaña: ${c.titulo}`,
+          cuerpo: cuerpoNotif,
+          link: '/oportunidades.html',
+        }));
+        let notificados = 0;
+        for (let i = 0; i < notifRows.length; i += 500) {
+          const chunk = notifRows.slice(i, i + 500);
+          await sb('notificaciones', 'POST', chunk);
+          notificados += chunk.length;
+        }
+        // 2) Email opcional: solo si hay RESEND configurado (no frena la notificación in-app)
+        let enviados = 0;
+        if (process.env.RESEND_API_KEY) {
+          const htmlFn = (nombre) => emailWrap({
+            kicker: 'Nueva campaña 📋',
+            titulo: c.titulo,
+            cuerpoHtml:
+              `<p style="margin:0 0 16px">Hola <strong style="color:#F4F4EF">${escapeHtml(nombre) || 'crack'}</strong>,</p>` +
+              `<p style="margin:0 0 16px">Una marca publicó una nueva campaña en TRAMA. y ya podés postularte:</p>` +
+              `<p style="margin:0 0 6px;font-size:15px;color:#F4F4EF;font-weight:700">${escapeHtml(c.titulo)}</p>` +
+              `<p style="margin:0 0 16px;color:#999;line-height:1.6">${escapeHtml(desc.slice(0, 260))}${desc.length > 260 ? '…' : ''}</p>`,
+            ctaText: 'Ver y postularme →',
+            ctaHref: `${SITE_URL}/oportunidades.html`,
+          });
+          enviados = await enviarBatch(dests, `Nueva campaña en TRAMA.: ${c.titulo}`, htmlFn);
+        }
+        return res.status(200).json({ ok: true, notificados, enviados, total: dests.length });
       }
 
       // — Guardar nota interna de un creator —

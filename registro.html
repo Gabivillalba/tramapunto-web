@@ -385,17 +385,20 @@ function addRegVideos(input){
 function rmRegVideo(i){ videoFiles.splice(i,1); renderRegVideos(); }
 function togglePet(){ document.getElementById('petFields').style.display=document.getElementById('f-pet').checked?'block':'none'; }
 async function uploadRegVideos(email, token){
+  // Los videos ahora van a Cloudflare R2 (no a Supabase Storage) para no llenar la cuota.
+  // Pedimos una URL firmada al server y subimos el archivo DIRECTO a R2.
   const urls=[];
   for(const f of videoFiles.slice(0,MAX_VIDEOS)){
-    const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'');
-    const path=`reg/${email.replace(/[@.]/g,'_')}_${Date.now()}_${safe}`;
     try{
-      const r=await fetch(`${SB_URL}/storage/v1/object/creator-fotos/${path}`,{
+      const pres=await fetch('/api/mi-perfil',{
         method:'POST',
-        headers:{'apikey':SB_ANON,'Authorization':'Bearer '+(token||SB_ANON),'Content-Type':f.type,'x-upsert':'true'},
-        body:f
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},
+        body:JSON.stringify({accion:'presign_video',content_type:f.type,scope:'video'})
       });
-      if(r.ok) urls.push(`${SB_URL}/storage/v1/object/public/creator-fotos/${path}`);
+      if(!pres.ok) continue;
+      const {putUrl,publicUrl}=await pres.json();
+      const up=await fetch(putUrl,{method:'PUT',headers:{'Content-Type':f.type},body:f});
+      if(up.ok) urls.push(publicUrl);
     }catch(_){}
   }
   return urls;

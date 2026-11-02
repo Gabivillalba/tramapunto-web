@@ -7,6 +7,7 @@
 // el propio perfil se busca por email acá, en el servidor (service_role + JWT).
 // El OAuth vive acá (y no en un archivo nuevo) para no pasar el límite de 12 funciones.
 import { encrypt } from '../lib/mp-crypto.js';
+import { presignPutUrl, buildVideoTarget } from '../lib/r2-presign.js';
 
 const SB_URL     = process.env.SUPABASE_URL;
 const SB_SERVICE = process.env.SUPABASE_SERVICE_KEY;
@@ -162,6 +163,39 @@ export default async function handler(req, res) {
     } catch (err) {
       console.error('follow_bonus error:', err);
       return res.status(500).json({ error: 'No se pudo sumar los puntos' });
+    }
+  }
+
+  // ══ Firma de subida de video a Cloudflare R2 (presigned PUT) ══
+  // El navegador pide acá una URL temporal y sube el video DIRECTO a R2.
+  // Gated por el JWT válido (ya verificado arriba). El Secret de R2 nunca sale del server.
+  if (req.body && req.body.accion === 'presign_video') {
+    const need = ['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET', 'R2_PUBLIC_BASE'];
+    if (need.some((k) => !process.env[k])) {
+      return res.status(503).json({ error: 'El almacenamiento de video todavía no está configurado.' });
+    }
+    const contentType = String((req.body && req.body.content_type) || '');
+    const scope = (req.body && req.body.scope) === 'reel' ? 'reels' : 'videos';
+    const target = buildVideoTarget({
+      scope,
+      ownerId: email.replace(/[@.]/g, '_'),
+      contentType,
+      publicBase: process.env.R2_PUBLIC_BASE,
+    });
+    if (!target) return res.status(400).json({ error: 'Tipo de archivo no permitido (solo video).' });
+    try {
+      const putUrl = presignPutUrl({
+        accountId: process.env.R2_ACCOUNT_ID,
+        accessKeyId: process.env.R2_ACCESS_KEY_ID,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+        bucket: process.env.R2_BUCKET,
+        key: target.key,
+        expiresIn: 900,
+      });
+      return res.status(200).json({ putUrl, publicUrl: target.publicUrl });
+    } catch (err) {
+      console.error('presign_video error:', err);
+      return res.status(500).json({ error: 'No se pudo preparar la subida.' });
     }
   }
 

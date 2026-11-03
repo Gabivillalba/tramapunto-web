@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- RECUPERACIÓN DE CONTRASEÑA (permanente): si el link de Supabase cae acá
+     con el token de recovery, rebota a reset.html conservando el hash.
+     NO BORRAR este bloque. -->
+<script>(function(){try{var h=location.hash||'',q=location.search||'';if((h.indexOf('type=recovery')>-1||q.indexOf('type=recovery')>-1||h.indexOf('access_token=')>-1)&&location.pathname.indexOf('reset.html')===-1){location.replace('/reset.html'+h+q);}}catch(e){}})();</script>
+<!-- TRAMA. — captura de fuente de registro (first-touch). NO BORRAR -->
+<script>(function(){try{if(localStorage.getItem('trama_fuente'))return;var p=new URLSearchParams(location.search);var f=p.get('utm_source')||p.get('ref')||'';var camp=p.get('utm_campaign')||'';if(!f){var r=document.referrer||'';if(r){try{var h=new URL(r).hostname.replace(/^www\./,'');if(h&&location.hostname.indexOf(h)===-1)f=h;}catch(e){}}}if(!f)f='directo';localStorage.setItem('trama_fuente',(camp?f+' / '+camp:f).slice(0,120));}catch(e){}})();</script>
+
+<!-- ═══ SEO ═══ -->
+<title>TRAMA. — Creadores de contenido UGC verificados en Argentina</title>
+<meta name="description" content="Conectá tu marca con creadores de contenido UGC e influencers verificados uno por uno. Marketplace argentino de creator marketing. Publicá tu campaña gratis.">
+<link rel="canonical" href="https://www.tramapunto.com/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="TRAMA.">
+<meta name="geo.region" content="AR-C">
+<meta name="geo.placename" content="Buenos Aires">
+<meta property="og:locale" content="es_AR">
+
+<!-- ═══ Open Graph (WhatsApp, Instagram, Facebook, LinkedIn) ═══ -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TRAMA.">
+<meta property="og:url" content="https://www.tramapunto.com/">
+<meta property="og:title" content="TRAMA. — Creadores de contenido UGC verificados">
+<meta property="og:description" content="Marcas y creadores reales. Cada perfil verificado a mano por nuestro equipo. Sin perfiles falsos.">
+<meta property="og:image" content="https://www.tramapunto.com/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- ═══ Twitter/X ═══ -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="TRAMA. — Creadores de contenido UGC verificados">
+<meta name="twitter:description" content="Marcas y creadores reales. Cada perfil verificado a mano.">
+<meta name="twitter:image" content="https://www.tramapunto.com/og-image.jpg">
+
+<!-- ═══ Schema.org — le dice a Google QUÉ es TRAMA. ═══ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "TRAMA.",
+  "url": "https://www.tramapunto.com",
+  "logo": "https://www.tramapunto.com/og-image.jpg",
+  "description": "Marketplace argentino que conecta marcas con creadores de contenido UGC e influencers verificados manualmente.",
+  "email": "info.tramapunto@gmail.com",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Buenos Aires",
+    "addressCountry": "AR"
+  },
+  "areaServed": { "@type": "Country", "name": "Argentina" },
+  "sameAs": ["https://www.instagram.com/tramapunto"]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "TRAMA.",
+  "url": "https://www.tramapunto.com",
+  "inLanguage": "es-AR"
+}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --black:#080808;--green:#C8FF1A;--white:#F4F4EF;
+  --g1:#111;--g2:#1C1C1C;--g3:#2A2A2A;
+  --muted:#8a8a8a;--muted2:#aaa;--purple:#c084fc;
+  --red:#ff4444;--amber:#f59e0b;--blue:#60a5fa;
+}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+body{background:var(--black);color:var(--white);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased;min-height:100vh}
+
+/* NAV */
+nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,.96);backdrop-filter:blur(12px);border-bottom:1px solid #1a1a1a}
+.logo{font-size:1.2rem;font-weight:900;letter-spacing:.18em;color:var(--green);text-decoration:none;cursor:pointer;flex-shrink:0}
+.nav-center{display:flex;gap:2rem;list-style:none;align-items:center;position:absolute;left:50%;transform:translateX(-50%)}
+.nav-center a{position:relative;color:var(--muted2);text-decoration:none;font-size:.76rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;transition:color .2s;cursor:pointer;white-space:nowrap;padding:4px 0}
+.nav-center a::after{content:'';position:absolute;left:0;bottom:-3px;height:2px;width:0;background:var(--green);transition:width .25s ease}
+.nav-center a:hover{color:var(--white)}
+.nav-center a:hover::after{width:100%}
+.nav-right{display:flex;align-items:center;gap:.6rem;flex-shrink:0}
+.nav-cta{display:inline-flex;align-items:center;gap:.4rem;background:var(--green);color:var(--black);padding:.5rem 1.1rem;font-weight:900;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;border:none;cursor:pointer;border-radius:2px;text-decoration:none;white-space:nowrap;transition:transform .2s,box-shadow .2s}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,255,26,.2)}
+.nav-account{display:inline-flex;align-items:center;gap:.45rem;background:#141414;color:var(--green);border:1px solid #2a3a00;padding:.5rem .9rem;font-weight:800;font-size:.71rem;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;text-decoration:none;white-space:nowrap;transition:background .2s,border-color .2s}
+.nav-account:hover{background:#1a2200;border-color:var(--green)}
+.nav-account .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
+.ham{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;background:none;border:none}
+.ham span{display:block;width:20px;height:2px;background:var(--white);transition:all .3s;transform-origin:center}
+.ham.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.ham.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+.ham.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.mob-menu{display:none;position:fixed;top:56px;left:0;right:0;z-index:299;background:var(--g1);border-bottom:1px solid #222;flex-direction:column;padding:1.25rem 1.5rem;gap:.875rem}
+.mob-menu.open{display:flex}
+.mob-menu a{color:var(--muted2);text-decoration:none;font-size:.88rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.5rem 0;border-bottom:1px solid #1a1a1a;cursor:pointer}
+.mob-menu a:last-child{border:none}
+.mob-pill{background:var(--green);color:var(--black);padding:.65rem 1rem;font-weight:900;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;text-align:center;border-radius:2px;margin-top:.5rem;border:none;cursor:pointer;text-decoration:none;display:block}
+.mob-pill.purple{background:var(--purple);color:var(--black)}
+.mob-group-label{font-size:.58rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);padding:.4rem 0 .1rem}
+
+/* PÁGINAS */
+.page{display:none;min-height:100vh;padding-top:56px;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* HERO */
+#hero{display:grid;grid-template-columns:1fr 1fr;position:relative}
+.half{position:relative;display:flex;flex-direction:column;justify-content:center;padding:4rem 2.5rem;cursor:pointer;transition:background .3s}
+.half.marca{border-right:1px solid #1a1a1a;background:#0D0D0D}
+.half.creator{background:#090909}
+.half-glow{position:absolute;inset:0;pointer-events:none;opacity:.05;transition:opacity .3s}
+.marca .half-glow{background:radial-gradient(ellipse at 70% 30%,var(--green),transparent 65%)}
+.creator .half-glow{background:radial-gradient(ellipse at 30% 30%,var(--purple),transparent 65%)}
+.half:hover .half-glow{opacity:.1}
+.h-tag{font-size:.63rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;display:flex;align-items:center;gap:.5rem;margin-bottom:1.25rem}
+.marca .h-tag{color:var(--green)}
+.creator .h-tag{color:var(--purple)}
+.h-tag::before{content:'';width:20px;height:1px;background:currentColor;flex-shrink:0}
+.h-title{font-size:clamp(2rem,3.2vw,3.6rem);font-weight:900;line-height:.92;letter-spacing:-.03em;text-transform:uppercase;margin-bottom:1.1rem}
+.marca .h-title em{color:var(--green);font-style:normal}
+.creator .h-title em{color:var(--purple);font-style:normal}
+.h-copy{font-size:.88rem;line-height:1.65;color:var(--muted2);max-width:360px;margin-bottom:2rem}
+.h-copy strong{color:var(--white);font-weight:500}
+.h-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.8rem 1.6rem;font-weight:900;font-size:.77rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;cursor:pointer;text-decoration:none;transition:all .2s;border:none}
+.btn-g{background:var(--green);color:var(--black)}
+.btn-g:hover{opacity:.85}
+.btn-p{background:transparent;color:var(--purple);border:1.5px solid var(--purple)}
+.btn-p:hover{background:var(--purple);color:var(--black)}
+.h-proof{display:flex;gap:1.5rem;margin-top:2.5rem;padding-top:2rem;border-top:1px solid #1e1e1e;flex-wrap:wrap}
+.proof-n{font-size:1.3rem;font-weight:900;letter-spacing:-.02em}
+.marca .proof-n{color:var(--green)}
+.creator .proof-n{color:var(--purple)}
+.proof-l{font-size:.65rem;color:var(--muted);font-weight:500;margin-top:.15rem}
+.vs-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;width:44px;height:44px;background:var(--black);border:1px solid #2a2a2a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:900;letter-spacing:.08em;color:var(--muted)}
+
+/* SECCIONES */
+section{padding:5rem 1.5rem;border-top:1px solid #161616}
+@media(min-width:768px){section{padding:6rem 4rem}}
+.s-tag{font-size:.62rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--green);display:flex;align-items:center;gap:.5rem;margin-bottom:.875rem}
+.s-tag::before{content:'';width:18px;height:1px;background:var(--green)}
+.s-line{width:36px;height:2px;background:var(--green);margin-bottom:1.75rem}
+.s-h2{font-size:clamp(1.75rem,3vw,2.8rem);font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:1;margin-bottom:.875rem}
+.s-sub{color:var(--muted2);font-size:.9rem;line-height:1.7;max-width:500px;margin-bottom:2.5rem}
+
+/* COMO */
+.como-grid{display:grid;gap:1px;background:#161616;grid-template-columns:1fr}
+@media(min-width:500px){.como-grid{grid-template-columns:1fr 1fr}}
+@media(min-width:1024px){.como-grid{grid-template-columns:repeat(4,1fr)}}
+.como-card{background:var(--black);padding:1.75rem 1.5rem;transition:background .2s}
+.como-card:hover{background:#0d0d0d}
+.como-num{font-size:.62rem;font-weight:900;color:var(--green);letter-spacing:.22em;margin-bottom:1.25rem}
+.como-icon{font-size:1.4rem;margin-bottom:.6rem}
+.como-title{font-size:.88rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.5rem}
+.como-desc{font-size:.8rem;color:var(--muted2);line-height:1.65}
+
+/* DOS COL */
+.two-col{display:grid;grid-template-columns:1fr;gap:3rem}
+@media(min-width:900px){.two-col{grid-template-columns:1fr 1fr;align-items:center}}
+.feats{display:flex;flex-direction:column;gap:1.25rem;margin-top:1.75rem}
+.feat{display:flex;gap:.875rem;align-items:flex-start}
+.feat-ic{width:34px;height:34px;min-width:34px;background:#0f1a00;border:1px solid #2a3a00;display:flex;align-items:center;justify-content:center;font-size:.85rem;border-radius:2px}
+.feat h4{font-size:.82rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.25rem}
+.feat p{font-size:.78rem;color:var(--muted2);line-height:1.6}
+.cta-box{background:var(--g2);border:1px solid #222;padding:2.25rem;display:flex;flex-direction:column;gap:1.25rem}
+.cta-tag{font-size:.62rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--green)}
+.cta-h{font-size:1.4rem;font-weight:900;text-transform:uppercase;line-height:1.1}
+.cta-p{font-size:.82rem;color:var(--muted2);line-height:1.6}
+.btn-solid{background:var(--green);color:var(--black);padding:.8rem 1.6rem;font-weight:900;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;border:none;cursor:pointer;border-radius:2px;text-decoration:none;display:inline-block;transition:opacity .2s}
+.btn-solid:hover{opacity:.85}
+.btn-out{background:transparent;color:var(--white);padding:.8rem 1.6rem;font-weight:900;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;border:1px solid #2a2a2a;cursor:pointer;border-radius:2px;text-decoration:none;display:inline-block;transition:all .2s}
+.btn-out:hover{border-color:var(--green);color:var(--green)}
+
+/* CREATORS VIS */
+.c-vis{display:flex;flex-direction:column;gap:1px;background:#1a1a2a}
+.c-row{background:#09090e;padding:1.1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;transition:background .2s;cursor:pointer}
+.c-row:hover{background:#0f0f18}
+.c-left{display:flex;align-items:center;gap:.75rem}
+.c-av{width:36px;height:36px;min-width:36px;border-radius:50%;background:#1a1a2a;border:1.5px solid #2a2a40;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.75rem;color:var(--purple)}
+.c-name{font-size:.82rem;font-weight:700}
+.c-niche{font-size:.67rem;color:var(--muted);margin-top:.1rem}
+.c-stat strong{display:block;font-size:.82rem;font-weight:900;color:var(--purple);text-align:right}
+.c-stat span{font-size:.62rem;color:var(--muted);letter-spacing:.05em}
+.c-new{font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--purple);border:1px solid #3a1a5a;padding:.18rem .45rem}
+
+/* TEST */
+.test-grid{display:grid;gap:1px;background:#161616;grid-template-columns:1fr}
+@media(min-width:640px){.test-grid{grid-template-columns:1fr 1fr}}
+@media(min-width:1024px){.test-grid{grid-template-columns:repeat(3,1fr)}}
+.t-card{background:var(--black);padding:1.75rem}
+.t-quote{font-size:.85rem;color:var(--muted2);line-height:1.75;margin-bottom:1.25rem;font-style:italic}
+.t-quote strong{color:var(--white);font-style:normal}
+.t-author{display:flex;align-items:center;gap:.625rem}
+.t-av{width:34px;height:34px;min-width:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.75rem}
+.t-name{font-size:.78rem;font-weight:700}
+.t-role{font-size:.68rem;color:var(--muted);margin-top:.1rem}
+
+/* BOLSA */
+.bolsa-top{padding:3rem 1.5rem 2rem}
+@media(min-width:768px){.bolsa-top{padding:3rem 4rem 2rem}}
+.search-bar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.search-input{flex:1;min-width:180px;background:#111;border:1px solid #222;color:var(--white);padding:.7rem 1rem;font-size:.85rem;font-family:inherit;outline:none;border-radius:2px;transition:border-color .2s}
+.search-input:focus{border-color:var(--green)}
+.search-input::placeholder{color:var(--muted)}
+.search-btn{background:var(--green);color:var(--black);border:none;padding:.7rem 1.25rem;font-weight:900;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px}
+.filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.f-btn{background:transparent;border:1px solid #222;color:var(--muted);padding:.4rem .9rem;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s;white-space:nowrap}
+.f-btn:hover,.f-btn.on{border-color:var(--green);color:var(--green)}
+.plat-filters{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.p-btn{background:transparent;border:1px solid #1a1a1a;color:var(--muted);padding:.35rem .75rem;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:all .2s}
+.p-btn:hover,.p-btn.on{border-color:var(--green);color:var(--black);background:var(--green)}
+.sort-row{display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.sort-label{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.sort-btn{background:transparent;border:1px solid #1a1a1a;color:var(--muted);padding:.35rem .75rem;font-size:.68rem;font-weight:700;cursor:pointer;border-radius:2px;transition:all .2s}
+.sort-btn.on,.sort-btn:hover{border-color:var(--green);color:var(--green)}
+.adv-toggle{margin-top:1rem;background:transparent;border:1px solid #1a1a1a;color:var(--muted);padding:.45rem .9rem;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s}
+.adv-toggle:hover{border-color:var(--green);color:var(--green)}
+.adv-panel{display:none;flex-wrap:wrap;gap:.9rem;margin-top:1rem;padding:1.1rem;background:#0a0a0a;border:1px solid #1a1a1a;border-radius:3px;align-items:flex-end}
+.adv-panel.open{display:flex}
+.adv-field{display:flex;flex-direction:column;gap:.35rem}
+.adv-field label{font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.adv-field select{background:#0d0d0d;border:1px solid #222;color:var(--white,#f4f4ef);padding:.5rem .7rem;font-size:.78rem;border-radius:2px;cursor:pointer;min-width:130px;font-family:inherit}
+.adv-field select:focus{outline:none;border-color:var(--green)}
+.adv-clear{background:transparent;border:1px solid #2a2a2a;color:var(--muted);padding:.5rem .9rem;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:2px;height:fit-content}
+.adv-clear:hover{border-color:#f87171;color:#f87171}
+.saved-row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.9rem}
+.saved-sel{background:#0d0d0d;border:1px solid #222;color:var(--white,#f4f4ef);padding:.45rem .7rem;font-size:.72rem;border-radius:2px;cursor:pointer;font-family:inherit}
+.saved-sel:focus{outline:none;border-color:var(--green)}
+.bolsa-count{margin-top:1rem;font-size:.72rem;color:var(--muted);font-weight:600}
+.bolsa-inner{padding:0 1.5rem 3rem}
+@media(min-width:768px){.bolsa-inner{padding:0 4rem 4rem}}
+.c-grid{display:grid;gap:1px;background:#161616;grid-template-columns:1fr}
+@media(min-width:520px){.c-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:900px){.c-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1200px){.c-grid{grid-template-columns:repeat(4,1fr)}}
+.c-card{background:var(--black);padding:1.5rem;display:flex;flex-direction:column;transition:background .2s}
+.c-card:hover{background:#0d0d0d}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem}
+.card-av{width:48px;height:48px;min-width:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;border:2px solid #222;overflow:hidden;position:relative}
+.card-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.card-badge{font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .5rem;border-radius:2px}
+.badge-top{background:#1a2a00;color:var(--green);border:1px solid #2a4000}
+.card-top-r{display:flex;align-items:center;gap:.4rem}
+.fav-btn{background:none;border:none;cursor:pointer;font-size:1.15rem;line-height:1;color:#555;padding:0;transition:color .15s,transform .15s}
+.fav-btn:hover{color:#888;transform:scale(1.15)}
+.fav-btn.on{color:var(--green)}
+.cmp-btn{background:none;border:none;cursor:pointer;font-size:1rem;line-height:1;color:#555;padding:0;transition:color .15s,transform .15s}
+.cmp-btn:hover{color:#888;transform:scale(1.15)}
+.cmp-btn.on{color:var(--green)}
+#compareBar{position:fixed;left:50%;transform:translateX(-50%);bottom:1rem;z-index:350;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:4px;box-shadow:0 8px 30px -6px #000;display:none;align-items:center;gap:.9rem;padding:.6rem .9rem;max-width:92vw}
+#compareBar.show{display:flex}
+.cmp-bar-txt{font-size:.78rem;color:var(--muted,#999);font-weight:700}
+.cmp-bar-txt b{color:#fff}
+.cmp-bar-go{background:var(--green);color:#000;border:none;font-weight:900;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:.55rem .9rem;border-radius:2px;cursor:pointer}
+.cmp-bar-go:disabled{opacity:.4;cursor:not-allowed}
+.cmp-bar-clear{background:none;border:none;color:var(--muted,#999);font-size:.72rem;cursor:pointer;text-decoration:underline}
+.cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cmp-table{border-collapse:collapse;width:100%;min-width:380px;font-size:.8rem}
+.cmp-table th,.cmp-table td{border-bottom:1px solid #1a1a1a;padding:.55rem .65rem;text-align:left;vertical-align:middle}
+.cmp-table th.cmp-lbl{color:var(--muted,#999);font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:.64rem;white-space:nowrap}
+.cmp-head{display:flex;flex-direction:column;align-items:center;gap:.35rem;text-align:center}
+.cmp-av{width:44px;height:44px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:900;border:2px solid #222;position:relative}
+.cmp-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cmp-name{font-weight:900;font-size:.78rem;line-height:1.1}
+.cmp-best{color:var(--green);font-weight:900}
+.cmp-conn{background:var(--green);color:#000;border:none;font-weight:900;font-size:.62rem;letter-spacing:.05em;text-transform:uppercase;padding:.45rem .5rem;border-radius:2px;cursor:pointer;width:100%}
+.card-rating{font-size:.72rem;font-weight:800;color:#f5b301;margin:-.4rem 0 .5rem;letter-spacing:.02em}
+.card-rating span{color:var(--muted,#777);font-weight:600}
+.card-reps{display:flex;flex-wrap:wrap;gap:.3rem;margin:.1rem 0 .4rem}
+.c-rep{font-size:.62rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:.25rem .55rem;border-radius:2px;display:inline-flex;align-items:center;gap:.25rem}
+.c-rep.camp{background:#2a2200;color:#f5d312;border:1px solid #5a4a00;box-shadow:0 0 0 1px #4a3c0055,0 2px 8px -2px #f5d31233}
+.c-rep.top{background:#2a1a00;color:#f5a301;border:1px solid #4a2e00}
+.c-rep.pet{background:#1a0a2a;color:#c084fc;border:1px solid #3a1a5a}
+.badge-new{background:#1a0a2a;color:var(--purple);border:1px solid #3a1a5a}
+.card-name{font-size:.92rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.2rem}
+.card-niche{font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:.875rem}
+.card-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem;padding:.875rem 0;border-top:1px solid #1a1a1a;border-bottom:1px solid #1a1a1a}
+.cs{text-align:center}
+.cs strong{display:block;font-size:.9rem;font-weight:900}
+.cs span{font-size:.6rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:.15rem}
+.card-tags{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:1.1rem}
+.c-tag{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.22rem .5rem;border:1px solid #222;color:var(--muted);border-radius:2px}
+.card-plats{display:flex;gap:.4rem;margin-bottom:1.25rem}
+.plat{font-size:.62rem;font-weight:700;padding:.2rem .5rem;border-radius:20px;background:#1a1a1a;color:var(--muted2)}
+.card-btn{width:100%;background:var(--green);color:var(--black);border:none;padding:.7rem;font-weight:900;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .2s;margin-top:auto}
+.card-btn:hover{opacity:.85}
+.empty-state{grid-column:1/-1;padding:4rem 2rem;text-align:center;color:var(--muted)}
+.empty-state div{font-size:2rem;margin-bottom:1rem}
+.loading-bolsa{grid-column:1/-1;padding:4rem;text-align:center;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:1rem}
+.spin{width:32px;height:32px;border:2px solid #222;border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:400;align-items:center;justify-content:center;padding:1rem}
+.modal-bg.open{display:flex}
+.modal{background:var(--g1);border:1px solid #222;padding:2rem;width:100%;max-width:440px;position:relative;max-height:90vh;overflow-y:auto;border-radius:3px}
+.modal-x{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;font-weight:900;line-height:1;padding:4px}
+.modal-x:hover{color:var(--white)}
+.m-tag{font-size:.62rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--green);margin-bottom:.6rem}
+.m-title{font-size:1.2rem;font-weight:900;text-transform:uppercase;margin-bottom:.4rem}
+.m-sub{font-size:.82rem;color:var(--muted2);margin-bottom:1.5rem;line-height:1.5}
+.m-preview{display:flex;align-items:center;gap:.875rem;padding:1rem;background:#0d0d0d;border:1px solid #222;margin-bottom:1.25rem;border-radius:2px}
+.m-av{width:44px;height:44px;min-width:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.95rem;border:2px solid #222;overflow:hidden;position:relative}
+.m-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.m-name{font-weight:900;font-size:.88rem;text-transform:uppercase}
+.m-niche{font-size:.68rem;font-weight:700;letter-spacing:.1em;margin-top:.15rem}
+.m-price{display:flex;justify-content:space-between;align-items:center;padding:.875rem 0;border-top:1px solid #222;border-bottom:1px solid #222;margin-bottom:1.25rem}
+.m-price-label{font-size:.72rem;color:var(--muted);font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.m-price-val{font-size:1.6rem;font-weight:900;color:var(--green)}
+.m-pay-btn{width:100%;background:var(--green);color:var(--black);border:none;padding:.9rem;font-weight:900;font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;margin-top:.875rem;border-radius:2px;transition:opacity .2s}
+.m-pay-btn:hover{opacity:.85}
+.m-bio{font-size:.8rem;color:var(--muted2);line-height:1.6;margin-bottom:1rem;padding:.875rem;background:#0d0d0d;border:1px solid #1a1a1a;border-radius:2px}
+.m-fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-bottom:1rem}
+.m-videos{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;margin-bottom:1rem}
+.m-videos video{width:100%;aspect-ratio:9/16;object-fit:cover;background:#000;border-radius:4px;display:block}
+.m-foto{display:block;aspect-ratio:1;border-radius:2px;overflow:hidden;border:1px solid #1a1a1a;cursor:pointer;transition:border-color .2s}
+.m-foto:hover{border-color:var(--green)}
+.m-foto img{width:100%;height:100%;object-fit:cover;display:block}
+.m-rating{font-size:.95rem;font-weight:800;color:#f5b301;margin-bottom:.875rem}
+.m-rating span{color:var(--muted2);font-size:.78rem;font-weight:600}
+.m-resenas-t{font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin:.25rem 0 .6rem}
+.m-resena{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:2px;padding:.7rem .8rem;margin-bottom:.5rem}
+.m-resena-top{display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem}
+.m-resena-stars{color:#f5b301;font-size:.8rem;letter-spacing:.05em}
+.m-resena-who{font-size:.7rem;font-weight:700;color:var(--muted2)}
+.m-resena p{margin:0;font-size:.78rem;color:var(--muted2);line-height:1.5}
+/* LIGHTBOX */
+.lightbox{display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.94);align-items:center;justify-content:center;padding:2rem}
+.lightbox.open{display:flex}
+.lightbox img{max-width:92vw;max-height:84vh;object-fit:contain;border-radius:3px;box-shadow:0 10px 60px rgba(0,0,0,.6)}
+.lb-x{position:absolute;top:1.1rem;right:1.25rem;background:none;border:none;color:#fff;font-size:1.7rem;cursor:pointer;line-height:1;z-index:2}
+.lb-count{position:absolute;top:1.3rem;left:1.25rem;color:#999;font-size:.8rem;font-weight:700;letter-spacing:.08em}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;width:46px;height:46px;border-radius:50%;font-size:1.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;padding-bottom:3px}
+.lb-nav:hover{background:rgba(255,255,255,.18)}
+.lb-prev{left:1rem}.lb-next{right:1rem}
+@media(max-width:600px){.lb-nav{width:40px;height:40px;font-size:1.4rem}}
+.success-m{display:none;text-align:center;padding:.5rem 0}
+.sm-ic{font-size:2.5rem;margin-bottom:.875rem}
+.sm-title{font-size:1.1rem;font-weight:900;text-transform:uppercase;color:var(--green);margin-bottom:.4rem}
+.sm-sub{font-size:.82rem;color:var(--muted2);margin-bottom:1.5rem;line-height:1.5}
+.contact-box{background:#0d0d0d;border:1px solid #222;padding:1rem;text-align:left;border-radius:2px}
+.c-item{display:flex;align-items:center;gap:.625rem;padding:.45rem 0;border-bottom:1px solid #1a1a1a;font-size:.8rem}
+.c-item:last-child{border:none}
+.c-ic{color:var(--green);width:18px;text-align:center}
+.c-key{color:var(--muted);width:70px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.c-val{color:var(--white);font-weight:600;font-size:.8rem;word-break:break-all}
+
+.card-fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem;margin:.55rem 0 .15rem;cursor:pointer}
+.cf-thumb{position:relative;aspect-ratio:1;border-radius:3px;overflow:hidden;background:#111;border:1px solid #222}
+.cf-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.cf-more{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff;font-weight:800}
+
+.cart-btn{background:none;border:1px solid #2a2a2a;border-radius:3px;color:var(--muted);cursor:pointer;font-size:.85rem;padding:2px 5px;line-height:1}
+.cart-btn.on{border-color:var(--green);background:#0a1a0a}
+.cart-fab{position:fixed;bottom:1.2rem;right:1.2rem;z-index:350;background:var(--green);color:#080808;border:none;border-radius:40px;padding:.8rem 1.2rem;font-weight:800;font-size:.9rem;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.5);align-items:center;gap:.4rem}
+.cart-row{display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px solid #1a1a1a;font-size:.88rem}
+.cart-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;font-weight:800}
+     
+     
+/* GATE MODAL */
+.gate-modal{background:var(--g1);border:1px solid #222;padding:2rem;width:100%;max-width:420px;position:relative;border-radius:3px;text-align:center}
+.gate-icon{font-size:2rem;margin-bottom:1rem}
+.gate-tag{font-size:.62rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--green);margin-bottom:.5rem}
+.gate-title{font-size:1.2rem;font-weight:900;text-transform:uppercase;margin-bottom:.625rem}
+.gate-sub{font-size:.82rem;color:var(--muted2);line-height:1.6;margin-bottom:1.75rem}
+.gate-opts{display:flex;flex-direction:column;gap:.625rem}
+
+/* LIGA RANKING */
+.lr-list{display:flex;flex-direction:column;gap:1px;background:#1a1a2a;border:1px solid #1a1a2a;border-radius:3px;overflow:hidden}
+.lr-row{background:#09090e;padding:.9rem 1.1rem;display:flex;align-items:center;gap:.875rem;transition:background .2s}
+.lr-row:hover{background:#0f0f18}
+.lr-pos{font-size:1.05rem;font-weight:900;min-width:30px;text-align:center}
+.lr-av{width:34px;height:34px;min-width:34px;border-radius:50%;background:#1a1a2a;border:1.5px solid #2a2a40;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.72rem;color:var(--purple);overflow:hidden}
+.lr-av img{width:100%;height:100%;object-fit:cover}
+.lr-name{flex:1;font-size:.85rem;font-weight:700;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lr-stat{font-size:.72rem;color:var(--amber);font-weight:700;white-space:nowrap}
+
+/* FOOTER */
+footer{border-top:1px solid #161616;padding:2.5rem 1.5rem;display:flex;flex-direction:column;gap:1.5rem}
+@media(min-width:768px){footer{flex-direction:row;justify-content:space-between;align-items:center;padding:2.5rem 4rem}}
+.f-logo{font-size:1rem;font-weight:900;letter-spacing:.18em;color:var(--green);cursor:pointer}
+.f-tag{font-size:.72rem;color:var(--muted);margin-top:.25rem}
+.f-copy{font-size:.68rem;color:#333;margin-top:.5rem}
+.f-links{display:flex;gap:1.25rem;flex-wrap:wrap}
+.f-links a{font-size:.72rem;color:var(--muted);text-decoration:none;font-weight:700;letter-spacing:.08em;text-transform:uppercase;transition:color .2s;cursor:pointer}
+.f-links a:hover{color:var(--green)}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:600;padding:.75rem 1.1rem;border-radius:3px;font-size:.75rem;font-weight:700;display:none;align-items:center;gap:.5rem;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:280px}
+.toast.show{display:flex}
+.toast.ok{background:#0f1a00;border:1px solid #2a4000;color:var(--green)}
+.toast.err{background:#1a0000;border:1px solid #2a0000;color:var(--red)}
+.toast.info{background:#0a1020;border:1px solid #1a2a40;color:var(--blue)}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  #hero{grid-template-columns:1fr;grid-template-rows:auto auto}
+  .vs-badge{display:none}
+  .half{min-height:52vh;padding:2.5rem 1.25rem 2rem;justify-content:flex-end}
+  .half.marca{border-right:none;border-bottom:1px solid #1a1a1a}
+  .h-title{font-size:clamp(1.7rem,7vw,2.5rem)}
+  .h-proof{gap:1rem;margin-top:1.5rem;padding-top:1.25rem}
+  .proof-n{font-size:1.1rem}
+}
+@media(max-width:768px){
+  .nav-center{display:none}
+  .ham{display:flex}
+  .nav-cta{display:none}
+  .nav-account{display:none}
+}
+@media(min-width:769px){
+  .ham{display:none!important}
+  .mob-menu{display:none!important}
+  .nav-center{display:flex}
+}
+</style>
+</head>
+<body>
+
+<!-- AVISO TEMPORAL — desperfectos técnicos (quitar cuando vuelva el servicio) -->
+<div id="statusBar" style="position:fixed;left:0;right:0;bottom:0;z-index:360;background:#1a1407;border-top:1px solid #4d3a0a;color:#ffd98a;padding:.7rem 1rem;font-size:.82rem;display:flex;align-items:center;justify-content:center;gap:.9rem;text-align:center;line-height:1.45;flex-wrap:wrap">
+  <span>🛠️ Estamos con unos ajustes técnicos y puede que algo no ande del todo por unos días. Ya lo estamos resolviendo — gracias por bancarnos.</span>
+  <button onclick="document.getElementById('statusBar').style.display='none'" style="background:none;border:1px solid #6b5212;color:#ffd98a;border-radius:4px;padding:.25rem .6rem;cursor:pointer;font-size:.75rem;white-space:nowrap">Entendido ✕</button>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#" onclick="showPage('landing')">TRAMA.</a>
+  <ul class="nav-center">
+    <li><a href="#como" onclick="showPage('landing')">Cómo funciona</a></li>
+    <li><a href="#marcas" onclick="showPage('landing')">Marcas</a></li>
+    <li><a href="#creators" onclick="showPage('landing')">Creators</a></li>
+    <li><a href="./oportunidades.html">Campañas 📋</a></li>
+    <li><a href="#liga" onclick="showPage('landing')">Liga 🔥</a></li>
+  </ul>
+  <div class="nav-right">
+    <a class="nav-cta" href="#" onclick="checkAndShowBolsa()">🔍 Encontrá tu creator</a>
+    <a class="nav-account" href="./perfil.html"><span class="dot"></span>Mi perfil</a>
+    <button class="ham" id="hamBtn" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mob-menu" id="mobMenu">
+  <div class="mob-group-label">Explorar</div>
+  <a href="#como" onclick="showPage('landing');closeMenu()">Cómo funciona</a>
+  <a href="#marcas" onclick="showPage('landing');closeMenu()">Para marcas</a>
+  <a href="#creators" onclick="showPage('landing');closeMenu()">Para creators</a>
+  <a href="./oportunidades.html">Campañas abiertas 📋</a>
+  <a href="#liga" onclick="showPage('landing');closeMenu()">Liga 🔥</a>
+  <a href="#" onclick="checkAndShowBolsa();closeMenu()">Encontrá tu creator</a>
+  <div class="mob-group-label">Tu cuenta</div>
+  <a class="mob-pill" href="./perfil.html">Mi perfil →</a>
+  <a class="mob-pill purple" href="./registro.html">Soy creator →</a>
+  <a class="mob-pill" href="./marcas.html" style="background:#222;color:#fff">Soy marca →</a>
+</div>
+
+<!-- LANDING -->
+<div class="page active" id="page-landing">
+  <div id="hero">
+    <div class="half marca" onclick="window.location.href='./marcas.html'">
+      <div class="half-glow"></div>
+      <div class="h-tag">Para marcas</div>
+      <h2 class="h-title">Encontrá el creator que tu marca <em>necesita.</em></h2>
+      <p class="h-copy">Tenemos una red verificada con datos reales. <strong>Vos elegís, nosotros conectamos.</strong></p>
+      <a href="./marcas.html" class="h-btn btn-g" onclick="event.stopPropagation()">Soy marca →</a>
+      <div class="h-proof">
+        <div><div class="proof-n">+130</div><div class="proof-l">Creators verificados</div></div>
+        <div><div class="proof-n">1 a 1</div><div class="proof-l">Verificados a mano</div></div>
+        <div><div class="proof-n">Directo</div><div class="proof-l">Hablás sin intermediarios</div></div>
+      </div>
+    </div>
+    <div class="vs-badge">VS</div>
+    <div class="half creator" onclick="window.location.href='./registro.html'">
+      <div class="half-glow"></div>
+      <div class="h-tag" style="color:var(--purple)">Para creators</div>
+      <h2 class="h-title">Convertí tu audiencia en tu <em>trabajo.</em></h2>
+      <p class="h-copy">Cargá tu perfil y accedé a marcas que <strong>buscan exactamente lo que vos tenés.</strong></p>
+      <a href="./registro.html" class="h-btn btn-p" onclick="event.stopPropagation()">Soy creator →</a>
+      <div class="h-proof">
+        <div><div class="proof-n">$0</div><div class="proof-l">Para registrarte</div></div>
+        <div><div class="proof-n">0%</div><div class="proof-l">Comisión sobre tu tarifa</div></div>
+        <div><div class="proof-n">Vos</div><div class="proof-l">Ponés tu precio</div></div>
+      </div>
+    </div>
+  </div>
+
+  <section id="como">
+    <div class="s-tag">El proceso</div>
+    <div class="s-line"></div>
+    <h2 class="s-h2">Sin vueltas.<br>Así funciona.</h2>
+    <p class="s-sub">Cuatro pasos, de registrarte a tener el contacto.</p>
+    <div class="como-grid">
+      <div class="como-card"><div class="como-num">01</div><div class="como-icon">🙌</div><div class="como-title">Sumate gratis</div><div class="como-desc">Los creadores arman su perfil sin costo. Las marcas crean su cuenta. Empezar no cuesta nada.</div></div>
+      <div class="como-card"><div class="como-num">02</div><div class="como-icon">✅</div><div class="como-title">Verificamos</div><div class="como-desc">Revisamos cada perfil a mano antes de publicarlo en la bolsa. Nada de bots ni cuentas infladas.</div></div>
+      <div class="como-card"><div class="como-num">03</div><div class="como-icon">🔍</div><div class="como-title">Conectan</div><div class="como-desc">La marca busca en la bolsa, encuentra al creador que encaja y desbloquea su contacto. Hablan directo.</div></div>
+      <div class="como-card"><div class="como-num">04</div><div class="como-icon">🤝</div><div class="como-title">Trabajan</div><div class="como-desc">Arreglan la colaboración y la tarifa entre ellos. TRAMA. no se queda con tu plata ni cobra comisión al creador.</div></div>
+    </div>
+  </section>
+
+  <section id="marcas">
+    <div class="two-col">
+      <div>
+        <div class="s-tag">Para marcas</div>
+        <div class="s-line"></div>
+        <h2 class="s-h2">Dejá de buscar.<br>Empezá a conectar.</h2>
+        <p class="s-sub">En 48 horas tenés opciones reales sobre la mesa.</p>
+        <div class="feats">
+          <div class="feat"><div class="feat-ic">⚡</div><div><h4>Red verificada</h4><p>Todos los creators pasaron por un proceso de validación de TRAMA. Métricas reales, audiencias reales.</p></div></div>
+          <div class="feat"><div class="feat-ic">🎨</div><div><h4>Estrategia incluida</h4><p>Te acompañamos en el brief, la negociación y el seguimiento. No sos un ticket de soporte.</p></div></div>
+          <div class="feat"><div class="feat-ic">📊</div><div><h4>Resultados medibles</h4><p>KPIs claros desde el inicio. Al final sabés exactamente qué funcionó y por qué.</p></div></div>
+        </div>
+      </div>
+      <div class="cta-box">
+        <div class="cta-tag">Empezá ahora</div>
+        <h3 class="cta-h">Contanos qué necesitás</h3>
+        <p class="cta-p">Sin compromiso. Entendemos tu proyecto y te proponemos un camino.</p>
+        <a href="./marcas.html" class="btn-solid">Registrarme como marca →</a>
+        <a href="./campanas.html" class="btn-out" style="margin-top:.5rem">📋 Publicá tu campaña gratis →</a>
+        <a href="https://wa.me/541157976633?text=Hola%20TRAMA.%2C%20quiero%20saber%20m%C3%A1s%20sobre%20c%C3%B3mo%20trabajar%20con%20creators" class="btn-out" style="margin-top:.5rem" target="_blank">Hablar con el equipo →</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="creators" style="background:#09090e">
+    <div class="two-col">
+      <div class="c-vis" id="creVis">
+        <div style="padding:1.5rem;text-align:center;color:var(--muted)"><div class="spin" style="margin:0 auto .5rem"></div>Cargando creators reales…</div>
+      </div>
+      <div>
+        <div class="s-tag" style="color:var(--purple)">Para creators</div>
+        <div class="s-line" style="background:var(--purple)"></div>
+        <h2 class="s-h2">Tu contenido vale.<br>Que te paguen por eso.</h2>
+        <p class="s-sub">En TRAMA. no sos un número. Sos un perfil verificado que las marcas encuentran y contactan directo.</p>
+        <div class="feats">
+          <div class="feat"><div class="feat-ic" style="background:#1a0a2a;border-color:#3a1a5a">✨</div><div><h4>Registrate gratis</h4><p>Cargás tu perfil y quedás visible para las marcas de la red.</p></div></div>
+          <div class="feat"><div class="feat-ic" style="background:#1a0a2a;border-color:#3a1a5a">💬</div><div><h4>Campañas abiertas</h4><p>Las marcas publican sus briefs y vos te postulás a las que van con tu nicho. Propuestas reales, no spam.</p></div></div>
+          <div class="feat"><div class="feat-ic" style="background:#1a0a2a;border-color:#3a1a5a">💸</div><div><h4>0% de comisión</h4><p>Vos ponés tu tarifa y la arreglás directo con la marca. TRAMA. no te cobra comisión por tu trabajo.</p></div></div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.75rem">
+          <a href="./registro.html" class="h-btn btn-p" style="display:inline-flex">Subir mi perfil →</a>
+          <a href="./oportunidades.html" class="h-btn" style="display:inline-flex;border:1px solid #3a1a5a;color:var(--purple)">📋 Ver campañas abiertas →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="liga" style="background:#0a0a0a">
+    <div class="s-tag">Liga TRAMA. 🔥</div>
+    <div class="s-line"></div>
+    <h2 class="s-h2">No es solo estar.<br>Es competir.</h2>
+    <p class="s-sub">Cada día una misión. Los creadores más constantes suben en la bolsa, y el #1 del mes se corona campeón. Así se premia a los que de verdad crean.</p>
+    <div class="como-grid" style="margin-bottom:3rem">
+      <div class="como-card"><div class="como-num">01</div><div class="como-icon">🎯</div><div class="como-title">Misión diaria</div><div class="como-desc">Retos creativos, trivias y tendencias que cambian cada semana. Entrás, cumplís y sumás puntos.</div></div>
+      <div class="como-card"><div class="como-num">02</div><div class="como-icon">🔥</div><div class="como-title">Racha que pesa</div><div class="como-desc">Días seguidos suman más índice y te suben en la bolsa. Si cortás la racha, bajás.</div></div>
+      <div class="como-card"><div class="como-num">03</div><div class="como-icon">👑</div><div class="como-title">Campeón del mes</div><div class="como-desc">El #1 se corona, suma el doble el mes siguiente y arranca con ventaja. Todos quieren destronarlo.</div></div>
+      <div class="como-card"><div class="como-num">04</div><div class="como-icon">📬</div><div class="como-title">Agenda semanal</div><div class="como-desc">Cada lunes te llega por mail la agenda de desafíos de la semana. Sin excusas para no jugar.</div></div>
+    </div>
+    <div class="two-col" style="align-items:start">
+      <div>
+        <div class="s-tag" style="color:var(--purple)">Ranking en vivo</div>
+        <div class="s-line" style="background:var(--purple)"></div>
+        <div class="lr-list" id="ligaRanking"><div style="padding:2rem;text-align:center"><div class="spin" style="margin:0 auto"></div></div></div>
+      </div>
+      <div class="cta-box">
+        <div class="cta-tag">Para creators</div>
+        <h3 class="cta-h">Entrá a la Liga</h3>
+        <p class="cta-p">Registrate, cargá tu perfil y empezá a sumar desde hoy. Cuanto más constante, más te ven las marcas.</p>
+        <a href="./registro.html" class="btn-solid">Sumarme a la Liga →</a>
+        <a href="./perfil.html" class="btn-out" style="margin-top:.5rem">Ya tengo cuenta →</a>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="s-tag">Historias reales</div>
+    <div class="s-line"></div>
+    <h2 class="s-h2">Lo dicen ellos,<br>no nosotros.</h2>
+    <p class="s-sub">Personas con las que laburamos de verdad.</p>
+    <div class="test-grid">
+      <div class="t-card"><p class="t-quote">"Llevábamos meses buscando. TRAMA. nos presentó tres perfiles en dos días. <strong>La campaña superó todas las expectativas.</strong>"</p><div class="t-author"><div class="t-av" style="background:#1a2a0a;color:var(--green)">MG</div><div><div class="t-name">Marcela G.</div><div class="t-role">Brand Manager · Consumo masivo</div></div></div></div>
+      <div class="t-card"><p class="t-quote">"Antes las colaboraciones llegaban sueltas y a veces no cobraba bien. Ahora tengo <strong>propuestas que tienen sentido y el pago siempre en tiempo.</strong>"</p><div class="t-author"><div class="t-av" style="background:#1a0a2a;color:var(--purple)">RP</div><div><div class="t-name">Rodrigo P.</div><div class="t-role">Creator · Tech & Lifestyle · 380K</div></div></div></div>
+      <div class="t-card"><p class="t-quote">"Lo que más valoro es que no son intermediarios pasivos. <strong>Estuvieron en todo el proceso</strong>, desde el brief hasta la revisión de resultados."</p><div class="t-author"><div class="t-av" style="background:#0a1a2a;color:var(--blue)">VC</div><div><div class="t-name">Valeria C.</div><div class="t-role">Directora Comercial · Indumentaria</div></div></div></div>
+    </div>
+  </section>
+
+  <div style="border-top:1px solid #161616;padding:2rem 1.5rem" id="nichos-seo">
+    <div style="max-width:1100px;margin:0 auto">
+      <div style="font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted,#666);margin-bottom:1rem">Creadores por nicho</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem">
+        <a href="./creadores-ugc-lifestyle.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Lifestyle</a>
+        <a href="./creadores-ugc-belleza.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Belleza</a>
+        <a href="./creadores-ugc-moda.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Moda</a>
+        <a href="./creadores-ugc-gastronomia.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Gastronomía</a>
+        <a href="./creadores-ugc-humor.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Humor</a>
+        <a href="./creadores-ugc-viajes.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Viajes</a>
+        <a href="./creadores-ugc-fitness.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Fitness</a>
+        <a href="./creadores-ugc-tech.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Tech</a>
+        <a href="./creadores-ugc-musica.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Música</a>
+        <a href="./creadores-ugc-gaming.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Gaming</a>
+        <a href="./creadores-ugc-fotografia.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Fotografía</a>
+        <a href="./creadores-ugc-educacion.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Educación</a>
+        <a href="./creadores-ugc-mascotas.html" style="font-size:.78rem;color:var(--purple,#c084fc);border:1px solid #3a1a5a;padding:.35rem .7rem;border-radius:2px">🐾 Mascotas</a>
+      </div>
+      <div style="font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted,#666);margin:1.5rem 0 1rem">Creadores por ciudad</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem">
+        <a href="./creadores-ugc-buenos-aires.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Buenos Aires</a>
+        <a href="./creadores-ugc-cordoba.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Córdoba</a>
+        <a href="./creadores-ugc-rosario.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Rosario</a>
+        <a href="./creadores-ugc-mendoza.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Mendoza</a>
+        <a href="./creadores-ugc-mar-del-plata.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">Mar del Plata</a>
+        <a href="./creadores-ugc-la-plata.html" style="font-size:.78rem;color:var(--muted2,#999);border:1px solid #1e1e1e;padding:.35rem .7rem;border-radius:2px">La Plata</a>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div>
+      <div class="f-logo" onclick="showPage('landing')">TRAMA.</div>
+      <div class="f-tag">Conectamos marcas con creators que mueven.</div>
+      <div class="f-copy">© 2025 TRAMA. Buenos Aires, Argentina.</div>
+    </div>
+    <div class="f-links">
+      <a href="#como" onclick="showPage('landing')">Cómo funciona</a>
+      <a href="#marcas" onclick="showPage('landing')">Marcas</a>
+      <a href="#" onclick="checkAndShowBolsa()">Encontrá tu creator</a>
+      <a href="#liga" onclick="showPage('landing')">Liga</a>
+      <a href="./registro.html">Creators</a>
+      <a href="./oportunidades.html">Campañas</a>
+      <a href="./campanas.html">Publicar campaña</a>
+      <a href="./guias.html">Guías</a>
+      <a href="./informe-ugc-argentina-2026.html">Informe UGC 2026</a>
+      <a href="./perfil.html">Mi perfil</a>
+      <a href="./terminos.html">Términos y privacidad</a>
+    </div>
+  </footer>
+</div>
+
+<!-- BOLSA -->
+<div class="page" id="page-bolsa">
+  <div class="bolsa-top">
+    <div class="s-tag">Bolsa de perfiles · TRAMA.</div>
+    <div class="s-line"></div>
+    <h2 class="s-h2">Encontrá tu creator</h2>
+    <p class="s-sub" style="margin-bottom:1.5rem">Solo mostramos creators aprobados por el equipo TRAMA. Datos verificados, sin humo.</p>
+    <div class="search-bar">
+      <input class="search-input" id="searchInp" type="text" placeholder="Buscar por nombre, nicho o palabra clave..." oninput="renderBolsa()">
+      <button class="search-btn" onclick="renderBolsa()">Buscar</button>
+    </div>
+    <div class="filters" id="nicheFilters"></div>
+    <div class="plat-filters" id="platFilters"></div>
+    <div class="sort-row">
+      <span class="sort-label">Ordenar:</span>
+      <button class="sort-btn on" onclick="setSort('liga',this)">🔥 Liga</button>
+      <button class="sort-btn" onclick="setSort('seg',this)">Mayor audiencia</button>
+      <button class="sort-btn" onclick="setSort('er',this)">Mejor engagement</button>
+      <button class="sort-btn" onclick="setSort('rating',this)">Mejor valorados</button>
+      <button class="sort-btn" onclick="setSort('nombre',this)">A-Z</button>
+    </div>
+    <button class="adv-toggle" id="advToggle" onclick="toggleAdv()">⚙ Filtros avanzados <span id="advChevron">⌄</span></button>
+    <div class="adv-panel" id="advPanel">
+      <div class="adv-field">
+        <label>Ciudad</label>
+        <select id="fCity" onchange="renderBolsa()"><option value="todas">Todas</option></select>
+      </div>
+      <div class="adv-field">
+        <label>Seguidores</label>
+        <select id="fSeg" onchange="renderBolsa()">
+          <option value="0">Cualquiera</option>
+          <option value="1000">1K+</option>
+          <option value="10000">10K+</option>
+          <option value="50000">50K+</option>
+          <option value="100000">100K+</option>
+        </select>
+      </div>
+      <div class="adv-field">
+        <label>Engagement</label>
+        <select id="fEr" onchange="renderBolsa()">
+          <option value="0">Cualquiera</option>
+          <option value="2">2%+</option>
+          <option value="4">4%+</option>
+          <option value="6">6%+</option>
+        </select>
+      </div>
+      <div class="adv-field">
+        <label>Tarifa reel máx. (ARS)</label>
+        <select id="fTarifa" onchange="renderBolsa()">
+          <option value="0">Cualquiera</option>
+          <option value="5000">Hasta $5.000</option>
+          <option value="15000">Hasta $15.000</option>
+          <option value="30000">Hasta $30.000</option>
+        </select>
+      </div>
+      <div class="adv-field">
+        <label>Valoración</label>
+        <select id="fRating" onchange="renderBolsa()">
+          <option value="0">Cualquiera</option>
+          <option value="1">Con reseñas</option>
+          <option value="4">4★ o más</option>
+        </select>
+      </div>
+      <div class="adv-field">
+        <label>🐾 Mascotas</label>
+        <select id="fPet" onchange="renderBolsa()">
+          <option value="todos">Todos</option>
+          <option value="pet">Solo pet creators</option>
+          <option value="no">Sin mascotas</option>
+        </select>
+      </div>
+      <button class="adv-clear" onclick="limpiarFiltros()">Limpiar filtros</button>
+    </div>
+    <div class="saved-row" id="savedRow">
+      <button class="adv-toggle" style="margin-top:0" onclick="guardarBusqueda()">💾 Guardar búsqueda</button>
+      <select class="saved-sel" id="savedSel" onchange="aplicarGuardada(this.value)"><option value="">Mis búsquedas guardadas…</option></select>
+      <button class="adv-clear" id="delSaved" onclick="borrarGuardada()" style="display:none">✕ Borrar</button>
+    </div>
+    <div class="bolsa-count" id="bolsaCount"></div>
+  </div>
+  <div class="bolsa-inner">
+    <div id="visitorCta" style="display:none;background:#0f1500;border:1px solid #2a4000;border-radius:4px;padding:.9rem 1.1rem;margin-bottom:1.1rem;display:none;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+      <span style="font-size:.82rem;color:var(--white,#f4f4ef)">Estás mirando como visitante. <strong>Registrate gratis</strong> para guardar búsquedas y contactar creadores.</span>
+      <a href="./registro.html" style="background:var(--green);color:#000;font-weight:900;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;padding:.55rem .9rem;border-radius:2px;text-decoration:none;white-space:nowrap">Registrarme →</a>
+    </div>
+    <div class="c-grid" id="cGrid">
+      <div class="loading-bolsa"><div class="spin"></div><span>Cargando creators...</span></div>
+    </div>
+  </div>
+  <footer>
+    <div>
+      <div class="f-logo" onclick="showPage('landing')">TRAMA.</div>
+      <div class="f-copy">© 2025 TRAMA. Buenos Aires, Argentina.</div>
+    </div>
+    <div class="f-links">
+      <a href="#" onclick="showPage('landing')">Inicio</a>
+      <a href="./registro.html">Soy creator</a>
+      <a href="./perfil.html">Mi perfil</a>
+      <a href="./terminos.html">Términos y privacidad</a>
+    </div>
+  </footer>
+</div>
+
+<!-- MODAL GATE -->
+<div class="modal-bg" id="gateModal">
+  <div class="gate-modal">
+    <button class="modal-x" onclick="closeGate()">✕</button>
+    <div class="gate-icon">🔒</div>
+    <div class="gate-tag">Acceso exclusivo · TRAMA.</div>
+    <h3 class="gate-title">Registrate para ver los perfiles</h3>
+    <p class="gate-sub">Nuestra bolsa de creators es exclusiva para marcas registradas. Es gratis y tarda menos de 2 minutos.</p>
+    <div class="gate-opts">
+      <a href="./perfil.html" style="display:block;background:var(--green);color:var(--black);padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none;text-align:center">Registrarme como marca →</a>
+      <a href="./perfil.html" style="display:block;background:transparent;color:var(--purple);border:1.5px solid var(--purple);padding:.875rem;font-weight:900;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;text-decoration:none;text-align:center">Soy creator →</a>
+      <button onclick="closeGate()" style="background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;margin-top:.25rem">Seguir explorando</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONTACTO -->
+<div class="modal-bg" id="contactModal">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <div id="mForm">
+      <div class="m-tag">Conexión directa · TRAMA.</div>
+      <h3 class="m-title" id="mTitle">Conectá</h3>
+      <p class="m-sub">Abonás una vez y accedés a los datos de contacto verificados por TRAMA.</p>
+      <div class="m-preview" id="mPreview"></div>
+      <div id="mExtra"></div>
+      <div class="m-price"><span class="m-price-label">Acceso al contacto</span><span class="m-price-val">—</span></div>
+      <button class="m-pay-btn" onclick="iniciarPago()">Pagar con MercadoPago →</button>
+    </div>
+    <div class="success-m" id="mSuccess">
+      <div class="sm-ic">✓</div>
+      <div class="sm-title">¡Contacto desbloqueado!</div>
+      <div class="sm-sub">Ya podés contactar directamente a <strong id="sName"></strong></div>
+      <div class="contact-box" id="cBox"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX (visor de fotos) -->
+<div class="lightbox" id="lightbox" onclick="cerrarFoto(event)">
+  <span class="lb-count" id="lbCount"></span>
+  <button class="lb-x" onclick="cerrarFoto()" aria-label="Cerrar">✕</button>
+  <button class="lb-nav lb-prev" onclick="navFoto(-1,event)" aria-label="Anterior">‹</button>
+  <img id="lbImg" src="" alt="">
+  <button class="lb-nav lb-next" onclick="navFoto(1,event)" aria-label="Siguiente">›</button>
+</div>
+
+<!-- COMPARADOR -->
+<div id="compareBar">
+  <span class="cmp-bar-txt"><b id="cmpN">0</b> para comparar</span>
+  <button class="cmp-bar-go" id="cmpGo" onclick="abrirComparador()" disabled>Comparar</button>
+  <button class="cmp-bar-clear" onclick="limpiarCompare()">Limpiar</button>
+</div>
+<div class="modal-bg" id="compareModal">
+  <div class="modal" style="max-width:760px">
+    <button class="modal-x" onclick="cerrarComparador()">✕</button>
+    <div class="m-tag">Comparar creators · TRAMA.</div>
+    <h3 class="m-title" style="margin-bottom:1rem">Comparación</h3>
+    <div class="cmp-wrap" id="cmpBody"></div>
+  </div>
+</div>
+
+<!-- PROMPT PROPIO (reemplaza el prompt() nativo) -->
+<div class="modal-bg" id="promptModal">
+  <div class="modal" style="max-width:420px">
+    <button class="modal-x" onclick="uiPromptResolve(null)">✕</button>
+    <div class="m-tag">TRAMA.</div>
+    <h3 class="m-title" id="promptTitle" style="margin-bottom:1rem"></h3>
+    <input id="promptInput" type="text" style="width:100%;background:#0d0d0d;border:1px solid #222;color:var(--white,#f4f4ef);padding:.7rem;font-size:.9rem;border-radius:3px;box-sizing:border-box;font-family:inherit">
+    <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1.1rem">
+      <button onclick="uiPromptResolve(null)" style="background:none;border:1px solid #2a2a2a;color:var(--muted2,#aaa);padding:.55rem 1rem;border-radius:2px;cursor:pointer;font-weight:700;font-size:.74rem">Cancelar</button>
+      <button onclick="uiPromptConfirm()" style="background:var(--green);color:#000;border:none;padding:.55rem 1.1rem;border-radius:2px;cursor:pointer;font-weight:900;font-size:.74rem">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- CARRITO (desbloqueo múltiple de la bolsa) -->
+<button id="cartFab" class="cart-fab" onclick="abrirCarrito()" style="display:none">🛒 <span id="cartFabN">0</span></button>
+<div class="modal-bg" id="cartModal">
+  <div class="modal">
+    <button class="modal-x" onclick="cerrarCarrito()">✕</button>
+    <div class="m-tag">TRAMA.</div>
+    <h3 class="m-title" style="margin-bottom:.9rem">Tu carrito</h3>
+    <div id="cartList"></div>
+    <div id="cartTotal" style="margin:.9rem 0;font-weight:800;color:var(--green)"></div>
+    <button class="card-btn" id="cartPayBtn" onclick="pagarCarrito()">Pagar todo con MercadoPago →</button>
+  </div>
+</div>
+
+<script>
+const SB_URL  = 'https://mcpmabvxmdepastmpzbi.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
+
+const COLORS=['#C8FF1A','#4ade80','#fb923c','#60a5fa','#f472b6','#c084fc','#f59e0b','#34d399'];
+const BGS=['#0f1a00','#0a2010','#1a0a00','#0a1020','#1a0a14','#1a0a2a','#1a1000','#0a1a14'];
+
+let allCreators=[], bolsaNiche='todos', bolsaPlats=[], bolsaSort='liga';
+let favSet=new Set();   // ids de creators guardados por el usuario logueado
+let compareSet=new Set();   // ids seleccionados para comparar (máx 3)
+
+// Email del usuario logueado (marca o creador). null si no hay sesión.
+function buyerEmail(){
+  try{
+    const s=localStorage.getItem('trama_marca')||localStorage.getItem('trama_creator');
+    const b=s?JSON.parse(s):null;
+    return b&&b.email?b.email.trim():null;
+  }catch(_){ return null; }
+}
+
+// ── FAVORITOS ──
+async function cargarFavoritos(){
+  const email=buyerEmail();
+  if(!email){ favSet=new Set(); return; }
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/favoritos?select=creator_id&marca_email=eq.${encodeURIComponent(email)}`,{
+      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
+    });
+    if(!r.ok) return;
+    const rows=await r.json();
+    favSet=new Set((rows||[]).map(x=>x.creator_id));
+  }catch(_){ /* queda vacío */ }
+}
+
+async function toggleFav(id,ev){
+  if(ev){ ev.stopPropagation(); }
+  const email=buyerEmail();
+  if(!email){
+    // Sin sesión: lo mandamos a crear cuenta / iniciar sesión
+    document.getElementById('gateModal')?.classList.add('open');
+    document.body.style.overflow='hidden';
+    return;
+  }
+  const btn=ev?.currentTarget;
+  const yaEsta=favSet.has(id);
+  // Optimista: cambiamos la UI al toque
+  if(yaEsta){ favSet.delete(id); } else { favSet.add(id); }
+  if(btn){ btn.classList.toggle('on',!yaEsta); btn.textContent=yaEsta?'☆':'★'; }
+  try{
+    if(yaEsta){
+      await fetch(`${SB_URL}/rest/v1/favoritos?marca_email=eq.${encodeURIComponent(email)}&creator_id=eq.${id}`,{
+        method:'DELETE',
+        headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
+      });
+    }else{
+      await fetch(`${SB_URL}/rest/v1/favoritos`,{
+        method:'POST',
+        headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json','Prefer':'resolution=ignore-duplicates'},
+        body:JSON.stringify({marca_email:email,creator_id:id})
+      });
+    }
+  }catch(_){
+    // Si falla, revertimos
+    if(yaEsta){ favSet.add(id); } else { favSet.delete(id); }
+    if(btn){ btn.classList.toggle('on',yaEsta); btn.textContent=yaEsta?'★':'☆'; }
+  }
+}
+
+// ── PRECIOS DINÁMICOS ──
+// Se leen de /api/precios (que a su vez lee de la tabla config,
+// editable desde el admin). Nunca más hardcodeados en el HTML.
+let PRECIO = { monto: 4900, label: '$4.900 ARS' };   // fallback si la API falla
+
+async function cargarPrecios(){
+  try{
+    const r = await fetch('/api/precios');
+    if(!r.ok) return;
+    const p = await r.json();
+    if(p?.bolsa?.label) PRECIO = p.bolsa;
+    pintarPrecios();
+  }catch(_){ /* se queda con el fallback */ }
+}
+
+// Escribe el precio en todos los lugares donde aparece
+function pintarPrecios(){
+  const val = document.querySelector('.m-price-val');
+  if(val) val.textContent = PRECIO.label;
+
+  const payBtn = document.querySelector('.m-pay-btn');
+  if(payBtn && !payBtn.disabled) payBtn.textContent = `Pagar ${PRECIO.label} con MercadoPago →`;
+
+  document.querySelectorAll('.card-btn').forEach(b=>{
+    b.textContent = `Conectar · ${PRECIO.label} →`;
+  });
+}
+
+cargarPrecios();
+
+// ── RESEÑAS en el preview de compra ──
+async function cargarResenasModal(id){
+  const box=document.getElementById('mResenas');
+  if(!box)return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/resenas?select=rating,comentario,marca_nombre,created_at,respuesta&creator_id=eq.${id}&oculta=not.is.true&order=created_at.desc&limit=3`,{
+      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
+    });
+    if(!r.ok)return;
+    const rows=await r.json();
+    const conTexto=(rows||[]).filter(x=>x.comentario&&x.comentario.trim());
+    if(!conTexto.length)return;
+    box.innerHTML=`<div class="m-resenas-t">Lo que dicen las marcas</div>`+conTexto.map(x=>{
+      const estrellas='★'.repeat(x.rating)+'☆'.repeat(5-x.rating);
+      const quien=x.marca_nombre||'Marca';
+      const resp=x.respuesta?`<div style="margin-top:.4rem;padding:.4rem .6rem;background:#0f1a00;border-left:2px solid var(--green);font-size:.78rem;color:#cde8a0"><strong>TRAMA.:</strong> ${x.respuesta}</div>`:'';
+      return `<div class="m-resena"><div class="m-resena-top"><span class="m-resena-stars">${estrellas}</span> <span class="m-resena-who">${quien}</span></div><p>${x.comentario}</p>${resp}</div>`;
+    }).join('');
+  }catch(_){}
+}
+
+// ── RANKING LIGA (top 5 por índice, en vivo) ──
+async function loadLigaRanking(){
+  const el=document.getElementById('ligaRanking');
+  if(!el)return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/creators?status=eq.aprobado&indice=gt.0&select=nombre,indice,racha,avatar_url&order=indice.desc&limit=5`,{
+      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
+    });
+    if(!r.ok)throw 0;
+    const list=await r.json();
+    if(!list.length){
+      el.innerHTML=`<div style="padding:2.5rem 1.5rem;text-align:center;color:var(--muted);font-size:.82rem">La liga arranca pronto.<br>¡Sé el primero en sumar puntos! 🔥</div>`;
+      return;
+    }
+    const pos=['🥇','🥈','🥉','4º','5º'];
+    el.innerHTML=list.map((c,i)=>{
+      const init=((c.nombre||'?')[0]||'?').toUpperCase();
+      const av=c.avatar_url?`<img src="${c.avatar_url}" alt="">`:init;
+      return `<div class="lr-row">
+        <div class="lr-pos">${pos[i]||(i+1)}</div>
+        <div class="lr-av">${av}</div>
+        <div class="lr-name">${c.nombre||'Creador'}</div>
+        <div class="lr-stat">🔥 ${c.racha||0} · ${c.indice} pts</div>
+      </div>`;
+    }).join('');
+  }catch(_){
+    el.innerHTML=`<div style="padding:2rem;text-align:center;color:var(--muted);font-size:.8rem">Ranking no disponible por ahora.</div>`;
+  }
+}
+loadLigaRanking();
+
+// Showcase "Para creators": creadores REALES aprobados (no datos fijos)
+async function cargarShowcase(){
+  const box=document.getElementById('creVis'); if(!box)return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/creators?status=eq.aprobado&select=nombre,niches,plats,ig_seg,tt_seg,yt_seg,avatar_url,created_at&order=created_at.desc&limit=40`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});
+    if(!r.ok) throw 0;
+    const seg=c=>Math.max(c.ig_seg||0,c.tt_seg||0,c.yt_seg||0);
+    let list=(await r.json())||[];
+    list=list.sort((a,b)=>seg(b)-seg(a)).slice(0,4);
+    if(!list.length){ box.innerHTML='<div style="padding:1.5rem;text-align:center;color:var(--muted)">Pronto vas a ver creadores acá. <a href="/" onclick="checkAndShowBolsa();return false" style="color:var(--green)">Ver la bolsa →</a></div>'; return; }
+    box.innerHTML=list.map((c,i)=>{
+      const ini=((c.nombre||'?').trim()[0]||'?').toUpperCase();
+      const nombre=(c.nombre||'Creador').split(' ').slice(0,2).join(' ');
+      const av=c.avatar_url?`<div class="c-av" style="overflow:hidden;padding:0"><img src="${c.avatar_url}" alt="${nombre}" style="width:100%;height:100%;object-fit:cover"></div>`:`<div class="c-av">${ini}</div>`;
+      const plats=(c.plats||[]).slice(0,2).join(' · ');
+      const niche=(c.niches||[])[0]||'Creador';
+      const sub=plats?`${niche} · ${plats}`:niche;
+      const nuevo=(c.created_at&&(Date.now()-new Date(c.created_at).getTime())<14*86400000)?'<div class="c-new">Nuevo</div>':'';
+      const borde=i>0?' style="border-top:1px solid #1a1a2a"':'';
+      return `<div class="c-row" onclick="checkAndShowBolsa()"${borde}><div class="c-left">${av}<div><div class="c-name">${nombre}</div><div class="c-niche">${sub}</div></div></div><div style="display:flex;align-items:center;gap:.625rem">${nuevo}<div class="c-stat"><strong>${fmtSeg(seg(c))}</strong><span>SEGUIDORES</span></div></div></div>`;
+    }).join('');
+  }catch(_){ box.innerHTML='<div style="padding:1.5rem;text-align:center;color:var(--muted)"><a href="/" onclick="checkAndShowBolsa();return false" style="color:var(--green)">Mirá los creadores en la bolsa →</a></div>'; }
+}
+cargarShowcase();
+// Permite entrar directo a la bolsa desde otra página con /#bolsa
+if(location.hash==='#bolsa'){ try{ checkAndShowBolsa(); }catch(_){} }
+
+let currentCreator=null, filtersBuilt=false;
+
+// ── PÁGINAS ──
+function showPage(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(p==='bolsa'&&allCreators.length===0)loadCreators();
+}
+
+// ── MENÚ MOBILE ──
+function toggleMenu(){
+  document.getElementById('mobMenu').classList.toggle('open');
+  document.getElementById('hamBtn').classList.toggle('open');
+}
+function closeMenu(){
+  document.getElementById('mobMenu').classList.remove('open');
+  document.getElementById('hamBtn').classList.remove('open');
+}
+document.addEventListener('click',e=>{
+  const m=document.getElementById('mobMenu');
+  const h=document.getElementById('hamBtn');
+  if(m.classList.contains('open')&&!m.contains(e.target)&&!h.contains(e.target))closeMenu();
+});
+
+// ── GATE ──
+function checkAndShowBolsa(){
+  // Cualquiera puede espiar la bolsa (los datos públicos ya se ven en las
+  // páginas de SEO). El contacto sigue detrás del pago, y el registro se pide
+  // recién al tocar "Conectar".
+  showPage('bolsa');
+  const cta=document.getElementById('visitorCta');
+  if(cta) cta.style.display = logueado() ? 'none' : 'flex';
+}
+function closeGate(){
+  document.getElementById('gateModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// ── SUPABASE ──
+async function loadCreators(){
+  try{
+    // Solo columnas públicas: NUNCA traer email ni tel al navegador.
+    // Antes usaba select=* y los contactos (que son lo que se vende)
+    // viajaban al cliente, visibles en DevTools sin pagar.
+    const COLS = 'id,nombre,pais,ciudad,bio,niches,nicho_esp,plats,audiencia,'
+               + 'ig_seg,ig_er,ig_alc,tt_seg,tt_er,tt_vistas,yt_seg,yt_vistas,'
+               + 't_story,t_reel,t_post,canje,moneda,disponibilidad,avatar_url,fotos,videos,es_pet,pet_nombre,pet_tipo,indice,racha,rating_prom,rating_count,es_campeon,campeon_label,created_at';
+    const r=await fetch(`${SB_URL}/rest/v1/creators?select=${COLS}&status=eq.aprobado&order=created_at.desc`,{
+      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
+    });
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    allCreators=await r.json();
+    await cargarFavoritos();
+    buildFilters();
+    renderBolsa();
+  }catch(e){
+    document.getElementById('cGrid').innerHTML=`<div class="empty-state"><div>⚠️</div><p>Error al cargar creators.<br><small>${e.message}</small></p></div>`;
+  }
+}
+
+function buildFilters(){
+  if(filtersBuilt)return;
+  filtersBuilt=true;
+  const niches=[...new Set(allCreators.flatMap(c=>c.niches||[]))].sort();
+  const nf=document.getElementById('nicheFilters');
+  nf.innerHTML='';
+  ['Todos',...niches].forEach(n=>{
+    const b=document.createElement('button');
+    b.className='f-btn'+(n==='Todos'?' on':'');
+    b.textContent=n;
+    b.onclick=()=>{bolsaNiche=n==='Todos'?'todos':n;document.querySelectorAll('#nicheFilters .f-btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');renderBolsa()};
+    nf.appendChild(b);
+  });
+  const plats=[...new Set(allCreators.flatMap(c=>c.plats||[]))].sort();
+  const pf=document.getElementById('platFilters');
+  pf.innerHTML='';
+  plats.forEach(p=>{
+    const b=document.createElement('button');
+    b.className='p-btn';b.textContent=p;
+    b.onclick=()=>{
+      if(bolsaPlats.includes(p)){bolsaPlats=bolsaPlats.filter(x=>x!==p);b.classList.remove('on')}
+      else{bolsaPlats.push(p);b.classList.add('on')}
+      renderBolsa();
+    };
+    pf.appendChild(b);
+  });
+  // Ciudades (para el filtro avanzado)
+  const fc=document.getElementById('fCity');
+  if(fc){
+    const cities=[...new Set(allCreators.map(c=>(c.ciudad||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+    cities.forEach(ci=>{ const o=document.createElement('option'); o.value=ci; o.textContent=ci; fc.appendChild(o); });
+  }
+  refreshSavedUI();
+}
+
+function toggleAdv(){
+  const p=document.getElementById('advPanel');
+  const ch=document.getElementById('advChevron');
+  const open=p.classList.toggle('open');
+  if(ch) ch.textContent=open?'⌃':'⌄';
+}
+
+// ── BÚSQUEDAS GUARDADAS (por usuario, en este navegador) ──
+function sesionEmail(){ try{const s=localStorage.getItem('trama_marca')||localStorage.getItem('trama_creator'); return s?(JSON.parse(s).email||'anon'):'anon';}catch(_){return 'anon';} }
+function savedKey(){ return 'trama_filtros_'+sesionEmail(); }
+function getSavedLocal(){ try{return JSON.parse(localStorage.getItem(savedKey())||'[]');}catch(_){return [];} }
+function setSavedLocal(a){ try{localStorage.setItem(savedKey(), JSON.stringify(a));}catch(_){} }
+function logueado(){ return !!localStorage.getItem('sb_token'); }
+let savedCache=[];   // {name, state} de la última carga (para aplicar sin re-consultar)
+
+// Refresca el access_token de Supabase usando el refresh_token (los tokens duran ~1h)
+async function refreshToken(){
+  const rt=localStorage.getItem('sb_refresh'); if(!rt) return null;
+  try{
+    const r=await fetch(`${SB_URL}/auth/v1/token?grant_type=refresh_token`,{method:'POST',headers:{'apikey':SB_ANON,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:rt})});
+    if(!r.ok) return null; const j=await r.json();
+    if(j.access_token){ localStorage.setItem('sb_token',j.access_token); if(j.refresh_token) localStorage.setItem('sb_refresh',j.refresh_token); return j.access_token; }
+  }catch(_){}
+  return null;
+}
+// fetch autenticado a PostgREST con reintento si el token venció
+async function sbAuthed(path, method='GET', body=null){
+  let tok=localStorage.getItem('sb_token'); if(!tok) return null;
+  const run=t=>{
+    const h={'apikey':SB_ANON,'Authorization':'Bearer '+t,'Content-Type':'application/json'};
+    if(method==='POST') h['Prefer']='resolution=merge-duplicates';
+    const o={method,headers:h}; if(body) o.body=JSON.stringify(body);
+    return fetch(`${SB_URL}/rest/v1/${path}`,o);
+  };
+  let r=await run(tok);
+  if(r.status===401){ const nt=await refreshToken(); if(nt) r=await run(nt); }
+  return r;
+}
+async function getSavedCloud(){
+  const r=await sbAuthed('filtros_guardados?select=nombre,estado&order=nombre.asc');
+  if(!r||!r.ok) return null;
+  const rows=await r.json().catch(()=>[]);
+  return (rows||[]).map(x=>({name:x.nombre, state:x.estado}));
+}
+function estadoActual(){
+  const g=id=>document.getElementById(id)?document.getElementById(id).value:'';
+  return {niche:bolsaNiche, plats:[...bolsaPlats], sort:bolsaSort, city:g('fCity'), seg:g('fSeg'), er:g('fEr'), tarifa:g('fTarifa'), rating:g('fRating')};
+}
+function aplicarEstado(st){
+  bolsaNiche=st.niche||'todos'; bolsaPlats=Array.isArray(st.plats)?[...st.plats]:[]; bolsaSort=st.sort||'liga';
+  const set=(id,v)=>{const el=document.getElementById(id); if(el&&v!=null) el.value=v;};
+  set('fCity',st.city||'todas'); set('fSeg',st.seg||'0'); set('fEr',st.er||'0'); set('fTarifa',st.tarifa||'0'); set('fRating',st.rating||'0');
+  document.querySelectorAll('#nicheFilters .f-btn').forEach(x=>x.classList.toggle('on', (bolsaNiche==='todos'&&x.textContent==='Todos')||x.textContent===bolsaNiche));
+  document.querySelectorAll('#platFilters .p-btn').forEach(x=>x.classList.toggle('on', bolsaPlats.includes(x.textContent)));
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('on'));
+  const sortIdx={liga:0,seg:1,er:2,rating:3,nombre:4}[bolsaSort];
+  const sb=document.querySelectorAll('.sort-btn')[sortIdx!=null?sortIdx:0]; if(sb) sb.classList.add('on');
+  renderBolsa();
+}
+async function refreshSavedUI(){
+  const sel=document.getElementById('savedSel'); if(!sel)return;
+  let arr=null;
+  if(logueado()) arr=await getSavedCloud();      // cross-device si hay login
+  if(arr===null) arr=getSavedLocal();            // fallback por navegador
+  savedCache=arr;
+  sel.innerHTML='<option value="">Mis búsquedas guardadas…</option>'+arr.map(s=>`<option value="${(s.name||'').replace(/"/g,'&quot;')}">${s.name}</option>`).join('');
+}
+// Prompt propio (promesa), reemplaza el prompt() nativo
+let _promptResolver=null;
+function uiPrompt(titulo, placeholder){
+  return new Promise(res=>{
+    _promptResolver=res;
+    document.getElementById('promptTitle').textContent=titulo||'';
+    const inp=document.getElementById('promptInput'); inp.value=''; inp.placeholder=placeholder||'';
+    inp.onkeydown=e=>{ if(e.key==='Enter'){e.preventDefault();uiPromptConfirm();} };
+    document.getElementById('promptModal').classList.add('open');
+    document.body.style.overflow='hidden';
+    setTimeout(()=>inp.focus(),50);
+  });
+}
+function _closePrompt(){ document.getElementById('promptModal').classList.remove('open'); document.body.style.overflow=''; }
+function uiPromptConfirm(){ const v=document.getElementById('promptInput').value; _closePrompt(); if(_promptResolver){const r=_promptResolver;_promptResolver=null;r(v);} }
+function uiPromptResolve(val){ _closePrompt(); if(_promptResolver){const r=_promptResolver;_promptResolver=null;r(val);} }
+
+async function guardarBusqueda(){
+  const name=((await uiPrompt('Guardar búsqueda','ej: Fitness BA 10K+'))||'').trim();
+  if(!name)return;
+  const state=estadoActual();
+  if(logueado()){
+    const r=await sbAuthed('filtros_guardados?on_conflict=user_email,nombre','POST',{user_email:sesionEmail(), nombre:name, estado:state, updated_at:new Date().toISOString()});
+    if(!r||!r.ok){ showToast('No se pudo guardar','err'); return; }
+  }else{
+    const arr=getSavedLocal(); const i=arr.findIndex(s=>s.name.toLowerCase()===name.toLowerCase());
+    const item={name, state}; if(i>=0) arr[i]=item; else arr.push(item); setSavedLocal(arr);
+  }
+  await refreshSavedUI();
+  const sel=document.getElementById('savedSel'); if(sel) sel.value=name;
+  document.getElementById('delSaved').style.display='inline-block';
+  showToast('Búsqueda guardada','ok');
+}
+function aplicarGuardada(name){
+  const del=document.getElementById('delSaved');
+  if(!name){ if(del) del.style.display='none'; return; }
+  const s=savedCache.find(x=>x.name===name);
+  if(s){ aplicarEstado(s.state); if(del) del.style.display='inline-block'; }
+}
+async function borrarGuardada(){
+  const sel=document.getElementById('savedSel'); if(!sel||!sel.value)return;
+  const name=sel.value;
+  if(logueado()){
+    await sbAuthed(`filtros_guardados?user_email=eq.${encodeURIComponent(sesionEmail())}&nombre=eq.${encodeURIComponent(name)}`,'DELETE');
+  }else{
+    setSavedLocal(getSavedLocal().filter(s=>s.name!==name));
+  }
+  await refreshSavedUI(); document.getElementById('delSaved').style.display='none';
+  showToast('Búsqueda borrada','info');
+}
+
+function limpiarFiltros(){
+  bolsaNiche='todos'; bolsaPlats=[];
+  const si=document.getElementById('searchInp'); if(si) si.value='';
+  ['fCity','fSeg','fEr','fTarifa','fRating','fPet'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=(el.id==='fCity'?'todas':el.id==='fPet'?'todos':'0'); });
+  document.querySelectorAll('#nicheFilters .f-btn').forEach((x,ix)=>x.classList.toggle('on',ix===0));
+  document.querySelectorAll('#platFilters .p-btn').forEach(x=>x.classList.remove('on'));
+  renderBolsa();
+}
+
+function setSort(s,btn){
+  bolsaSort=s;
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderBolsa();
+}
+
+function fmtSeg(n){if(!n)return'—';return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':n}
+function getColor(i){return COLORS[i%COLORS.length]}
+function getBg(i){return BGS[i%BGS.length]}
+function getInit(c){const n=(c.nombre||'?').trim();return (n[0]||'?').toUpperCase()}
+
+function badgesDe(c){
+  const b=[];
+  if(c.es_campeon) b.push(`<span class="c-rep camp">👑 Campeón</span>`);
+  if((c.rating_count||0)>=3 && Number(c.rating_prom||0)>=4.5) b.push(`<span class="c-rep top">⭐ Top valorado</span>`);
+  if(c.es_pet) b.push(`<span class="c-rep pet">🐾 Pet creator${c.pet_nombre?' · '+c.pet_nombre:''}</span>`);
+  return b.length?`<div class="card-reps">${b.join('')}</div>`:'';
+}
+// ── CARRITO (desbloqueo múltiple de la bolsa) ──
+let cart=[];
+try{ cart=JSON.parse(localStorage.getItem('trama_cart')||'[]'); if(!Array.isArray(cart)) cart=[]; }catch(_){ cart=[]; }
+function cartSave(){ try{ localStorage.setItem('trama_cart', JSON.stringify(cart)); }catch(_){}}
+function cartHas(id){ return cart.some(x=>x&&x.id===id); }
+function toggleCart(id, ev){ if(ev) ev.stopPropagation();
+  if(cartHas(id)){ cart=cart.filter(x=>x.id!==id); }
+  else{ const c=(allCreators||[]).find(x=>x.id===id); cart.push({id, nombre:(c&&c.nombre)||'Creador'}); }
+  cartSave(); renderBolsa();
+}
+function cartMoney(n){ return '$'+Number(n||0).toLocaleString('es-AR')+' ARS'; }
+function renderCartUI(){
+  const n=cart.length;
+  const fab=document.getElementById('cartFab');
+  if(fab){ fab.style.display=n?'flex':'none'; const fn=document.getElementById('cartFabN'); if(fn) fn.textContent=n; }
+  const list=document.getElementById('cartList');
+  if(list) list.innerHTML = n ? cart.map(it=>`<div class="cart-row"><span>${it.nombre}</span><button class="cart-del" title="Quitar" onclick="toggleCart('${it.id}')">✕</button></div>`).join('') : '<div style="color:var(--muted);font-size:.85rem;padding:.5rem 0">El carrito está vacío.</div>';
+  const tot=document.getElementById('cartTotal');
+  if(tot) tot.textContent = n ? `${n} contacto${n>1?'s':''} · ${cartMoney((PRECIO.monto||0)*n)}` : '';
+  const payb=document.getElementById('cartPayBtn');
+  if(payb) payb.style.display = n ? 'block':'none';
+}
+function abrirCarrito(){ renderCartUI(); document.getElementById('cartModal').classList.add('open'); document.body.style.overflow='hidden'; }
+function cerrarCarrito(){ document.getElementById('cartModal').classList.remove('open'); document.body.style.overflow=''; }
+document.getElementById('cartModal')?.addEventListener('click',e=>{ if(e.target===document.getElementById('cartModal')) cerrarCarrito(); });
+async function pagarCarrito(){
+  if(!cart.length) return;
+  const session=localStorage.getItem('trama_marca')||localStorage.getItem('trama_creator');
+  if(!session){ cerrarCarrito(); document.getElementById('gateModal').classList.add('open'); document.body.style.overflow='hidden'; return; }
+  const buyer=JSON.parse(session);
+  const btn=document.getElementById('cartPayBtn'); if(btn){ btn.disabled=true; btn.textContent='Conectando con MercadoPago...'; }
+  try{
+    const res=await fetch('/api/crear-preferencia',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({origen:'carrito', creator_ids:cart.map(x=>x.id), marca_email:buyer.email||'anonimo@trama.com', marca_nombre:buyer.nombre||'Comprador TRAMA.'})});
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error||'Error al crear preferencia');
+    if(data.yaComprado){ showToast(data.mensaje||'Ya tenés acceso a esos contactos.','ok'); if(btn){ btn.disabled=false; btn.textContent='Pagar todo con MercadoPago →'; } return; }
+    cart=[]; cartSave();
+    window.location.href=data.init_point||data.sandbox_init_point;
+  }catch(e){ showToast('Error: '+e.message,'err'); if(btn){ btn.disabled=false; btn.textContent='Pagar todo con MercadoPago →'; } }
+}
+function renderBolsa(){
+  const q=(document.getElementById('searchInp')?.value||'').toLowerCase().trim();
+  const city=document.getElementById('fCity')?.value||'todas';
+  const minSeg=+(document.getElementById('fSeg')?.value||0);
+  const minEr=+(document.getElementById('fEr')?.value||0);
+  const maxTar=+(document.getElementById('fTarifa')?.value||0);
+  const minRat=+(document.getElementById('fRating')?.value||0);
+  const pet=document.getElementById('fPet')?.value||'todos';
+  const segN=c=>Math.max(c.ig_seg||0,c.tt_seg||0,c.yt_seg||0);
+  const erN=c=>Math.max(c.ig_er||0,c.tt_er||0);
+  let list=allCreators.filter(c=>{
+    const mN=bolsaNiche==='todos'||(c.niches||[]).includes(bolsaNiche);
+    const mP=bolsaPlats.length===0||bolsaPlats.every(p=>(c.plats||[]).includes(p));
+    const mQ=!q||(c.nombre||'').toLowerCase().includes(q)||(c.niches||[]).join(' ').toLowerCase().includes(q);
+    const mCity=city==='todas'||((c.ciudad||'').trim().toLowerCase()===city.toLowerCase());
+    const mSeg=!minSeg||segN(c)>=minSeg;
+    const mEr=!minEr||erN(c)>=minEr;
+    const mTar=!maxTar||((c.moneda||'ARS')!=='USD'&&c.t_reel&&c.t_reel<=maxTar);
+    const mRat=!minRat||(minRat===1?((c.rating_count||0)>0):(Number(c.rating_prom||0)>=minRat));
+    const mPet=pet==='todos'||(pet==='pet'?!!c.es_pet:!c.es_pet);
+    return mN&&mP&&mQ&&mCity&&mSeg&&mEr&&mTar&&mRat&&mPet;
+  });
+  if(bolsaSort==='liga')list.sort((a,b)=>((b.indice||0)-(a.indice||0))||(segN(b)-segN(a)));
+  else if(bolsaSort==='seg')list.sort((a,b)=>segN(b)-segN(a));
+  else if(bolsaSort==='er')list.sort((a,b)=>(b.ig_er||0)-(a.ig_er||0));
+  else if(bolsaSort==='rating')list.sort((a,b)=>(Number(b.rating_prom||0)-Number(a.rating_prom||0))||((b.rating_count||0)-(a.rating_count||0)));
+  else list.sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''));
+
+  const cnt=document.getElementById('bolsaCount');
+  if(cnt) cnt.textContent = allCreators.length ? `${list.length} ${list.length===1?'creator':'creators'}` : '';
+
+  const g=document.getElementById('cGrid');
+  if(!list.length){
+    g.innerHTML=allCreators.length===0
+      ?'<div class="loading-bolsa"><div class="spin"></div><span>Cargando creators...</span></div>'
+      :'<div class="empty-state"><div>🔍</div><p>No hay creators con esos filtros.<br><button class="adv-clear" style="margin-top:.75rem" onclick="limpiarFiltros()">Limpiar filtros</button></p></div>';
+    return;
+  }
+  g.innerHTML=list.map((c,i)=>{
+    const col=getColor(i),bg=getBg(i),init=getInit(c);
+    const seg=fmtSeg(Math.max(c.ig_seg||0,c.tt_seg||0,c.yt_seg||0));
+    const er=c.ig_er||c.tt_er||0;
+    const plats=c.plats||[];
+    const niches=(c.niches||[]).join(' · ')||'—';
+    const avHtml=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre}" onerror="this.onerror=null;this.outerHTML='<span>${init}</span>'">`:`<span>${init}</span>`;
+    const fotos=Array.isArray(c.fotos)?c.fotos.filter(Boolean):[];
+    const fotosStrip=fotos.length?`<div class="card-fotos" onclick="openModal('${c.id}',${i})" title="Ver fotos de ${c.nombre}">${fotos.slice(0,3).map((u,fx)=>`<div class="cf-thumb"><img src="${u}" alt="" loading="lazy">${(fx===2&&fotos.length>3)?`<span class="cf-more">+${fotos.length-3}</span>`:''}</div>`).join('')}</div>`:'';
+    return`<div class="c-card">
+      <div class="card-top">
+        <div class="card-av" style="background:${bg};border-color:${col}33;color:${col}">${avHtml}</div>
+        <div class="card-top-r">
+          ${c.racha>0?`<span class="card-badge badge-top">🔥 ${c.racha}</span>`:''}
+          <button class="cmp-btn${compareSet.has(c.id)?' on':''}" title="Comparar" onclick="toggleCompare('${c.id}',event)">⚖</button>
+          <button class="fav-btn${favSet.has(c.id)?' on':''}" title="Guardar" onclick="toggleFav('${c.id}',event)">${favSet.has(c.id)?'★':'☆'}</button>
+          <button class="cart-btn${cartHas(c.id)?' on':''}" title="${cartHas(c.id)?'Quitar del carrito':'Agregar al carrito'}" onclick="toggleCart('${c.id}',event)">🛒</button>
+        </div>
+      </div>
+      <div class="card-name">${c.nombre}</div>
+      ${badgesDe(c)}
+      <div class="card-niche" style="color:${col}">${niches}</div>
+      ${c.rating_count>0?`<div class="card-rating">★ ${Number(c.rating_prom).toFixed(1)} <span>(${c.rating_count} ${c.rating_count==1?'reseña':'reseñas'})</span></div>`:''}
+      <div class="card-stats">
+        <div class="cs"><strong>${seg}</strong><span>Seguidores</span></div>
+        <div class="cs"><strong style="color:${col}">${er?er+'%':'—'}</strong><span>Eng.</span></div>
+        <div class="cs"><strong>${plats.length||'—'}</strong><span>Redes</span></div>
+      </div>
+      <div class="card-tags">${(c.niches||[]).map(n=>`<span class="c-tag">${n}</span>`).join('')}</div>
+      <div class="card-plats">${plats.map(p=>`<span class="plat">${p}</span>`).join('')}</div>
+      ${fotosStrip}
+      <button class="card-btn" onclick="openModal('${c.id}',${i})">Conectar · ${PRECIO.label} →</button>
+    </div>`;
+  }).join('');
+  renderCartUI();
+}
+
+// ── MODAL CONTACTO ──
+function openModal(id,i){
+  const c=allCreators.find(x=>x.id===id);
+  if(!c)return;
+  currentCreator=c;
+  const col=getColor(i),bg=getBg(i),init=getInit(c);
+  document.getElementById('mTitle').textContent=`Conectá con ${c.nombre}`;
+  const avHtml=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre}">`:`${init}`;
+  document.getElementById('mPreview').innerHTML=`<div class="m-av" style="background:${bg};border-color:${col}44;color:${col}">${avHtml}</div><div><div class="m-name">${c.nombre}</div><div class="m-niche" style="color:${col}">${(c.niches||[]).join(' · ')} · ${fmtSeg(Math.max(c.ig_seg||0,c.tt_seg||0,c.yt_seg||0))}</div></div>`;
+  // Preview antes de comprar: SOLO card + descripción + fotos que cargó el creador
+  let extra='';
+  extra+=badgesDe(c);
+  if(c.rating_count>0) extra+=`<div class="m-rating">★ ${Number(c.rating_prom).toFixed(1)} <span>· ${c.rating_count} ${c.rating_count==1?'reseña':'reseñas'}</span></div>`;
+  if(c.bio) extra+=`<p class="m-bio">${c.bio}</p>`;
+  const fotos=Array.isArray(c.fotos)?c.fotos:[];
+  if(fotos.length) extra+=`<div class="m-fotos">${fotos.slice(0,6).map((u,ix)=>`<div class="m-foto" onclick="verFoto(${ix})"><img src="${u}" alt="" loading="lazy"></div>`).join('')}</div>`;
+  const videos=Array.isArray(c.videos)?c.videos:[];
+  if(videos.length) extra+=`<div class="m-videos">${videos.slice(0,4).map(u=>`<video src="${u}" controls preload="metadata" playsinline></video>`).join('')}</div>`;
+  extra+=`<div id="mResenas"></div>`;
+  document.getElementById('mExtra').innerHTML=extra;
+  if(c.rating_count>0) cargarResenasModal(c.id);
+  document.getElementById('mForm').style.display='block';
+  document.getElementById('mSuccess').style.display='none';
+  document.getElementById('contactModal').classList.add('open');
+  document.body.style.overflow='hidden';
+  pintarPrecios();   // asegura que el precio mostrado sea el vigente
+  registrarVista(id);
+}
+// Registra una vista de perfil (una vez por creador por sesión, sin bloquear la UI)
+function registrarVista(id){
+  try{
+    const k='trama_vistas';
+    const seen=JSON.parse(sessionStorage.getItem(k)||'[]');
+    if(seen.includes(id)) return;
+    seen.push(id); sessionStorage.setItem(k, JSON.stringify(seen));
+    fetch('/api/ver-perfil',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({creator_id:id})}).catch(()=>{});
+  }catch(_){}
+}
+function closeModal(){
+  document.getElementById('contactModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.getElementById('contactModal').addEventListener('click',e=>{if(e.target===document.getElementById('contactModal'))closeModal()});
+
+// ── COMPARADOR DE CREADORES ──
+function toggleCompare(id,ev){
+  if(ev){ev.stopPropagation();ev.preventDefault();}
+  if(compareSet.has(id)){ compareSet.delete(id); }
+  else{
+    if(compareSet.size>=3){ showToast('Podés comparar hasta 3 creators a la vez','info'); return; }
+    compareSet.add(id);
+  }
+  if(ev&&ev.currentTarget){ ev.currentTarget.classList.toggle('on', compareSet.has(id)); }
+  renderCompareBar();
+}
+function renderCompareBar(){
+  const bar=document.getElementById('compareBar'); if(!bar)return;
+  const n=compareSet.size;
+  document.getElementById('cmpN').textContent=n;
+  document.getElementById('cmpGo').disabled=n<2;
+  bar.classList.toggle('show', n>0);
+}
+function limpiarCompare(){
+  compareSet.clear();
+  document.querySelectorAll('.cmp-btn.on').forEach(b=>b.classList.remove('on'));
+  renderCompareBar();
+}
+function cerrarComparador(){
+  document.getElementById('compareModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+function abrirComparador(){
+  const cs=[...compareSet].map(id=>allCreators.find(x=>x.id===id)).filter(Boolean);
+  if(cs.length<2) return;
+  const money=(n,m)=> n?('$'+Number(n).toLocaleString('es-AR')+' '+(m||'ARS')):'—';
+  const maxOf=f=>Math.max(...cs.map(c=>Number(f(c)||0)));
+  const maxIg=maxOf(c=>c.ig_seg),maxTt=maxOf(c=>c.tt_seg),maxYt=maxOf(c=>c.yt_seg),
+        maxRat=maxOf(c=>c.rating_prom),maxEr=maxOf(c=>c.ig_er);
+  const cell=(v,best)=>`<td class="${best?'cmp-best':''}">${v}</td>`;
+  const row=(lbl,fn)=>`<tr><th class="cmp-lbl">${lbl}</th>${cs.map(fn).join('')}</tr>`;
+  const head=cs.map(c=>{
+    const i=allCreators.indexOf(c), col=getColor(i<0?0:i), bg=getBg(i<0?0:i);
+    const av=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre}">`:`<span>${getInit(c)}</span>`;
+    return `<td><div class="cmp-head"><div class="cmp-av" style="background:${bg};border-color:${col}44;color:${col}">${av}</div><div class="cmp-name">${c.nombre}</div></div></td>`;
+  }).join('');
+  document.getElementById('cmpBody').innerHTML=`<table class="cmp-table">
+    <tr><th class="cmp-lbl"></th>${head}</tr>
+    ${row('Ciudad',c=>cell(c.ciudad||'—'))}
+    ${row('Nicho',c=>cell((c.niches||[]).join(', ')||'—'))}
+    ${row('IG seguidores',c=>cell(fmtSeg(c.ig_seg),(c.ig_seg||0)===maxIg&&maxIg>0))}
+    ${row('IG engagement',c=>cell(c.ig_er?c.ig_er+'%':'—',Number(c.ig_er||0)===maxEr&&maxEr>0))}
+    ${row('TikTok seguidores',c=>cell(fmtSeg(c.tt_seg),(c.tt_seg||0)===maxTt&&maxTt>0))}
+    ${row('YouTube',c=>cell(fmtSeg(c.yt_seg),(c.yt_seg||0)===maxYt&&maxYt>0))}
+    ${row('Rating',c=>cell(c.rating_count>0?('★ '+Number(c.rating_prom).toFixed(1)):'—',Number(c.rating_prom||0)===maxRat&&maxRat>0))}
+    ${row('Tarifa reel',c=>cell(money(c.t_reel,c.moneda)))}
+    ${row('Tarifa story',c=>cell(money(c.t_story,c.moneda)))}
+    ${row('Tarifa post',c=>cell(money(c.t_post,c.moneda)))}
+    ${row('Disponibilidad',c=>cell((c.disponibilidad||[]).join(', ')||'—'))}
+    <tr><th class="cmp-lbl"></th>${cs.map(c=>{const i=allCreators.indexOf(c);return `<td><button class="cmp-conn" onclick="cerrarComparador();openModal('${c.id}',${i<0?0:i})">Conectar</button></td>`;}).join('')}</tr>
+  </table>`;
+  document.getElementById('compareModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+document.getElementById('compareModal').addEventListener('click',e=>{if(e.target===document.getElementById('compareModal'))cerrarComparador()});
+// Cerrar cualquier modal con Esc
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  let cerre=false;
+  document.querySelectorAll('.modal-bg.open').forEach(m=>{ m.classList.remove('open'); cerre=true; });
+  const lb=document.getElementById('lightbox'); if(lb&&lb.classList.contains('open')){ lb.classList.remove('open'); cerre=true; }
+  if(_promptResolver){ const r=_promptResolver; _promptResolver=null; r(null); }
+  if(cerre) document.body.style.overflow='';
+});
+
+// ── quickPay ELIMINADA ──
+// Antes esta función revelaba email, teléfono e Instagram del creator
+// SIN cobrar. Cualquiera podía llamarla desde la consola del navegador
+// y llevarse el contacto gratis, salteando el modelo de negocio.
+// El contacto ahora SOLO se revela en pago-exitoso.html, después de
+// que MercadoPago confirma el pago.
+
+async function iniciarPago(){
+  // El comprador puede ser una marca O un creador (se compran contactos entre creadores)
+  const session=localStorage.getItem('trama_marca')||localStorage.getItem('trama_creator');
+  // Visitante sin cuenta: pedir registro recién acá (punto de conversión)
+  if(!session){
+    closeModal();
+    document.getElementById('gateModal').classList.add('open');
+    document.body.style.overflow='hidden';
+    return;
+  }
+  const btn=document.querySelector('.m-pay-btn');
+  btn.disabled=true;btn.textContent='Conectando con MercadoPago...';
+  const buyer=JSON.parse(session);
+  const marcaEmail=buyer.email||'anonimo@trama.com';
+  const marcaNombre=buyer.nombre||'Comprador TRAMA.';
+  try{
+    const res=await fetch('/api/crear-preferencia',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        creator_id:currentCreator.id,
+        creator_nombre:currentCreator.nombre,
+        marca_email:marcaEmail,
+        marca_nombre:marcaNombre,
+      })
+    });
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'Error al crear preferencia');
+    // Ya tenía acceso vigente: no se cobra de nuevo
+    if(data.yaComprado){
+      showToast(data.mensaje||'Ya tenés acceso a este contacto.','ok');
+      btn.disabled=false;btn.textContent=`Pagar ${PRECIO.label} con MercadoPago →`;
+      return;
+    }
+    // Producción: usamos init_point (checkout real). sandbox_init_point solo
+    // existe como fallback por si faltara el real.
+    const url=data.init_point||data.sandbox_init_point;
+    window.location.href=url;
+  }catch(e){
+    showToast('Error: '+e.message,'err');
+    btn.disabled=false;btn.textContent=`Pagar ${PRECIO.label} con MercadoPago →`;
+  }
+}
+
+// ── LIGHTBOX de fotos (ver, pasar, volver, salir) ──
+let lbFotos=[], lbIdx=0;
+function verFoto(i){
+  lbFotos=(currentCreator&&Array.isArray(currentCreator.fotos))?currentCreator.fotos:[];
+  if(!lbFotos.length)return;
+  lbIdx=i;
+  pintarFoto();
+  document.getElementById('lightbox').classList.add('open');
+}
+function pintarFoto(){
+  document.getElementById('lbImg').src=lbFotos[lbIdx]||'';
+  const cnt=document.getElementById('lbCount');
+  if(cnt) cnt.textContent=lbFotos.length>1?`${lbIdx+1} / ${lbFotos.length}`:'';
+  const show=lbFotos.length>1?'flex':'none';
+  document.querySelectorAll('.lb-nav').forEach(b=>b.style.display=show);
+}
+function navFoto(d,e){
+  if(e)e.stopPropagation();
+  if(!lbFotos.length)return;
+  lbIdx=(lbIdx+d+lbFotos.length)%lbFotos.length;
+  pintarFoto();
+}
+function cerrarFoto(e){
+  if(e&&e.target&&e.target.tagName==='IMG')return;   // click en la imagen no cierra
+  document.getElementById('lightbox').classList.remove('open');
+}
+document.addEventListener('keydown',e=>{
+  const lb=document.getElementById('lightbox');
+  if(!lb||!lb.classList.contains('open'))return;
+  if(e.key==='Escape')cerrarFoto();
+  else if(e.key==='ArrowRight')navFoto(1);
+  else if(e.key==='ArrowLeft')navFoto(-1);
+});
+
+// ── TOAST ──
+let tt;
+function showToast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+type;
+  clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+<!-- Entrada directa a la bolsa desde la home nueva (/) -->
+<script>try{if((location.hash+location.search).indexOf('bolsa')>-1){window.addEventListener('load',function(){try{(typeof checkAndShowBolsa==='function')?checkAndShowBolsa():(typeof showPage==='function'&&showPage('bolsa'));}catch(e){}});}}catch(e){}</script>
+</body>
+</html>

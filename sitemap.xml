@@ -18,6 +18,13 @@
     <priority>0.9</priority>
   </url>
 
+  <!-- TRAMA. LABS — intención: creators que quieren aprender a hacer UGC -->
+  <url>
+    <loc>https://www.tramapunto.com/tramalabs.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
   <!-- REGISTRO CREATORS — intención: "cómo ser creador de contenido UGC" -->
   <url>
     <loc>https://www.tramapunto.com/registro.html</loc>

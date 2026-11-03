@@ -106,6 +106,9 @@ export default async function handler(req, res) {
     const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
     const email = await labsEmailDelToken(token);
     if (!email) return res.status(401).json({ error: 'Sesión no válida' });
+    // Flag de lanzamiento: hasta que `config.labs_abierto` = 'true', no se vende (el hub puede estar vivo antes).
+    const cfg = await fetch(`${process.env.SUPABASE_URL}/rest/v1/config?clave=eq.labs_abierto&select=valor`, { headers: { apikey: process.env.SUPABASE_SERVICE_KEY, Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}` } }).then((r) => (r.ok ? r.json() : [])).catch(() => []);
+    if (!(cfg && cfg[0] && String(cfg[0].valor) === 'true')) return res.status(503).json({ error: 'TRAMA. LABS abre muy pronto' });
     if (!process.env.MP_ACCESS_TOKEN) return res.status(503).json({ error: 'Pagos no configurados todavía' });
     try {
       const PRECIOS = await getPrecios();

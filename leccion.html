@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creativos UGC Realistas — TRAMA. LABS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A0A;--panel:#121212;--surface:#171717;--surface-2:#1E1E1E;
+    --line:#2A2A28;--line-2:#343431;--ink:#F2F2F0;--muted:#8E8E88;--muted-2:#6a6a65;
+    --acid:#C8FF1A;--acid-dim:#9ec219;--radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .display{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;line-height:.95}
+  .brandmark{font-family:'Anton',sans-serif;font-size:19px}
+  .brandmark .dot{color:var(--acid)} .brandmark .labs{color:var(--muted);font-size:12px;letter-spacing:.16em;margin-left:5px}
+
+  header{position:sticky;top:0;z-index:30;background:rgba(10,10,10,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .nav{max-width:1240px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between}
+  .nav .back{color:var(--muted);font-size:13.5px}
+  .nav .back:hover{color:var(--ink)}
+  .nav .who{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:13px}
+  .nav .who .av{width:27px;height:27px;border-radius:999px;background:var(--acid);color:#0A0A0A;display:grid;place-items:center;font-weight:800;font-size:12px}
+
+  .layout{max-width:1240px;margin:0 auto;padding:22px 24px 70px;display:grid;grid-template-columns:1fr 340px;gap:26px;align-items:start}
+
+  /* player */
+  .player-wrap{position:relative;aspect-ratio:16/9;background:#000;border-radius:var(--radius);overflow:hidden;
+    border:1px solid var(--line);user-select:none}
+  .poster{position:absolute;inset:0;background:
+      radial-gradient(130% 100% at 20% 0%,#1d2a05 0%,transparent 55%),
+      radial-gradient(130% 100% at 90% 100%,#241406 0%,transparent 55%),#0b0b0b;
+    display:grid;place-items:center}
+  .playbtn{width:76px;height:76px;border-radius:999px;background:var(--acid);display:grid;place-items:center;
+    box-shadow:0 10px 40px rgba(200,255,26,.25);cursor:pointer;transition:transform .15s}
+  .playbtn:hover{transform:scale(1.06)}
+  .playbtn svg{width:30px;height:30px;fill:#0A0A0A;margin-left:4px}
+  /* watermark overlay */
+  .wm{position:absolute;inset:0;pointer-events:none;overflow:hidden;display:flex;flex-wrap:wrap;
+    transform:rotate(-24deg) scale(1.4);align-content:center;justify-content:center;gap:34px 54px;z-index:3}
+  .wm span{font-size:12px;color:rgba(242,242,240,.09);font-weight:600;white-space:nowrap;letter-spacing:.04em}
+  /* fake controls */
+  .controls{position:absolute;left:0;right:0;bottom:0;z-index:4;padding:12px 14px;
+    background:linear-gradient(transparent,rgba(0,0,0,.65));display:flex;align-items:center;gap:12px}
+  .controls .track{flex:1;height:4px;background:rgba(255,255,255,.2);border-radius:999px;position:relative}
+  .controls .track i{position:absolute;left:0;top:0;bottom:0;width:32%;background:var(--acid);border-radius:999px}
+  .controls .t{font-size:12px;color:#ddd;font-variant-numeric:tabular-nums}
+  .controls svg{width:16px;height:16px;fill:#fff}
+
+  .wm-note{display:flex;align-items:center;gap:8px;color:var(--muted-2);font-size:12px;margin:10px 2px 0}
+  .wm-note svg{width:14px;height:14px;stroke:var(--muted-2);fill:none;stroke-width:1.8}
+
+  .lesson-head{margin:22px 2px 0}
+  .lesson-head .crumb{color:var(--muted);font-size:12.5px;margin-bottom:8px}
+  .lesson-head .crumb b{color:var(--acid)}
+  .lesson-head h1{font-size:26px;font-weight:800;letter-spacing:-.01em}
+  .lesson-head p{color:var(--muted);font-size:15px;margin-top:10px;max-width:68ch}
+
+  .actions{display:flex;align-items:center;gap:14px;margin:22px 2px 0;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:14px;border-radius:9px;padding:11px 18px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);cursor:pointer;transition:.15s}
+  .btn:hover{border-color:var(--muted-2)}
+  .btn.acid{background:var(--acid);color:#0A0A0A;border-color:var(--acid)}
+  .btn.done{background:#17230a;color:var(--acid);border-color:var(--acid-dim)}
+  .btn svg{width:17px;height:17px}
+  .next{color:var(--muted);font-size:13.5px;display:inline-flex;align-items:center;gap:7px}
+  .next:hover{color:var(--ink)}
+
+  /* resources */
+  .res{margin:30px 2px 0}
+  .res h3{font-size:14px;font-weight:800;margin-bottom:12px}
+  .reslist{display:grid;gap:10px}
+  .resitem{display:flex;align-items:center;gap:13px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+  .resitem .ic{width:36px;height:36px;border-radius:8px;background:#1c2408;display:grid;place-items:center;flex:none}
+  .resitem .ic svg{width:18px;height:18px;stroke:var(--acid);fill:none;stroke-width:1.7}
+  .resitem .rt{flex:1}
+  .resitem .rt b{font-weight:700;font-size:14px}
+  .resitem .rt span{display:block;color:var(--muted);font-size:12px}
+  .resitem .view{font-size:13px;font-weight:700;color:var(--acid);border:1px solid var(--acid-dim);border-radius:7px;padding:7px 13px;background:none;cursor:pointer}
+  .resitem .lock{color:var(--muted-2);font-size:11.5px;display:flex;align-items:center;gap:5px}
+  .resitem .lock svg{width:12px;height:12px;stroke:var(--muted-2);fill:none;stroke-width:2}
+
+  /* curriculum sidebar */
+  .curri{position:sticky;top:78px;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .curri .ch{padding:16px 17px;border-bottom:1px solid var(--line)}
+  .curri .ch .star{color:var(--acid)}
+  .curri .ch .ct{font-weight:800;font-size:15px;margin-bottom:10px}
+  .curri .prog{display:flex;align-items:center;gap:10px}
+  .curri .prog .bar{flex:1;height:6px;background:#262622;border-radius:999px;overflow:hidden}
+  .curri .prog .bar i{display:block;height:100%;background:var(--acid);border-radius:999px;transition:width .3s}
+  .curri .prog .pct{font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap}
+  .curri .items{max-height:62vh;overflow:auto}
+  .li{display:flex;align-items:center;gap:11px;padding:12px 17px;border-bottom:1px solid #202020;cursor:pointer;transition:background .15s}
+  .li:hover{background:var(--surface)}
+  .li.active{background:#15180c}
+  .li .mk{width:21px;height:21px;border-radius:999px;border:1.6px solid #3a3a36;flex:none;display:grid;place-items:center}
+  .li.done .mk{background:var(--acid);border-color:var(--acid)}
+  .li.done .mk svg{width:12px;height:12px;stroke:#0A0A0A;fill:none;stroke-width:3}
+  .li.active .mk{border-color:var(--acid)}
+  .li .lt{flex:1;font-size:13.5px}
+  .li.active .lt{font-weight:700}
+  .li .dur{color:var(--muted-2);font-size:12px}
+
+  /* toast */
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(120%);
+    background:var(--acid);color:#0A0A0A;font-weight:800;font-size:14px;padding:13px 22px;border-radius:999px;
+    box-shadow:0 12px 40px rgba(0,0,0,.4);transition:transform .35s cubic-bezier(.2,.8,.2,1);z-index:50}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+
+  @media (max-width:900px){
+    .layout{grid-template-columns:1fr}
+    .curri{position:static;order:-1}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="#" class="back">← Creativos UGC Realistas</a>
+    <a href="#" class="brandmark">TRAMA<span class="dot">.</span><span class="labs">LABS</span></a>
+    <div class="who"><span>Melina Gómez</span><span class="av">M</span></div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- MAIN -->
+  <main>
+    <div class="player-wrap" id="player" oncontextmenu="return false">
+      <div class="poster">
+        <div class="playbtn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+      </div>
+      <div class="wm" id="wm"></div>
+      <div class="controls">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <span class="t">3:12</span>
+        <div class="track"><i></i></div>
+        <span class="t">9:48</span>
+        <svg viewBox="0 0 24 24"><path d="M4 8h4l5-4v16l-5-4H4z"/></svg>
+      </div>
+    </div>
+
+    <div class="wm-note">
+      <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
+      Contenido protegido · marca de agua con tus datos · no está permitido descargar ni compartir.
+    </div>
+
+    <div class="lesson-head">
+      <div class="crumb">Lección <b>4</b> de 12 · Módulo: Grabación</div>
+      <h1>El gancho de los primeros 3 segundos</h1>
+      <p>Cómo abrir el video para que no te pasen de largo: el patrón de interrupción, la promesa y el error más común que mata el alcance. Practicá con el ejercicio del final.</p>
+    </div>
+
+    <div class="actions">
+      <button class="btn acid" id="complete">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>
+        Marcar como completada
+      </button>
+      <a href="#" class="next">Siguiente lección: Guion simple que convierte →</a>
+    </div>
+
+    <div class="res">
+      <h3>Recursos de la lección</h3>
+      <div class="reslist">
+        <div class="resitem">
+          <span class="ic"><svg viewBox="0 0 24 24"><path d="M6 2h8l4 4v16H6zM14 2v4h4"/></svg></span>
+          <div class="rt"><b>Plantilla de ganchos.pdf</b><span>12 estructuras para abrir tu video</span></div>
+          <span class="lock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg> solo lectura</span>
+          <button class="view">Ver</button>
+        </div>
+        <div class="resitem">
+          <span class="ic"><svg viewBox="0 0 24 24"><path d="M6 2h8l4 4v16H6zM14 2v4h4"/></svg></span>
+          <div class="rt"><b>Checklist de grabación.pdf</b><span>Antes de apretar REC</span></div>
+          <span class="lock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg> solo lectura</span>
+          <button class="view">Ver</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- CURRICULUM -->
+  <aside class="curri">
+    <div class="ch">
+      <div class="ct"><span class="star">★</span> Creativos UGC Realistas</div>
+      <div class="prog"><div class="bar"><i id="pbar" style="width:33%"></i></div><span class="pct" id="ppct">4/12</span></div>
+    </div>
+    <div class="items" id="items">
+      <div class="li done"><span class="mk"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><span class="lt">Qué es un buen UGC</span><span class="dur">6:20</span></div>
+      <div class="li done"><span class="mk"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><span class="lt">El error que mata el alcance</span><span class="dur">7:05</span></div>
+      <div class="li done"><span class="mk"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><span class="lt">Preparar la escena</span><span class="dur">5:40</span></div>
+      <div class="li active"><span class="mk"></span><span class="lt">El gancho de los primeros 3 segundos</span><span class="dur">9:48</span></div>
+      <div class="li"><span class="mk"></span><span class="lt">Guion simple que convierte</span><span class="dur">8:10</span></div>
+      <div class="li"><span class="mk"></span><span class="lt">Luz natural sin equipo</span><span class="dur">6:55</span></div>
+      <div class="li"><span class="mk"></span><span class="lt">Encuadre y estabilidad</span><span class="dur">5:30</span></div>
+      <div class="li"><span class="mk"></span><span class="lt">Hablarle a la cámara</span><span class="dur">7:40</span></div>
+    </div>
+  </aside>
+</div>
+
+<div class="toast" id="toast">✓ Lección completada · +50 puntos a tu Liga</div>
+
+<script>
+  // per-user watermark grid (intercala datos del alumno + "Propiedad de TRAMA.")
+  const user = 'Melina Gómez · melina@mail.com';
+  const marks = [user, 'Propiedad de TRAMA.'];
+  const wm = document.getElementById('wm');
+  wm.innerHTML = Array.from({length:60}).map((_,i)=>`<span>${marks[i % 2]}</span>`).join('');
+
+  // mark complete
+  const btn = document.getElementById('complete');
+  const activeLi = document.querySelector('.li.active');
+  let completed = false;
+  btn.addEventListener('click', ()=>{
+    if(completed) return; completed = true;
+    btn.classList.add('done');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Completada';
+    activeLi.classList.add('done');
+    activeLi.querySelector('.mk').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>';
+    document.getElementById('pbar').style.width = '42%';
+    document.getElementById('ppct').textContent = '5/12';
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 2600);
+  });
+
+  // deterrents (disuasivos — no son protección absoluta)
+  document.getElementById('player').addEventListener('contextmenu', e=>e.preventDefault());
+</script>
+
+<!-- TRAMA. LABS — wiring de la lección (login + contenido gated + completar) -->
+<script>
+(function(){
+  const params=new URLSearchParams(location.search);
+  const leccionId=params.get('id');
+  if(!leccionId) return; // sin id: queda el contenido de muestra (demo)
+  const getToken=()=>{ try{return localStorage.getItem('sb_token')}catch(e){return null} };
+  const token=getToken();
+  if(!token){ location.href='/app.html?next=labs'; return; }
+
+  function wm(id){ const el=document.getElementById('wm'); if(!el) return; const marks=[id,'Propiedad de TRAMA.']; el.innerHTML=Array.from({length:60}).map((_,i)=>'<span>'+marks[i%2]+'</span>').join(''); }
+  async function api(body){ const r=await fetch('/api/mi-perfil',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(body)}); return {status:r.status, data: await r.json().catch(()=>({}))}; }
+
+  (async()=>{
+    const {status, data}=await api({labs:'leccion', leccion_id:leccionId});
+    if(status===402 || (data&&data.necesitaSuscripcion)){ location.href='/tramalabs.html#precio'; return; }
+    if(!data||!data.leccion) return;
+    const L=data.leccion;
+    if(data.marca_agua) wm(data.marca_agua);
+    const h=document.querySelector('.lesson-head h1'); if(h&&L.titulo) h.textContent=L.titulo;
+    const p=document.querySelector('.lesson-head p'); if(p&&L.descripcion) p.textContent=L.descripcion;
+    // Video embed (Vimeo) dentro del player, debajo de la marca de agua
+    if(L.video_url){
+      const pw=document.getElementById('player');
+      const src=/^https?:/.test(L.video_url)?L.video_url:('https://player.vimeo.com/video/'+String(L.video_url).replace(/\D/g,''));
+      const ifr=document.createElement('iframe'); ifr.src=src; ifr.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0;z-index:1'; ifr.allow='autoplay; fullscreen; picture-in-picture'; ifr.allowFullscreen=true;
+      pw.querySelector('.controls')?.remove();
+      const poster=pw.querySelector('.poster'); if(poster) poster.replaceWith(ifr); else pw.prepend(ifr);
+    }
+    if(Array.isArray(L.recursos)&&L.recursos.length){
+      const rl=document.querySelector('.reslist');
+      if(rl) rl.innerHTML=L.recursos.map(r=>'<div class="resitem"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 2h8l4 4v16H6zM14 2v4h4"/></svg></span><div class="rt"><b>'+((r&&r.titulo)||'Recurso')+'</b></div><span class="lock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg> solo lectura</span><button class="view">Ver</button></div>').join('');
+    }
+  })();
+
+  // Botón "completar": handler real (reemplaza el de la demo)
+  const old=document.getElementById('complete');
+  if(old){
+    const btn=old.cloneNode(true); old.replaceWith(btn);
+    btn.addEventListener('click', async ()=>{
+      if(btn.classList.contains('done')) return;
+      const {data}=await api({labs:'completar', leccion_id:leccionId});
+      if(!data||!data.ok) return;
+      btn.classList.add('done'); btn.innerHTML='✓ Completada';
+      const t=document.getElementById('toast'); if(t){ t.textContent='✓ Lección completada'+(data.sumado?' · +'+data.sumado+' puntos a tu Liga':''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+      if(data.curso_completo && data.certificado){ setTimeout(()=>{ if(confirm('¡Completaste el curso! ¿Ver tu certificado?')) location.href='/certificado.html?codigo='+encodeURIComponent(data.certificado); }, 900); }
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biblioteca de prompts — TRAMA. LABS</title>
+<meta name="description" content="Banco de prompts de TRAMA. LABS: la imagen, el vídeo y los formatos. Copiá, pegá y listo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A0A;--surface:#141414;--surface-2:#191919;--line:#2A2A28;
+    --ink:#F2F2F0;--muted:#8E8E88;--acid:#C8FF1A;--acid-dim:#9ec219;--maxw:1200px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  a{color:inherit;text-decoration:none}
+  .display{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;line-height:.95}
+
+  /* header */
+  header{position:sticky;top:0;z-index:50;background:rgba(10,10,10,.85);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:62px}
+  .brand{display:flex;align-items:baseline;gap:2px;font-family:'Anton',sans-serif;font-size:21px}
+  .brand .dot{color:var(--acid)}
+  .brand .labs{color:var(--muted);margin-left:7px;font-size:13px;letter-spacing:.18em;align-self:center}
+  .nav a.back{font-size:13.5px;color:var(--muted)}
+  .nav a.back:hover{color:var(--ink)}
+
+  /* hero */
+  .lib-hero{padding:48px 0 30px}
+  .lib-hero .tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.16em;
+    background:var(--acid);color:#0A0A0A;padding:5px 10px;border-radius:6px;margin-bottom:18px}
+  .lib-hero h1{font-size:clamp(40px,7vw,78px);margin-bottom:14px}
+  .lib-hero p{color:var(--muted);font-size:17px;max-width:52ch}
+  .lib-hero p b{color:var(--ink);font-weight:700}
+
+  /* layout */
+  .layout{display:grid;grid-template-columns:260px 1fr;gap:40px;padding:20px 0 90px;align-items:start}
+  /* index */
+  .index{position:sticky;top:82px;background:var(--surface);border:1px solid var(--line);
+    border-radius:14px;padding:18px;max-height:calc(100vh - 110px);overflow:auto}
+  .index .lbl{font-size:11px;letter-spacing:.18em;color:var(--muted);font-weight:700;margin:0 0 12px}
+  .index .grp{margin-bottom:16px}
+  .index .grp>a{display:flex;align-items:center;gap:9px;font-weight:800;font-size:14.5px;margin-bottom:7px}
+  .index .grp>a .k{width:19px;height:19px;border-radius:5px;background:var(--acid);color:#0A0A0A;
+    display:grid;place-items:center;font-size:11px;font-weight:800;flex:none}
+  .index .sub a{display:block;color:var(--muted);font-size:13px;padding:4px 0 4px 28px;transition:color .15s}
+  .index .sub a:hover{color:var(--ink)}
+
+  /* content */
+  .content{min-width:0}
+  .chap{margin-bottom:14px;display:flex;align-items:center;gap:12px;padding-top:8px}
+  .chap .k{width:34px;height:34px;border-radius:9px;background:var(--acid);color:#0A0A0A;
+    display:grid;place-items:center;font-family:'Anton',sans-serif;font-size:19px;flex:none}
+  .chap h2{font-size:clamp(26px,3.4vw,38px)}
+  .chap-intro{color:var(--muted);font-size:15px;margin:-4px 0 26px;max-width:62ch}
+  .group{margin:34px 0}
+  .group h3{font-size:20px;font-weight:800;margin-bottom:6px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+  .group .gnote{color:var(--muted);font-size:14px;margin:10px 0 18px}
+  .group .gnote.tip{border-left:2px solid var(--acid);padding-left:12px;color:#cfcfc9}
+
+  .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .pcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    display:flex;flex-direction:column}
+  .pcard .bar{display:flex;align-items:center;gap:8px;padding:11px 13px;border-bottom:1px solid var(--line);
+    background:var(--surface-2)}
+  .pcard .dots{display:flex;gap:4px}
+  .pcard .dots i{width:7px;height:7px;border-radius:999px;background:#3a3a36}
+  .pcard .plabel{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.04em;
+    color:var(--muted);text-transform:uppercase;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pcard .kind{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--muted);
+    border:1px solid var(--line);border-radius:5px;padding:3px 6px;text-transform:uppercase}
+  .copy{font-size:12px;font-weight:800;background:var(--acid);color:#0A0A0A;border:0;border-radius:6px;
+    padding:5px 11px;cursor:pointer;flex:none;transition:transform .12s}
+  .copy:active{transform:scale(.94)}
+  .copy.done{background:#0A0A0A;color:var(--acid);border:1px solid var(--acid-dim)}
+  .imgslot{aspect-ratio:16/10;background:
+      repeating-linear-gradient(45deg,#121212 0 10px,#0f0f0f 10px 20px);
+    border-bottom:1px solid var(--line);display:grid;place-items:center;color:#4a4a45;
+    font-size:11.5px;letter-spacing:.04em}
+  .imgslot .refs{position:absolute}
+  .pbody{padding:14px}
+  .ptext{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.65;color:#d6d6d0;
+    white-space:pre-wrap}
+  .ptext mark{background:transparent;color:var(--acid);font-weight:500}
+
+  /* assembly table */
+  .asm{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .asm table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .asm th,.asm td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  .asm th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .asm td:first-child{white-space:nowrap;font-weight:700}
+  .asm td .n{color:var(--acid);font-family:'JetBrains Mono',monospace;margin-right:8px}
+  .asm td em{color:var(--muted);font-style:normal;font-size:12px}
+  .asm .ex{font-family:'JetBrains Mono',monospace;font-size:12px;color:#cfcfc9}
+  .asm tr:last-child td{border-bottom:0}
+
+  footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-size:13px;text-align:center}
+
+  @media (max-width:860px){
+    .layout{grid-template-columns:1fr;gap:20px}
+    .index{position:static;max-height:none;display:none}
+    .cards{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a href="#" class="brand">TRAMA<span class="dot">.</span><span class="labs">LABS</span></a>
+    <a href="#" class="back">← Volver a los cursos</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="lib-hero">
+    <span class="tag">Banco de recursos</span>
+    <h1 class="display">Biblioteca de prompts</h1>
+    <p>Todo en el mismo lugar: <b>la imagen</b>, <b>el vídeo</b> y <b>los formatos</b>. Copiá, pegá y listo — cambiá lo que está <mark style="color:var(--acid);background:none">[entre corchetes]</mark> por lo tuyo.</p>
+  </div>
+
+  <div class="layout" id="lib-layout" style="visibility:hidden">
+    <aside class="index" id="index"></aside>
+    <main class="content" id="content"></main>
+  </div>
+</div>
+
+<footer>Biblioteca de TRAMA. LABS · se actualiza con cada curso nuevo.</footer>
+
+<script>
+(function(){
+  const SB_URL='https://mcpmabvxmdepastmpzbi.supabase.co';
+  const SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
+  const getToken=()=>{ try{return localStorage.getItem('sb_token')}catch(e){return null} };
+  const token=getToken();
+  const layout=document.getElementById('lib-layout');
+  const content=document.getElementById('content');
+  const idx=document.getElementById('index');
+  if(!token){ location.href='/app.html?next=labs'; return; }
+
+  const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const mark=s=>esc(s).replace(/\[([^\]]+)\]/g,'<mark>[$1]</mark>');
+  const slug=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+
+  function renderCard(c){
+    return '<article class="pcard"><div class="bar">'+
+      '<span class="dots"><i></i><i></i><i></i></span>'+
+      '<span class="plabel">'+esc(c.titulo||'')+'</span>'+
+      (c.etiqueta?'<span class="kind">'+esc(c.etiqueta)+'</span>':'')+
+      '<button class="copy" data-p="'+encodeURIComponent(c.prompt||'')+'">copiar</button></div>'+
+      (c.imagen_url?'<div class="imgslot" style="background:#0e0e0e"><img src="'+esc(c.imagen_url)+'" alt="" style="width:100%;height:100%;object-fit:cover"></div>':'')+
+      '<div class="pbody"><div class="ptext">'+mark(c.prompt||'')+'</div></div></article>';
+  }
+
+  function render(cats, prompts){
+    const byCat={};
+    (prompts||[]).forEach(p=>{ const cid=p.categoria_id||'sin'; (byCat[cid]=byCat[cid]||[]).push(p); });
+    const chapters=(cats||[]).filter(c=>byCat[c.id]).map(c=>({id:c.id,nombre:c.nombre,prompts:byCat[c.id]}));
+    if(byCat['sin']) chapters.push({id:'sin',nombre:'Otros',prompts:byCat['sin']});
+
+    if(!chapters.length){
+      content.innerHTML='<p style="color:var(--muted);font-size:16px">La biblioteca se está cargando. Muy pronto vas a tener acá todos los prompts. 🧵</p>';
+      idx.innerHTML=''; layout.style.visibility='visible'; return;
+    }
+    const letters='ABCDEFGHIJ';
+    idx.innerHTML='<p class="lbl">ÍNDICE</p>'+chapters.map((ch,i)=>{
+      const grupos=[...new Set(ch.prompts.map(p=>p.grupo).filter(Boolean))];
+      return '<div class="grp"><a href="#ch-'+slug(ch.nombre)+'"><span class="k">'+(letters[i]||'•')+'</span>'+esc(ch.nombre)+'</a>'+
+        '<div class="sub">'+grupos.map(g=>'<a href="#g-'+slug(g)+'">'+esc(g)+'</a>').join('')+'</div></div>';
+    }).join('');
+
+    content.innerHTML=chapters.map((ch,i)=>{
+      const grupos=[]; const seen={};
+      ch.prompts.slice().sort((a,b)=>(a.orden||0)-(b.orden||0)).forEach(p=>{
+        const g=p.grupo||'';
+        if(!(g in seen)){ seen[g]=grupos.length; grupos.push({nombre:g,cards:[]}); }
+        grupos[seen[g]].cards.push(p);
+      });
+      return '<section><div class="chap" id="ch-'+slug(ch.nombre)+'"><span class="k">'+(letters[i]||'•')+'</span><h2 class="display">'+esc(ch.nombre)+'</h2></div>'+
+        grupos.map(g=>'<div class="group" '+(g.nombre?'id="g-'+slug(g.nombre)+'"':'')+'>'+
+          (g.nombre?'<h3>'+esc(g.nombre)+'</h3>':'')+
+          '<div class="cards">'+g.cards.map(renderCard).join('')+'</div></div>').join('')+
+        '</section>';
+    }).join('');
+    layout.style.visibility='visible';
+  }
+
+  document.addEventListener('click', async e=>{
+    const b=e.target.closest('.copy'); if(!b) return;
+    const txt=decodeURIComponent(b.dataset.p);
+    try{ await navigator.clipboard.writeText(txt); }
+    catch(_){ const t=document.createElement('textarea'); t.value=txt; document.body.appendChild(t); t.select(); try{document.execCommand('copy');}catch(e){} t.remove(); }
+    const old=b.textContent; b.textContent='¡copiado!'; b.classList.add('done');
+    setTimeout(()=>{b.textContent=old; b.classList.remove('done');},1400);
+  });
+
+  (async()=>{
+    try{
+      const cats=await fetch(SB_URL+'/rest/v1/categorias?tipo=eq.prompt&select=id,nombre,slug,orden&order=orden.asc',{headers:{apikey:SB_ANON,Authorization:'Bearer '+SB_ANON}}).then(r=>r.ok?r.json():[]).catch(()=>[]);
+      const res=await fetch('/api/mi-perfil',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({labs:'prompts'})});
+      if(res.status===402){ location.href='/tramalabs.html#precio'; return; }
+      const data=await res.json().catch(()=>({}));
+      render(cats, (data&&data.prompts)||[]);
+    }catch(err){ location.href='/tramalabs.html#precio'; }
+  })();
+})();
+</script>
+</body>
+</html>

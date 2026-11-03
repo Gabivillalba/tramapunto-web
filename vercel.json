@@ -5,6 +5,7 @@
   ],
    "rewrites": [
     { "source": "/mp/callback", "destination": "/api/mi-perfil?mp_oauth=callback" },
-    { "source": "/api/mp/webhook", "destination": "/api/mp-webhook" }
+    { "source": "/api/mp/webhook", "destination": "/api/mp-webhook" },
+    { "source": "/labs", "destination": "/tramalabs.html" }
   ]
 }

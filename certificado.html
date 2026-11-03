@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificado — TRAMA. LABS</title>
+<meta name="description" content="Verificá un certificado de TRAMA. LABS por su código.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A0A;--surface:#141414;--line:#2A2A28;--ink:#F2F2F0;
+    --muted:#8E8E88;--acid:#C8FF1A;--acid-dim:#9ec219;--maxw:1040px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#070707;color:var(--ink);font-family:'Inter',system-ui,sans-serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased;padding:34px 20px 60px}
+  .wrap{max-width:var(--maxw);margin:0 auto}
+  .display{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;line-height:.95}
+  a{color:inherit}
+
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:baseline;gap:2px;font-family:'Anton',sans-serif;font-size:21px;letter-spacing:.02em}
+  .brand .dot{color:var(--acid)}
+  .brand .labs{color:var(--muted);margin-left:7px;font-size:14px;letter-spacing:.18em;align-self:center}
+  .btns{display:flex;gap:10px}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:700;border-radius:999px;
+    padding:10px 18px;font-size:13.5px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--ink)}
+  .btn.acid{background:var(--acid);color:#0A0A0A;border-color:var(--acid)}
+
+  /* ---------- CERTIFICATE ---------- */
+  .cert{position:relative;background:
+      radial-gradient(120% 90% at 100% 0%, #16190c 0%, transparent 45%),
+      radial-gradient(120% 90% at 0% 100%, #11140a 0%, transparent 45%),
+      #0A0A0A;
+    border:1px solid #333a1c;border-radius:16px;
+    aspect-ratio:1.414/1;overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .frame{position:absolute;inset:16px;border:1px solid #2c3417;border-radius:9px;pointer-events:none}
+  .corner{position:absolute;width:46px;height:46px;border:2px solid var(--acid);opacity:.85}
+  .corner.tl{top:26px;left:26px;border-right:0;border-bottom:0}
+  .corner.tr{top:26px;right:26px;border-left:0;border-bottom:0}
+  .corner.bl{bottom:26px;left:26px;border-right:0;border-top:0}
+  .corner.br{bottom:26px;right:26px;border-left:0;border-top:0}
+  .orbit-bg{position:absolute;right:-90px;top:50%;transform:translateY(-50%);width:460px;opacity:.1}
+  .node{fill:var(--acid)}
+
+  .cert-inner{position:absolute;inset:0;display:flex;flex-direction:column;
+    padding:clamp(28px,5.5%,64px);z-index:2}
+  .cert-head{display:flex;justify-content:space-between;align-items:center}
+  .kicker{font-size:clamp(11px,1.2vw,13px);letter-spacing:.24em;color:var(--acid);font-weight:700;text-transform:uppercase}
+  .cert-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(8px,1.4vw,14px)}
+  .title{font-size:clamp(26px,4.6vw,52px);color:var(--ink)}
+  .given{font-size:clamp(12px,1.5vw,16px);color:var(--muted);letter-spacing:.02em}
+  .name{font-size:clamp(34px,6vw,72px);color:var(--acid);line-height:.98}
+  .course-line{font-size:clamp(13px,1.6vw,18px);color:#d8d8d2;max-width:34ch}
+  .course-line b{color:var(--ink);font-weight:800}
+  .cert-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+  .meta-row{display:flex;gap:clamp(20px,4vw,56px);flex-wrap:wrap}
+  .meta b{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-weight:700}
+  .meta span{font-size:clamp(13px,1.5vw,16px);color:var(--ink);font-weight:600}
+  .meta .code{font-family:'Anton',sans-serif;letter-spacing:.06em}
+  .verify{display:flex;align-items:center;gap:12px}
+  #qr{width:clamp(58px,8vw,84px);height:clamp(58px,8vw,84px);background:#fff;border-radius:7px;padding:5px;display:grid;place-items:center}
+  #qr img,#qr canvas{width:100%;height:100%;display:block}
+  .verify small{font-size:11px;color:var(--muted);max-width:14ch;line-height:1.35}
+  .seal{position:absolute;right:clamp(28px,5.5%,64px);top:clamp(28px,5.5%,64px);
+    width:clamp(54px,7vw,76px);height:clamp(54px,7vw,76px);border:1.5px solid var(--acid-dim);
+    border-radius:999px;display:grid;place-items:center;text-align:center;color:var(--acid);
+    font-size:9px;letter-spacing:.1em;text-transform:uppercase;line-height:1.3;font-weight:700}
+
+  /* ---------- VERIFY PANEL ---------- */
+  .verify-panel{margin-top:30px;background:var(--surface);border:1px solid var(--line);
+    border-radius:14px;padding:22px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .verify-panel .vp-txt{flex:1;min-width:220px}
+  .verify-panel h3{font-size:16px;font-weight:800;margin-bottom:4px}
+  .verify-panel p{color:var(--muted);font-size:13.5px}
+  .vp-form{display:flex;gap:10px}
+  .vp-form input{background:#0d0d0d;border:1px solid var(--line);border-radius:9px;
+    padding:11px 14px;color:var(--ink);font-size:14px;font-family:inherit;min-width:170px}
+  .vp-form input:focus{outline:2px solid var(--acid-dim);outline-offset:1px}
+  .status{margin-top:14px;font-size:13.5px;display:none;align-items:center;gap:8px}
+  .status.ok{display:inline-flex;color:var(--acid)}
+  .status.bad{display:inline-flex;color:#ff8e8e}
+
+  .foot-note{color:var(--muted);font-size:12px;margin-top:22px;text-align:center}
+
+  @media (max-width:640px){
+    .seal{display:none}
+    .verify small{display:none}
+  }
+
+  /* ---------- PRINT (A4 landscape) ---------- */
+  @page{size:A4 landscape;margin:0}
+  @media print{
+    body{background:#0A0A0A;padding:0}
+    .topbar,.verify-panel,.status,.foot-note{display:none!important}
+    .cert{border:0;border-radius:0;box-shadow:none;width:297mm;height:210mm;aspect-ratio:auto}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="#" class="brand">TRAMA<span class="dot">.</span><span class="labs">LABS</span></a>
+    <div class="btns">
+      <button class="btn" onclick="window.print()">Guardar PDF</button>
+      <a class="btn acid" href="https://tramapunto.com">Ir a TRAMA. LABS</a>
+    </div>
+  </div>
+
+  <!-- CERTIFICATE -->
+  <div class="cert" id="cert">
+    <div class="frame"></div>
+    <span class="corner tl"></span><span class="corner tr"></span>
+    <span class="corner bl"></span><span class="corner br"></span>
+    <svg class="orbit-bg" viewBox="-200 -200 400 400" aria-hidden="true">
+      <circle cx="0" cy="0" r="150" fill="none" stroke="var(--acid)" stroke-width="1"/>
+      <circle cx="0" cy="0" r="95" fill="none" stroke="var(--acid)" stroke-width="1"/>
+      <circle class="node" cx="150" cy="0" r="7"/><circle class="node" cx="-67" cy="67" r="6"/>
+      <circle class="node" cx="0" cy="-95" r="5"/><circle class="node" cx="0" cy="0" r="10"/>
+    </svg>
+
+    <div class="seal">Liga<br>TRAMA.</div>
+
+    <div class="cert-inner">
+      <div class="cert-head">
+        <span class="brand" style="font-size:19px">TRAMA<span class="dot">.</span><span class="labs" style="font-size:12px">LABS</span></span>
+      </div>
+
+      <div class="cert-body">
+        <div class="title display">Certificado<br>de finalización</div>
+        <div>
+          <div class="given">Otorgado a</div>
+          <div class="name display" id="c-name">Melina Gómez</div>
+        </div>
+        <div class="course-line">por completar el curso <b id="c-course">Creativos UGC Realistas</b> en TRAMA. LABS.</div>
+      </div>
+
+      <div class="cert-foot">
+        <div class="meta-row">
+          <div class="meta"><b>Fecha</b><span id="c-date">3 de noviembre de 2026</span></div>
+          <div class="meta"><b>Código</b><span class="code" id="c-code">TL-7F3A-9K2D</span></div>
+        </div>
+        <div class="verify">
+          <div id="qr" aria-hidden="true"></div>
+          <small>Verificá en tramapunto.com/certificado</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VERIFY PANEL -->
+  <div class="verify-panel">
+    <div class="vp-txt">
+      <h3>¿Verificás un certificado?</h3>
+      <p>Pegá el código que figura en el certificado para confirmar que es auténtico.</p>
+      <div class="status" id="status"></div>
+    </div>
+    <form class="vp-form" id="vform" onsubmit="return verificar(event)">
+      <input type="text" id="vinput" placeholder="TL-7F3A-9K2D" aria-label="Código del certificado">
+      <button class="btn acid" type="submit">Verificar</button>
+    </form>
+  </div>
+
+  <p class="foot-note">Vista de demostración. En producción, la página consulta la base de TRAMA. y confirma el certificado por su código.</p>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  // ---- Datos del certificado: desde la URL (?nombre=&curso=&fecha=&codigo=) o demo ----
+  const q = new URLSearchParams(location.search);
+  const data = {
+    nombre: q.get('nombre') || 'Melina Gómez',
+    curso:  q.get('curso')  || 'Creativos UGC Realistas',
+    fecha:  q.get('fecha')  || '3 de noviembre de 2026',
+    codigo: q.get('codigo') || 'TL-7F3A-9K2D'
+  };
+  document.getElementById('c-name').textContent   = data.nombre;
+  document.getElementById('c-course').textContent = data.curso;
+  document.getElementById('c-date').textContent   = data.fecha;
+  document.getElementById('c-code').textContent   = data.codigo;
+
+  // Verificación real contra la base (vista pública certificados_verificacion).
+  const SB_URL='https://mcpmabvxmdepastmpzbi.supabase.co';
+  const SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
+  function pintar(d){
+    if(d.nombre_mostrado) document.getElementById('c-name').textContent=d.nombre_mostrado;
+    if(d.curso) document.getElementById('c-course').textContent=d.curso;
+    if(d.emitido_at){ try{ document.getElementById('c-date').textContent=new Date(d.emitido_at).toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'}); }catch(_){} }
+  }
+  if(q.get('codigo')){
+    fetch(SB_URL+'/rest/v1/certificados_verificacion?codigo=eq.'+encodeURIComponent(data.codigo)+'&select=*&limit=1',{headers:{apikey:SB_ANON,Authorization:'Bearer '+SB_ANON}})
+      .then(r=>r.ok?r.json():[]).then(rows=>{ if(rows&&rows[0]) pintar(rows[0]); }).catch(()=>{});
+  }
+
+  // ---- QR a la URL de verificación (con fallback si la librería no carga) ----
+  try{
+    const url = 'https://tramapunto.com/certificado?codigo=' + encodeURIComponent(data.codigo);
+    if (window.QRCode){
+      new QRCode(document.getElementById('qr'), {text:url, width:160, height:160,
+        colorDark:'#0A0A0A', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.M});
+    } else { throw new Error('no-qr'); }
+  }catch(e){
+    const el=document.getElementById('qr');
+    el.style.cssText='width:auto;height:auto;background:transparent;padding:0;text-align:right';
+    el.innerHTML='<span style="font-family:Anton,sans-serif;color:var(--acid);font-size:14px;letter-spacing:.05em">'+data.codigo+'</span>';
+  }
+
+  // ---- Verificación (demo: compara con el código mostrado) ----
+  async function verificar(e){
+    e.preventDefault();
+    const val=document.getElementById('vinput').value.trim().toUpperCase();
+    const st=document.getElementById('status');
+    if(!val){return false;}
+    st.className='status'; st.style.display='inline-flex'; st.textContent='Verificando…';
+    try{
+      const r=await fetch(SB_URL+'/rest/v1/certificados_verificacion?codigo=eq.'+encodeURIComponent(val)+'&select=*&limit=1',{headers:{apikey:SB_ANON,Authorization:'Bearer '+SB_ANON}});
+      const rows=r.ok?await r.json():[];
+      if(rows&&rows[0]){ st.className='status ok'; st.innerHTML='✓ Certificado válido — '+rows[0].curso+' · '+(rows[0].nombre_mostrado||''); }
+      else { st.className='status bad'; st.innerHTML='✕ No encontramos un certificado con ese código.'; }
+    }catch(_){ st.className='status bad'; st.innerHTML='✕ No se pudo verificar ahora. Probá de nuevo.'; }
+    return false;
+  }
+</script>
+</body>
+</html>

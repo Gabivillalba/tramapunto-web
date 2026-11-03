@@ -337,6 +337,11 @@ body.t-creator .spin{border-top-color:var(--purple)}
 </style>
 </head>
 <body>
+<!-- AVISO TEMPORAL — desperfectos técnicos (quitar cuando vuelva el servicio) -->
+<div id="statusBar" style="position:fixed;left:0;right:0;bottom:0;z-index:9000;background:#1a1407;border-top:1px solid #4d3a0a;color:#ffd98a;padding:.7rem 1rem;font-size:.82rem;display:flex;align-items:center;justify-content:center;gap:.9rem;text-align:center;line-height:1.45;flex-wrap:wrap">
+  <span>🛠️ Estamos con unos ajustes técnicos y puede que algo no ande del todo por unos días. Ya lo estamos resolviendo — gracias por bancarnos.</span>
+  <button onclick="document.getElementById('statusBar').style.display='none'" style="background:none;border:1px solid #6b5212;color:#ffd98a;border-radius:4px;padding:.25rem .6rem;cursor:pointer;font-size:.75rem;white-space:nowrap">Entendido ✕</button>
+</div>
 
 <nav>
   <a class="logo" href="/">TRAMA.</a>

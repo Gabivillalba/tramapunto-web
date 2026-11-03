@@ -166,6 +166,66 @@
   .ia-img img{width:100%;height:100%;object-fit:cover;display:block}
   .final .img.has .ph{display:none}
   .final .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+
+  /* ===== Resto de secciones de la landing ===== */
+  .sec-wrap{position:relative;z-index:1}
+  .sec-wrap.dark{background:#09090e}
+  .sec-wrap.dark2{background:#0b0b10}
+  .sec{max-width:1120px;margin:0 auto;padding:5rem 1.5rem}
+  .sec-tag{font-size:.72rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--acid)}
+  .sec-tag.p{color:var(--creator)}
+  .sec-line{width:40px;height:2px;background:var(--acid);margin:.7rem 0 1.1rem}
+  .sec-line.p{background:var(--creator)}
+  .sec-h2{font-family:Anton,sans-serif;font-weight:400;text-transform:uppercase;line-height:.98;font-size:clamp(2rem,5.5vw,3.5rem)}
+  .sec-sub{color:#bdbdb6;font-size:clamp(1rem,2.2vw,1.12rem);line-height:1.5;max-width:560px;margin-top:1rem}
+  .cards4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.5rem}
+  .card4{background:#101014;border:1px solid var(--line);border-radius:12px;padding:1.4rem}
+  .card4 .num{font-family:Anton,sans-serif;color:var(--acid);font-size:1.1rem}
+  .card4 .ic{font-size:1.6rem;margin:.5rem 0}
+  .card4 .t{font-weight:800;font-size:.98rem;margin-bottom:.35rem}
+  .card4 .d{color:#a7a7a0;font-size:.85rem;line-height:1.45}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;margin-top:.5rem}
+  .feats2{display:flex;flex-direction:column;gap:1.2rem;margin-top:1.8rem}
+  .ft{display:flex;gap:.9rem;align-items:flex-start}
+  .ft .fi{flex:none;width:42px;height:42px;border-radius:10px;background:#15150f;border:1px solid #2c2c14;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+  .ft.p .fi{background:#160a24;border-color:#3a1a5a}
+  .ft h4{font-size:.95rem;font-weight:800;margin-bottom:.25rem}
+  .ft p{color:#a7a7a0;font-size:.85rem;line-height:1.45}
+  .ctabox{background:#101014;border:1px solid var(--line);border-radius:14px;padding:2rem}
+  .ctabox .ct-tag{font-size:.7rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--acid)}
+  .ctabox h3{font-family:Anton,sans-serif;font-weight:400;text-transform:uppercase;font-size:1.6rem;margin:.6rem 0 .5rem}
+  .ctabox p{color:#a7a7a0;font-size:.9rem;line-height:1.5;margin-bottom:1.3rem}
+  .btn-wide{display:block;text-align:center;margin-top:.5rem;padding:.9rem;border-radius:5px;font-weight:800;font-size:.85rem}
+  .btn-wide.solid{background:var(--acid);color:#0a0a0a}
+  .btn-wide.out{border:1px solid var(--line);color:#ddd}
+  .cre-vis{aspect-ratio:1/1;border-radius:14px;border:1px solid var(--line);background:#101014;overflow:hidden;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:4px;padding:4px}
+  .cre-vis .ct{border-radius:8px;background:#161620;position:relative;overflow:hidden}
+  .cre-vis .ct::after{content:"";position:absolute;inset:0;background:radial-gradient(100% 100% at 30% 20%,rgba(179,136,255,.25),transparent 60%),#15131c}
+  .cre-vis img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+  .liga-cta{text-align:center;margin-top:2.5rem}
+  .tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:2.5rem}
+  .tc{background:#101014;border:1px solid var(--line);border-radius:12px;padding:1.6rem}
+  .tc .q{color:#d6d6cf;font-size:.92rem;line-height:1.55;margin-bottom:1.2rem}
+  .tc .q strong{color:#fff}
+  .tc .au{display:flex;align-items:center;gap:.7rem}
+  .tc .av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;flex:none}
+  .tc .nm{font-weight:700;font-size:.85rem}
+  .tc .ro{color:var(--muted);font-size:.72rem}
+  .seo{border-top:1px solid var(--line);max-width:1120px;margin:0 auto;padding:2.4rem 1.5rem}
+  .seo .lab{font-size:.7rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.9rem}
+  .seo .chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.4rem}
+  .seo .chips a{font-size:.78rem;color:#b9b9b2;border:1px solid var(--line);padding:.35rem .7rem;border-radius:3px}
+  .seo .chips a:hover{border-color:var(--acid);color:var(--acid)}
+  .ft-wrap{border-top:1px solid var(--line);background:#070709;padding:3rem 1.5rem}
+  .ft-in{max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;gap:2rem;flex-wrap:wrap}
+  .ft-logo{font-family:Anton,sans-serif;font-size:1.6rem}.ft-logo .d{color:var(--acid)}
+  .ft-tag{color:var(--muted);font-size:.85rem;margin-top:.5rem;max-width:280px}
+  .ft-copy{color:#555;font-size:.75rem;margin-top:1rem}
+  .ft-links{display:flex;flex-wrap:wrap;gap:.5rem 1.4rem;align-content:flex-start;max-width:420px}
+  .ft-links a{color:#b9b9b2;font-size:.82rem}
+  .ft-links a:hover{color:var(--acid)}
+  @media(max-width:860px){.cards4{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr;gap:2rem}.tgrid{grid-template-columns:1fr}}
+  @media(max-width:560px){.cards4{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -256,6 +316,86 @@
       <div class="vsbadge">VS</div>
     </div>
 
+    <!-- Cómo funciona -->
+    <section class="sec-wrap">
+      <div class="sec">
+        <div class="sec-tag">El proceso</div><div class="sec-line"></div>
+        <h2 class="sec-h2">Sin vueltas.<br>Así funciona.</h2>
+        <p class="sec-sub">Cuatro pasos, de registrarte a tener el contacto.</p>
+        <div class="cards4">
+          <div class="card4"><div class="num">01</div><div class="ic">🙌</div><div class="t">Sumate gratis</div><div class="d">Los creadores arman su perfil sin costo. Las marcas crean su cuenta. Empezar no cuesta nada.</div></div>
+          <div class="card4"><div class="num">02</div><div class="ic">✅</div><div class="t">Verificamos</div><div class="d">Revisamos cada perfil a mano antes de publicarlo. Nada de bots ni cuentas infladas.</div></div>
+          <div class="card4"><div class="num">03</div><div class="ic">🔍</div><div class="t">Conectan</div><div class="d">La marca busca, encuentra al creador que encaja y desbloquea su contacto. Hablan directo.</div></div>
+          <div class="card4"><div class="num">04</div><div class="ic">🤝</div><div class="t">Trabajan</div><div class="d">Arreglan la colaboración y la tarifa entre ellos. TRAMA. no cobra comisión al creador.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Para marcas -->
+    <section class="sec-wrap dark">
+      <div class="sec">
+        <div class="two">
+          <div>
+            <div class="sec-tag">Para marcas</div><div class="sec-line"></div>
+            <h2 class="sec-h2">Dejá de buscar.<br>Empezá a conectar.</h2>
+            <p class="sec-sub">En 48 horas tenés opciones reales sobre la mesa.</p>
+            <div class="feats2">
+              <div class="ft"><div class="fi">⚡</div><div><h4>Red verificada</h4><p>Todos los creators pasaron por validación de TRAMA. Métricas reales, audiencias reales.</p></div></div>
+              <div class="ft"><div class="fi">🎨</div><div><h4>Estrategia incluida</h4><p>Te acompañamos en el brief, la negociación y el seguimiento. No sos un ticket de soporte.</p></div></div>
+              <div class="ft"><div class="fi">📊</div><div><h4>Resultados medibles</h4><p>KPIs claros desde el inicio. Al final sabés qué funcionó y por qué.</p></div></div>
+            </div>
+          </div>
+          <div class="ctabox">
+            <div class="ct-tag">Empezá ahora</div>
+            <h3>Contanos qué necesitás</h3>
+            <p>Sin compromiso. Entendemos tu proyecto y te proponemos un camino.</p>
+            <a href="./marcas.html" class="btn-wide solid">Registrarme como marca →</a>
+            <a href="./campanas.html" class="btn-wide out">📋 Publicá tu campaña gratis →</a>
+            <a href="https://wa.me/541157976633?text=Hola%20TRAMA.%2C%20quiero%20saber%20m%C3%A1s" target="_blank" class="btn-wide out">Hablar con el equipo →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Para creators -->
+    <section class="sec-wrap">
+      <div class="sec">
+        <div class="two">
+          <div class="cre-vis" id="creVis"></div>
+          <div>
+            <div class="sec-tag p">Para creators</div><div class="sec-line p"></div>
+            <h2 class="sec-h2">Tu contenido vale.<br>Que te paguen por eso.</h2>
+            <p class="sec-sub">En TRAMA. no sos un número. Sos un perfil verificado que las marcas encuentran y contactan directo.</p>
+            <div class="feats2">
+              <div class="ft p"><div class="fi">✨</div><div><h4>Registrate gratis</h4><p>Cargás tu perfil y quedás visible para las marcas de la red.</p></div></div>
+              <div class="ft p"><div class="fi">💬</div><div><h4>Campañas abiertas</h4><p>Las marcas publican briefs y vos te postulás a las que van con tu nicho.</p></div></div>
+              <div class="ft p"><div class="fi">💸</div><div><h4>0% de comisión</h4><p>Vos ponés tu tarifa y la arreglás directo con la marca.</p></div></div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.8rem">
+              <a href="./registro.html" class="btn btn-creator">Subir mi perfil →</a>
+              <a href="./oportunidades.html" class="btn btn-creator">📋 Ver campañas →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Liga TRAMA. -->
+    <section class="sec-wrap dark2">
+      <div class="sec">
+        <div class="sec-tag">Liga TRAMA. 🔥</div><div class="sec-line"></div>
+        <h2 class="sec-h2">No es solo estar.<br>Es competir.</h2>
+        <p class="sec-sub">Cada día una misión. Los más constantes suben en la bolsa, y el #1 del mes se corona campeón.</p>
+        <div class="cards4">
+          <div class="card4"><div class="num">01</div><div class="ic">🎯</div><div class="t">Misión diaria</div><div class="d">Retos, trivias y tendencias que cambian cada semana. Entrás, cumplís y sumás puntos.</div></div>
+          <div class="card4"><div class="num">02</div><div class="ic">🔥</div><div class="t">Racha que pesa</div><div class="d">Días seguidos suman más índice y te suben en la bolsa. Si cortás, bajás.</div></div>
+          <div class="card4"><div class="num">03</div><div class="ic">👑</div><div class="t">Campeón del mes</div><div class="d">El #1 se corona, suma el doble el mes siguiente y arranca con ventaja.</div></div>
+          <div class="card4"><div class="num">04</div><div class="ic">📬</div><div class="t">Agenda semanal</div><div class="d">Cada lunes te llega por mail la agenda de desafíos. Sin excusas.</div></div>
+        </div>
+        <div class="liga-cta"><a href="./registro.html" class="btn btn-marca">Sumarme a la Liga →</a></div>
+      </div>
+    </section>
+
     <!-- Avatares IA (sección live) -->
     <section class="ia" id="ia">
       <div class="ia-in">
@@ -273,6 +413,49 @@
       </div>
     </section>
 
+    <!-- Testimonios -->
+    <section class="sec-wrap">
+      <div class="sec">
+        <div class="sec-tag">Historias reales</div><div class="sec-line"></div>
+        <h2 class="sec-h2">Lo dicen ellos,<br>no nosotros.</h2>
+        <p class="sec-sub">Personas con las que laburamos de verdad.</p>
+        <div class="tgrid">
+          <div class="tc"><p class="q">"Llevábamos meses buscando. TRAMA. nos presentó tres perfiles en dos días. <strong>La campaña superó todas las expectativas.</strong>"</p><div class="au"><div class="av" style="background:#1a2a0a;color:var(--acid)">MG</div><div><div class="nm">Marcela G.</div><div class="ro">Brand Manager · Consumo masivo</div></div></div></div>
+          <div class="tc"><p class="q">"Antes las colaboraciones llegaban sueltas y a veces no cobraba bien. Ahora tengo <strong>propuestas que tienen sentido y el pago siempre en tiempo.</strong>"</p><div class="au"><div class="av" style="background:#160a24;color:var(--creator)">RP</div><div><div class="nm">Rodrigo P.</div><div class="ro">Creator · Tech & Lifestyle · 380K</div></div></div></div>
+          <div class="tc"><p class="q">"Lo que más valoro es que no son intermediarios pasivos. <strong>Estuvieron en todo el proceso</strong>, del brief a la revisión."</p><div class="au"><div class="av" style="background:#0a1a2a;color:#63d6ff">VC</div><div><div class="nm">Valeria C.</div><div class="ro">Directora Comercial · Indumentaria</div></div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEO: nichos y ciudades -->
+    <div class="seo">
+      <div class="lab">Creadores por nicho</div>
+      <div class="chips">
+        <a href="./creadores-ugc-lifestyle.html">Lifestyle</a>
+        <a href="./creadores-ugc-belleza.html">Belleza</a>
+        <a href="./creadores-ugc-moda.html">Moda</a>
+        <a href="./creadores-ugc-gastronomia.html">Gastronomía</a>
+        <a href="./creadores-ugc-humor.html">Humor</a>
+        <a href="./creadores-ugc-viajes.html">Viajes</a>
+        <a href="./creadores-ugc-fitness.html">Fitness</a>
+        <a href="./creadores-ugc-tech.html">Tech</a>
+        <a href="./creadores-ugc-musica.html">Música</a>
+        <a href="./creadores-ugc-gaming.html">Gaming</a>
+        <a href="./creadores-ugc-fotografia.html">Fotografía</a>
+        <a href="./creadores-ugc-educacion.html">Educación</a>
+        <a href="./creadores-ugc-mascotas.html" style="color:var(--creator);border-color:#3a1a5a">🐾 Mascotas</a>
+      </div>
+      <div class="lab">Creadores por ciudad</div>
+      <div class="chips">
+        <a href="./creadores-ugc-buenos-aires.html">Buenos Aires</a>
+        <a href="./creadores-ugc-cordoba.html">Córdoba</a>
+        <a href="./creadores-ugc-rosario.html">Rosario</a>
+        <a href="./creadores-ugc-mendoza.html">Mendoza</a>
+        <a href="./creadores-ugc-mar-del-plata.html">Mar del Plata</a>
+        <a href="./creadores-ugc-la-plata.html">La Plata</a>
+      </div>
+    </div>
+
     <!-- Sección final editable (texto + slot imagen + CTA) -->
     <section class="final">
       <div class="final-in">
@@ -287,6 +470,26 @@
     </section>
 
   </div>
+
+  <footer class="ft-wrap">
+    <div class="ft-in">
+      <div>
+        <div class="ft-logo">TRAMA<span class="d">.</span></div>
+        <div class="ft-tag">Conectamos marcas con creators que mueven.</div>
+        <div class="ft-copy">© 2026 TRAMA. Buenos Aires, Argentina.</div>
+      </div>
+      <div class="ft-links">
+        <a href="./index.html#como">Cómo funciona</a>
+        <a href="./marcas.html">Marcas</a>
+        <a href="./registro.html">Creators</a>
+        <a href="./oportunidades.html">Campañas</a>
+        <a href="./campanas.html">Publicar campaña</a>
+        <a href="#ia">Avatares IA</a>
+        <a href="./guias.html">Guías</a>
+        <a href="./terminos.html">Términos</a>
+      </div>
+    </div>
+  </footer>
 
 <script>
   // Imágenes de la landing: se cargan desde /api/precios (campo `landing`, editable
@@ -319,6 +522,12 @@
     let cfg=null;
     try{ const r=await fetch('/api/precios'); if(r.ok){ const j=await r.json(); cfg=j.landing||null; } }catch(_){}
     buildMosaic(cfg && cfg.hero_mosaico);
+    // mini-mosaico de creators (3x3): usa las mismas imágenes del mosaico si hay
+    (function(){
+      const cv=document.getElementById('creVis'); if(!cv) return;
+      const imgs=(cfg&&cfg.hero_mosaico)||[];
+      for(let i=0;i<9;i++){ const d=document.createElement('div'); d.className='ct'; if(imgs.length) d.innerHTML='<img src="'+imgs[i%imgs.length]+'" alt="" loading="lazy">'; cv.appendChild(d); }
+    })();
     if(cfg){
       setImg('marcaImg', cfg.marcas_img);
       setImg('creatorImg', cfg.creators_img);

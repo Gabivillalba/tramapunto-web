@@ -15,6 +15,7 @@
 
 import { getPrecios } from './precios.js';
 import { decrypt } from '../lib/mp-crypto.js';
+import { presignPutUrl } from '../lib/r2-presign.js';
 const DIAS_ACCESO = 60;
 
 // TRAMA. LABS: identidad del alumno por su JWT (igual que mi-perfil.js).
@@ -98,6 +99,31 @@ async function registrarGratis({ creator_id, marca_email, marca_nombre, campania
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
+  }
+
+  // ══ TRAMA. LABS — lista de espera (interesados pre-lanzamiento) ══
+  // Se guarda en R2 con key aleatoria (privada, no listable, no adivinable),
+  // porque la base está restringida hasta el reset. No necesita login.
+  if (req.body && req.body.accion === 'labs_waitlist') {
+    const email = String(req.body.email || '').trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: 'Email inválido' });
+    const need = ['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET'];
+    if (need.some((k) => !process.env[k])) return res.status(503).json({ error: 'No configurado' });
+    try {
+      const rand = (globalThis.crypto?.randomUUID?.() || String(Math.random()).slice(2) + Date.now()).replace(/-/g, '');
+      const key = `waitlist/${Date.now()}_${rand}.json`;
+      const putUrl = presignPutUrl({
+        accountId: process.env.R2_ACCOUNT_ID, accessKeyId: process.env.R2_ACCESS_KEY_ID,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY, bucket: process.env.R2_BUCKET,
+        key, expiresIn: 300,
+      });
+      const r = await fetch(putUrl, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, fuente: String(req.body.fuente || 'labs-hub'), ts: new Date().toISOString() }) });
+      if (!r.ok) throw new Error('R2 ' + r.status);
+      return res.status(200).json({ ok: true });
+    } catch (e) {
+      console.error('labs_waitlist error:', e);
+      return res.status(500).json({ error: 'No se pudo registrar' });
+    }
   }
 
   // ══ TRAMA. LABS — suscripción mensual (preapproval recurrente de MercadoPago) ══

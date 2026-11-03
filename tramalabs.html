@@ -391,6 +391,14 @@
           <p class="note">En pesos. Acceso a todo el catálogo.</p>
           <button id="btn-suscribir" class="btn btn-acid">Suscribirme</button>
           <p class="fine">Pagás seguro con MercadoPago. Cancelás cuando quieras.</p>
+          <div style="border-top:1px solid var(--line);margin-top:16px;padding-top:14px">
+            <p class="fine" style="margin:0 0 8px">¿Todavía no abrió? Dejanos tu mail y te avisamos en el lanzamiento.</p>
+            <form id="wl-form" style="display:flex;gap:8px">
+              <input id="wl-email" type="email" required placeholder="tu@email.com" style="flex:1;min-width:0;background:#0d0d0d;border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--ink);font:inherit;font-size:14px">
+              <button class="btn btn-acid" type="submit" style="padding:10px 16px">Avisame</button>
+            </form>
+            <p id="wl-msg" class="fine" style="margin-top:8px"></p>
+          </div>
         </div>
       </div>
     </div>
@@ -448,6 +456,22 @@
       else { alert(d&&d.error ? d.error : 'No se pudo iniciar la suscripción. Probá de nuevo.'); }
     }catch(e){ alert('No se pudo iniciar la suscripción.'); }
     btn.disabled=false; btn.textContent=prev;
+  });
+
+  // Lista de espera: guarda el email (en R2, server-side) para avisar en el lanzamiento.
+  const wl=document.getElementById('wl-form');
+  if(wl) wl.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const email=(document.getElementById('wl-email').value||'').trim();
+    const msg=document.getElementById('wl-msg');
+    if(!email) return;
+    msg.textContent='Enviando…';
+    try{
+      const r=await fetch('/api/crear-preferencia',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accion:'labs_waitlist', email, fuente:'labs-hub'})});
+      const d=await r.json().catch(()=>({}));
+      if(d&&d.ok){ wl.reset(); msg.innerHTML='✓ ¡Listo! Te avisamos cuando abra.'; }
+      else { msg.textContent=(d&&d.error)||'No se pudo registrar. Probá de nuevo.'; }
+    }catch(_){ msg.textContent='No se pudo registrar. Probá de nuevo.'; }
   });
 })();
 </script>

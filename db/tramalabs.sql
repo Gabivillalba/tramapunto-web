@@ -192,6 +192,19 @@ grant select on public.recursos_publicos          to anon, authenticated;
 grant select on public.prompts_publicos           to anon, authenticated;
 grant select on public.certificados_verificacion  to anon, authenticated;
 
+-- Lista de espera (interesados pre-lanzamiento). Pre-12 los signups se guardan
+-- en R2 con key aleatoria (la base está restringida); esta tabla es para
+-- importarlos y usarlos post-lanzamiento (y para nuevos signups con la base viva).
+create table if not exists public.labs_interesados (
+  id         uuid primary key default gen_random_uuid(),
+  email      text not null,
+  fuente     text,
+  created_at timestamptz default now(),
+  unique (email)
+);
+alter table public.labs_interesados enable row level security;
+-- Sin policy de cliente: inserción y lectura solo server-side.
+
 -- Precio de la suscripción (editable desde el admin, igual que precio_bolsa).
 insert into public.config (clave, valor) values ('precio_labs', '30000')
 on conflict (clave) do nothing;

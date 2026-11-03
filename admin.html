@@ -312,6 +312,7 @@ textarea.em-inp{resize:vertical;line-height:1.5}
     <button class="tab" id="tabResenas" onclick="switchTab('resenas')">⭐ Reseñas</button>
     <button class="tab" id="tabComunicacion" onclick="switchTab('comunicacion')">✉ Emails</button>
     <button class="tab" id="tabConfig" onclick="switchTab('config')">💲 Precios</button>
+    <button class="tab" id="tabLanding" onclick="switchTab('landing');loadLanding()">🖼️ Landing</button>
   </div>
 
   <!-- ══ VISTA DASHBOARD ══ -->
@@ -489,6 +490,63 @@ textarea.em-inp{resize:vertical;line-height:1.5}
 
       <div class="cfg-note">
         ⚠️ Cambiar un precio no afecta pagos ya realizados. Los nuevos checkouts usan el valor actualizado.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ VISTA LANDING (imágenes editables) ══ -->
+  <div class="tab-view" id="viewLanding">
+    <div style="padding:1.5rem;max-width:720px">
+      <div style="font-size:1rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.35rem">Imágenes de la landing</div>
+      <div style="font-size:.8rem;color:var(--muted2);margin-bottom:1.5rem;line-height:1.55">
+        Subí las imágenes y tocá <b>Guardar landing</b>. Se reflejan en la landing nueva en ~30s. Formatos: JPG, PNG, WEBP.
+      </div>
+      <style>
+        .ldg-field{margin-bottom:1.3rem}
+        .ldg-field > label{display:block;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.5rem}
+        .ldg-field input[type=file]{font-size:.8rem;color:var(--muted2)}
+        .ldg-field input[type=text], .ldg-field textarea{width:100%;background:#0d0d0d;border:1px solid #222;color:#eee;padding:.6rem .7rem;border-radius:4px;font-size:.85rem;font-family:inherit}
+        .ldg-prev{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem}
+        .ldg-thumb{position:relative;width:76px;height:76px;border-radius:6px;overflow:hidden;border:1px solid #222}
+        .ldg-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+        .ldg-thumb button{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.72);color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:.7rem;line-height:1}
+      </style>
+
+      <div class="cfg-card" style="padding:1.3rem">
+        <div class="ldg-field">
+          <label>🎞️ Mosaico del hero (varias)</label>
+          <input type="file" accept="image/*" multiple onchange="landingPick(this,'hero_mosaico',true)">
+          <div class="ldg-prev" id="prevHero"></div>
+        </div>
+        <div class="ldg-field">
+          <label>🏢 Imagen "Para marcas"</label>
+          <input type="file" accept="image/*" onchange="landingPick(this,'marcas_img',false)">
+          <div class="ldg-prev" id="prevMarcas"></div>
+        </div>
+        <div class="ldg-field">
+          <label>🎥 Imagen "Para creators"</label>
+          <input type="file" accept="image/*" onchange="landingPick(this,'creators_img',false)">
+          <div class="ldg-prev" id="prevCreators"></div>
+        </div>
+        <div class="ldg-field">
+          <label>🤖 Imagen "Avatares IA"</label>
+          <input type="file" accept="image/*" onchange="landingPick(this,'ia_img',false)">
+          <div class="ldg-prev" id="prevIa"></div>
+        </div>
+      </div>
+
+      <div style="font-size:.9rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin:1.5rem 0 .8rem">Sección final (texto + imagen + botón)</div>
+      <div class="cfg-card" style="padding:1.3rem">
+        <div class="ldg-field"><label>Título</label><input type="text" id="lf-titulo" placeholder="¿Listo para tu próxima campaña?"></div>
+        <div class="ldg-field"><label>Texto</label><textarea id="lf-texto" rows="2" placeholder="Sumá tu marca o armá tu perfil..."></textarea></div>
+        <div class="ldg-field"><label>Texto del botón</label><input type="text" id="lf-cta-label" placeholder="Empezar ahora →"></div>
+        <div class="ldg-field"><label>Link del botón</label><input type="text" id="lf-cta-url" placeholder="./registro.html"></div>
+        <div class="ldg-field"><label>Imagen de la sección final</label><input type="file" accept="image/*" onchange="landingPick(this,'final_img',false)"><div class="ldg-prev" id="prevFinal"></div></div>
+      </div>
+
+      <div style="margin-top:1.3rem;display:flex;align-items:center;gap:1rem">
+        <button class="cfg-save" onclick="saveLanding()">💾 Guardar landing</button>
+        <span id="landingMsg" style="font-size:.85rem"></span>
       </div>
     </div>
   </div>
@@ -1293,6 +1351,64 @@ async function crearCampaniaDesdeMarca(id, tieneBrief){
     showToast('✓ Campaña creada (en revisión). Activala en Campañas.','ok');
     switchTab('campanias'); loadCampanias();
   }catch(e){ showToast('Error: '+e.message,'err'); }
+}
+
+// ══════════ LANDING (imágenes editables) ══════════
+let LANDING={hero_mosaico:[],marcas_img:'',creators_img:'',ia_img:'',final:{titulo:'',texto:'',img:'',cta_label:'',cta_url:''}};
+
+async function loadLanding(){
+  try{
+    const {data}=await adminCall('get_config');
+    const row=(data||[]).find(x=>x.clave==='landing_media');
+    if(row&&row.valor){ try{ const o=JSON.parse(row.valor); LANDING=Object.assign({hero_mosaico:[],marcas_img:'',creators_img:'',ia_img:'',final:{}}, o); if(!LANDING.final) LANDING.final={}; }catch(_){ } }
+  }catch(e){ showToast('No se pudo cargar: '+e.message,'err'); }
+  renderLanding();
+}
+function ldgThumb(url,onRemove){ return '<div class="ldg-thumb"><img src="'+url+'"><button onclick="'+onRemove+'">✕</button></div>'; }
+function renderLanding(){
+  const f=LANDING.final||(LANDING.final={});
+  const set=(id,html)=>{ const e=document.getElementById(id); if(e) e.innerHTML=html; };
+  set('prevHero',(LANDING.hero_mosaico||[]).map((u,i)=>ldgThumb(u,'ldgRemoveHero('+i+')')).join(''));
+  set('prevMarcas', LANDING.marcas_img?ldgThumb(LANDING.marcas_img,"ldgClear('marcas_img')"):'');
+  set('prevCreators', LANDING.creators_img?ldgThumb(LANDING.creators_img,"ldgClear('creators_img')"):'');
+  set('prevIa', LANDING.ia_img?ldgThumb(LANDING.ia_img,"ldgClear('ia_img')"):'');
+  set('prevFinal', f.img?ldgThumb(f.img,"ldgClearFinalImg()"):'');
+  const val=(id,v)=>{ const e=document.getElementById(id); if(e) e.value=v||''; };
+  val('lf-titulo',f.titulo); val('lf-texto',f.texto); val('lf-cta-label',f.cta_label); val('lf-cta-url',f.cta_url);
+}
+async function ldgUploadOne(file,slot){
+  const {putUrl,publicUrl}=await adminCall('landing_presign',{content_type:file.type,scope:slot});
+  const up=await fetch(putUrl,{method:'PUT',headers:{'Content-Type':file.type},body:file});
+  if(!up.ok) throw new Error('No se pudo subir a R2');
+  return publicUrl;
+}
+async function landingPick(input,slot,multi){
+  const files=[...input.files]; input.value=''; if(!files.length) return;
+  const msg=document.getElementById('landingMsg'); msg.textContent='Subiendo...'; msg.style.color='#aaa';
+  try{
+    for(const file of files){
+      if(!file.type.startsWith('image/')) continue;
+      const url=await ldgUploadOne(file, slot==='final_img'?'final':slot);
+      if(slot==='hero_mosaico'){ LANDING.hero_mosaico=LANDING.hero_mosaico||[]; LANDING.hero_mosaico.push(url); }
+      else if(slot==='final_img'){ LANDING.final=LANDING.final||{}; LANDING.final.img=url; }
+      else { LANDING[slot]=url; }
+      if(!multi) break;
+    }
+    renderLanding(); msg.textContent='Subido ✓ — acordate de Guardar'; msg.style.color='#C8FF1A';
+  }catch(e){ msg.textContent='Error: '+e.message; msg.style.color='#ff6b6b'; }
+}
+function ldgRemoveHero(i){ LANDING.hero_mosaico.splice(i,1); renderLanding(); }
+function ldgClear(slot){ LANDING[slot]=''; renderLanding(); }
+function ldgClearFinalImg(){ LANDING.final.img=''; renderLanding(); }
+async function saveLanding(){
+  LANDING.final=LANDING.final||{};
+  LANDING.final.titulo=(document.getElementById('lf-titulo').value||'').trim();
+  LANDING.final.texto=(document.getElementById('lf-texto').value||'').trim();
+  LANDING.final.cta_label=(document.getElementById('lf-cta-label').value||'').trim();
+  LANDING.final.cta_url=(document.getElementById('lf-cta-url').value||'').trim();
+  const msg=document.getElementById('landingMsg'); msg.textContent='Guardando...'; msg.style.color='#aaa';
+  try{ await adminCall('set_config',{clave:'landing_media', valor:JSON.stringify(LANDING)}); msg.textContent='Guardado ✓'; msg.style.color='#C8FF1A'; }
+  catch(e){ msg.textContent='Error: '+e.message; msg.style.color='#ff6b6b'; }
 }
 
 // ══════════ CONFIGURACIÓN (PRECIOS) ══════════

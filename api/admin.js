@@ -12,6 +12,8 @@
 // en el servidor con una comparación de tiempo constante propia (sin
 // depender del módulo 'crypto', para que funcione en cualquier runtime).
 
+import { presignPutUrl, buildMediaTarget } from '../lib/r2-presign.js';
+
 const SB_URL      = process.env.SUPABASE_URL;
 const SB_SERVICE  = process.env.SUPABASE_SERVICE_KEY;
 const ADMIN_PASS  = process.env.ADMIN_PASS;
@@ -386,6 +388,30 @@ export default async function handler(req, res) {
       case 'get_config': {
         const data = await sb('config?select=*&order=clave');
         return res.status(200).json({ ok: true, data });
+      }
+
+      // — Firmar subida de imagen de la landing a R2 (admin) —
+      // El navegador del admin pide una URL temporal y sube la imagen DIRECTO a R2.
+      // El Secret de R2 nunca sale del server. Gateado por x-admin-pass (ya validado arriba).
+      case 'landing_presign': {
+        const need = ['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET', 'R2_PUBLIC_BASE'];
+        if (need.some(k => !process.env[k])) {
+          return res.status(503).json({ error: 'Almacenamiento no configurado' });
+        }
+        const ct = String(payload.content_type || '');
+        const slot = String(payload.scope || 'hero').replace(/[^a-z0-9_-]/gi, '').slice(0, 20) || 'hero';
+        const target = buildMediaTarget({
+          scope: `landing/${slot}`, family: 'image', ownerId: 'admin',
+          contentType: ct, publicBase: process.env.R2_PUBLIC_BASE,
+        });
+        if (!target) return res.status(400).json({ error: 'Tipo de archivo no permitido (solo imagen)' });
+        const putUrl = presignPutUrl({
+          accountId: process.env.R2_ACCOUNT_ID,
+          accessKeyId: process.env.R2_ACCESS_KEY_ID,
+          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+          bucket: process.env.R2_BUCKET, key: target.key, expiresIn: 900,
+        });
+        return res.status(200).json({ ok: true, putUrl, publicUrl: target.publicUrl });
       }
 
       // — Limpiar cuentas de Auth sin perfil (huérfanas) —

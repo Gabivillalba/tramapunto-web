@@ -4,6 +4,7 @@
     { "path": "/api/emails-cron", "schedule": "0 13 * * *" }
   ],
    "rewrites": [
+    { "source": "/", "destination": "/home.html" },
     { "source": "/mp/callback", "destination": "/api/mi-perfil?mp_oauth=callback" },
     { "source": "/api/mp/webhook", "destination": "/api/mp-webhook" }
   ]

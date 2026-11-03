@@ -1579,5 +1579,7 @@ function showToast(msg,type='ok'){
   clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);
 }
 </script>
+<!-- Entrada directa a la bolsa desde la home nueva (/) -->
+<script>try{if((location.hash+location.search).indexOf('bolsa')>-1){window.addEventListener('load',function(){try{(typeof checkAndShowBolsa==='function')?checkAndShowBolsa():(typeof showPage==='function'&&showPage('bolsa'));}catch(e){}});}}catch(e){}</script>
 </body>
 </html>

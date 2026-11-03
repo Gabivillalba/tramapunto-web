@@ -41,11 +41,33 @@ export async function getPrecios() {
 
 function fmt(n){ return '$' + Number(n).toLocaleString('es-AR'); }
 
+// Imágenes de la landing, editables desde el admin (clave `landing_media` en config).
+// Devuelve el objeto parseado o null. La landing cae a placeholders si es null.
+async function getLandingMedia() {
+  try {
+    const r = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/config?clave=eq.landing_media&select=valor`,
+      {
+        headers: {
+          'apikey': process.env.SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`,
+        },
+      }
+    );
+    if (!r.ok) return null;
+    const rows = await r.json();
+    if (!rows || !rows[0] || !rows[0].valor) return null;
+    return JSON.parse(rows[0].valor);
+  } catch (_) {
+    return null;
+  }
+}
+
 export default async function handler(req, res) {
-  // Cache corto: si cambiás un precio en el admin, se refleja en ~30s
+  // Cache corto: si cambiás un precio o una imagen en el admin, se refleja en ~30s
   res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate');
 
-  const p = await getPrecios();
+  const [p, landing] = await Promise.all([getPrecios(), getLandingMedia()]);
 
   return res.status(200).json({
     bolsa: {
@@ -58,5 +80,6 @@ export default async function handler(req, res) {
       primer_gratis: p.primer_gratis,
     },
     moneda: 'ARS',
+    landing: landing || null,
   });
 }

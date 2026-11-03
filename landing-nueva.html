@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRAMA. — Hero "Constelación real" (preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A0A;
+    --acid:#C8FF1A;      /* verde ácido / marcas */
+    --creator:#B388FF;   /* lila / creators */
+    --ink:#F4F4F0;
+    --muted:#8a8a82;
+    --line:#1c1c1c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  body{overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+
+  /* ===== NAV ===== */
+  .nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.85rem 1.5rem;background:rgba(10,10,10,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06)}
+  .nav .logo{font-family:Anton,sans-serif;font-size:1.5rem;letter-spacing:.02em;color:#fff;text-transform:uppercase}
+  .nav .logo .d{color:var(--acid)}
+  .nav ul{display:flex;gap:1.5rem;list-style:none}
+  .nav ul a{font-size:.82rem;font-weight:600;color:#b9b9b2;letter-spacing:.01em;transition:color .15s}
+  .nav ul a:hover{color:var(--acid)}
+  .nav .right{display:flex;align-items:center;gap:.8rem}
+  .nav-cta{background:var(--acid);color:#0a0a0a;font-weight:800;font-size:.8rem;padding:.6rem 1rem;border-radius:4px;white-space:nowrap}
+  .nav-account{font-size:.8rem;font-weight:600;color:#e8e8e2;display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap}
+  .nav-account .dot{width:7px;height:7px;border-radius:50%;background:var(--creator);box-shadow:0 0 8px var(--creator)}
+  .ham{display:none;flex-direction:column;gap:4px;background:none;border:none;cursor:pointer;padding:6px}
+  .ham span{width:22px;height:2px;background:#e8e8e2;border-radius:2px}
+  .nav-login{font-size:.8rem;font-weight:700;color:#e8e8e2;border:1px solid rgba(255,255,255,.18);padding:.55rem .95rem;border-radius:4px;white-space:nowrap}
+  .nav-login:hover{border-color:var(--acid);color:var(--acid)}
+  .right-in{display:none;align-items:center;gap:.7rem}
+  body.logged .right-out{display:none}
+  body.logged .right-in{display:inline-flex}
+  .nav-account .dot{background:var(--creator)} /* lila = creator; lima para marca */
+  .nav-logout{font-size:.76rem;color:var(--muted)}
+  .nav-logout:hover{color:#e8e8e2}
+  .preview-toggle{position:fixed;right:14px;bottom:14px;z-index:99;background:#141414;border:1px solid #2a2a2a;color:#cfcfc8;font-size:.72rem;padding:.5rem .85rem;border-radius:100px;cursor:pointer}
+  .preview-toggle b{color:var(--acid)}
+  .nav-ghost{font-size:.8rem;font-weight:600;color:#b9b9b2;white-space:nowrap}
+  .nav-ghost:hover{color:var(--acid)}
+  @media(max-width:860px){.nav ul,.nav-ghost,.right-out,.right-in,body.logged .right-in{display:none}.ham{display:flex}}
+
+  /* ===== HERO ===== */
+  .hero{position:relative;min-height:92vh;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:7rem 1rem 4rem}
+
+  /* mosaico de contenido real (placeholder) */
+  .mosaic{position:absolute;inset:-4%;z-index:0;display:grid;grid-template-columns:repeat(8,1fr);grid-auto-rows:13.5vh;gap:10px;transform:rotate(-4deg) scale(1.15);opacity:.5;filter:grayscale(.2)}
+  .tile{border-radius:10px;background:#141414;position:relative;overflow:hidden}
+  .tile::after{content:"";position:absolute;inset:0;background:
+    radial-gradient(120% 120% at 30% 20%, rgba(179,136,255,.22), transparent 60%),
+    radial-gradient(120% 120% at 80% 90%, rgba(200,255,26,.16), transparent 55%),
+    linear-gradient(160deg,#1a1a22,#0e0e0e)}
+  .tile.t-tall{grid-row:span 2}
+  .tile .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;opacity:.25;z-index:1}
+
+  /* capa orbit/node */
+  .netlayer{position:absolute;inset:0;z-index:1;pointer-events:none}
+  .node{fill:var(--acid)}
+  .node.pulse{animation:pulse 3.2s ease-in-out infinite}
+  .node.pulse.d{animation-delay:1.4s}
+  @keyframes pulse{0%,100%{opacity:.25}50%{opacity:1}}
+  .edge{stroke:var(--acid);stroke-width:1;opacity:.14}
+
+  /* velo para legibilidad (foto editorial oscura con degradé) */
+  .veil{position:absolute;inset:0;z-index:2;background:
+    radial-gradient(90% 70% at 50% 42%, rgba(10,10,10,.35), rgba(10,10,10,.9) 78%),
+    linear-gradient(180deg, rgba(10,10,10,.75) 0%, rgba(10,10,10,.2) 35%, rgba(10,10,10,.85) 100%)}
+
+  .hero-in{position:relative;z-index:3;max-width:960px;text-align:center}
+  .eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-size:.72rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--acid);border:1px solid rgba(200,255,26,.3);border-radius:100px;padding:.45rem .9rem;margin-bottom:1.6rem}
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--acid);box-shadow:0 0 10px var(--acid)}
+  h1{font-family:Anton,Inter,sans-serif;font-weight:400;line-height:.94;letter-spacing:.01em;text-transform:uppercase;font-size:clamp(2.7rem,8.5vw,6.2rem)}
+  h1 .acid{color:var(--acid)}
+  .sub{max-width:620px;margin:1.5rem auto 0;color:#cfcfc8;font-size:clamp(1rem,2.4vw,1.2rem);line-height:1.5}
+  .sub strong{color:var(--ink);font-weight:700}
+
+  .ctas{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:2.3rem}
+  .btn{font-weight:800;font-size:.9rem;letter-spacing:.02em;padding:1rem 1.6rem;border-radius:4px;border:1px solid transparent;transition:transform .15s,box-shadow .15s;display:inline-flex;align-items:center;gap:.4rem}
+  .btn:hover{transform:translateY(-2px)}
+  .btn-marca{background:var(--acid);color:#0a0a0a;box-shadow:0 0 0 rgba(200,255,26,.0)}
+  .btn-marca:hover{box-shadow:0 10px 30px rgba(200,255,26,.25)}
+  .btn-creator{background:transparent;color:var(--creator);border-color:rgba(179,136,255,.55)}
+  .btn-creator:hover{border-color:var(--creator);box-shadow:0 10px 30px rgba(179,136,255,.18)}
+
+  .proof{display:flex;gap:2.2rem;justify-content:center;flex-wrap:wrap;margin-top:3rem;padding-top:1.8rem;border-top:1px solid var(--line)}
+  .proof .n{font-family:Anton,sans-serif;font-size:1.5rem;color:var(--ink)}
+  .proof .l{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:.2rem}
+
+  /* ===== VS (secundario, debajo) ===== */
+  .vs-wrap{position:relative;z-index:1;border-top:1px solid var(--line);background:#0b0b0e}
+  .vs-head{text-align:center;padding:3.2rem 1rem 1rem}
+  .vs-head .s-tag{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .vs-head h2{font-family:Anton,sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(1.8rem,5vw,3rem);margin-top:.5rem;line-height:1}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:0;max-width:1100px;margin:1.5rem auto 0;position:relative}
+  .half{padding:2.6rem 2rem;position:relative}
+  .half.marca{border-right:1px solid var(--line)}
+  .half .tag{font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+  .half.marca .tag{color:var(--acid)} .half.creator .tag{color:var(--creator)}
+  .half h3{font-family:Anton,sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(1.4rem,3.4vw,2rem);line-height:1.02;margin:.7rem 0 .6rem}
+  .half p{color:#b9b9b2;font-size:.95rem;line-height:1.5;margin-bottom:1.2rem}
+  .half .mini{display:flex;gap:1.4rem;margin-top:1.3rem}
+  .half .mini .n{font-family:Anton,sans-serif;font-size:1.15rem}
+  .half .mini .l{font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .vsbadge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:#0a0a0a;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:Anton,sans-serif;font-size:1rem;color:var(--acid);z-index:2}
+
+  @media(max-width:720px){
+    .mosaic{grid-template-columns:repeat(5,1fr);grid-auto-rows:11vh}
+    .split{grid-template-columns:1fr}
+    .half.marca{border-right:none;border-bottom:1px solid var(--line)}
+    .vsbadge{display:none}
+    .proof{gap:1.4rem}
+  }
+  .note{max-width:960px;margin:0 auto;padding:2.4rem 1rem 3.5rem;color:var(--muted);font-size:.8rem;line-height:1.6;border-top:1px solid var(--line)}
+  .note b{color:var(--acid)}
+
+  /* ===== IA (etapa 3, teaser) ===== */
+  .ia{position:relative;padding:4.5rem 1.5rem;text-align:center;border-top:1px solid var(--line);
+      background:radial-gradient(120% 90% at 50% 0%, rgba(99,214,255,.07), transparent 60%),#0a0a0d}
+  .ia-in{max-width:760px;margin:0 auto}
+  .ia-badge{display:inline-flex;align-items:center;gap:.45rem;font-size:.66rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;
+      padding:.4rem .9rem;border-radius:100px;color:#0a0a0a;background:linear-gradient(90deg,var(--acid),#63d6ff)}
+  .ia-h{font-family:Anton,sans-serif;font-weight:400;text-transform:uppercase;line-height:1;margin:1.3rem 0 .8rem;
+      font-size:clamp(2rem,6vw,3.6rem);
+      background:linear-gradient(90deg,#fff 25%,#63d6ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .ia-sub{color:#c3c3bc;font-size:clamp(.95rem,2.2vw,1.1rem);line-height:1.55;max-width:600px;margin:0 auto}
+  .ia-sub strong{color:var(--acid)}
+  .ia-feats{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin:2rem 0}
+  .ia-feat{border:1px solid var(--line);border-radius:8px;padding:.9rem 1.2rem;min-width:150px;background:rgba(255,255,255,.02)}
+  .ia-feat .ic{font-size:1.2rem}
+  .ia-feat .t{font-weight:700;font-size:.85rem;margin-top:.3rem}
+  .ia-feat .d{font-size:.72rem;color:var(--muted);margin-top:.15rem}
+  .btn-ia{background:linear-gradient(90deg,var(--acid),#63d6ff);color:#0a0a0a;margin-top:.3rem}
+  .btn-ia:hover{box-shadow:0 10px 30px rgba(99,214,255,.25)}
+  .ia-note{font-size:.72rem;color:var(--muted);margin-top:.9rem;letter-spacing:.04em}
+
+  /* ===== Sección final (editable desde admin: texto + slot + CTA) ===== */
+  .final{border-top:1px solid var(--line);background:#0a0a0a;padding:5rem 1.5rem}
+  .final-in{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;gap:2.8rem;align-items:center}
+  .final .eyebrow{margin-bottom:1.1rem}
+  .final h2{font-family:Anton,sans-serif;font-weight:400;text-transform:uppercase;line-height:1;font-size:clamp(2rem,5vw,3.4rem)}
+  .final h2 .acid{color:var(--acid)}
+  .final p{color:#bdbdb6;font-size:1.05rem;line-height:1.5;margin:1rem 0 1.8rem;max-width:460px}
+  .final .img{aspect-ratio:4/3;border-radius:14px;background:#141414;border:1px solid var(--line);position:relative;overflow:hidden}
+  .final .img::after{content:"";position:absolute;inset:0;background:
+    radial-gradient(120% 120% at 25% 20%, rgba(179,136,255,.18), transparent 60%),
+    radial-gradient(120% 120% at 85% 90%, rgba(200,255,26,.14), transparent 55%),
+    linear-gradient(160deg,#1a1a22,#0e0e0e)}
+  .final .img .ph{position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;gap:.5rem;color:var(--muted);font-size:.82rem;letter-spacing:.04em}
+  @media(max-width:720px){.final-in{grid-template-columns:1fr;gap:1.6rem}.final .img{order:-1}}
+
+  /* imágenes editables desde el admin (ocultas hasta que se carguen) */
+  .tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+  .half-img{display:none;width:100%;aspect-ratio:16/7;border-radius:8px;overflow:hidden;margin-bottom:1.1rem;background:#141414}
+  .half-img.on{display:block}
+  .half-img img{width:100%;height:100%;object-fit:cover;display:block}
+  .ia-img{display:none;max-width:440px;margin:1.7rem auto 0;aspect-ratio:16/9;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+  .ia-img.on{display:block}
+  .ia-img img{width:100%;height:100%;object-fit:cover;display:block}
+  .final .img.has .ph{display:none}
+  .final .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+</style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a class="logo" href="./index.html">TRAMA<span class="d">.</span></a>
+    <ul>
+      <li><a href="./index.html#como">Cómo funciona</a></li>
+      <li><a href="./marcas.html">Marcas</a></li>
+      <li><a href="./index.html#creators">Creators</a></li>
+      <li><a href="./oportunidades.html">Campañas</a></li>
+      <li><a href="./index.html#liga">Liga 🔥</a></li>
+      <li><a href="#ia" style="color:#63d6ff">Avatares IA</a></li>
+    </ul>
+    <div class="right">
+      <a class="nav-ghost" href="./index.html">🔍 Encontrá tu creator</a>
+      <span class="right-out">
+        <a class="nav-login" href="./perfil.html">Ingresar</a>
+        <a class="nav-cta" href="./registro.html">Registrate</a>
+      </span>
+      <span class="right-in"><a class="nav-account" href="./perfil.html"><span class="dot"></span>Gabi</a><a class="nav-logout" href="#">Salir</a></span>
+      <button class="ham" aria-label="Menú"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <!-- MOSAICO: cada .tile es un slot de imagen de creador real (o AI). Hoy placeholder. -->
+    <div class="mosaic" id="mosaic"></div>
+
+    <!-- capa orbit/node -->
+    <svg class="netlayer" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+      <line class="edge" x1="180" y1="150" x2="520" y2="330"/>
+      <line class="edge" x1="520" y1="330" x2="980" y2="210"/>
+      <line class="edge" x1="520" y1="330" x2="640" y2="620"/>
+      <line class="edge" x1="980" y1="210" x2="1050" y2="520"/>
+      <line class="edge" x1="180" y1="150" x2="240" y2="560"/>
+      <line class="edge" x1="640" y1="620" x2="1050" y2="520"/>
+      <circle class="node pulse" cx="180" cy="150" r="4"/>
+      <circle class="node" cx="520" cy="330" r="5"/>
+      <circle class="node pulse d" cx="980" cy="210" r="4"/>
+      <circle class="node" cx="640" cy="620" r="4"/>
+      <circle class="node pulse" cx="1050" cy="520" r="3.5"/>
+      <circle class="node" cx="240" cy="560" r="3.5"/>
+    </svg>
+
+    <div class="veil"></div>
+
+    <div class="hero-in">
+      <span class="eyebrow"><span class="dot"></span> La red UGC real de Argentina</span>
+      <h1>El contenido conecta.<br><span class="acid">TRAMA.</span> lo transforma.</h1>
+      <p class="sub">+130 creadores verificados <strong>uno por uno, a mano</strong>. Las marcas encuentran contenido real; los creadores ponen su precio. Nosotros conectamos — sin intermediarios ni cuentas infladas.</p>
+      <div class="ctas">
+        <a class="btn btn-marca" href="#">Soy marca →</a>
+        <a class="btn btn-creator" href="#">Soy creator →</a>
+      </div>
+      <div class="proof">
+        <div><div class="n">+130</div><div class="l">Verificados a mano</div></div>
+        <div><div class="n">0%</div><div class="l">Comisión al creador</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VS como sección secundaria -->
+  <div class="vs-wrap">
+    <div class="split" style="margin-top:3.5rem">
+      <div class="half marca">
+        <div class="half-img" id="marcaImg"></div>
+        <div class="tag">Para marcas</div>
+        <h3>Encontrá el creator que tu marca necesita.</h3>
+        <p>Red verificada con datos reales. Vos elegís, nosotros conectamos. Hablás directo, sin intermediarios.</p>
+        <a class="btn btn-marca" href="#">Soy marca →</a>
+        <div class="mini">
+          <div><div class="n">+130</div><div class="l">Creators</div></div>
+          <div><div class="n">Directo</div><div class="l">Sin intermediarios</div></div>
+        </div>
+      </div>
+      <div class="half creator">
+        <div class="half-img" id="creatorImg"></div>
+        <div class="tag">Para creators</div>
+        <h3>Convertí tu audiencia en tu trabajo.</h3>
+        <p>Cargá tu perfil y accedé a marcas que buscan exactamente lo que vos tenés. Gratis, y vos ponés tu precio.</p>
+        <a class="btn btn-creator" href="#">Soy creator →</a>
+        <div class="mini">
+          <div><div class="n">$0</div><div class="l">Registrarte</div></div>
+          <div><div class="n">0%</div><div class="l">Comisión</div></div>
+        </div>
+      </div>
+      <div class="vsbadge">VS</div>
+    </div>
+
+    <!-- Avatares IA (sección live) -->
+    <section class="ia" id="ia">
+      <div class="ia-in">
+        <span class="ia-badge">◆ Avatares IA · Nuevo</span>
+        <h2 class="ia-h">Avatares IA para marcas.</h2>
+        <p class="ia-sub">Contenido a escala, sin logística de rodaje. Y fiel a lo nuestro: <strong>siempre etiquetados como IA</strong>. Acá nunca se hace pasar un avatar por una persona — transparencia, siempre.</p>
+        <div class="ia-img" id="iaImg"></div>
+        <div class="ia-feats">
+          <div class="ia-feat"><div class="ic">⚡</div><div class="t">A escala</div><div class="d">Volumen sin rodaje</div></div>
+          <div class="ia-feat"><div class="ic">🎭</div><div class="t">A tu medida</div><div class="d">Voz y estilo de tu marca</div></div>
+          <div class="ia-feat"><div class="ic">🏷️</div><div class="t">100% etiquetado</div><div class="d">Siempre marcado como IA</div></div>
+        </div>
+        <a class="btn btn-ia" href="mailto:info.trama@gmail.com?subject=Quiero%20avatares%20IA%20para%20mi%20marca">Hablemos de tu proyecto →</a>
+        <div class="ia-note">Escribinos a info.trama@gmail.com y lo armamos a tu medida.</div>
+      </div>
+    </section>
+
+    <!-- Sección final editable (texto + slot imagen + CTA) -->
+    <section class="final">
+      <div class="final-in">
+        <div class="txt">
+          <span class="eyebrow"><span class="dot"></span> Último paso</span>
+          <h2 id="finalTitulo">¿Listo para tu <span class="acid">próxima campaña?</span></h2>
+          <p id="finalTexto">Sumá tu marca o armá tu perfil y empezá hoy. Registrarte no cuesta nada.</p>
+          <a class="btn btn-marca" id="finalCta" href="#">Empezar ahora →</a>
+        </div>
+        <div class="img" id="finalImg"><span class="ph">🖼️ slot de imagen (editable)</span></div>
+      </div>
+    </section>
+
+  </div>
+
+<script>
+  // Imágenes de la landing: se cargan desde /api/precios (campo `landing`, editable
+  // desde el admin). Si no hay nada configurado, caen placeholders.
+  const GLYPHS=['🎬','📸','✨','🎥','💬','⭐','🎨','📱'];
+  function buildMosaic(urls){
+    const m=document.getElementById('mosaic'); if(!m) return; m.innerHTML='';
+    const N=40;
+    for(let i=0;i<N;i++){
+      const d=document.createElement('div');
+      d.className='tile'+(Math.random()<0.22?' t-tall':'');
+      if(urls && urls.length){
+        const u=urls[i%urls.length];
+        d.innerHTML='<img src="'+u+'" alt="" loading="lazy">';
+      }else{
+        d.innerHTML='<span class="ph">'+GLYPHS[i%GLYPHS.length]+'</span>';
+      }
+      m.appendChild(d);
+    }
+  }
+  function setImg(id,url){
+    const el=document.getElementById(id); if(!el||!url) return;
+    el.innerHTML='<img src="'+url+'" alt="" loading="lazy">'; el.classList.add('on');
+  }
+  // Links de los CTA (los que quedaron en "#")
+  document.querySelectorAll('.btn-marca').forEach(a=>{ if(a.getAttribute('href')==='#') a.href='./marcas.html'; });
+  document.querySelectorAll('.btn-creator').forEach(a=>{ if(a.getAttribute('href')==='#') a.href='./registro.html'; });
+
+  (async()=>{
+    let cfg=null;
+    try{ const r=await fetch('/api/precios'); if(r.ok){ const j=await r.json(); cfg=j.landing||null; } }catch(_){}
+    buildMosaic(cfg && cfg.hero_mosaico);
+    if(cfg){
+      setImg('marcaImg', cfg.marcas_img);
+      setImg('creatorImg', cfg.creators_img);
+      setImg('iaImg', cfg.ia_img);
+      const f=cfg.final||{};
+      if(f.titulo){ const e=document.getElementById('finalTitulo'); if(e) e.innerHTML=f.titulo; }
+      if(f.texto){ const e=document.getElementById('finalTexto'); if(e) e.textContent=f.texto; }
+      const fc=document.getElementById('finalCta');
+      if(fc){ if(f.cta_label) fc.textContent=f.cta_label; fc.href=f.cta_url||'./registro.html'; }
+      if(f.img){ const fi=document.getElementById('finalImg'); if(fi){ fi.innerHTML='<img src="'+f.img+'" alt="" loading="lazy">'; fi.classList.add('has'); } }
+    } else {
+      const fc=document.getElementById('finalCta'); if(fc) fc.href='./registro.html';
+    }
+  })();
+</script>
+
+  <button class="preview-toggle" onclick="document.body.classList.toggle('logged')">Ver nav como: <b>visitante ⇄ logueado</b></button>
+</body>
+</html>

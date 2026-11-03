@@ -463,14 +463,15 @@ const MAX_VIDEO_MB = 50;
 const SB_URL  = 'https://mcpmabvxmdepastmpzbi.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
 
-// Sube un video a Cloudflare R2 vía URL firmada por el server. Devuelve la URL pública o null.
-// Reemplaza la subida directa a Supabase Storage para no volver a llenar la cuota de 1 GB.
-async function subirVideoR2(f, scope){
+// Sube un archivo (video o imagen) a Cloudflare R2 vía URL firmada por el server.
+// Devuelve la URL pública o null. Reemplaza la subida directa a Supabase Storage
+// para no volver a llenar la cuota de 1 GB. scope: 'video' | 'reel' | 'foto'.
+async function subirMediaR2(f, scope){
   try{
     const pres=await fetch('/api/mi-perfil',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
-      body:JSON.stringify({accion:'presign_video',content_type:f.type,scope:scope||'video'})
+      body:JSON.stringify({accion:'presign_upload',content_type:f.type,scope:scope||'video'})
     });
     if(!pres.ok) return null;
     const {putUrl,publicUrl}=await pres.json();
@@ -1976,7 +1977,7 @@ async function enviarReel(){
   const token=getToken();
   try{
     showToast('Subiendo tu reel...','info');
-    const video_url=await subirVideoR2(f,'reel');
+    const video_url=await subirMediaR2(f,'reel');
     if(!video_url) throw new Error('No se pudo subir el video');
     const r=await fetch(`${SB_URL}/rest/v1/reel_submissions`,{method:'POST',headers:{apikey:SB_ANON,Authorization:'Bearer '+token,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({creator_id:userProfile.id, tipo:'reel', ig_url:url, video_url, periodo:mes})});
     if(!r.ok) throw new Error('No se pudo enviar');
@@ -2359,16 +2360,8 @@ async function subirFotos(input){
   const nuevas=[];
   for(const f of files){
     if(!f.type.startsWith('image/')) continue;
-    const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'');
-    const path=`${userProfile.id}/${Date.now()}_${safe}`;
-    try{
-      const r=await fetch(`${SB_URL}/storage/v1/object/creator-fotos/${path}`,{
-        method:'POST',
-        headers:{'apikey':SB_ANON,'Authorization':'Bearer '+token},
-        body:f
-      });
-      if(r.ok) nuevas.push(`${SB_URL}/storage/v1/object/public/creator-fotos/${path}`);
-    }catch(_){}
+    const publicUrl=await subirMediaR2(f,'foto');
+    if(publicUrl) nuevas.push(publicUrl);
   }
   if(!nuevas.length){ showToast('No se pudieron subir las fotos','err'); return; }
   const fotos=[...((userProfile.fotos)||[]), ...nuevas];
@@ -2404,7 +2397,7 @@ async function subirVideos(input){
     if(!f.type.startsWith('video/')){ showToast('Solo archivos de video','err'); continue; }
     if(f.size > MAX_VIDEO_MB*1024*1024){ showToast(`"${f.name}" supera los ${MAX_VIDEO_MB} MB`,'err'); continue; }
     showToast('Subiendo video… puede tardar','info');
-    const publicUrl=await subirVideoR2(f,'video');
+    const publicUrl=await subirMediaR2(f,'video');
     if(publicUrl) nuevas.push(publicUrl);
     else showToast('No se pudo subir un video','err');
   }

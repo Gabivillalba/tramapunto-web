@@ -116,6 +116,9 @@ function escapeHtml(s) {
   return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// Whitelist: devuelve solo las claves permitidas que vinieron definidas.
+function pick(o, keys) { const r = {}; for (const k of keys) if (o && o[k] !== undefined) r[k] = o[k]; return r; }
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
@@ -1057,6 +1060,119 @@ export default async function handler(req, res) {
         if (!id) return res.status(400).json({ error: 'Falta id' });
         await sb(`emails_programados?id=eq.${id}&estado=eq.pendiente`, 'PATCH', { estado: 'cancelado' });
         return res.status(200).json({ ok: true });
+      }
+
+      // ═══════════════════════ TRAMA. LABS ═══════════════════════
+      case 'labs_list': {
+        const [cursos, categorias, anuncios] = await Promise.all([
+          sb('cursos?select=*,categorias(nombre)&order=orden.asc'),
+          sb('categorias?select=*&order=tipo.asc,orden.asc'),
+          sb('anuncios?select=*&order=created_at.desc'),
+        ]);
+        return res.status(200).json({ ok: true, cursos: cursos || [], categorias: categorias || [], anuncios: anuncios || [] });
+      }
+
+      case 'labs_save_curso': {
+        const d = pick(payload, ['slug', 'titulo', 'subtitulo', 'descripcion', 'nivel', 'instructor', 'categoria_id', 'portada_url', 'duracion_min', 'orden', 'gratis', 'proteger_contenido', 'publicado']);
+        if (!d.slug || !d.titulo) return res.status(400).json({ error: 'Faltan slug y título' });
+        if (payload.id) { await sb(`cursos?id=eq.${payload.id}`, 'PATCH', d); return res.status(200).json({ ok: true, id: payload.id }); }
+        const r = await sb('cursos', 'POST', d); return res.status(200).json({ ok: true, curso: r && r[0] });
+      }
+      case 'labs_delete_curso': {
+        if (!payload.id) return res.status(400).json({ error: 'Falta id' });
+        await sb(`cursos?id=eq.${payload.id}`, 'DELETE'); return res.status(200).json({ ok: true });
+      }
+
+      case 'labs_list_lecciones': {
+        if (!payload.curso_id) return res.status(400).json({ error: 'Falta curso_id' });
+        const r = await sb(`lecciones?curso_id=eq.${payload.curso_id}&select=*&order=orden.asc`);
+        return res.status(200).json({ ok: true, lecciones: r || [] });
+      }
+      case 'labs_save_leccion': {
+        const d = pick(payload, ['curso_id', 'orden', 'titulo', 'descripcion', 'video_url', 'duracion_seg', 'recursos', 'es_preview']);
+        if (!d.curso_id || !d.titulo) return res.status(400).json({ error: 'Faltan curso_id y título' });
+        if (payload.id) { await sb(`lecciones?id=eq.${payload.id}`, 'PATCH', d); return res.status(200).json({ ok: true, id: payload.id }); }
+        const r = await sb('lecciones', 'POST', d); return res.status(200).json({ ok: true, leccion: r && r[0] });
+      }
+      case 'labs_delete_leccion': {
+        if (!payload.id) return res.status(400).json({ error: 'Falta id' });
+        await sb(`lecciones?id=eq.${payload.id}`, 'DELETE'); return res.status(200).json({ ok: true });
+      }
+
+      case 'labs_list_prompts': {
+        const r = await sb('prompts?select=*&order=orden.asc');
+        return res.status(200).json({ ok: true, prompts: r || [] });
+      }
+      case 'labs_save_prompt': {
+        const d = pick(payload, ['categoria_id', 'grupo', 'titulo', 'etiqueta', 'prompt', 'imagen_url', 'orden', 'publicado']);
+        if (!d.titulo) return res.status(400).json({ error: 'Falta título' });
+        if (payload.id) { await sb(`prompts?id=eq.${payload.id}`, 'PATCH', d); return res.status(200).json({ ok: true, id: payload.id }); }
+        const r = await sb('prompts', 'POST', d); return res.status(200).json({ ok: true, prompt: r && r[0] });
+      }
+      case 'labs_delete_prompt': {
+        if (!payload.id) return res.status(400).json({ error: 'Falta id' });
+        await sb(`prompts?id=eq.${payload.id}`, 'DELETE'); return res.status(200).json({ ok: true });
+      }
+
+      case 'labs_list_recursos': {
+        const r = await sb('recursos_banco?select=*&order=orden.asc');
+        return res.status(200).json({ ok: true, recursos: r || [] });
+      }
+      case 'labs_save_recurso': {
+        const d = pick(payload, ['categoria_id', 'titulo', 'descripcion', 'archivo_url', 'tipo', 'orden', 'publicado']);
+        if (!d.titulo) return res.status(400).json({ error: 'Falta título' });
+        if (payload.id) { await sb(`recursos_banco?id=eq.${payload.id}`, 'PATCH', d); return res.status(200).json({ ok: true, id: payload.id }); }
+        const r = await sb('recursos_banco', 'POST', d); return res.status(200).json({ ok: true, recurso: r && r[0] });
+      }
+      case 'labs_delete_recurso': {
+        if (!payload.id) return res.status(400).json({ error: 'Falta id' });
+        await sb(`recursos_banco?id=eq.${payload.id}`, 'DELETE'); return res.status(200).json({ ok: true });
+      }
+
+      case 'labs_save_categoria': {
+        const d = pick(payload, ['tipo', 'nombre', 'slug', 'orden']);
+        if (!d.tipo || !d.nombre || !d.slug) return res.status(400).json({ error: 'Faltan tipo, nombre y slug' });
+        if (payload.id) { await sb(`categorias?id=eq.${payload.id}`, 'PATCH', d); return res.status(200).json({ ok: true, id: payload.id }); }
+        const r = await sb('categorias', 'POST', d); return res.status(200).json({ ok: true, categoria: r && r[0] });
+      }
+      case 'labs_delete_categoria': {
+        if (!payload.id) return res.status(400).json({ error: 'Falta id' });
+        await sb(`categorias?id=eq.${payload.id}`, 'DELETE'); return res.status(200).json({ ok: true });
+      }
+
+      case 'labs_save_anuncio': {
+        const d = pick(payload, ['tipo', 'titulo', 'cuerpo', 'categoria_id', 'fecha_estimada', 'etiqueta', 'link', 'mostrar_en_hub', 'activo']);
+        if (!d.titulo) return res.status(400).json({ error: 'Falta título' });
+        let id = payload.id;
+        if (id) { await sb(`anuncios?id=eq.${id}`, 'PATCH', d); }
+        else { const r = await sb('anuncios', 'POST', d); id = r && r[0] && r[0].id; }
+        // Notificación interna a los alumnos con suscripción activa (sin mail).
+        let notificados = 0;
+        if (payload.notificar) {
+          const subs = await sb('suscripciones?estado=eq.activa&select=email');
+          const emails = [...new Set((subs || []).map((s) => s.email).filter(Boolean))];
+          const titulo = `📣 ${d.titulo}`;
+          const cuerpo = d.cuerpo || (d.fecha_estimada ? `Nuevo curso ${d.fecha_estimada}.` : 'Novedad en TRAMA. LABS.');
+          for (let i = 0; i < emails.length; i += 100) {
+            const chunk = emails.slice(i, i + 100).map((para_email) => ({ para_email, tipo: 'sistema', titulo, cuerpo, link: d.link || '/app.html' }));
+            await sb('notificaciones', 'POST', chunk).catch(() => {});
+          }
+          notificados = emails.length;
+        }
+        return res.status(200).json({ ok: true, id, notificados });
+      }
+      case 'labs_delete_anuncio': {
+        if (!payload.id) return res.status(400).json({ error: 'Falta id' });
+        await sb(`anuncios?id=eq.${payload.id}`, 'DELETE'); return res.status(200).json({ ok: true });
+      }
+
+      case 'labs_presign': {
+        const need = ['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET', 'R2_PUBLIC_BASE'];
+        if (need.some((k) => !process.env[k])) return res.status(503).json({ error: 'Almacenamiento no configurado' });
+        const target = buildMediaTarget({ scope: 'labs', family: 'image', ownerId: 'admin', contentType: String(payload.content_type || ''), publicBase: process.env.R2_PUBLIC_BASE });
+        if (!target) return res.status(400).json({ error: 'Tipo de archivo no permitido' });
+        const putUrl = presignPutUrl({ accountId: process.env.R2_ACCOUNT_ID, accessKeyId: process.env.R2_ACCESS_KEY_ID, secretAccessKey: process.env.R2_SECRET_ACCESS_KEY, bucket: process.env.R2_BUCKET, key: target.key, expiresIn: 900 });
+        return res.status(200).json({ ok: true, putUrl, publicUrl: target.publicUrl });
       }
 
       default:

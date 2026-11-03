@@ -49,6 +49,33 @@ async function sbPatch(path, body) {
   if (!r.ok) throw new Error('Supabase PATCH ' + r.status + ' ' + (await r.text().catch(() => '')));
 }
 
+// ── TRAMA. LABS: helpers ──
+const LABS_PTS_LECCION = 20;   // puntos de Liga por lección completada
+const LABS_PTS_CURSO   = 100;  // bonus al terminar un curso entero
+
+async function sbPost(path, body, prefer = 'return=representation') {
+  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    method: 'POST',
+    headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, 'Content-Type': 'application/json', Prefer: prefer },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error('Supabase POST ' + r.status + ' ' + (await r.text().catch(() => '')));
+  return prefer.includes('minimal') ? null : r.json().catch(() => null);
+}
+
+// ¿El email tiene suscripción de LABS activa y vigente? (encEmail ya viene encodeURIComponent)
+async function labsSubActiva(encEmail) {
+  const rows = await sbGet(`suscripciones?email=eq.${encEmail}&estado=eq.activa&select=vigencia_hasta&limit=1`);
+  if (!rows || !rows[0]) return false;
+  const v = rows[0].vigencia_hasta;
+  return !v || new Date(v).getTime() > Date.now();
+}
+
+function labsCodigoCert() {
+  const s = (globalThis.crypto?.randomUUID?.() || String(Math.random()).slice(2) + Date.now()).replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  return `TL-${s.slice(0, 4)}-${s.slice(4, 8)}`;
+}
+
 export default async function handler(req, res) {
   const mpOauth = req.query && req.query.mp_oauth;
 
@@ -203,6 +230,105 @@ export default async function handler(req, res) {
     } catch (err) {
       console.error('presign_video error:', err);
       return res.status(500).json({ error: 'No se pudo preparar la subida.' });
+    }
+  }
+
+  // ══════════════════════ TRAMA. LABS ══════════════════════
+  // Contenido pago servido SOLO tras verificar suscripción activa. El cliente
+  // nunca lee las tablas de cursos/lecciones/prompts directo.
+  if (req.body && typeof req.body.labs === 'string') {
+    try {
+      const op = req.body.labs;
+
+      // Estado de suscripción + progreso de un curso (para armar el player)
+      if (op === 'estado') {
+        const activa = await labsSubActiva(enc);
+        let completadas = [];
+        const rows = await sbGet(`progreso_lecciones?email=eq.${enc}&completado=is.true&select=leccion_id`);
+        completadas = (rows || []).map((r) => r.leccion_id);
+        return res.status(200).json({ ok: true, suscripcion: activa ? 'activa' : 'inactiva', completadas, alumno: email });
+      }
+
+      // Contenido gated de una lección (video + recursos)
+      if (op === 'leccion') {
+        const id = String(req.body.leccion_id || '');
+        if (!id) return res.status(400).json({ error: 'Falta la lección' });
+        const lec = (await sbGet(`lecciones?id=eq.${encodeURIComponent(id)}&limit=1&select=id,curso_id,titulo,descripcion,video_url,duracion_seg,recursos,es_preview`))[0];
+        if (!lec) return res.status(404).json({ error: 'Lección no encontrada' });
+        const cur = (await sbGet(`cursos?id=eq.${encodeURIComponent(lec.curso_id)}&limit=1&select=gratis`))[0];
+        const abierta = lec.es_preview || (cur && cur.gratis);
+        if (!abierta && !(await labsSubActiva(enc))) {
+          return res.status(402).json({ error: 'Necesitás la suscripción de TRAMA. LABS', necesitaSuscripcion: true });
+        }
+        return res.status(200).json({
+          ok: true,
+          leccion: { id: lec.id, titulo: lec.titulo, descripcion: lec.descripcion, video_url: lec.video_url, duracion_seg: lec.duracion_seg, recursos: lec.recursos || [] },
+          marca_agua: `${email} · Propiedad de TRAMA.`,
+        });
+      }
+
+      // Marcar lección completada → progreso + puntos de Liga + certificado al terminar
+      if (op === 'completar') {
+        const id = String(req.body.leccion_id || '');
+        if (!id) return res.status(400).json({ error: 'Falta la lección' });
+        const lec = (await sbGet(`lecciones?id=eq.${encodeURIComponent(id)}&limit=1&select=id,curso_id,es_preview`))[0];
+        if (!lec) return res.status(404).json({ error: 'Lección no encontrada' });
+        const cur = (await sbGet(`cursos?id=eq.${encodeURIComponent(lec.curso_id)}&limit=1&select=id,titulo,gratis`))[0];
+        const abierta = lec.es_preview || (cur && cur.gratis);
+        if (!abierta && !(await labsSubActiva(enc))) {
+          return res.status(402).json({ error: 'Necesitás la suscripción', necesitaSuscripcion: true });
+        }
+
+        // ¿Ya estaba completada? (para no re-sumar puntos)
+        const ya = (await sbGet(`progreso_lecciones?email=eq.${enc}&leccion_id=eq.${encodeURIComponent(id)}&select=leccion_id&limit=1`))[0];
+        let sumado = 0;
+        if (!ya) {
+          await sbPost('progreso_lecciones', { email, leccion_id: id, completado: true, completado_at: new Date().toISOString() }, 'return=minimal,resolution=ignore-duplicates');
+          const cre = (await sbGet(`creators?email=eq.${enc}&limit=1&select=id,nombre,puntos`))[0];
+          if (cre) { await sbPatch(`creators?id=eq.${encodeURIComponent(cre.id)}`, { puntos: (Number(cre.puntos) || 0) + LABS_PTS_LECCION }); sumado = LABS_PTS_LECCION; }
+        }
+
+        // ¿Completó TODAS las lecciones del curso? → certificado + bonus + aviso interno
+        let curso_completo = false, certificado = null;
+        const total = (await sbGet(`lecciones?curso_id=eq.${encodeURIComponent(lec.curso_id)}&select=id`)) || [];
+        const hechas = (await sbGet(`progreso_lecciones?email=eq.${enc}&completado=is.true&select=leccion_id`)) || [];
+        const hechasSet = new Set(hechas.map((h) => h.leccion_id));
+        if (total.length && total.every((l) => hechasSet.has(l.id))) {
+          curso_completo = true;
+          const existe = (await sbGet(`certificados?email=eq.${enc}&curso_id=eq.${encodeURIComponent(lec.curso_id)}&select=codigo&limit=1`))[0];
+          if (existe) { certificado = existe.codigo; }
+          else {
+            const codigo = labsCodigoCert();
+            const cre = (await sbGet(`creators?email=eq.${enc}&limit=1&select=id,nombre,puntos`))[0];
+            await sbPost('certificados', { email, curso_id: lec.curso_id, codigo, nombre_mostrado: (cre && cre.nombre) || email }, 'return=minimal,resolution=ignore-duplicates');
+            certificado = codigo;
+            if (cre) await sbPatch(`creators?id=eq.${encodeURIComponent(cre.id)}`, { puntos: (Number(cre.puntos) || 0) + LABS_PTS_CURSO });
+            await sbPost('notificaciones', { para_email: email, tipo: 'sistema', titulo: '🎓 ¡Completaste un curso!', cuerpo: `Terminaste "${(cur && cur.titulo) || 'un curso'}" en TRAMA. LABS. Tu certificado ya está disponible.`, link: '/app.html' }, 'return=minimal').catch(() => {});
+          }
+        }
+        return res.status(200).json({ ok: true, sumado, curso_completo, certificado });
+      }
+
+      // Biblioteca de prompts (texto gated) — requiere suscripción
+      if (op === 'prompts') {
+        if (!(await labsSubActiva(enc))) return res.status(402).json({ error: 'Necesitás la suscripción', necesitaSuscripcion: true });
+        const rows = await sbGet(`prompts?publicado=is.true&select=id,grupo,titulo,etiqueta,prompt,imagen_url,orden,categoria_id&order=orden.asc`);
+        return res.status(200).json({ ok: true, prompts: rows || [] });
+      }
+
+      // Recurso del banco (archivo gated, view-only)
+      if (op === 'recurso') {
+        if (!(await labsSubActiva(enc))) return res.status(402).json({ error: 'Necesitás la suscripción', necesitaSuscripcion: true });
+        const id = String(req.body.recurso_id || '');
+        const r = (await sbGet(`recursos_banco?id=eq.${encodeURIComponent(id)}&publicado=is.true&limit=1&select=titulo,archivo_url,tipo`))[0];
+        if (!r) return res.status(404).json({ error: 'Recurso no encontrado' });
+        return res.status(200).json({ ok: true, recurso: r, marca_agua: `${email} · Propiedad de TRAMA.` });
+      }
+
+      return res.status(400).json({ error: 'Operación LABS desconocida' });
+    } catch (err) {
+      console.error('labs error:', err);
+      return res.status(500).json({ error: err.message });
     }
   }
 

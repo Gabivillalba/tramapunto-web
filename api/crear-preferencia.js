@@ -17,6 +17,19 @@ import { getPrecios } from './precios.js';
 import { decrypt } from '../lib/mp-crypto.js';
 const DIAS_ACCESO = 60;
 
+// TRAMA. LABS: identidad del alumno por su JWT (igual que mi-perfil.js).
+const SB_ANON_KEY = process.env.SUPABASE_ANON_KEY
+  || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
+async function labsEmailDelToken(token) {
+  if (!token) return null;
+  try {
+    const r = await fetch(`${process.env.SUPABASE_URL}/auth/v1/user`, { headers: { apikey: SB_ANON_KEY, Authorization: `Bearer ${token}` } });
+    if (!r.ok) return null;
+    const u = await r.json();
+    return u && u.email ? String(u.email) : null;
+  } catch { return null; }
+}
+
 // ¿La marca YA tiene acceso vigente (≤60 días) a ESTE contacto? (cualquier origen)
 // Evita que se cobre dos veces el mismo contacto dentro del período de acceso.
 async function yaTieneAcceso(marcaEmail, creatorId) {
@@ -85,6 +98,37 @@ async function registrarGratis({ creator_id, marca_email, marca_nombre, campania
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
+  }
+
+  // ══ TRAMA. LABS — suscripción mensual (preapproval recurrente de MercadoPago) ══
+  if (req.body && req.body.accion === 'labs_suscribir') {
+    const auth = req.headers.authorization || '';
+    const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+    const email = await labsEmailDelToken(token);
+    if (!email) return res.status(401).json({ error: 'Sesión no válida' });
+    if (!process.env.MP_ACCESS_TOKEN) return res.status(503).json({ error: 'Pagos no configurados todavía' });
+    try {
+      const PRECIOS = await getPrecios();
+      const monto = Number(PRECIOS.precio_labs) || 30000;
+      const pre = await fetch('https://api.mercadopago.com/preapproval', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reason: 'TRAMA. LABS — suscripción mensual',
+          external_reference: `labs|${email}`,
+          payer_email: email,
+          back_url: `${process.env.SITE_URL}/app.html?labs=ok`,
+          auto_recurring: { frequency: 1, frequency_type: 'months', transaction_amount: monto, currency_id: 'ARS' },
+          status: 'pending',
+        }),
+      });
+      const d = await pre.json();
+      if (!pre.ok) throw new Error(d.message || 'Error en MercadoPago (suscripción)');
+      return res.status(200).json({ id: d.id, init_point: d.init_point, monto });
+    } catch (e) {
+      console.error('labs_suscribir error:', e);
+      return res.status(500).json({ error: e.message });
+    }
   }
 
   const {

@@ -64,6 +64,49 @@ async function obtenerPago(paymentId) {
   return trama.json().catch(() => ({}));    // nada funcionó: devolvemos el intento original (no-ok)
 }
 
+// ── TRAMA. LABS: procesa un evento de suscripción (preapproval) ──
+// Lee el preapproval de MP, mapea el estado y hace upsert por email en
+// `suscripciones`. Avisa por notificación interna al activarse (nunca email).
+// NOTA: el payload exacto de estos eventos conviene validarlo el 12/11 con un
+// evento real de MercadoPago (sandbox o vivo) antes de empujar tráfico.
+async function labsManejarSuscripcion(type, id) {
+  if (!id) return;
+  const H = { apikey: process.env.SUPABASE_SERVICE_KEY, Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json' };
+  const mpH = { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` };
+
+  let preId = id;
+  if (type === 'subscription_authorized_payment') {
+    const ap = await fetch(`https://api.mercadopago.com/authorized_payments/${id}`, { headers: mpH }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    preId = (ap && (ap.preapproval_id || ap.preapproval)) || null;
+    if (!preId) return;
+  }
+
+  const pre = await fetch(`https://api.mercadopago.com/preapproval/${preId}`, { headers: mpH }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  if (!pre) return;
+
+  const email = (pre.external_reference || '').startsWith('labs|')
+    ? pre.external_reference.slice(5)
+    : (pre.payer_email || '');
+  if (!email) return;
+
+  const map = { authorized: 'activa', paused: 'pausada', cancelled: 'cancelada', pending: 'pausada' };
+  const estado = map[pre.status] || 'pausada';
+  const vig = pre.next_payment_date || new Date(Date.now() + 32 * 86400000).toISOString();
+
+  await fetch(`${process.env.SUPABASE_URL}/rest/v1/suscripciones?on_conflict=email`, {
+    method: 'POST',
+    headers: { ...H, Prefer: 'return=minimal,resolution=merge-duplicates' },
+    body: JSON.stringify({ email, mp_preapproval_id: preId, estado, vigencia_hasta: vig, updated_at: new Date().toISOString() }),
+  }).catch(() => {});
+
+  if (estado === 'activa') {
+    await fetch(`${process.env.SUPABASE_URL}/rest/v1/notificaciones`, {
+      method: 'POST', headers: { ...H, Prefer: 'return=minimal' },
+      body: JSON.stringify({ para_email: email, tipo: 'sistema', titulo: '🎓 ¡Bienvenido a TRAMA. LABS!', cuerpo: 'Tu suscripción está activa. Ya tenés acceso a todos los cursos, la biblioteca de prompts y el banco de recursos.', link: '/app.html' }),
+    }).catch(() => {});
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
@@ -74,6 +117,14 @@ export default async function handler(req, res) {
   }
 
   const { type, data } = req.body;
+
+  // ══ TRAMA. LABS — eventos de suscripción (preapproval) ══
+  if (type === 'subscription_preapproval' || type === 'subscription_authorized_payment') {
+    try { await labsManejarSuscripcion(type, data && data.id); }
+    catch (e) { console.error('labs sub webhook error:', e); }
+    return res.status(200).json({ received: true });
+  }
+
   if (type !== 'payment') {
     return res.status(200).json({ received: true });
   }

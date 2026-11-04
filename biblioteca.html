@@ -142,7 +142,7 @@
   const layout=document.getElementById('lib-layout');
   const content=document.getElementById('content');
   const idx=document.getElementById('index');
-  if(!token){ location.href='/app.html?next=labs'; return; }
+  if(!token){ location.href='/perfil.html?next='+encodeURIComponent(location.pathname+location.search); return; }
 
   const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const mark=s=>esc(s).replace(/\[([^\]]+)\]/g,'<mark>[$1]</mark>');

@@ -460,7 +460,7 @@
   const btn=document.getElementById('btn-suscribir');
   if(btn) btn.addEventListener('click', async ()=>{
     const token=getToken();
-    if(!token){ location.href='/app.html?next=labs'; return; }
+    if(!token){ location.href='/perfil.html?next='+encodeURIComponent('/tramalabs.html#precio'); return; }
     btn.disabled=true; const prev=btn.textContent; btn.textContent='Redirigiendo…';
     try{
       const r=await fetch('/api/crear-preferencia',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({accion:'labs_suscribir'})});

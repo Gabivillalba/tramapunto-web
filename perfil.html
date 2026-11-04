@@ -656,6 +656,9 @@ async function doLogin(){
 
   saveSession(data.access_token, data.refresh_token);
   currentUser = data.user;
+  // Si vino con ?next=<ruta interna>, volver ahí después de entrar (p. ej. desde TRAMA. LABS).
+  const _next = new URLSearchParams(location.search).get('next');
+  if(_next && _next.charAt(0)==='/' && _next.charAt(1)!=='/'){ location.href=_next; return; }
   await loadProfile(data.access_token);
 }
 

@@ -241,7 +241,7 @@
   if(!leccionId) return; // sin id: queda el contenido de muestra (demo)
   const getToken=()=>{ try{return localStorage.getItem('sb_token')}catch(e){return null} };
   const token=getToken();
-  if(!token){ location.href='/app.html?next=labs'; return; }
+  if(!token){ location.href='/perfil.html?next='+encodeURIComponent(location.pathname+location.search); return; }
 
   function wm(id){ const el=document.getElementById('wm'); if(!el) return; const marks=[id,'Propiedad de TRAMA.']; el.innerHTML=Array.from({length:60}).map((_,i)=>'<span>'+marks[i%2]+'</span>').join(''); }
   async function api(body){ const r=await fetch('/api/mi-perfil',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(body)}); return {status:r.status, data: await r.json().catch(()=>({}))}; }

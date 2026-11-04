@@ -504,8 +504,15 @@
         body:JSON.stringify({email, fuente:'labs-hub'})
       });
       if(r.ok){ wl.reset(); msg.innerHTML='✓ ¡Listo! Te avisamos cuando abra.'; }
-      else { msg.textContent='No se pudo registrar. Probá de nuevo.'; }
-    }catch(_){ msg.textContent='No se pudo registrar. Probá de nuevo.'; }
+      else {
+        let body=''; try{ body=await r.text(); }catch(_){}
+        console.log('[waitlist] error', r.status, body);
+        msg.textContent='No se pudo registrar ['+r.status+'] '+(body||'').slice(0,160);
+      }
+    }catch(err){
+      console.log('[waitlist] fetch exception', err);
+      msg.textContent='No se pudo registrar (red/CORS): '+(err&&err.message?err.message:String(err));
+    }
   });
 })();
 </script>

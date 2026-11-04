@@ -488,8 +488,8 @@
     btn.disabled=false; btn.textContent=prev;
   });
 
-  // Lista de espera: inserta el email directo en Supabase (tabla labs_interesados, RLS insert-only).
-  // El navegador puede anotar pero NO leer la lista; duplicados se ignoran (on_conflict=email).
+  // Lista de espera (interino → R2 vía serverless): la Data API de Supabase está restringida por
+  // cuota (402) hasta que se levante la restricción. Al destrabarse se mueve a labs_interesados.
   const wl=document.getElementById('wl-form');
   if(wl) wl.addEventListener('submit', async (e)=>{
     e.preventDefault();
@@ -498,21 +498,11 @@
     if(!email || email.indexOf('@')<1){ msg.textContent='Ingresá un email válido.'; return; }
     msg.textContent='Enviando…';
     try{
-      const r=await fetch(SB_URL+'/rest/v1/labs_interesados?on_conflict=email',{
-        method:'POST',
-        headers:{'Content-Type':'application/json',apikey:SB_ANON,Authorization:'Bearer '+SB_ANON,Prefer:'resolution=ignore-duplicates,return=minimal'},
-        body:JSON.stringify({email, fuente:'labs-hub'})
-      });
-      if(r.ok){ wl.reset(); msg.innerHTML='✓ ¡Listo! Te avisamos cuando abra.'; }
-      else {
-        let body=''; try{ body=await r.text(); }catch(_){}
-        console.log('[waitlist] error', r.status, body);
-        msg.textContent='No se pudo registrar ['+r.status+'] '+(body||'').slice(0,160);
-      }
-    }catch(err){
-      console.log('[waitlist] fetch exception', err);
-      msg.textContent='No se pudo registrar (red/CORS): '+(err&&err.message?err.message:String(err));
-    }
+      const r=await fetch('/api/crear-preferencia',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accion:'labs_waitlist', email, fuente:'labs-hub'})});
+      const d=await r.json().catch(()=>({}));
+      if(r.ok && d && d.ok){ wl.reset(); msg.innerHTML='✓ ¡Listo! Te avisamos cuando abra.'; }
+      else { msg.textContent=(d&&d.error)||'No se pudo registrar. Probá de nuevo.'; }
+    }catch(_){ msg.textContent='No se pudo registrar. Probá de nuevo.'; }
   });
 })();
 </script>

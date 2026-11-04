@@ -7,6 +7,7 @@ const FALLBACK = {
   precio_bolsa:    Number(process.env.PRECIO_BOLSA)    || 4900,
   precio_campania: Number(process.env.PRECIO_CAMPANIA) || 25000,
   precio_labs:     Number(process.env.PRECIO_LABS)     || 30000,
+  labs_abierto:    process.env.LABS_ABIERTO === 'true',
   primer_gratis:   (process.env.PRIMER_GRATIS ?? 'true') === 'true',
 };
 
@@ -32,6 +33,7 @@ export async function getPrecios() {
       precio_bolsa:    Number(map.precio_bolsa)    || FALLBACK.precio_bolsa,
       precio_campania: Number(map.precio_campania) || FALLBACK.precio_campania,
       precio_labs:     Number(map.precio_labs)     || FALLBACK.precio_labs,
+      labs_abierto:    (process.env.LABS_ABIERTO === 'true') || map.labs_abierto === 'true',
       primer_gratis:   map.primer_gratis !== undefined
                          ? map.primer_gratis === 'true'
                          : FALLBACK.primer_gratis,
@@ -84,6 +86,7 @@ export default async function handler(req, res) {
     labs: {
       monto: p.precio_labs,
       label: fmt(p.precio_labs) + ' ARS',
+      abierto: p.labs_abierto,
     },
     moneda: 'ARS',
     landing: landing || null,

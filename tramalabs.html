@@ -402,7 +402,7 @@
         </div>
         <div class="pbox">
           <div class="amt"><span id="labs-precio">$30.000</span><small>/mes</small></div>
-          <p class="note">En pesos. Acceso a todo el catálogo.</p>
+          <p class="note" id="labs-nota">En pesos. Acceso a todo el catálogo.</p>
           <button id="btn-suscribir" class="btn btn-acid">Suscribirme</button>
           <p class="fine">Pagás seguro con MercadoPago. Cancelás cuando quieras.</p>
           <div style="border-top:1px solid var(--line);margin-top:16px;padding-top:14px">
@@ -443,9 +443,17 @@
   const SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
   const getToken=()=>{ try{return localStorage.getItem('sb_token')}catch(e){return null} };
 
-  // Precio en vivo (de /api/precios → tabla config). Si falla, queda el del HTML.
+  // Precio + estado de lanzamiento (de /api/precios → tabla config). Si falla, queda el del HTML.
+  // Por defecto arranca CERRADO: el botón lleva a la lista de espera hasta confirmar que abrió.
+  let labsAbierto=false;
   fetch('/api/precios').then(r=>r.ok?r.json():null).then(p=>{
-    if(p&&p.labs&&p.labs.monto){ const el=document.getElementById('labs-precio'); if(el) el.textContent='$'+Number(p.labs.monto).toLocaleString('es-AR'); }
+    const L=p&&p.labs;
+    if(L&&L.monto){ const el=document.getElementById('labs-precio'); if(el) el.textContent='$'+Number(L.monto).toLocaleString('es-AR'); }
+    labsAbierto = !!(L&&L.abierto);
+    if(!labsAbierto){
+      const b=document.getElementById('btn-suscribir'); if(b) b.textContent='Avisame cuando abra';
+      const n=document.getElementById('labs-nota'); if(n) n.innerHTML='Todavía no abrió. Anotate y te damos un <b style="color:var(--acid)">precio especial de lanzamiento</b>.';
+    }
   }).catch(()=>{});
 
   // Aviso de "próximo curso" (tabla anuncios, lectura pública). Fallback al texto estático.
@@ -456,9 +464,17 @@
       if(el) el.innerHTML='🧵 <b>'+(a.etiqueta||'Próximo curso')+':</b> '+a.titulo+(a.fecha_estimada?' — '+a.fecha_estimada:'');
     }).catch(()=>{});
 
-  // Suscribirse: logueado → preapproval de MP; si no → a login.
+  // Botón principal. Prelanzamiento: lleva a la lista de espera (precio especial), no a suscribirse.
+  // Cuando labs_abierto=true (12/11): logueado → preapproval de MP; si no → a login.
   const btn=document.getElementById('btn-suscribir');
   if(btn) btn.addEventListener('click', async ()=>{
+    if(!labsAbierto){
+      const inp=document.getElementById('wl-email');
+      const form=document.getElementById('wl-form');
+      if(form) form.scrollIntoView({behavior:'smooth',block:'center'});
+      if(inp){ inp.focus(); inp.style.outline='2px solid var(--acid)'; setTimeout(()=>{inp.style.outline='';},1600); }
+      return;
+    }
     const token=getToken();
     if(!token){ location.href='/perfil.html?next='+encodeURIComponent('/tramalabs.html#precio'); return; }
     btn.disabled=true; const prev=btn.textContent; btn.textContent='Redirigiendo…';

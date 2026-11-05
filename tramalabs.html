@@ -452,31 +452,6 @@ h1,h2{letter-spacing:-.01em}
   const SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
   const getToken=()=>{ try{return localStorage.getItem('sb_token')}catch(e){return null} };
 
-  // Paddle.js (checkout internacional en USD). Se carga sólo si hace falta.
-  function cargarPaddle(){
-    return new Promise((resolve,reject)=>{
-      if(window.Paddle) return resolve();
-      const s=document.createElement('script');
-      s.src='https://cdn.paddle.com/paddle/v2/paddle.js';
-      s.onload=()=>resolve(); s.onerror=()=>reject(new Error('paddle'));
-      document.head.appendChild(s);
-    });
-  }
-  async function abrirPaddle(cfg, email){
-    await cargarPaddle();
-    if(!window.__paddleInit){
-      if(cfg.env==='sandbox' && window.Paddle.Environment) window.Paddle.Environment.set('sandbox');
-      window.Paddle.Initialize({ token: cfg.clientToken });
-      window.__paddleInit=true;
-    }
-    window.Paddle.Checkout.open({
-      items:[{ priceId: cfg.priceId, quantity:1 }],
-      customer: email?{ email }:undefined,
-      customData: email?{ email }:undefined,
-      settings:{ successUrl: location.origin+'/app.html?labs=ok', theme:'dark' }
-    });
-  }
-
   // Precio + estado de lanzamiento (de /api/precios → tabla config). Si falla, queda el del HTML.
   // Por defecto arranca CERRADO: el botón lleva a la lista de espera hasta confirmar que abrió.
   let labsAbierto=false;
@@ -515,12 +490,8 @@ h1,h2{letter-spacing:-.01em}
     try{
       const r=await fetch('/api/crear-preferencia',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({accion:'labs_suscribir'})});
       const d=await r.json().catch(()=>({}));
-      // Resto del mundo → checkout de Paddle (USD). Argentina → redirección a MercadoPago.
-      if(d&&d.usar==='paddle'&&d.paddle){
-        try{ await abrirPaddle(d.paddle, d.email||''); }
-        catch(_){ alert('No se pudo abrir el checkout. Probá de nuevo en un momento.'); }
-        btn.disabled=false; btn.textContent=prev; return;
-      }
+      // Resto del mundo → checkout de Gumroad (USD). Argentina → redirección a MercadoPago.
+      if(d&&d.usar==='gumroad'&&d.url){ location.href=d.url; return; }
       if(d&&d.init_point){ location.href=d.init_point; return; }
       if(r.status===503){ alert('¡Ya casi! La suscripción de TRAMA. LABS abre muy pronto. Seguinos en @tramapunto para enterarte.'); }
       else { alert(d&&d.error ? d.error : 'No se pudo iniciar la suscripción. Probá de nuevo.'); }

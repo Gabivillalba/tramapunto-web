@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — TRAMA. LABS</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{--bg:#0A0A0A;--surface:#141414;--surface-2:#1a1a1a;--line:#2A2A28;--ink:#F2F2F0;--muted:#8E8E88;--acid:#C8FF1A;--acid-dim:#9ec219;--red:#ff6b5e}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,sans-serif;font-size:14px;line-height:1.5}
+  .wrap{max-width:1000px;margin:0 auto;padding:22px}
+  h1{font-size:22px;font-weight:800;letter-spacing:-.01em}
+  h1 .d{color:var(--acid)}
+  h2{font-size:17px;font-weight:800;margin:0 0 12px}
+  a{color:var(--acid)}
+  .muted{color:var(--muted)}
+  .tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin:18px 0 20px;flex-wrap:wrap}
+  .tab{background:none;border:0;color:var(--muted);font:inherit;font-weight:700;padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent}
+  .tab.on{color:var(--ink);border-bottom-color:var(--acid)}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+  label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:10px 0 4px}
+  input,textarea,select{width:100%;background:#0d0d0d;border:1px solid var(--line);border-radius:8px;padding:9px 11px;color:var(--ink);font:inherit;font-size:13px}
+  input:focus,textarea:focus,select:focus{outline:0;border-color:var(--acid-dim)}
+  textarea{min-height:64px;resize:vertical}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .chk{display:flex;align-items:center;gap:8px;margin-top:12px}
+  .chk input{width:auto}
+  .btn{background:var(--acid);color:#0A0A0A;border:0;border-radius:8px;padding:9px 16px;font:inherit;font-weight:800;cursor:pointer}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn.danger{background:transparent;color:var(--red);border:1px solid #4a2a28}
+  .btn.sm{padding:5px 10px;font-size:12px}
+  .btn:disabled{opacity:.5;cursor:default}
+  .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px}
+  .list-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;margin-bottom:7px;background:var(--surface-2)}
+  .list-item .t{flex:1;min-width:0}
+  .list-item .t b{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .list-item .t small{color:var(--muted)}
+  .pill{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:3px 7px;border-radius:5px}
+  .pill.on{background:#1c2408;color:var(--acid)}
+  .pill.off{background:#2a2a28;color:var(--muted)}
+  .pill.prev{background:#102a2a;color:#7fd1e8}
+  #msg{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#1c2408;color:var(--acid);border:1px solid var(--acid-dim);border-radius:9px;padding:10px 16px;font-weight:700;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}
+  #msg.err{background:#2a1413;color:var(--red);border-color:#4a2a28}
+  #login{max-width:360px;margin:60px auto}
+  .hide{display:none!important}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Admin <span class="d">·</span> TRAMA. LABS</h1>
+
+  <!-- LOGIN -->
+  <div id="login" class="card">
+    <h2>Ingresar</h2>
+    <label>Contraseña del panel</label>
+    <input id="pass" type="password" placeholder="••••••••" autocomplete="current-password">
+    <div class="bar"><button class="btn" id="btn-login">Entrar</button></div>
+    <p class="hint" id="login-err" style="color:var(--red)"></p>
+  </div>
+
+  <!-- PANEL -->
+  <div id="panel" class="hide">
+    <div class="tabs">
+      <button class="tab on" data-tab="cursos">Cursos</button>
+      <button class="tab" data-tab="recursos">Recursos</button>
+      <button class="tab" data-tab="avisos">Avisos</button>
+      <button class="tab" data-tab="precio">Precio</button>
+      <button class="tab" data-tab="biblio">Biblioteca</button>
+      <span style="flex:1"></span>
+      <button class="tab" id="btn-logout">Salir</button>
+    </div>
+
+    <!-- CURSOS -->
+    <section id="tab-cursos">
+      <div class="card">
+        <h2>Cursos</h2>
+        <div id="cursos-list"></div>
+        <div class="bar"><button class="btn ghost sm" id="curso-new">+ Nuevo curso</button></div>
+      </div>
+      <div class="card hide" id="curso-form">
+        <h2 id="curso-form-t">Editar curso</h2>
+        <div class="row"><div><label>Slug (URL)</label><input id="c-slug"></div><div><label>Orden</label><input id="c-orden" type="number"></div></div>
+        <label>Título</label><input id="c-titulo">
+        <label>Subtítulo</label><input id="c-subtitulo">
+        <label>Descripción</label><textarea id="c-descripcion"></textarea>
+        <div class="row3">
+          <div><label>Nivel</label><input id="c-nivel"></div>
+          <div><label>Categoría</label><select id="c-categoria"></select></div>
+          <div><label>Portada</label><input id="c-portada" placeholder="URL o subí una imagen"><input id="c-portada-file" type="file" accept="image/*" style="margin-top:6px;padding:4px"></div>
+        </div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap">
+          <div class="chk"><input type="checkbox" id="c-publicado"><label style="margin:0">Publicado</label></div>
+          <div class="chk"><input type="checkbox" id="c-gratis"><label style="margin:0">Gratis (embudo)</label></div>
+          <div class="chk"><input type="checkbox" id="c-proteger" checked><label style="margin:0">Proteger contenido</label></div>
+        </div>
+        <div class="bar">
+          <button class="btn" id="curso-save">Guardar curso</button>
+          <button class="btn ghost" id="curso-cancel">Cancelar</button>
+          <button class="btn danger" id="curso-del">Eliminar</button>
+        </div>
+        <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+        <h2>Lecciones</h2>
+        <div id="lec-list"></div>
+        <div class="bar"><button class="btn ghost sm" id="lec-new">+ Nueva lección</button></div>
+        <div class="card hide" id="lec-form" style="background:#0d0d0d">
+          <div class="row"><div><label>Orden</label><input id="l-orden" type="number"></div><div><label>Duración (seg)</label><input id="l-dur" type="number"></div></div>
+          <label>Título</label><input id="l-titulo">
+          <label>Descripción</label><textarea id="l-descripcion"></textarea>
+          <label>Video (ID/URL de Vimeo)</label><input id="l-video" placeholder="ej: 123456789">
+          <label>Recursos (slugs separados por coma)</label><input id="l-recursos" placeholder="plantilla-guion, 12-ganchos">
+          <div class="chk"><input type="checkbox" id="l-preview"><label style="margin:0">Preview (abierta sin suscripción)</label></div>
+          <div class="bar"><button class="btn sm" id="lec-save">Guardar lección</button><button class="btn ghost sm" id="lec-cancel">Cancelar</button><button class="btn danger sm" id="lec-del">Eliminar</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECURSOS -->
+    <section id="tab-recursos" class="hide">
+      <div class="card">
+        <h2>Recursos descargables</h2>
+        <div id="rec-list"></div>
+        <div class="bar"><button class="btn ghost sm" id="rec-new">+ Nuevo recurso</button></div>
+      </div>
+      <div class="card hide" id="rec-form">
+        <h2 id="rec-form-t">Editar recurso</h2>
+        <label>Título</label><input id="r-titulo">
+        <label>Descripción</label><textarea id="r-descripcion"></textarea>
+        <div class="row3">
+          <div><label>Categoría</label><select id="r-categoria"></select></div>
+          <div><label>Tipo</label><input id="r-tipo" placeholder="pdf"></div>
+          <div><label>Orden</label><input id="r-orden" type="number"></div>
+        </div>
+        <label>Archivo (URL en R2)</label><input id="r-archivo" placeholder="https://...">
+        <div class="chk"><input type="checkbox" id="r-publicado"><label style="margin:0">Publicado</label></div>
+        <div class="bar"><button class="btn" id="rec-save">Guardar recurso</button><button class="btn ghost" id="rec-cancel">Cancelar</button><button class="btn danger" id="rec-del">Eliminar</button></div>
+      </div>
+    </section>
+
+    <!-- AVISOS -->
+    <section id="tab-avisos" class="hide">
+      <div class="card">
+        <h2>Avisos (hub + notificación interna)</h2>
+        <div id="av-list"></div>
+        <div class="bar"><button class="btn ghost sm" id="av-new">+ Nuevo aviso</button></div>
+      </div>
+      <div class="card hide" id="av-form">
+        <h2 id="av-form-t">Editar aviso</h2>
+        <label>Título</label><input id="a-titulo">
+        <label>Cuerpo</label><textarea id="a-cuerpo"></textarea>
+        <div class="row3">
+          <div><label>Etiqueta</label><input id="a-etiqueta" placeholder="Próximo curso"></div>
+          <div><label>Fecha estimada</label><input id="a-fecha" placeholder="Diciembre"></div>
+          <div><label>Link</label><input id="a-link" placeholder="/app.html"></div>
+        </div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap">
+          <div class="chk"><input type="checkbox" id="a-hub" checked><label style="margin:0">Mostrar en el hub</label></div>
+          <div class="chk"><input type="checkbox" id="a-activo" checked><label style="margin:0">Activo</label></div>
+          <div class="chk"><input type="checkbox" id="a-notificar"><label style="margin:0">Notificar a suscriptores</label></div>
+        </div>
+        <div class="bar"><button class="btn" id="av-save">Guardar aviso</button><button class="btn ghost" id="av-cancel">Cancelar</button><button class="btn danger" id="av-del">Eliminar</button></div>
+      </div>
+    </section>
+
+    <!-- PRECIO -->
+    <section id="tab-precio" class="hide">
+      <div class="card">
+        <h2>Precio de la suscripción</h2>
+        <label>Precio mensual (ARS)</label><input id="p-precio" type="number">
+        <p class="hint">Se guarda en <code>config.precio_labs</code>. Cambia el precio que muestra el hub sin redeploy.</p>
+        <div class="bar"><button class="btn" id="precio-save">Guardar precio</button></div>
+      </div>
+      <div class="card">
+        <h2>Abrir / cerrar la venta</h2>
+        <div class="chk"><input type="checkbox" id="p-abierto"><label style="margin:0">Venta abierta (<code>labs_abierto</code>)</label></div>
+        <p class="hint">Cuando está apagado, el hub muestra "Avisame cuando abra". Prendelo el día del lanzamiento.</p>
+        <div class="bar"><button class="btn" id="abierto-save">Guardar estado</button></div>
+      </div>
+    </section>
+
+    <!-- BIBLIOTECA (info) -->
+    <section id="tab-biblio" class="hide">
+      <div class="card">
+        <h2>Biblioteca de prompts</h2>
+        <p class="muted">La biblioteca no se edita desde acá: es un documento que se mantiene desde Claude (el artifact) y se publica con un deploy. Hay una tarea mensual que propone mejoras. Pedíselo a Claude cuando quieras sumar o cambiar prompts.</p>
+      </div>
+    </section>
+  </div>
+</div>
+<div id="msg"></div>
+
+<script>
+(function(){
+  let KEY=null, CATS=[], CURSO=null, LECCION=null, RECURSO=null, AVISO=null, AVISOS=[];
+  const $=id=>document.getElementById(id);
+  const val=id=>$(id).value.trim();
+  const chk=id=>$(id).checked;
+  const setChk=(id,v)=>{ $(id).checked=!!v; };
+  function toast(t,err){ const m=$('msg'); m.textContent=t; m.classList.toggle('err',!!err); m.style.opacity='1'; setTimeout(()=>m.style.opacity='0',2200); }
+
+  async function api(action,payload){
+    const r=await fetch('/api/admin',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pass':KEY||''},body:JSON.stringify({action,payload:payload||{}})});
+    const d=await r.json().catch(()=>({}));
+    if(r.status===401){ logout(); throw new Error('Sesión vencida'); }
+    if(!r.ok||d.error) throw new Error(d.error||('Error '+r.status));
+    return d;
+  }
+
+  // ── Login ──
+  $('btn-login').onclick=async()=>{
+    KEY=val('pass'); if(!KEY) return;
+    try{ await api('labs_list'); sessionStorage.setItem('tla','1'); $('login').classList.add('hide'); $('panel').classList.remove('hide'); loadAll(); }
+    catch(e){ $('login-err').textContent='Contraseña incorrecta.'; KEY=null; }
+  };
+  $('pass').addEventListener('keydown',e=>{ if(e.key==='Enter') $('btn-login').click(); });
+  function logout(){ KEY=null; sessionStorage.removeItem('tla'); $('panel').classList.add('hide'); $('login').classList.remove('hide'); }
+  $('btn-logout').onclick=logout;
+
+  // ── Tabs ──
+  document.querySelectorAll('.tab[data-tab]').forEach(t=>t.onclick=()=>{
+    document.querySelectorAll('.tab[data-tab]').forEach(x=>x.classList.remove('on')); t.classList.add('on');
+    ['cursos','recursos','avisos','precio','biblio'].forEach(n=>$('tab-'+n).classList.toggle('hide',n!==t.dataset.tab));
+  });
+
+  async function loadAll(){ await loadCursos(); loadRecursos(); loadPrecio(); }
+
+  // ── CURSOS ──
+  async function loadCursos(){
+    const d=await api('labs_list'); CATS=d.categorias||[]; AVISOS=d.anuncios||[];
+    fillCatSelect('c-categoria','curso'); fillCatSelect('r-categoria','recurso'); renderAvisos();
+    $('cursos-list').innerHTML=(d.cursos||[]).map(c=>itemHTML(c.titulo, (c.nivel||'')+' · orden '+(c.orden||0), c.publicado?'on':'off', c.publicado?'Publicado':'Borrador', 'curso', c.id)).join('')||'<p class="muted">Sin cursos.</p>';
+    bindList('cursos-list', id=>{ const c=(d.cursos||[]).find(x=>x.id===id); openCurso(c); });
+  }
+  function fillCatSelect(id,tipo){ $(id).innerHTML='<option value="">—</option>'+CATS.filter(c=>c.tipo===tipo).map(c=>'<option value="'+c.id+'">'+esc(c.nombre)+'</option>').join(''); }
+  function openCurso(c){
+    CURSO=c||null; $('curso-form').classList.remove('hide'); $('curso-form-t').textContent=c?'Editar curso':'Nuevo curso';
+    $('curso-del').style.display=c?'':'none';
+    $('c-slug').value=c?c.slug:''; $('c-titulo').value=c?c.titulo:''; $('c-subtitulo').value=c?(c.subtitulo||''):'';
+    $('c-descripcion').value=c?(c.descripcion||''):''; $('c-nivel').value=c?(c.nivel||''):''; $('c-orden').value=c?(c.orden||0):0;
+    $('c-categoria').value=c?(c.categoria_id||''):''; $('c-portada').value=c?(c.portada_url||''):'';
+    setChk('c-publicado',c&&c.publicado); setChk('c-gratis',c&&c.gratis); setChk('c-proteger',c?c.proteger_contenido:true);
+    $('lec-form').classList.add('hide'); if(c) loadLecciones(c.id); else $('lec-list').innerHTML='<p class="muted">Guardá el curso para agregar lecciones.</p>';
+    $('curso-form').scrollIntoView({behavior:'smooth'});
+  }
+  $('curso-new').onclick=()=>openCurso(null);
+  $('curso-cancel').onclick=()=>$('curso-form').classList.add('hide');
+  $('curso-save').onclick=async()=>{
+    try{
+      const p={slug:val('c-slug'),titulo:val('c-titulo'),subtitulo:val('c-subtitulo'),descripcion:val('c-descripcion'),nivel:val('c-nivel'),categoria_id:val('c-categoria')||null,portada_url:val('c-portada')||null,orden:Number(val('c-orden'))||0,publicado:chk('c-publicado'),gratis:chk('c-gratis'),proteger_contenido:chk('c-proteger')};
+      if(CURSO) p.id=CURSO.id;
+      const d=await api('labs_save_curso',p); if(d.curso) CURSO=d.curso; else if(!CURSO) CURSO={id:d.id,...p};
+      toast('Curso guardado'); loadCursos(); if(CURSO&&CURSO.id) loadLecciones(CURSO.id);
+    }catch(e){ toast(e.message,true); }
+  };
+  $('curso-del').onclick=async()=>{ if(!CURSO||!confirm('¿Eliminar el curso y sus lecciones?'))return; try{ await api('labs_delete_curso',{id:CURSO.id}); toast('Curso eliminado'); $('curso-form').classList.add('hide'); loadCursos(); }catch(e){ toast(e.message,true); } };
+
+  $('c-portada-file').onchange=async e=>{ const f=e.target.files[0]; if(!f)return; try{ const d=await api('labs_presign',{content_type:f.type}); await fetch(d.putUrl,{method:'PUT',headers:{'Content-Type':f.type},body:f}); $('c-portada').value=d.publicUrl; toast('Imagen subida'); }catch(err){ toast(err.message,true); } };
+
+  // ── LECCIONES ──
+  async function loadLecciones(cursoId){
+    const d=await api('labs_list_lecciones',{curso_id:cursoId});
+    $('lec-list').innerHTML=(d.lecciones||[]).map(l=>itemHTML(l.orden+' · '+l.titulo, l.video_url?'video ✓':'sin video', l.es_preview?'prev':(l.video_url?'on':'off'), l.es_preview?'Preview':(l.video_url?'Lista':'Borrador'),'lec',l.id)).join('')||'<p class="muted">Sin lecciones.</p>';
+    bindList('lec-list', id=>{ const l=(d.lecciones||[]).find(x=>x.id===id); openLec(l); });
+  }
+  function openLec(l){
+    LECCION=l||null; $('lec-form').classList.remove('hide'); $('lec-del').style.display=l?'':'none';
+    $('l-orden').value=l?l.orden:(($('lec-list').children.length)||0)+1; $('l-dur').value=l?(l.duracion_seg||''):'';
+    $('l-titulo').value=l?l.titulo:''; $('l-descripcion').value=l?(l.descripcion||''):''; $('l-video').value=l?(l.video_url||''):'';
+    $('l-recursos').value=l&&Array.isArray(l.recursos)?l.recursos.map(x=>x.slug||x).join(', '):'';
+    setChk('l-preview',l&&l.es_preview);
+  }
+  $('lec-new').onclick=()=>{ if(!CURSO){toast('Guardá el curso primero',true);return;} openLec(null); };
+  $('lec-cancel').onclick=()=>$('lec-form').classList.add('hide');
+  $('lec-save').onclick=async()=>{
+    try{
+      const recs=val('l-recursos').split(',').map(s=>s.trim()).filter(Boolean).map(slug=>({slug}));
+      const p={curso_id:CURSO.id,orden:Number(val('l-orden'))||0,titulo:val('l-titulo'),descripcion:val('l-descripcion'),video_url:val('l-video')||null,duracion_seg:Number(val('l-dur'))||null,recursos:recs,es_preview:chk('l-preview')};
+      if(LECCION) p.id=LECCION.id;
+      await api('labs_save_leccion',p); toast('Lección guardada'); $('lec-form').classList.add('hide'); loadLecciones(CURSO.id);
+    }catch(e){ toast(e.message,true); }
+  };
+  $('lec-del').onclick=async()=>{ if(!LECCION||!confirm('¿Eliminar la lección?'))return; try{ await api('labs_delete_leccion',{id:LECCION.id}); toast('Lección eliminada'); $('lec-form').classList.add('hide'); loadLecciones(CURSO.id); }catch(e){ toast(e.message,true); } };
+
+  // ── RECURSOS ──
+  async function loadRecursos(){
+    const d=await api('labs_list_recursos');
+    $('rec-list').innerHTML=(d.recursos||[]).map(r=>itemHTML(r.titulo,(r.tipo||'')+' · orden '+(r.orden||0), r.archivo_url?(r.publicado?'on':'off'):'off', r.archivo_url?(r.publicado?'Publicado':'Con archivo'):'Sin archivo','rec',r.id)).join('')||'<p class="muted">Sin recursos.</p>';
+    bindList('rec-list', id=>{ const r=(d.recursos||[]).find(x=>x.id===id); openRec(r); });
+  }
+  function openRec(r){
+    RECURSO=r||null; $('rec-form').classList.remove('hide'); $('rec-form-t').textContent=r?'Editar recurso':'Nuevo recurso'; $('rec-del').style.display=r?'':'none';
+    $('r-titulo').value=r?r.titulo:''; $('r-descripcion').value=r?(r.descripcion||''):''; $('r-categoria').value=r?(r.categoria_id||''):'';
+    $('r-tipo').value=r?(r.tipo||'pdf'):'pdf'; $('r-orden').value=r?(r.orden||0):0; $('r-archivo').value=r?(r.archivo_url||''):''; setChk('r-publicado',r&&r.publicado);
+    $('rec-form').scrollIntoView({behavior:'smooth'});
+  }
+  $('rec-new').onclick=()=>openRec(null);
+  $('rec-cancel').onclick=()=>$('rec-form').classList.add('hide');
+  $('rec-save').onclick=async()=>{
+    try{ const p={titulo:val('r-titulo'),descripcion:val('r-descripcion'),categoria_id:val('r-categoria')||null,tipo:val('r-tipo'),orden:Number(val('r-orden'))||0,archivo_url:val('r-archivo')||null,publicado:chk('r-publicado')};
+      if(RECURSO) p.id=RECURSO.id; await api('labs_save_recurso',p); toast('Recurso guardado'); $('rec-form').classList.add('hide'); loadRecursos();
+    }catch(e){ toast(e.message,true); }
+  };
+  $('rec-del').onclick=async()=>{ if(!RECURSO||!confirm('¿Eliminar el recurso?'))return; try{ await api('labs_delete_recurso',{id:RECURSO.id}); toast('Recurso eliminado'); $('rec-form').classList.add('hide'); loadRecursos(); }catch(e){ toast(e.message,true); } };
+
+  // ── AVISOS ──
+  function renderAvisos(){
+    $('av-list').innerHTML=(AVISOS||[]).map(a=>itemHTML(a.titulo,(a.etiqueta||'')+(a.fecha_estimada?' · '+a.fecha_estimada:''), a.activo?'on':'off', a.activo?'Activo':'Inactivo','av',a.id)).join('')||'<p class="muted">Sin avisos.</p>';
+    bindList('av-list', id=>{ const a=AVISOS.find(x=>x.id===id); openAv(a); });
+  }
+  function openAv(a){
+    AVISO=a||null; $('av-form').classList.remove('hide'); $('av-form-t').textContent=a?'Editar aviso':'Nuevo aviso'; $('av-del').style.display=a?'':'none';
+    $('a-titulo').value=a?a.titulo:''; $('a-cuerpo').value=a?(a.cuerpo||''):''; $('a-etiqueta').value=a?(a.etiqueta||''):''; $('a-fecha').value=a?(a.fecha_estimada||''):''; $('a-link').value=a?(a.link||''):'';
+    setChk('a-hub',a?a.mostrar_en_hub:true); setChk('a-activo',a?a.activo:true); setChk('a-notificar',false);
+    $('av-form').scrollIntoView({behavior:'smooth'});
+  }
+  $('av-new').onclick=()=>openAv(null);
+  $('av-cancel').onclick=()=>$('av-form').classList.add('hide');
+  $('av-save').onclick=async()=>{
+    try{ const p={tipo:'proximo_curso',titulo:val('a-titulo'),cuerpo:val('a-cuerpo'),etiqueta:val('a-etiqueta'),fecha_estimada:val('a-fecha'),link:val('a-link')||null,mostrar_en_hub:chk('a-hub'),activo:chk('a-activo'),notificar:chk('a-notificar')};
+      if(AVISO) p.id=AVISO.id; const d=await api('labs_save_anuncio',p); toast('Aviso guardado'+(d.notificados?(' · '+d.notificados+' notificados'):'')); $('av-form').classList.add('hide'); loadCursos();
+    }catch(e){ toast(e.message,true); }
+  };
+  $('av-del').onclick=async()=>{ if(!AVISO||!confirm('¿Eliminar el aviso?'))return; try{ await api('labs_delete_anuncio',{id:AVISO.id}); toast('Aviso eliminado'); $('av-form').classList.add('hide'); loadCursos(); }catch(e){ toast(e.message,true); } };
+
+  // ── PRECIO + flag ──
+  async function loadPrecio(){
+    try{ const d=await api('get_config'); const cfg=d.data||[]; const map={}; (Array.isArray(cfg)?cfg:[]).forEach(x=>map[x.clave]=x.valor);
+      $('p-precio').value=map.precio_labs||'30000'; setChk('p-abierto',String(map.labs_abierto)==='true');
+    }catch(e){}
+  }
+  $('precio-save').onclick=async()=>{ try{ await api('set_config',{clave:'precio_labs',valor:String(val('p-precio')||'30000')}); toast('Precio guardado'); }catch(e){ toast(e.message,true); } };
+  $('abierto-save').onclick=async()=>{ try{ await api('set_config',{clave:'labs_abierto',valor:chk('p-abierto')?'true':'false'}); toast('Estado guardado'); }catch(e){ toast(e.message,true); } };
+
+  // ── helpers ──
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function itemHTML(t,sub,pill,pillTxt,kind,id){ return '<div class="list-item" data-id="'+id+'"><div class="t"><b>'+esc(t)+'</b><small>'+esc(sub)+'</small></div><span class="pill '+pill+'">'+esc(pillTxt)+'</span><button class="btn ghost sm" data-edit>Editar</button></div>'; }
+  function bindList(listId,onEdit){ $(listId).querySelectorAll('.list-item').forEach(el=>{ el.querySelector('[data-edit]').onclick=()=>onEdit(el.dataset.id); }); }
+})();
+</script>
+</body>
+</html>

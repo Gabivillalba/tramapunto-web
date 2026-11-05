@@ -9,11 +9,43 @@
 import crypto from 'node:crypto';
 import { decrypt } from '../lib/mp-crypto.js';
 
+// Desactivamos el body-parser de Vercel para poder leer el cuerpo crudo (raw):
+// Paddle firma el HMAC sobre los bytes exactos del request. El flujo de
+// MercadoPago sigue igual, pero toma el body desde `parsed` (JSON.parse del raw).
+export const config = { api: { bodyParser: false } };
+
+// Lee el cuerpo crudo del request y lo parsea. Defensivo: si por lo que sea
+// Vercel ya dejó req.body poblado, lo reusamos (raw queda null → Paddle no
+// podría verificar firma, pero MP nunca se rompe).
+async function leerCuerpo(req) {
+  const b = req.body;
+  // Ya parseado por el runtime como objeto: lo usamos (sin raw → MP anda igual).
+  if (b && typeof b === 'object' && !Buffer.isBuffer(b)) {
+    return { raw: null, parsed: b };
+  }
+  // El runtime dejó el cuerpo crudo como Buffer o string: lo aprovechamos.
+  if (Buffer.isBuffer(b) || typeof b === 'string') {
+    const raw = Buffer.isBuffer(b) ? b.toString('utf8') : b;
+    let parsed = {};
+    try { parsed = raw ? JSON.parse(raw) : {}; } catch { parsed = {}; }
+    return { raw, parsed };
+  }
+  // No hay body: leemos el stream nosotros.
+  const chunks = [];
+  try {
+    for await (const c of req) chunks.push(typeof c === 'string' ? Buffer.from(c) : c);
+  } catch { return { raw: null, parsed: {} }; }
+  const raw = Buffer.concat(chunks).toString('utf8');
+  let parsed = {};
+  try { parsed = raw ? JSON.parse(raw) : {}; } catch { parsed = {}; }
+  return { raw, parsed };
+}
+
 // Valida la firma HMAC-SHA256 que MercadoPago envía en el header x-signature.
 // Requiere MP_WEBHOOK_SECRET (la "clave secreta" del webhook, desde el panel de MP).
 // Si no está configurada NO bloquea, para no romper notificaciones durante el rollout:
 // apenas cargás el secret, la validación queda activa.
-function firmaMpValida(req) {
+function firmaMpValida(req, parsed) {
   const secret = process.env.MP_WEBHOOK_SECRET;
   if (!secret) return true;                 // sin secret configurado todavía: no bloquea
   const sig = String(req.headers['x-signature'] || '');
@@ -26,7 +58,7 @@ function firmaMpValida(req) {
   const ts = parts.ts, v1 = parts.v1;
   if (!ts || !v1) return false;
   const q = req.query || {};
-  let dataId = q['data.id'] ?? q.id ?? (req.body && req.body.data && req.body.data.id);
+  let dataId = q['data.id'] ?? q.id ?? (parsed && parsed.data && parsed.data.id);
   dataId = dataId != null ? String(dataId) : '';
   if (/[a-zA-Z]/.test(dataId)) dataId = dataId.toLowerCase();
   const manifest = `id:${dataId};request-id:${reqId};ts:${ts};`;
@@ -107,16 +139,99 @@ async function labsManejarSuscripcion(type, id) {
   }
 }
 
+// ── TRAMA. LABS (internacional): valida la firma de Paddle ──
+// Paddle manda `Paddle-Signature: ts=...;h1=...`; el HMAC-SHA256 se calcula
+// sobre `${ts}:${rawBody}` con el secret de la notification destination.
+// Sin PADDLE_WEBHOOK_SECRET no bloquea (rollout); apenas lo cargás, se activa.
+function firmaPaddleValida(raw, req) {
+  const secret = process.env.PADDLE_WEBHOOK_SECRET;
+  if (!secret) return true;
+  if (raw == null) return false;            // necesitamos el raw body para el HMAC
+  const header = String(req.headers['paddle-signature'] || '');
+  const parts = {};
+  for (const kv of header.split(';')) {
+    const i = kv.indexOf('=');
+    if (i !== -1) parts[kv.slice(0, i).trim()] = kv.slice(i + 1).trim();
+  }
+  const ts = parts.ts, h1 = parts.h1;
+  if (!ts || !h1) return false;
+  const edad = Math.abs(Date.now() / 1000 - Number(ts));   // anti-replay (5 min)
+  if (!Number.isFinite(edad) || edad > 300) return false;
+  const esperado = crypto.createHmac('sha256', secret).update(`${ts}:${raw}`).digest('hex');
+  const a = Buffer.from(esperado), b = Buffer.from(h1);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+// ── TRAMA. LABS (internacional): procesa un evento de suscripción de Paddle ──
+// Upsert por email en `suscripciones` (procesador='paddle'). El email viene en
+// custom_data (lo seteamos en el checkout); si no, lo pedimos a Paddle por API.
+async function labsManejarPaddle(evt) {
+  const tipo = evt && evt.event_type;
+  if (!tipo) return;
+  if (!tipo.startsWith('subscription.') && tipo !== 'transaction.completed') return;
+
+  const d = (evt && evt.data) || {};
+  const H = { apikey: process.env.SUPABASE_SERVICE_KEY, Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json' };
+
+  let email = (d.custom_data && (d.custom_data.email || d.custom_data.Email)) || '';
+  const subId = (d.id && String(d.id).startsWith('sub_')) ? d.id : (d.subscription_id || null);
+  const customerId = d.customer_id || null;
+  if (!email && customerId && process.env.PADDLE_API_KEY) {
+    const base = (process.env.PADDLE_ENV === 'sandbox') ? 'https://sandbox-api.paddle.com' : 'https://api.paddle.com';
+    const c = await fetch(`${base}/customers/${customerId}`, { headers: { Authorization: `Bearer ${process.env.PADDLE_API_KEY}` } }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    email = (c && c.data && c.data.email) || '';
+  }
+  if (!email) return;
+
+  let estado = 'activa';
+  if (tipo === 'subscription.canceled') estado = 'cancelada';
+  else if (tipo === 'subscription.paused') estado = 'pausada';
+  else if (d.status) {
+    const map = { active: 'activa', trialing: 'activa', canceled: 'cancelada', paused: 'pausada', past_due: 'pausada' };
+    estado = map[d.status] || 'activa';
+  }
+  const vig = (d.current_billing_period && d.current_billing_period.ends_at)
+    || (d.billing_period && d.billing_period.ends_at)
+    || d.next_billed_at
+    || new Date(Date.now() + 32 * 86400000).toISOString();
+
+  await fetch(`${process.env.SUPABASE_URL}/rest/v1/suscripciones?on_conflict=email`, {
+    method: 'POST',
+    headers: { ...H, Prefer: 'return=minimal,resolution=merge-duplicates' },
+    body: JSON.stringify({ email, procesador: 'paddle', paddle_subscription_id: subId, estado, vigencia_hasta: vig, updated_at: new Date().toISOString() }),
+  }).catch(() => {});
+
+  if (estado === 'activa') {
+    await fetch(`${process.env.SUPABASE_URL}/rest/v1/notificaciones`, {
+      method: 'POST', headers: { ...H, Prefer: 'return=minimal' },
+      body: JSON.stringify({ para_email: email, tipo: 'sistema', titulo: '🎓 ¡Bienvenido a TRAMA. LABS!', cuerpo: 'Tu suscripción está activa. Ya tenés acceso a todos los cursos, la biblioteca de prompts y el banco de recursos.', link: '/app.html' }),
+    }).catch(() => {});
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
-  if (!firmaMpValida(req)) {
+  const { raw, parsed } = await leerCuerpo(req);
+
+  // ══ TRAMA. LABS (internacional) — webhook de Paddle ══
+  // Se distingue por el header Paddle-Signature. Rama aislada del flujo MP.
+  if (req.headers['paddle-signature']) {
+    if (!firmaPaddleValida(raw, req)) {
+      return res.status(401).json({ error: 'Firma Paddle inválida' });
+    }
+    try { await labsManejarPaddle(parsed); }
+    catch (e) { console.error('paddle webhook error:', e); }
+    return res.status(200).json({ received: true });
+  }
+
+  if (!firmaMpValida(req, parsed)) {
     return res.status(401).json({ error: 'Firma inválida' });
   }
 
-  const { type, data } = req.body;
+  const { type, data } = parsed;
 
   // ══ TRAMA. LABS — eventos de suscripción (preapproval) ══
   if (type === 'subscription_preapproval' || type === 'subscription_authorized_payment') {

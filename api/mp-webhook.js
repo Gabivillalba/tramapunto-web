@@ -167,7 +167,16 @@ async function labsManejarGumroad(c, ev) {
   // Chequeo opcional de vendedor (si está configurado).
   if (process.env.GUMROAD_SELLER_ID && c.seller_id && String(c.seller_id) !== String(process.env.GUMROAD_SELLER_ID)) return;
 
-  const estado = (ev === 'cancellation' || ev === 'subscription_ended') ? 'cancelada' : 'activa';
+  // El ping simple de Gumroad llega siempre a la misma URL (ev=sale): decidimos
+  // por el contenido. Hay venta/cobro (sale_id) → activa (+32d, se renueva con
+  // cada cobro mensual). Evento de baja → cancelada. Cualquier otra cosa: no toca.
+  const esCancel = ev === 'cancellation' || ev === 'subscription_ended'
+    || c.cancelled === 'true' || c.cancelled === true
+    || !!c.subscription_ended_at;
+  let estado;
+  if (saleId) estado = 'activa';
+  else if (esCancel) estado = 'cancelada';
+  else return;
   const vig = new Date(Date.now() + 32 * 86400000).toISOString();   // se renueva con cada ping de 'sale'
 
   const H = { apikey: process.env.SUPABASE_SERVICE_KEY, Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json' };

@@ -141,6 +141,25 @@ export default async function handler(req, res) {
       abierto = !!(cfg && cfg[0] && String(cfg[0].valor) === 'true');
     }
     if (!abierto) return res.status(503).json({ error: 'TRAMA. LABS abre muy pronto' });
+
+    // ── Ruteo por país ──
+    // Argentina (o país desconocido) → MercadoPago en ARS.
+    // Resto del mundo → Paddle en USD (merchant of record), si ya está configurado.
+    // El país lo da Vercel en el header x-vercel-ip-country.
+    const pais = String(req.headers['x-vercel-ip-country'] || '').toUpperCase();
+    const paddleListo = !!(process.env.PADDLE_PRICE_ID && process.env.PADDLE_CLIENT_TOKEN);
+    if (pais && pais !== 'AR' && paddleListo) {
+      return res.status(200).json({
+        usar: 'paddle',
+        email,
+        paddle: {
+          env: (process.env.PADDLE_ENV === 'sandbox') ? 'sandbox' : 'production',
+          clientToken: process.env.PADDLE_CLIENT_TOKEN,
+          priceId: process.env.PADDLE_PRICE_ID,
+        },
+      });
+    }
+
     if (!process.env.MP_ACCESS_TOKEN) return res.status(503).json({ error: 'Pagos no configurados todavía' });
     try {
       const PRECIOS = await getPrecios();
@@ -159,7 +178,7 @@ export default async function handler(req, res) {
       });
       const d = await pre.json();
       if (!pre.ok) throw new Error(d.message || 'Error en MercadoPago (suscripción)');
-      return res.status(200).json({ id: d.id, init_point: d.init_point, monto });
+      return res.status(200).json({ usar: 'mp', id: d.id, init_point: d.init_point, monto });
     } catch (e) {
       console.error('labs_suscribir error:', e);
       return res.status(500).json({ error: e.message });

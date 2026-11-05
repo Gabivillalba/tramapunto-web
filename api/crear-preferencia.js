@@ -144,20 +144,16 @@ export default async function handler(req, res) {
 
     // ── Ruteo por país ──
     // Argentina (o país desconocido) → MercadoPago en ARS.
-    // Resto del mundo → Paddle en USD (merchant of record), si ya está configurado.
+    // Resto del mundo → Gumroad en USD (merchant of record), si ya está configurado.
     // El país lo da Vercel en el header x-vercel-ip-country.
     const pais = String(req.headers['x-vercel-ip-country'] || '').toUpperCase();
-    const paddleListo = !!(process.env.PADDLE_PRICE_ID && process.env.PADDLE_CLIENT_TOKEN);
-    if (pais && pais !== 'AR' && paddleListo) {
-      return res.status(200).json({
-        usar: 'paddle',
-        email,
-        paddle: {
-          env: (process.env.PADDLE_ENV === 'sandbox') ? 'sandbox' : 'production',
-          clientToken: process.env.PADDLE_CLIENT_TOKEN,
-          priceId: process.env.PADDLE_PRICE_ID,
-        },
-      });
+    const gumroadListo = !!process.env.GUMROAD_PRODUCT_URL;
+    if (pais && pais !== 'AR' && gumroadListo) {
+      const base = process.env.GUMROAD_PRODUCT_URL;
+      const sep = base.includes('?') ? '&' : '?';
+      // Gumroad prellena el email y abre directo el checkout con wanted=true.
+      const url = `${base}${sep}email=${encodeURIComponent(email)}&wanted=true`;
+      return res.status(200).json({ usar: 'gumroad', url });
     }
 
     if (!process.env.MP_ACCESS_TOKEN) return res.status(503).json({ error: 'Pagos no configurados todavía' });

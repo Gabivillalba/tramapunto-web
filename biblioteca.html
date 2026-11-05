@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Biblioteca de prompts — TRAMA. LABS</title>
-<meta name="description" content="Banco de prompts de TRAMA. LABS: la imagen, el vídeo y los formatos. Copiá, pegá y listo.">
+<meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -100,6 +100,29 @@
   .asm .ex{font-family:'JetBrains Mono',monospace;font-size:12px;color:#cfcfc9}
   .asm tr:last-child td{border-bottom:0}
 
+  /* toolbar: búsqueda + favoritos */
+  .toolbar{position:sticky;top:70px;z-index:30;display:flex;gap:10px;background:var(--bg);
+    padding:12px 0 14px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+  .toolbar input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);
+    border-radius:10px;padding:11px 14px;color:var(--ink);font:inherit;font-size:14px}
+  .toolbar input::placeholder{color:var(--muted)}
+  .toolbar input:focus{outline:0;border-color:var(--acid-dim)}
+  .ft{background:var(--surface);border:1px solid var(--line);color:var(--muted);border-radius:10px;
+    padding:0 16px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;transition:all .15s}
+  .ft.on{background:var(--acid);color:#0A0A0A;border-color:var(--acid)}
+  .fav{background:none;border:0;color:#45453f;font-size:17px;line-height:1;cursor:pointer;flex:none;
+    padding:0 3px;transition:color .15s,transform .1s}
+  .fav:hover{color:var(--muted)}
+  .fav.on{color:var(--acid)}
+  .fav:active{transform:scale(.85)}
+  .menu{display:grid;grid-template-columns:1fr 1fr;gap:4px 26px}
+  .menurow{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);align-items:baseline}
+  .menurow .mk{color:var(--acid);font-weight:700;font-size:13px;white-space:nowrap;min-width:150px}
+  .menurow .mv{color:#cfcfc9;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.5}
+  .hidden{display:none!important}
+  .empty{display:none;color:var(--muted);padding:40px 0;font-size:15px}
+  @media (max-width:860px){ .menu{grid-template-columns:1fr} .toolbar{top:62px} .menurow .mk{min-width:120px} }
+
   footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-size:13px;text-align:center}
 
   @media (max-width:860px){
@@ -113,8 +136,8 @@
 
 <header>
   <div class="wrap nav">
-    <a href="#" class="brand">TRAMA<span class="dot">.</span><span class="labs">LABS</span></a>
-    <a href="#" class="back">← Volver a los cursos</a>
+    <a href="/app.html" class="brand">TRAMA<span class="dot">.</span><span class="labs">LABS</span></a>
+    <a href="/app.html" class="back">← Volver a los cursos</a>
   </div>
 </header>
 
@@ -122,7 +145,7 @@
   <div class="lib-hero">
     <span class="tag">Banco de recursos</span>
     <h1 class="display">Biblioteca de prompts</h1>
-    <p>Todo en el mismo lugar: <b>la imagen</b>, <b>el vídeo</b> y <b>los formatos</b>. Copiá, pegá y listo — cambiá lo que está <mark style="color:var(--acid);background:none">[entre corchetes]</mark> por lo tuyo.</p>
+    <p>Todo en el mismo lugar: <b>la imagen</b>, <b>el vídeo</b> y <b>los formatos</b>. Copiá, pegá y listo — cambiá lo que está <mark style="color:var(--acid);background:none">[entre corchetes]</mark> por lo tuyo. El acento por default es <b>rioplatense</b>.</p>
   </div>
 
   <div class="layout" id="lib-layout" style="visibility:hidden">
@@ -135,78 +158,131 @@
 
 <script>
 (function(){
-  const SB_URL='https://mcpmabvxmdepastmpzbi.supabase.co';
-  const SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
-  const getToken=()=>{ try{return localStorage.getItem('sb_token')}catch(e){return null} };
-  const token=getToken();
+  const token=(function(){ try{return localStorage.getItem('sb_token')}catch(e){return null} })();
   const layout=document.getElementById('lib-layout');
-  const content=document.getElementById('content');
-  const idx=document.getElementById('index');
   if(!token){ location.href='/perfil.html?next='+encodeURIComponent(location.pathname+location.search); return; }
 
-  const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const mark=s=>esc(s).replace(/\[([^\]]+)\]/g,'<mark>[$1]</mark>');
-  const slug=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  function boot(DATA){
+    // ---- render index ----
+const idx = document.getElementById('index');
+idx.innerHTML = '<p class="lbl">ÍNDICE</p>' + DATA.map(ch=>`
+  <div class="grp">
+    <a href="#ch-${ch.id}"><span class="k">${ch.letter}</span>${ch.title}</a>
+    <div class="sub">${ch.groups.map(g=>`<a href="#g-${g.id}">${g.title}</a>`).join('')}</div>
+  </div>`).join('');
 
-  function renderCard(c){
-    return '<article class="pcard"><div class="bar">'+
-      '<span class="dots"><i></i><i></i><i></i></span>'+
-      '<span class="plabel">'+esc(c.titulo||'')+'</span>'+
-      (c.etiqueta?'<span class="kind">'+esc(c.etiqueta)+'</span>':'')+
-      '<button class="copy" data-p="'+encodeURIComponent(c.prompt||'')+'">copiar</button></div>'+
-      (c.imagen_url?'<div class="imgslot" style="background:#0e0e0e"><img src="'+esc(c.imagen_url)+'" alt="" style="width:100%;height:100%;object-fit:cover"></div>':'')+
-      '<div class="pbody"><div class="ptext">'+mark(c.prompt||'')+'</div></div></article>';
+// ---- render content ----
+const cont = document.getElementById('content');
+const attr = s => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/\n/g,' ');
+cont.innerHTML =
+  `<div class="toolbar">
+     <input id="q" type="search" placeholder="Buscar prompt, acción o estilo…" autocomplete="off">
+     <button id="favToggle" class="ft" aria-pressed="false">★ Favoritos</button>
+   </div>` +
+  DATA.map(ch=>`
+  <section>
+    <div class="chap" id="ch-${ch.id}"><span class="k">${ch.letter}</span><h2 class="display">${ch.title}</h2></div>
+    <p class="chap-intro">${ch.intro}</p>
+    ${ch.groups.map(g=>`
+      <div class="group" id="g-${g.id}">
+        <h3>${g.title}</h3>
+        ${g.note?`<p class="gnote tip">${g.note}</p>`:''}
+        ${g.type==='table' ? renderTable(g) : g.type==='menu' ? renderMenu(g) : `<div class="cards">${(g.cards||[]).map((c,i)=>renderCard(c,ch.id,g.id,g.title,i)).join('')}</div>`}
+      </div>`).join('')}
+  </section>`).join('') +
+  `<p id="empty" class="empty">No hay prompts que coincidan. Probá con otra palabra o quitá el filtro de favoritos.</p>`;
+
+function renderCard(c,chId,gId,gTitle,i){
+  const mark = s => s.replace(/\[([^\]]+)\]/g,'<mark>[$1]</mark>');
+  const id = chId+':'+gId+':'+i;
+  return `<article class="pcard" data-id="${id}" data-text="${attr(((gTitle||'')+' '+c.label+' '+c.prompt).toLowerCase())}">
+    <div class="bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="plabel">${c.label}</span>
+      ${c.kind?`<span class="kind">${c.kind}</span>`:''}
+      <button class="fav" data-id="${id}" aria-label="Guardar en favoritos">★</button>
+      <button class="copy" data-p="${encodeURIComponent(c.prompt)}">copiar</button>
+    </div>
+    ${c.img?`<div class="imgslot">imagen de ejemplo</div>`:''}
+    <div class="pbody"><div class="ptext">${mark(c.prompt)}</div></div>
+  </article>`;
+}
+function renderMenu(g){
+  return `<div class="menu">${(g.items||[]).map(it=>`
+    <div class="menurow" data-text="${attr(((g.title||'')+' '+it[0]+' '+it[1]).toLowerCase())}">
+      <span class="mk">${it[0]}</span><span class="mv">${it[1]}</span>
+    </div>`).join('')}</div>`;
+}
+function renderTable(g){
+  return `<div class="asm"><table>
+    <thead><tr><th>Pieza</th><th>Ejemplo</th></tr></thead>
+    <tbody>${g.rows.map(r=>`<tr>
+      <td><span class="n">${r[0]}</span>${r[1]} <em>· ${r[2]}</em></td>
+      <td class="ex">${r[3]}</td></tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+// ---- copy ----
+document.addEventListener('click', async e=>{
+  const b = e.target.closest('.copy'); if(!b) return;
+  const txt = decodeURIComponent(b.dataset.p);
+  try{ await navigator.clipboard.writeText(txt); }
+  catch(_){ const t=document.createElement('textarea'); t.value=txt; document.body.appendChild(t); t.select();
+    try{document.execCommand('copy');}catch(e){} t.remove(); }
+  const old=b.textContent; b.textContent='¡copiado!'; b.classList.add('done');
+  setTimeout(()=>{b.textContent=old; b.classList.remove('done');},1400);
+});
+
+// ---- favoritos + búsqueda (por navegador, localStorage) ----
+const FAV_KEY='trama_fav_prompts';
+let favs=(()=>{try{return JSON.parse(localStorage.getItem(FAV_KEY)||'[]')}catch(_){return[]}})();
+function saveFav(){try{localStorage.setItem(FAV_KEY,JSON.stringify(favs))}catch(_){}}
+let onlyFav=false, query='';
+function applyFilter(){
+  const q=query.trim().toLowerCase(); const filtering=onlyFav||!!q;
+  if(!filtering){
+    document.querySelectorAll('.hidden').forEach(e=>e.classList.remove('hidden'));
+    document.getElementById('empty').style.display='none'; return;
   }
-
-  function render(cats, prompts){
-    const byCat={};
-    (prompts||[]).forEach(p=>{ const cid=p.categoria_id||'sin'; (byCat[cid]=byCat[cid]||[]).push(p); });
-    const chapters=(cats||[]).filter(c=>byCat[c.id]).map(c=>({id:c.id,nombre:c.nombre,prompts:byCat[c.id]}));
-    if(byCat['sin']) chapters.push({id:'sin',nombre:'Otros',prompts:byCat['sin']});
-
-    if(!chapters.length){
-      content.innerHTML='<p style="color:var(--muted);font-size:16px">La biblioteca se está cargando. Muy pronto vas a tener acá todos los prompts. 🧵</p>';
-      idx.innerHTML=''; layout.style.visibility='visible'; return;
-    }
-    const letters='ABCDEFGHIJ';
-    idx.innerHTML='<p class="lbl">ÍNDICE</p>'+chapters.map((ch,i)=>{
-      const grupos=[...new Set(ch.prompts.map(p=>p.grupo).filter(Boolean))];
-      return '<div class="grp"><a href="#ch-'+slug(ch.nombre)+'"><span class="k">'+(letters[i]||'•')+'</span>'+esc(ch.nombre)+'</a>'+
-        '<div class="sub">'+grupos.map(g=>'<a href="#g-'+slug(g)+'">'+esc(g)+'</a>').join('')+'</div></div>';
-    }).join('');
-
-    content.innerHTML=chapters.map((ch,i)=>{
-      const grupos=[]; const seen={};
-      ch.prompts.slice().sort((a,b)=>(a.orden||0)-(b.orden||0)).forEach(p=>{
-        const g=p.grupo||'';
-        if(!(g in seen)){ seen[g]=grupos.length; grupos.push({nombre:g,cards:[]}); }
-        grupos[seen[g]].cards.push(p);
-      });
-      return '<section><div class="chap" id="ch-'+slug(ch.nombre)+'"><span class="k">'+(letters[i]||'•')+'</span><h2 class="display">'+esc(ch.nombre)+'</h2></div>'+
-        grupos.map(g=>'<div class="group" '+(g.nombre?'id="g-'+slug(g.nombre)+'"':'')+'>'+
-          (g.nombre?'<h3>'+esc(g.nombre)+'</h3>':'')+
-          '<div class="cards">'+g.cards.map(renderCard).join('')+'</div></div>').join('')+
-        '</section>';
-    }).join('');
+  document.querySelectorAll('.pcard').forEach(el=>{
+    const show=(!onlyFav||favs.includes(el.dataset.id))&&(!q||(el.dataset.text||'').includes(q));
+    el.classList.toggle('hidden',!show);
+  });
+  document.querySelectorAll('.menurow').forEach(el=>{
+    const show=!onlyFav&&(!q||(el.dataset.text||'').includes(q));
+    el.classList.toggle('hidden',!show);
+  });
+  document.querySelectorAll('#content .group').forEach(g=>{
+    g.classList.toggle('hidden', g.querySelectorAll('.pcard:not(.hidden),.menurow:not(.hidden)').length===0);
+  });
+  document.querySelectorAll('#content section').forEach(s=>{
+    s.classList.toggle('hidden', s.querySelectorAll('.group:not(.hidden)').length===0);
+  });
+  const any=document.querySelectorAll('.pcard:not(.hidden),.menurow:not(.hidden)').length;
+  document.getElementById('empty').style.display=any?'none':'block';
+}
+document.getElementById('q').addEventListener('input',e=>{query=e.target.value;applyFilter();});
+document.getElementById('favToggle').addEventListener('click',e=>{
+  onlyFav=!onlyFav; e.currentTarget.classList.toggle('on',onlyFav);
+  e.currentTarget.setAttribute('aria-pressed',onlyFav); applyFilter();
+});
+document.addEventListener('click',e=>{
+  const f=e.target.closest('.fav'); if(!f) return;
+  const id=f.dataset.id, i=favs.indexOf(id);
+  if(i>=0) favs.splice(i,1); else favs.push(id);
+  saveFav(); f.classList.toggle('on',favs.includes(id));
+  if(onlyFav) applyFilter();
+});
+document.querySelectorAll('.fav').forEach(b=>b.classList.toggle('on',favs.includes(b.dataset.id)));
     layout.style.visibility='visible';
   }
 
-  document.addEventListener('click', async e=>{
-    const b=e.target.closest('.copy'); if(!b) return;
-    const txt=decodeURIComponent(b.dataset.p);
-    try{ await navigator.clipboard.writeText(txt); }
-    catch(_){ const t=document.createElement('textarea'); t.value=txt; document.body.appendChild(t); t.select(); try{document.execCommand('copy');}catch(e){} t.remove(); }
-    const old=b.textContent; b.textContent='¡copiado!'; b.classList.add('done');
-    setTimeout(()=>{b.textContent=old; b.classList.remove('done');},1400);
-  });
-
-  (async()=>{
+  (async function(){
     try{
-      const cats=await fetch(SB_URL+'/rest/v1/categorias?tipo=eq.prompt&select=id,nombre,slug,orden&order=orden.asc',{headers:{apikey:SB_ANON,Authorization:'Bearer '+SB_ANON}}).then(r=>r.ok?r.json():[]).catch(()=>[]);
       const res=await fetch('/api/mi-perfil',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({labs:'prompts'})});
       if(res.status===402){ location.href='/tramalabs.html#precio'; return; }
-      const data=await res.json().catch(()=>({}));
-      render(cats, (data&&data.prompts)||[]);
+      const data=await res.json().catch(function(){return {}});
+      boot((data&&data.doc)||[]);
     }catch(err){ location.href='/tramalabs.html#precio'; }
   })();
 })();

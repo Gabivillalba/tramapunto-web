@@ -249,6 +249,25 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, suscripcion: activa ? 'activa' : 'inactiva', completadas, alumno: email });
       }
 
+      // Panel LABS del perfil del creador: suscripción + cursos con progreso + certificados.
+      // Los títulos de curso son info pública (marketing); el progreso es del alumno.
+      if (op === 'panel') {
+        const activa = await labsSubActiva(enc);
+        const sub = (await sbGet(`suscripciones?email=eq.${enc}&select=estado,vigencia_hasta,plan&limit=1`))[0] || null;
+        const cursos = (await sbGet(`cursos?publicado=is.true&select=id,slug,titulo,subtitulo,nivel,portada_url,duracion_min,gratis,orden&order=orden.asc`)) || [];
+        const lecs   = (await sbGet(`lecciones?select=id,curso_id`)) || [];
+        const hechas = (await sbGet(`progreso_lecciones?email=eq.${enc}&completado=is.true&select=leccion_id`)) || [];
+        const certs  = (await sbGet(`certificados?email=eq.${enc}&select=curso_id,codigo,emitido_at`)) || [];
+        const hechasSet = new Set(hechas.map((h) => h.leccion_id));
+        const certBy = {}; certs.forEach((c) => { certBy[c.curso_id] = c.codigo; });
+        const cnt = {}; lecs.forEach((l) => { if (!cnt[l.curso_id]) cnt[l.curso_id] = { t: 0, h: 0 }; cnt[l.curso_id].t++; if (hechasSet.has(l.id)) cnt[l.curso_id].h++; });
+        const out = cursos.map((c) => {
+          const k = cnt[c.id] || { t: 0, h: 0 };
+          return { id: c.id, slug: c.slug, titulo: c.titulo, subtitulo: c.subtitulo, nivel: c.nivel, portada_url: c.portada_url, duracion_min: c.duracion_min, gratis: c.gratis, lecciones: k.t, completadas: k.h, pct: k.t ? Math.round((k.h * 100) / k.t) : 0, certificado: certBy[c.id] || null };
+        });
+        return res.status(200).json({ ok: true, suscripcion: activa ? 'activa' : 'inactiva', vigencia_hasta: sub ? sub.vigencia_hasta : null, cursos: out, certificados: certs });
+      }
+
       // Contenido gated de una lección (video + recursos)
       if (op === 'leccion') {
         const id = String(req.body.leccion_id || '');

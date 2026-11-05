@@ -911,7 +911,7 @@ function buildTabs(){
   // {l: etiqueta, i: índice de contenido} — el orden visual se desacopla del
   // índice interno (renderCreatorTab/renderMarcaTab siguen usando el mismo i).
   const tabs = userType==='creator'
-    ?[{l:'👤 Mi perfil',i:0},{l:'💼 Me compraron',i:5},{l:'📋 Campañas',i:7},{l:'📊 Resultados',i:8},{l:'🛒 Mis compras',i:6},{l:'🔥 Liga',i:1},{l:'🔗 Mis redes',i:2},{l:'✏️ Editar',i:4}]
+    ?[{l:'👤 Mi perfil',i:0},{l:'💼 Me compraron',i:5},{l:'📋 Campañas',i:7},{l:'📊 Resultados',i:8},{l:'🛒 Mis compras',i:6},{l:'🔥 Liga',i:1},{l:'🧵 LABS',i:9},{l:'🔗 Mis redes',i:2},{l:'✏️ Editar',i:4}]
     :[{l:'👤 Mi cuenta',i:0},{l:'🔗 Mis conexiones',i:2},{l:'📋 Mis campañas',i:4},{l:'☆ Guardados',i:1},{l:'✏️ Editar',i:3}];
   document.getElementById('dashTabs').innerHTML = tabs.map((t,pos)=>
     `<button class="tab${pos===0?' active':''}" data-i="${t.i}" onclick="switchTab(${t.i},this)">${t.l}</button>`
@@ -1189,6 +1189,10 @@ function renderCreatorTab(i,el){
     el.innerHTML=`<div class="tab-content active" id="resCreWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
     loadResultadosCreador('resCreWrap');
   }
+  else if(i===9){
+    el.innerHTML=`<div class="tab-content active" id="labsWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`;
+    loadLabsPanel('labsWrap');
+  }
 }
 
 // ── RESULTADOS (vista del creador: métricas que cargaron las marcas) ──
@@ -1274,6 +1278,81 @@ async function loadCampanasCreador(wrapId){
     </div>
     <div class="sec-title">Mis postulaciones (${(mis||[]).length})</div>
     <div class="cx-list">${misHtml}</div>
+  </div>`;
+}
+
+// ── TRAMA. LABS (vista del creador) ──
+function labsCursoRow(c,unlocked){
+  const lvl=c.nivel?c.nivel.charAt(0).toUpperCase()+c.nivel.slice(1):'';
+  const prog=unlocked?`<div style="margin-top:.55rem;display:flex;align-items:center;gap:.6rem">
+      <div style="flex:1;height:6px;background:#1a1a1a;border-radius:999px;overflow:hidden"><div style="height:100%;width:${c.pct||0}%;background:var(--green)"></div></div>
+      <span style="font-size:.72rem;color:var(--muted2);white-space:nowrap">${c.completadas||0}/${c.lecciones||0}</span>
+    </div>`:'';
+  const cta=unlocked
+    ? `<a href="/tramalabs.html#cursos" style="background:var(--green);color:#0a0a0a;font-weight:900;font-size:.72rem;letter-spacing:.03em;text-transform:uppercase;padding:.55rem .95rem;border-radius:999px;white-space:nowrap">${c.pct>=100?'Repasar':(c.pct>0?'Continuar':'Empezar')} →</a>`
+    : (c.gratis
+        ? `<a href="/tramalabs.html#cursos" style="font-size:.68rem;font-weight:900;color:var(--green);border:1px solid var(--green);padding:.4rem .7rem;border-radius:999px;white-space:nowrap">GRATIS →</a>`
+        : `<span style="font-size:1rem;opacity:.5">🔒</span>`);
+  const cert=unlocked&&c.certificado?`<a href="/certificado.html?codigo=${encodeURIComponent(c.certificado)}" style="font-size:.72rem;color:var(--green);margin-left:.5rem;white-space:nowrap">🎓 Certificado</a>`:'';
+  const meta=[c.lecciones?c.lecciones+' lecciones':'',lvl,c.duracion_min?c.duracion_min+' min':''].filter(Boolean).join(' · ');
+  return `<div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:10px;padding:1rem 1.1rem;display:flex;align-items:center;gap:1rem">
+    <div style="flex:1;min-width:0">
+      <div style="font-size:.92rem;font-weight:900;line-height:1.25">${c.titulo||'Curso'}${cert}</div>
+      ${meta?`<div style="font-size:.72rem;color:var(--muted2);margin-top:.15rem">${meta}</div>`:''}
+      ${prog}
+    </div>
+    ${cta}
+  </div>`;
+}
+async function loadLabsPanel(wrapId){
+  const wrap=document.getElementById(wrapId); if(!wrap) return;
+  let data=null, labs={};
+  try{
+    const [r,pr]=await Promise.all([
+      fetch('/api/mi-perfil',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},body:JSON.stringify({labs:'panel'})}).then(x=>x.json()),
+      fetch('/api/precios').then(x=>x.json()).catch(()=>null)
+    ]);
+    data=r; labs=(pr&&pr.labs)||{};
+  }catch(e){ data=null; }
+  if(!data||!data.ok){
+    wrap.innerHTML=`<div class="tab-content active"><div class="empty-state"><div>🧵</div>No pudimos cargar TRAMA. LABS ahora.<br><span style="font-size:.78rem;color:var(--muted)">Probá de nuevo en un rato.</span></div></div>`;
+    return;
+  }
+  const cursos=data.cursos||[], certs=data.certificados||[];
+  const abierto=!!labs.abierto, precio=labs.label||'';
+  const statCard=(n,l)=>`<div class="mc-stat"><div class="mc-n" style="color:var(--green)">${Number(n).toLocaleString('es-AR')}</div><div class="mc-l">${l}</div></div>`;
+
+  if(data.suscripcion==='activa'){
+    const vistas=cursos.reduce((a,c)=>a+(c.completadas||0),0);
+    wrap.innerHTML=`<div class="tab-content active">
+      <div class="sec-title" style="margin-top:0">Mi aprendizaje</div>
+      <p style="font-size:.78rem;color:var(--muted2);line-height:1.5;margin-bottom:1.25rem">Tu suscripción de TRAMA. LABS está activa${data.vigencia_hasta?` hasta el ${new Date(data.vigencia_hasta).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'})}`:''}. Cada lección suma puntos a tu Liga.</p>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.5rem">
+        ${statCard(cursos.length,'Cursos')}
+        ${statCard(vistas,'Lecciones vistas')}
+        ${statCard(certs.length,'Certificados')}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.7rem">${cursos.map(c=>labsCursoRow(c,true)).join('')||'<div class="empty-state" style="padding:1.5rem"><div>🎬</div>Pronto vas a ver tus cursos acá.</div>'}</div>
+    </div>`;
+    return;
+  }
+
+  wrap.innerHTML=`<div class="tab-content active">
+    <div style="background:linear-gradient(135deg,#0f0f0a,#141409);border:1px solid #2a2a14;border-left:4px solid var(--green);border-radius:12px;padding:1.7rem">
+      <div style="font-size:.7rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--green)">TRAMA. LABS</div>
+      <div style="font-size:1.5rem;font-weight:900;margin-top:.35rem;line-height:1.15">Aprendé a crear UGC que las marcas pagan.</div>
+      <div style="font-size:.85rem;color:var(--muted2);margin-top:.55rem;line-height:1.55">Cursos cortos y al grano, biblioteca de prompts, recursos descargables y certificado. Y cada lección suma puntos a tu Liga.</div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1.1rem">
+        ${['🎬 Cursos en video','🧠 Biblioteca de prompts','📎 Recursos','🎓 Certificado'].map(t=>`<span style="font-size:.73rem;background:#1a1a0e;border:1px solid #2a2a14;color:var(--green);padding:.32rem .65rem;border-radius:999px">${t}</span>`).join('')}
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:1.4rem">
+        <a href="/tramalabs.html#precio" style="background:var(--green);color:#0a0a0a;font-weight:900;font-size:.85rem;letter-spacing:.04em;text-transform:uppercase;padding:.8rem 1.5rem;border-radius:999px;white-space:nowrap">${abierto?'Sumarme a LABS →':'Avisame cuando abra →'}</a>
+        ${precio?`<div style="font-size:.8rem;color:var(--muted2)">${abierto?'Suscripción':'Precio de lanzamiento'}: <strong style="color:var(--white)">${precio}</strong>/mes</div>`:''}
+      </div>
+      ${abierto?'':`<div style="font-size:.73rem;color:var(--green);margin-top:.6rem">⏳ Abrimos muy pronto — sumate a la lista y te avisamos primero.</div>`}
+    </div>
+    ${cursos.length?`<div class="sec-title" style="margin-top:1.9rem">Lo que vas a encontrar</div>
+    <div style="display:flex;flex-direction:column;gap:.6rem">${cursos.map(c=>labsCursoRow(c,false)).join('')}</div>`:''}
   </div>`;
 }
 

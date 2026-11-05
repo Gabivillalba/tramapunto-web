@@ -10,13 +10,13 @@ import crypto from 'node:crypto';
 import { decrypt } from '../lib/mp-crypto.js';
 
 // Desactivamos el body-parser de Vercel para poder leer el cuerpo crudo (raw):
-// Paddle firma el HMAC sobre los bytes exactos del request. El flujo de
+// el ping de Gumroad llega form-urlencoded y lo parseamos nosotros. El flujo de
 // MercadoPago sigue igual, pero toma el body desde `parsed` (JSON.parse del raw).
 export const config = { api: { bodyParser: false } };
 
 // Lee el cuerpo crudo del request y lo parsea. Defensivo: si por lo que sea
-// Vercel ya dejó req.body poblado, lo reusamos (raw queda null → Paddle no
-// podría verificar firma, pero MP nunca se rompe).
+// Vercel ya dejó req.body poblado, lo reusamos (raw queda null; MP nunca se
+// rompe, y Gumroad igual lee los campos desde `parsed`).
 async function leerCuerpo(req) {
   const b = req.body;
   // Ya parseado por el runtime como objeto: lo usamos (sin raw → MP anda igual).
@@ -139,66 +139,42 @@ async function labsManejarSuscripcion(type, id) {
   }
 }
 
-// ── TRAMA. LABS (internacional): valida la firma de Paddle ──
-// Paddle manda `Paddle-Signature: ts=...;h1=...`; el HMAC-SHA256 se calcula
-// sobre `${ts}:${rawBody}` con el secret de la notification destination.
-// Sin PADDLE_WEBHOOK_SECRET no bloquea (rollout); apenas lo cargás, se activa.
-function firmaPaddleValida(raw, req) {
-  const secret = process.env.PADDLE_WEBHOOK_SECRET;
-  if (!secret) return true;
-  if (raw == null) return false;            // necesitamos el raw body para el HMAC
-  const header = String(req.headers['paddle-signature'] || '');
-  const parts = {};
-  for (const kv of header.split(';')) {
-    const i = kv.indexOf('=');
-    if (i !== -1) parts[kv.slice(0, i).trim()] = kv.slice(i + 1).trim();
-  }
-  const ts = parts.ts, h1 = parts.h1;
-  if (!ts || !h1) return false;
-  const edad = Math.abs(Date.now() / 1000 - Number(ts));   // anti-replay (5 min)
-  if (!Number.isFinite(edad) || edad > 300) return false;
-  const esperado = crypto.createHmac('sha256', secret).update(`${ts}:${raw}`).digest('hex');
-  const a = Buffer.from(esperado), b = Buffer.from(h1);
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
+// ── TRAMA. LABS (internacional): procesa un ping (webhook) de Gumroad ──
+// Gumroad NO firma los webhooks con HMAC: la verificación se hace consultando
+// la venta por API. El ping llega form-urlencoded; el tipo de evento viene en
+// el query ?ev= (lo seteamos al registrar cada resource subscription).
+function gumroadCampos(raw, parsed) {
+  if (parsed && typeof parsed === 'object' && (parsed.seller_id || parsed.sale_id)) return parsed;
+  const o = {};
+  try { for (const [k, v] of new URLSearchParams(raw || '')) o[k] = v; } catch { /* noop */ }
+  return o;
 }
 
-// ── TRAMA. LABS (internacional): procesa un evento de suscripción de Paddle ──
-// Upsert por email en `suscripciones` (procesador='paddle'). El email viene en
-// custom_data (lo seteamos en el checkout); si no, lo pedimos a Paddle por API.
-async function labsManejarPaddle(evt) {
-  const tipo = evt && evt.event_type;
-  if (!tipo) return;
-  if (!tipo.startsWith('subscription.') && tipo !== 'transaction.completed') return;
-
-  const d = (evt && evt.data) || {};
-  const H = { apikey: process.env.SUPABASE_SERVICE_KEY, Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json' };
-
-  let email = (d.custom_data && (d.custom_data.email || d.custom_data.Email)) || '';
-  const subId = (d.id && String(d.id).startsWith('sub_')) ? d.id : (d.subscription_id || null);
-  const customerId = d.customer_id || null;
-  if (!email && customerId && process.env.PADDLE_API_KEY) {
-    const base = (process.env.PADDLE_ENV === 'sandbox') ? 'https://sandbox-api.paddle.com' : 'https://api.paddle.com';
-    const c = await fetch(`${base}/customers/${customerId}`, { headers: { Authorization: `Bearer ${process.env.PADDLE_API_KEY}` } }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
-    email = (c && c.data && c.data.email) || '';
-  }
+async function labsManejarGumroad(c, ev) {
+  if (c.test === 'true' || c.test === true) return;         // ping de prueba de Gumroad
+  const email = String(c.email || '').trim().toLowerCase();
   if (!email) return;
+  const saleId = c.sale_id || null;
+  const subId = c.subscription_id || null;
 
-  let estado = 'activa';
-  if (tipo === 'subscription.canceled') estado = 'cancelada';
-  else if (tipo === 'subscription.paused') estado = 'pausada';
-  else if (d.status) {
-    const map = { active: 'activa', trialing: 'activa', canceled: 'cancelada', paused: 'pausada', past_due: 'pausada' };
-    estado = map[d.status] || 'activa';
+  // Verificación (no hay firma): confirmamos la venta con la API de Gumroad.
+  if (process.env.GUMROAD_ACCESS_TOKEN && saleId) {
+    const v = await fetch(`https://api.gumroad.com/v2/sales/${encodeURIComponent(saleId)}`, {
+      headers: { Authorization: `Bearer ${process.env.GUMROAD_ACCESS_TOKEN}` },
+    }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    if (!v || !v.success) return;                           // no verificada: no activamos
   }
-  const vig = (d.current_billing_period && d.current_billing_period.ends_at)
-    || (d.billing_period && d.billing_period.ends_at)
-    || d.next_billed_at
-    || new Date(Date.now() + 32 * 86400000).toISOString();
+  // Chequeo opcional de vendedor (si está configurado).
+  if (process.env.GUMROAD_SELLER_ID && c.seller_id && String(c.seller_id) !== String(process.env.GUMROAD_SELLER_ID)) return;
 
+  const estado = (ev === 'cancellation' || ev === 'subscription_ended') ? 'cancelada' : 'activa';
+  const vig = new Date(Date.now() + 32 * 86400000).toISOString();   // se renueva con cada ping de 'sale'
+
+  const H = { apikey: process.env.SUPABASE_SERVICE_KEY, Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json' };
   await fetch(`${process.env.SUPABASE_URL}/rest/v1/suscripciones?on_conflict=email`, {
     method: 'POST',
     headers: { ...H, Prefer: 'return=minimal,resolution=merge-duplicates' },
-    body: JSON.stringify({ email, procesador: 'paddle', paddle_subscription_id: subId, estado, vigencia_hasta: vig, updated_at: new Date().toISOString() }),
+    body: JSON.stringify({ email, procesador: 'gumroad', gumroad_subscription_id: subId, estado, vigencia_hasta: vig, updated_at: new Date().toISOString() }),
   }).catch(() => {});
 
   if (estado === 'activa') {
@@ -216,14 +192,14 @@ export default async function handler(req, res) {
 
   const { raw, parsed } = await leerCuerpo(req);
 
-  // ══ TRAMA. LABS (internacional) — webhook de Paddle ══
-  // Se distingue por el header Paddle-Signature. Rama aislada del flujo MP.
-  if (req.headers['paddle-signature']) {
-    if (!firmaPaddleValida(raw, req)) {
-      return res.status(401).json({ error: 'Firma Paddle inválida' });
-    }
-    try { await labsManejarPaddle(parsed); }
-    catch (e) { console.error('paddle webhook error:', e); }
+  // ══ TRAMA. LABS (internacional) — webhook (ping) de Gumroad ══
+  // Se distingue por ?src=gumroad; el tipo de evento viene en ?ev=. Rama
+  // aislada del flujo MP. La verificación se hace por API dentro del handler.
+  if (req.query && req.query.src === 'gumroad') {
+    try {
+      const campos = gumroadCampos(raw, parsed);
+      await labsManejarGumroad(campos, String((req.query && req.query.ev) || 'sale'));
+    } catch (e) { console.error('gumroad webhook error:', e); }
     return res.status(200).json({ received: true });
   }
 

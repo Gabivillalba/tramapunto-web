@@ -550,7 +550,7 @@ async function sbPatch(table, filter, body, token){
 (async function init(){
   try{ setRole(localStorage.getItem('trama_rol_pref')||'creator'); }catch(_){}
   const token = getToken();
-  if(!token){ showLogin(); return; }
+  if(!token){ showLogin(); if(/crear|registro/i.test(location.hash)){ try{ document.querySelectorAll('.ltab')[1].click(); }catch(_){} } return; }
   const {ok, data} = await sbFetch('/auth/v1/user','GET',null,token);
   if(!ok){ clearSession(); showLogin(); return; }
   currentUser = data;

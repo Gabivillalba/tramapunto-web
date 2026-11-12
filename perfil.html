@@ -912,7 +912,7 @@ function buildTabs(){
   // índice interno (renderCreatorTab/renderMarcaTab siguen usando el mismo i).
   const tabs = userType==='creator'
     ?[{l:'👤 Mi perfil',i:0},{l:'💼 Me compraron',i:5},{l:'📋 Campañas',i:7},{l:'📊 Resultados',i:8},{l:'🛒 Mis compras',i:6},{l:'🔥 Liga',i:1},{l:'🧵 LABS',i:9},{l:'🔗 Mis redes',i:2},{l:'✏️ Editar',i:4}]
-    :[{l:'👤 Mi cuenta',i:0},{l:'🔗 Mis conexiones',i:2},{l:'📋 Mis campañas',i:4},{l:'☆ Guardados',i:1},{l:'✏️ Editar',i:3}];
+    :[{l:'👤 Mi cuenta',i:0},{l:'🔗 Mis conexiones',i:2},{l:'📋 Mis campañas',i:4},{l:'🧵 LABS',i:9},{l:'☆ Guardados',i:1},{l:'✏️ Editar',i:3}];
   document.getElementById('dashTabs').innerHTML = tabs.map((t,pos)=>
     `<button class="tab${pos===0?' active':''}" data-i="${t.i}" onclick="switchTab(${t.i},this)">${t.l}</button>`
   ).join('');
@@ -929,6 +929,8 @@ function irATab(i){ const t=document.querySelector(`#dashTabs .tab[data-i="${i}"
 
 function renderTab(i){
   const el=document.getElementById('dashContent');
+  // LABS es por suscripción (por email), no por rol: lo servimos igual a creator y marca.
+  if(i===9){ el.innerHTML=`<div class="tab-content active" id="labsWrap"><div style="padding:2.5rem;text-align:center"><div class="spin"></div></div></div>`; loadLabsPanel('labsWrap'); return; }
   userType==='creator'?renderCreatorTab(i,el):renderMarcaTab(i,el);
 }
 

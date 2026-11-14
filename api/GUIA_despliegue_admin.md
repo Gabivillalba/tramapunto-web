@@ -23,7 +23,7 @@ En Vercel → tu proyecto → Settings → Environment Variables, asegurate de t
 | Variable | Valor |
 |---|---|
 | `ADMIN_PASS` | una contraseña nueva, larga y difícil (NO "trama2025"). Ej: 24+ caracteres al azar. |
-| `SUPABASE_URL` | `https://mcpmabvxmdepastmpzbi.supabase.co` |
+| `SUPABASE_URL` | `https://qoyekzqvjszeexdebrls.supabase.co` |
 | `SUPABASE_SERVICE_KEY` | la service_role key |
 | `SITE_URL` | `https://tramapunto-web.vercel.app` (o tu dominio final) |
 

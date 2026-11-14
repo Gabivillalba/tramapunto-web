@@ -4,7 +4,7 @@
 //
 // Variables de entorno necesarias en Vercel:
 //   ADMIN_PASS          → contraseña del panel (elegí una fuerte y larga)
-//   SUPABASE_URL        → https://mcpmabvxmdepastmpzbi.supabase.co
+//   SUPABASE_URL        → https://qoyekzqvjszeexdebrls.supabase.co
 //   SUPABASE_SERVICE_KEY→ service_role key (Settings → API → service_role)
 //   SITE_URL            → https://www.tramapunto.com (para los emails)
 //

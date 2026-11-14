@@ -12,7 +12,7 @@ import { presignPutUrl, buildMediaTarget } from '../lib/r2-presign.js';
 const SB_URL     = process.env.SUPABASE_URL;
 const SB_SERVICE = process.env.SUPABASE_SERVICE_KEY;
 const SB_ANON    = process.env.SUPABASE_ANON_KEY
-  || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
+  || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFveWVrenF2anN6ZWV4ZGVicmxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2Mjg5MTcsImV4cCI6MjExMDIwNDkxN30.sJDk9mJ-yWXwRv-OAFllZcn_Qc0DpL97jrK6Td9isbw';
 
 // Redirect URI del OAuth de MercadoPago (coincide con la registrada en la app de MP).
 const MP_REDIRECT = `${process.env.SITE_URL}/mp/callback`;

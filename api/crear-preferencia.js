@@ -20,7 +20,7 @@ const DIAS_ACCESO = 60;
 
 // TRAMA. LABS: identidad del alumno por su JWT (igual que mi-perfil.js).
 const SB_ANON_KEY = process.env.SUPABASE_ANON_KEY
-  || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcG1hYnZ4bWRlcGFzdG1wemJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDYwMDQsImV4cCI6MjA5NjkyMjAwNH0.4Sk9rKEtVjibczByGztgr_wOwyTH3c8XgOKtJHSzwRw';
+  || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFveWVrenF2anN6ZWV4ZGVicmxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2Mjg5MTcsImV4cCI6MjExMDIwNDkxN30.sJDk9mJ-yWXwRv-OAFllZcn_Qc0DpL97jrK6Td9isbw';
 async function labsEmailDelToken(token) {
   if (!token) return null;
   try {

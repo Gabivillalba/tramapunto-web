@@ -994,7 +994,7 @@ async function loadLigaRanking(){
     const pos=['🥇','🥈','🥉','4º','5º'];
     el.innerHTML=list.map((c,i)=>{
       const init=((c.nombre||'?')[0]||'?').toUpperCase();
-      const av=c.avatar_url?`<img src="${c.avatar_url}" alt="">`:init;
+      const av=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre||''}" onerror="this.onerror=null;var n=(this.alt||'').trim().split(' ').filter(Boolean);var s=document.createElement('span');s.textContent=(n.length?(n[0][0]+(n.length>1?n[n.length-1][0]:'')):'?').toUpperCase();s.className='av-ini';s.setAttribute('style','display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-weight:800;line-height:1');this.replaceWith(s)">`:init;
       return `<div class="lr-row">
         <div class="lr-pos">${pos[i]||(i+1)}</div>
         <div class="lr-av">${av}</div>
@@ -1021,7 +1021,7 @@ async function cargarShowcase(){
     box.innerHTML=list.map((c,i)=>{
       const ini=((c.nombre||'?').trim()[0]||'?').toUpperCase();
       const nombre=(c.nombre||'Creador').split(' ').slice(0,2).join(' ');
-      const av=c.avatar_url?`<div class="c-av" style="overflow:hidden;padding:0"><img src="${c.avatar_url}" alt="${nombre}" style="width:100%;height:100%;object-fit:cover"></div>`:`<div class="c-av">${ini}</div>`;
+      const av=c.avatar_url?`<div class="c-av" style="overflow:hidden;padding:0"><img src="${c.avatar_url}" alt="${nombre}" style="width:100%;height:100%;object-fit:cover" onerror="this.onerror=null;var n=(this.alt||'').trim().split(' ').filter(Boolean);var s=document.createElement('span');s.textContent=(n.length?(n[0][0]+(n.length>1?n[n.length-1][0]:'')):'?').toUpperCase();s.className='av-ini';s.setAttribute('style','display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-weight:800;line-height:1');this.replaceWith(s)"></div>`:`<div class="c-av">${ini}</div>`;
       const plats=(c.plats||[]).slice(0,2).join(' · ');
       const niche=(c.niches||[])[0]||'Creador';
       const sub=plats?`${niche} · ${plats}`:niche;
@@ -1399,7 +1399,7 @@ function openModal(id,i){
   currentCreator=c;
   const col=getColor(i),bg=getBg(i),init=getInit(c);
   document.getElementById('mTitle').textContent=`Conectá con ${c.nombre}`;
-  const avHtml=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre}">`:`${init}`;
+  const avHtml=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre}" onerror="this.onerror=null;var n=(this.alt||'').trim().split(' ').filter(Boolean);var s=document.createElement('span');s.textContent=(n.length?(n[0][0]+(n.length>1?n[n.length-1][0]:'')):'?').toUpperCase();s.className='av-ini';s.setAttribute('style','display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-weight:800;line-height:1');this.replaceWith(s)">`:`${init}`;
   document.getElementById('mPreview').innerHTML=`<div class="m-av" style="background:${bg};border-color:${col}44;color:${col}">${avHtml}</div><div><div class="m-name">${c.nombre}</div><div class="m-niche" style="color:${col}">${(c.niches||[]).join(' · ')} · ${fmtSeg(Math.max(c.ig_seg||0,c.tt_seg||0,c.yt_seg||0))}</div></div>`;
   // Preview antes de comprar: SOLO card + descripción + fotos que cargó el creador
   let extra='';
@@ -1474,7 +1474,7 @@ function abrirComparador(){
   const row=(lbl,fn)=>`<tr><th class="cmp-lbl">${lbl}</th>${cs.map(fn).join('')}</tr>`;
   const head=cs.map(c=>{
     const i=allCreators.indexOf(c), col=getColor(i<0?0:i), bg=getBg(i<0?0:i);
-    const av=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre}">`:`<span>${getInit(c)}</span>`;
+    const av=c.avatar_url?`<img src="${c.avatar_url}" alt="${c.nombre}" onerror="this.onerror=null;var n=(this.alt||'').trim().split(' ').filter(Boolean);var s=document.createElement('span');s.textContent=(n.length?(n[0][0]+(n.length>1?n[n.length-1][0]:'')):'?').toUpperCase();s.className='av-ini';s.setAttribute('style','display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-weight:800;line-height:1');this.replaceWith(s)">`:`<span>${getInit(c)}</span>`;
     return `<td><div class="cmp-head"><div class="cmp-av" style="background:${bg};border-color:${col}44;color:${col}">${av}</div><div class="cmp-name">${c.nombre}</div></div></td>`;
   }).join('');
   document.getElementById('cmpBody').innerHTML=`<table class="cmp-table">

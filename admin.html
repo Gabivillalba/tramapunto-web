@@ -47,6 +47,8 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .hamb:hover,.hdr-ic:hover{border-color:var(--green)}
 .ta-group{display:none}
 .amenu-back{display:none}
+.login-remember{display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:#9a9a9a;margin:.1rem 0 .9rem;cursor:pointer;user-select:none}
+.login-remember input{width:16px;height:16px;accent-color:var(--green);cursor:pointer}
 @media(max-width:1024px){
   .hamb,.hdr-ic{display:inline-flex;align-items:center;justify-content:center}
   .top-actions{display:none}
@@ -296,6 +298,7 @@ h1,h2{letter-spacing:-.01em}
     <div class="login-sub">Solo para el equipo TRAMA. Esta URL no está publicada.</div>
     <div class="login-err" id="loginErr">Contraseña incorrecta.</div>
     <div class="fg"><label>Contraseña</label><span class="pw"><input type="password" id="adminPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"><button type="button" class="pw-eye" onclick="togglePass(this)" tabindex="-1">👁</button></span></div>
+    <label class="login-remember"><input type="checkbox" id="adminRemember"> Recordarme en este dispositivo</label>
     <button class="btn-login" onclick="doLogin()">Ingresar →</button>
   </div>
 </div>
@@ -750,8 +753,11 @@ async function doLogin(){
     errEl.classList.remove('show');
     document.getElementById('loginWrap').style.display='none';
     document.getElementById('panel').classList.add('show');
-    sessionStorage.setItem('trama_admin','1');
-    try{sessionStorage.setItem('trama_admin_k',p);}catch(_){}
+    try{
+      const rem=document.getElementById('adminRemember');
+      const store=(rem&&rem.checked)?localStorage:sessionStorage;
+      store.setItem('trama_admin_k',p);
+    }catch(_){}
     loadAll();
   }catch(e){
     ADMIN_KEY=null;
@@ -763,8 +769,7 @@ async function doLogin(){
 }
 function doLogout(){
   ADMIN_KEY=null;
-  sessionStorage.removeItem('trama_admin');
-  try{sessionStorage.removeItem('trama_admin_k');}catch(_){}
+  try{localStorage.removeItem('trama_admin_k');sessionStorage.removeItem('trama_admin_k');sessionStorage.removeItem('trama_admin');}catch(_){}
   document.getElementById('panel').classList.remove('show');
   document.getElementById('loginWrap').style.display='flex';
   document.getElementById('adminPass').value='';
@@ -1991,7 +1996,7 @@ function showToast(msg,type='ok'){
 
 // ── SESIÓN PERSISTENTE (sobrevive al refresh) ──
 (async function(){
-  let k=null; try{k=sessionStorage.getItem('trama_admin_k')}catch(_){}
+  let k=null; try{k=localStorage.getItem('trama_admin_k')||sessionStorage.getItem('trama_admin_k')}catch(_){}
   if(!k) return;
   ADMIN_KEY=k;
   try{

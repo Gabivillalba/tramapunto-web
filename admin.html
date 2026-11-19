@@ -42,13 +42,23 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .panel-title span{color:var(--green)}
 .panel-meta{font-size:.7rem;color:var(--muted);margin-top:.15rem}
 .top-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-.hamb{display:none;background:transparent;border:1px solid #2a2a2a;color:var(--green);font-size:1.15rem;line-height:1;padding:.35rem .65rem;border-radius:6px;cursor:pointer}
-.hamb:hover{border-color:var(--green)}
+.panel-top{position:relative}
+.hamb,.hdr-ic{display:none;background:transparent;border:1px solid #2a2a2a;color:var(--green);font-size:1.15rem;line-height:1;padding:.35rem .65rem;border-radius:6px;cursor:pointer}
+.hamb:hover,.hdr-ic:hover{border-color:var(--green)}
+.ta-group{display:none}
+.amenu-back{display:none}
 @media(max-width:1024px){
-  .hamb{display:inline-flex;align-items:center;justify-content:center}
+  .hamb,.hdr-ic{display:inline-flex;align-items:center;justify-content:center}
   .top-actions{display:none}
-  body.amenu .top-actions{display:flex;flex-direction:column;align-items:stretch;gap:.4rem;margin-top:.75rem;width:100%;background:#0f0f0f;border:1px solid #242424;border-radius:10px;padding:.6rem}
-  body.amenu .top-actions .btn-sm,body.amenu .top-actions .btn-logout{width:100%;text-align:center;padding:.72rem .9rem;font-size:.72rem}
+  body.amenu .amenu-back{display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:900}
+  body.amenu .top-actions{display:flex;flex-direction:column;align-items:stretch;gap:.35rem;
+    position:absolute;top:calc(100% - .25rem);right:1rem;left:auto;width:min(320px,calc(100vw - 2rem));
+    max-height:72vh;overflow:auto;z-index:1000;background:#0f0f0f;border:1px solid #242424;border-radius:12px;padding:.55rem;box-shadow:0 18px 50px rgba(0,0,0,.55)}
+  body.amenu .top-actions .btn-sm,body.amenu .top-actions .btn-logout{width:100%;text-align:center;padding:.7rem .9rem;font-size:.72rem}
+  body.amenu .ta-group{display:block;font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#777;padding:.5rem .4rem .15rem}
+  #taRefresh{display:none}
+  .ta-logout{margin-top:.35rem;border-top:1px solid #242424;padding-top:.55rem}
+  .tabs{flex-wrap:wrap;overflow-x:visible;row-gap:.1rem}
 }
 
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:#161616}
@@ -292,6 +302,7 @@ h1,h2{letter-spacing:-.01em}
 
 <!-- PANEL -->
 <div class="panel" id="panel">
+  <div class="amenu-back" onclick="document.body.classList.remove('amenu')"></div>
   <div class="panel-top">
     <div class="panel-top-head">
       <div>
@@ -299,6 +310,7 @@ h1,h2{letter-spacing:-.01em}
         <div class="panel-meta" id="panelMeta">Cargando...</div>
       </div>
       <div style="display:flex;align-items:center;gap:.6rem;flex-shrink:0">
+      <button class="hdr-ic" id="hdrRefresh" onclick="loadAll()" aria-label="Actualizar">↻</button>
       <button class="hamb" id="hambBtn" onclick="toggleAdminMenu()" aria-label="Menú">☰</button>
       <div class="notif-wrap" style="position:relative">
         <button class="notif-bell" id="notifBell" onclick="toggleAdminNotif()" aria-label="Notificaciones">🔔<span class="notif-dot" id="notifDot" style="display:none"></span></button>
@@ -310,16 +322,18 @@ h1,h2{letter-spacing:-.01em}
       </div>
     </div>
     <div class="top-actions">
-      <button class="btn-sm" onclick="loadAll()">↻ Actualizar</button>
-      <button class="btn-sm" onclick="backfillCuentas()">🔑 Recuperar accesos</button>
-      <button class="btn-sm" onclick="limpiarHuerfanas()">🧹 Limpiar cuentas huérfanas</button>
-      <button class="btn-sm" onclick="recordarPortfolio()">📎 Recordar portfolio</button>
-      <button class="btn-sm" onclick="abrirEnvioMasivo()">✉ Envío masivo</button>
+      <button class="btn-sm" id="taRefresh" onclick="loadAll()">↻ Actualizar</button>
+      <div class="ta-group">Exportar datos</div>
       <button class="btn-sm" onclick="exportCreatorsCSV()">⬇ CSV creadores</button>
       <button class="btn-sm" onclick="exportMarcasCSV()">⬇ CSV marcas</button>
       <button class="btn-sm" onclick="exportVentasCSV()">⬇ CSV ventas</button>
       <button class="btn-sm" onclick="exportPostulacionesCSV()">⬇ CSV postulaciones</button>
-      <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
+      <div class="ta-group">Mantenimiento</div>
+      <button class="btn-sm" onclick="backfillCuentas()">🔑 Recuperar accesos</button>
+      <button class="btn-sm" onclick="limpiarHuerfanas()">🧹 Limpiar cuentas huérfanas</button>
+      <button class="btn-sm" onclick="recordarPortfolio()">📎 Recordar portfolio</button>
+      <button class="btn-sm" onclick="abrirEnvioMasivo()">✉ Envío masivo</button>
+      <button class="btn-logout ta-logout" onclick="doLogout()">Cerrar sesión</button>
     </div>
   </div>
 
@@ -737,6 +751,7 @@ async function doLogin(){
     document.getElementById('loginWrap').style.display='none';
     document.getElementById('panel').classList.add('show');
     sessionStorage.setItem('trama_admin','1');
+    try{sessionStorage.setItem('trama_admin_k',p);}catch(_){}
     loadAll();
   }catch(e){
     ADMIN_KEY=null;
@@ -749,6 +764,7 @@ async function doLogin(){
 function doLogout(){
   ADMIN_KEY=null;
   sessionStorage.removeItem('trama_admin');
+  try{sessionStorage.removeItem('trama_admin_k');}catch(_){}
   document.getElementById('panel').classList.remove('show');
   document.getElementById('loginWrap').style.display='flex';
   document.getElementById('adminPass').value='';
@@ -1972,6 +1988,28 @@ function showToast(msg,type='ok'){
   t.textContent=msg;t.className='toast show '+type;
   clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3200);
 }
+
+// ── SESIÓN PERSISTENTE (sobrevive al refresh) ──
+(async function(){
+  let k=null; try{k=sessionStorage.getItem('trama_admin_k')}catch(_){}
+  if(!k) return;
+  ADMIN_KEY=k;
+  try{
+    await adminCall('list_creators');
+    document.getElementById('loginWrap').style.display='none';
+    document.getElementById('panel').classList.add('show');
+    loadAll();
+  }catch(e){ doLogout(); }
+})();
+
+// cerrar el menú hamburguesa al tocar fuera o una acción
+document.addEventListener('click',function(e){
+  if(!document.body.classList.contains('amenu'))return;
+  if(e.target.closest('#hambBtn'))return;
+  var inMenu=e.target.closest('.top-actions');
+  if(inMenu && !e.target.closest('button'))return;
+  document.body.classList.remove('amenu');
+});
 </script>
 <script>function togglePass(b){var i=b.parentNode.querySelector('input');if(!i)return;var s=i.type==='password';i.type=s?'text':'password';b.textContent=s?'🙈':'👁';}</script>
 </body>

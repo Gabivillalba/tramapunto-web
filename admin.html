@@ -42,6 +42,14 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .panel-title span{color:var(--green)}
 .panel-meta{font-size:.7rem;color:var(--muted);margin-top:.15rem}
 .top-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.hamb{display:none;background:transparent;border:1px solid #2a2a2a;color:var(--green);font-size:1.15rem;line-height:1;padding:.35rem .65rem;border-radius:6px;cursor:pointer}
+.hamb:hover{border-color:var(--green)}
+@media(max-width:767px){
+  .hamb{display:inline-flex;align-items:center;justify-content:center}
+  .top-actions{display:none}
+  body.amenu .top-actions{display:flex;flex-direction:column;align-items:stretch;gap:.4rem;margin-top:.75rem;width:100%;background:#0f0f0f;border:1px solid #242424;border-radius:10px;padding:.6rem}
+  body.amenu .top-actions .btn-sm,body.amenu .top-actions .btn-logout{width:100%;text-align:center;padding:.72rem .9rem;font-size:.72rem}
+}
 
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:#161616}
 @media(min-width:600px){.stats{grid-template-columns:repeat(4,1fr)}}
@@ -290,12 +298,15 @@ h1,h2{letter-spacing:-.01em}
         <div class="panel-title">Panel <span>TRAMA.</span></div>
         <div class="panel-meta" id="panelMeta">Cargando...</div>
       </div>
-      <div class="notif-wrap" style="position:relative;flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:.6rem;flex-shrink:0">
+      <button class="hamb" id="hambBtn" onclick="toggleAdminMenu()" aria-label="Menú">☰</button>
+      <div class="notif-wrap" style="position:relative">
         <button class="notif-bell" id="notifBell" onclick="toggleAdminNotif()" aria-label="Notificaciones">🔔<span class="notif-dot" id="notifDot" style="display:none"></span></button>
         <div class="notif-panel" id="notifPanel">
           <div class="notif-head"><span>Notificaciones</span><button onclick="marcarAdminNotifLeidas()">Marcar leídas</button></div>
           <div id="notifList"></div>
         </div>
+      </div>
       </div>
     </div>
     <div class="top-actions">
@@ -1094,9 +1105,11 @@ async function enviarMasivo(){
   finally{ btn.disabled=false; btn.textContent='Enviar'; }
 }
 
+function toggleAdminMenu(){ document.body.classList.toggle('amenu'); }
 function switchTab(t){
   currentTab = t;
-  ['dashboard','creators','marcas','campanias','config','comunicacion','resenas'].forEach(k=>{
+  document.body.classList.remove('amenu');
+  ['dashboard','creators','marcas','campanias','config','comunicacion','resenas','landing'].forEach(k=>{
     const tabEl=document.getElementById('tab'+k.charAt(0).toUpperCase()+k.slice(1));
     const viewEl=document.getElementById('view'+k.charAt(0).toUpperCase()+k.slice(1));
     if(tabEl) tabEl.classList.toggle('on', t===k);

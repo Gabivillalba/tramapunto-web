@@ -147,6 +147,23 @@ body.t-creator .notif-item .nt-cta{color:var(--purple);border-color:#3a1a5a;back
 
 .dash-tabs{display:flex;border-bottom:1px solid #161616;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:sticky;top:0;z-index:20;background:var(--black)}
 .dash-tabs::-webkit-scrollbar{height:0}
+
+/* ── Menú de secciones (hamburguesa) — solo mobile; en desktop se usan las pestañas de arriba ── */
+.tab-menu{display:none;position:sticky;top:0;z-index:21;background:var(--black)}
+@media(max-width:767px){.tab-menu{display:block}.dash-tabs{display:none}}
+.tab-menu-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:.75rem;background:#0f0f0f;border:none;border-bottom:1px solid #161616;color:var(--white);padding:.95rem 1.25rem;font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.tmb-icon{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.tmb-icon span{display:block;width:20px;height:2px;background:var(--muted);border-radius:2px;transition:transform .2s,opacity .2s}
+.tab-menu.open .tmb-icon span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.tab-menu.open .tmb-icon span:nth-child(2){opacity:0}
+.tab-menu.open .tmb-icon span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+body.t-creator .tab-menu.open .tmb-icon span{background:var(--purple)}
+.tab-menu-list{display:none;flex-direction:column;background:var(--black);border-bottom:1px solid #161616;max-height:72vh;overflow-y:auto}
+.tab-menu.open .tab-menu-list{display:flex}
+.tab-menu-item{text-align:left;background:none;border:none;border-bottom:1px solid #161616;color:var(--muted);padding:.9rem 1.25rem;font-size:.78rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+.tab-menu-item:last-child{border-bottom:none}
+.tab-menu-item.active{color:var(--green);background:#0d0d0d}
+body.t-creator .tab-menu-item.active{color:var(--purple)}
 .tab{padding:.875rem 1.25rem;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none}
 .tab:hover{color:var(--white)}
 .tab.active{color:var(--green);border-bottom-color:var(--green)}
@@ -433,6 +450,14 @@ h1,h2{letter-spacing:-.01em}
     </div>
   </div>
   <div id="welcomeBanner"></div>
+  <!-- Navegación de secciones: menú desplegable en mobile, pestañas en desktop -->
+  <div class="tab-menu" id="tabMenu">
+    <button class="tab-menu-btn" id="tabMenuBtn" type="button" onclick="toggleTabMenu()" aria-haspopup="true" aria-expanded="false">
+      <span id="tabMenuLabel">Secciones</span>
+      <span class="tmb-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <div class="tab-menu-list" id="tabMenuList" role="menu"></div>
+  </div>
   <div class="dash-tabs" id="dashTabs"></div>
   <div id="dashContent"></div>
   <div style="max-width:1100px;margin:2.5rem auto 1.5rem;padding-top:1.25rem;border-top:1px solid #1a1a1a;text-align:center">
@@ -905,27 +930,50 @@ async function marcarNotifLeidas(){
 document.addEventListener('click',e=>{
   const w=document.querySelector('.notif-wrap'); const p=document.getElementById('notifPanel');
   if(w&&p&&p.classList.contains('open')&&!w.contains(e.target)) p.classList.remove('open');
+  const m=document.getElementById('tabMenu');
+  if(m&&m.classList.contains('open')&&!m.contains(e.target)){ m.classList.remove('open'); document.getElementById('tabMenuBtn').setAttribute('aria-expanded','false'); }
 });
 
+let TABS=[];
 function buildTabs(){
   // {l: etiqueta, i: índice de contenido} — el orden visual se desacopla del
   // índice interno (renderCreatorTab/renderMarcaTab siguen usando el mismo i).
-  const tabs = userType==='creator'
+  TABS = userType==='creator'
     ?[{l:'👤 Mi perfil',i:0},{l:'💼 Me compraron',i:5},{l:'📋 Campañas',i:7},{l:'📊 Resultados',i:8},{l:'🛒 Mis compras',i:6},{l:'🔥 Liga',i:1},{l:'🧵 LABS',i:9},{l:'🔗 Mis redes',i:2},{l:'✏️ Editar',i:4}]
     :[{l:'👤 Mi cuenta',i:0},{l:'🔗 Mis conexiones',i:2},{l:'📋 Mis campañas',i:4},{l:'🧵 LABS',i:9},{l:'☆ Guardados',i:1},{l:'✏️ Editar',i:3}];
-  document.getElementById('dashTabs').innerHTML = tabs.map((t,pos)=>
-    `<button class="tab${pos===0?' active':''}" data-i="${t.i}" onclick="switchTab(${t.i},this)">${t.l}</button>`
+  // Pestañas de desktop
+  document.getElementById('dashTabs').innerHTML = TABS.map((t,pos)=>
+    `<button class="tab${pos===0?' active':''}" data-i="${t.i}" onclick="selectTab(${t.i})">${t.l}</button>`
   ).join('');
-  renderTab(tabs[0].i);
+  // Lista del menú hamburguesa (mobile)
+  document.getElementById('tabMenuList').innerHTML = TABS.map((t,pos)=>
+    `<button class="tab-menu-item${pos===0?' active':''}" data-i="${t.i}" role="menuitem" onclick="selectTab(${t.i})">${t.l}</button>`
+  ).join('');
+  selectTab(TABS[0].i);
 }
 
-function switchTab(i,btn){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
+// Abre/cierra el menú de secciones (mobile)
+function toggleTabMenu(){
+  const m=document.getElementById('tabMenu'); if(!m) return;
+  const open=m.classList.toggle('open');
+  document.getElementById('tabMenuBtn').setAttribute('aria-expanded', open?'true':'false');
+}
+
+// Selecciona una sección por su ÍNDICE DE CONTENIDO y sincroniza ambas navegaciones
+function selectTab(i){
+  document.querySelectorAll('#dashTabs .tab, #tabMenuList .tab-menu-item').forEach(t=>
+    t.classList.toggle('active', Number(t.dataset.i)===i)
+  );
+  const cur=TABS.find(t=>t.i===i);
+  if(cur) document.getElementById('tabMenuLabel').textContent=cur.l;
+  const m=document.getElementById('tabMenu');
+  if(m){ m.classList.remove('open'); document.getElementById('tabMenuBtn').setAttribute('aria-expanded','false'); }
   renderTab(i);
 }
+// Alias de compatibilidad
+function switchTab(i){ selectTab(i); }
 // Va a un tab por su ÍNDICE DE CONTENIDO (no por posición visual)
-function irATab(i){ const t=document.querySelector(`#dashTabs .tab[data-i="${i}"]`); if(t){ t.click(); t.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}); } }
+function irATab(i){ selectTab(i); const t=document.querySelector(`#dashTabs .tab[data-i="${i}"]`); if(t) t.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}); }
 
 function renderTab(i){
   const el=document.getElementById('dashContent');

@@ -76,14 +76,14 @@ h1,h2,.h-title,.s-h2,.cta-h,.m-title,.sm-title,.gate-title,.sec-title,.hero-titl
 h1,h2{letter-spacing:-.01em}
 </style>
 </head><body>
-<nav><a class="logo" href="/">TRAMA.</a><div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:flex-end"><a href="/perfil.html" style="color:#eaeaea;text-decoration:none;font-weight:700;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap">Ingresar</a><a href="/perfil.html#crear" style="color:#C8FF1A;border:1px solid #C8FF1A;text-decoration:none;padding:.42rem .8rem;border-radius:2px;font-weight:800;font-size:.72rem;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap">Registrate</a><a class="nav-cta" href="/">🔍 Encontrá tu creator</a></div></nav>
+<nav><a class="logo" href="/">TRAMA.</a><div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:flex-end"><a href="/perfil.html" style="color:#eaeaea;text-decoration:none;font-weight:700;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap">Ingresar</a><a href="/perfil.html#crear" style="color:#C8FF1A;border:1px solid #C8FF1A;text-decoration:none;padding:.42rem .8rem;border-radius:2px;font-weight:800;font-size:.72rem;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap">Registrate</a><a class="nav-cta" href="/app.html#bolsa">🔍 Encontrá tu creator</a></div></nav>
 <header class="hero">
   <div class="crumb"><a href="/">Inicio</a> › <a href="/creadores-ugc-buenos-aires.html">Buenos Aires</a> › Belleza</div>
   <h1>Creadores UGC de Belleza en Buenos Aires</h1>
   <p class="intro">Creadores de belleza en Buenos Aires especializados en maquillaje, skincare y reseñas. El match ideal para marcas de cosmética que quieren contenido porteño.</p>
   <div class="hero-visual" style="background-image:url('/img/nicho-belleza.webp')" role="img" aria-label="Creadores UGC de Belleza en Buenos Aires — TRAMA."></div>
   <div class="cta-row">
-    <a class="btn btn-g" href="/">Ver la bolsa completa →</a>
+    <a class="btn btn-g" href="/app.html#bolsa">Ver la bolsa completa →</a>
     <a class="btn btn-o" href="/creadores-ugc-belleza.html">Todos los de Belleza</a>
     <a class="btn btn-o" href="/creadores-ugc-buenos-aires.html">Todos los de Buenos Aires</a>
   </div>
@@ -94,7 +94,7 @@ h1,h2{letter-spacing:-.01em}
   <div class="seo-copy">
     <h2>Creadores UGC de Belleza en Buenos Aires</h2>
     <p>En TRAMA. conectás con creadores de Belleza radicados en Buenos Aires, <strong>verificados uno por uno</strong>. Contenido con estética local, contacto directo y métricas reales para tus campañas.</p>
-    <p><a href="/" style="color:var(--green)">Ver toda la bolsa de creadores →</a></p>
+    <p><a href="/app.html#bolsa" style="color:var(--green)">Ver toda la bolsa de creadores →</a></p>
   </div>
   <section class="faq"><h2>Preguntas frecuentes</h2><details class="faq-q"><summary>¿Hay creadores de Belleza en Buenos Aires?</summary><p>Sí. En TRAMA. encontrás creadores de Belleza que viven y producen en Buenos Aires y CABA, verificados uno por uno, listos para colaborar con tu marca.</p></details><details class="faq-q"><summary>¿Cómo contrato un creador de Belleza en Buenos Aires?</summary><p>Elegís el creador en la bolsa, desbloqueás su contacto pagando una sola vez (el acceso dura 60 días) y coordinás directo, sin comisiones sobre la campaña.</p></details></section>
   <section class="otros">
@@ -125,7 +125,7 @@ const norm=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,
       const repsHtml=reps.length?('<div class="c-reps">'+reps.join('')+'</div>'):'';
       return `<a class="card" href="/"><div class="av">${av}</div><div class="c-nom">${c.nombre}</div><div class="c-sub">${seg?seg+' seguidores':'Creador/a'}</div>${repsHtml}${rat}</a>`;
     }).join('');
-  }catch(e){ g.innerHTML='<div class="empty">No se pudieron cargar los creadores. <a href="/" style="color:var(--green)">Ir a la bolsa →</a></div>'; }
+  }catch(e){ g.innerHTML='<div class="empty">No se pudieron cargar los creadores. <a href="/app.html#bolsa" style="color:var(--green)">Ir a la bolsa →</a></div>'; }
 })();
 </script>
 </body></html>

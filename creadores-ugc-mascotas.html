@@ -97,7 +97,7 @@ h1,h2{letter-spacing:-.01em}
 <body>
 <nav>
   <a class="logo" href="/">TRAMA.</a>
-  <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:flex-end"><a href="/perfil.html" style="color:#eaeaea;text-decoration:none;font-weight:700;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap">Ingresar</a><a href="/perfil.html#crear" style="color:#C8FF1A;border:1px solid #C8FF1A;text-decoration:none;padding:.42rem .8rem;border-radius:2px;font-weight:800;font-size:.72rem;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap">Registrate</a><a class="nav-cta" href="/">🔍 Encontrá tu creator</a></div>
+  <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:flex-end"><a href="/perfil.html" style="color:#eaeaea;text-decoration:none;font-weight:700;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap">Ingresar</a><a href="/perfil.html#crear" style="color:#C8FF1A;border:1px solid #C8FF1A;text-decoration:none;padding:.42rem .8rem;border-radius:2px;font-weight:800;font-size:.72rem;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap">Registrate</a><a class="nav-cta" href="/app.html#bolsa">🔍 Encontrá tu creator</a></div>
 </nav>
 
 <header class="hero">
@@ -107,7 +107,7 @@ h1,h2{letter-spacing:-.01em}
   <p class="intro">Perros, gatos y más: cuentas protagonizadas por mascotas que generan contenido auténtico y entrañable. Ideales para marcas pet-friendly —petfood, veterinarias, accesorios y pet shops— que buscan conectar con una comunidad fiel.</p>
   <div class="hero-visual" role="img" aria-label="Mascotas creadoras de contenido UGC en Argentina — TRAMA.">🐾</div>
   <div class="cta-row">
-    <a class="btn btn-g" href="/">Ver la bolsa completa →</a>
+    <a class="btn btn-g" href="/app.html#bolsa">Ver la bolsa completa →</a>
     <a class="btn btn-o" href="/marcas.html">Soy una marca</a>
     <a class="btn btn-o" href="/registro.html">Registrá a tu mascota</a>
   </div>
@@ -122,7 +122,7 @@ h1,h2{letter-spacing:-.01em}
     <p>En TRAMA. conectás tu marca pet-friendly con mascotas creadoras <strong>verificadas uno por uno</strong> por nuestro equipo. Nada de cuentas falsas ni métricas infladas: datos reales, contacto directo y contenido auténtico para tus campañas.</p>
     <p>El contenido con mascotas rinde porque genera cercanía y emoción: una comunidad fiel que confía en lo que su pet favorito muestra. Elegí la cuenta que mejor represente a tu marca, desbloqueá su contacto y coordinás la colaboración directo, sin intermediarios ni comisiones por la campaña.</p>
     <p>¿Tenés una mascota con cuenta propia? <a href="/registro.html" style="color:var(--purple)">Registrala en TRAMA. como Pet creator →</a> y empezá a recibir propuestas de marcas.</p>
-    <p><a href="/" style="color:var(--green)">Explorá todas las mascotas creadoras en la bolsa →</a></p>
+    <p><a href="/app.html#bolsa" style="color:var(--green)">Explorá todas las mascotas creadoras en la bolsa →</a></p>
   </div>
 
   <section class="faq"><h2>Preguntas frecuentes sobre mascotas creadoras de contenido</h2><details class="faq-q"><summary>¿Qué es una mascota creadora de contenido (pet influencer)?</summary><p>Es una cuenta cuyo protagonista es una mascota (perro, gato, ave y más) que genera contenido auténtico. Las marcas pet-friendly la usan en campañas de petfood, accesorios, veterinarias y productos para animales. En TRAMA. cada perfil está verificado a mano, con datos y métricas reales.</p></details><details class="faq-q"><summary>¿Qué tipo de marcas trabajan con mascotas creadoras?</summary><p>Marcas pet-friendly: alimento para mascotas, veterinarias, pet shops, accesorios, seguros para mascotas, hotelería y transporte que acepta animales, e incluso marcas de lifestyle que quieren sumar el factor mascota a su contenido.</p></details><details class="faq-q"><summary>¿Las mascotas creadoras están verificadas?</summary><p>Sí. El equipo de TRAMA. revisa uno por uno cada perfil antes de publicarlo: nada de cuentas falsas ni métricas infladas.</p></details><details class="faq-q"><summary>¿Cómo contacto a una mascota creadora en TRAMA.?</summary><p>Filtrás por "Solo pet creators" en la bolsa, mirás su contenido y métricas, y desbloqueás el contacto pagando una sola vez. El acceso queda disponible por 60 días y coordinás la colaboración directo con quien maneja la cuenta, sin comisiones por la campaña.</p></details></section>
@@ -145,7 +145,7 @@ const fmt=n=>!n?'':n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/10
     const r=await fetch(`${SB_URL}/rest/v1/creators?select=nombre,pet_nombre,pet_tipo,ig_seg,tt_seg,yt_seg,avatar_url,rating_prom,rating_count,es_campeon,campeon_label,indice&status=eq.aprobado&es_pet=eq.true&order=indice.desc`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});
     const all=await r.json();
     const list=(all||[]).slice(0,30);
-    if(!list.length){ g.innerHTML='<div class="empty">Pronto vas a ver mascotas creadoras acá. <a href="/" style="color:var(--green)">Ver la bolsa →</a></div>'; return; }
+    if(!list.length){ g.innerHTML='<div class="empty">Pronto vas a ver mascotas creadoras acá. <a href="/app.html#bolsa" style="color:var(--green)">Ver la bolsa →</a></div>'; return; }
     g.innerHTML=list.map(c=>{
       const seg=fmt(c.ig_seg||c.tt_seg||c.yt_seg);
       const ini=(c.nombre||'?').trim()[0]||'?';
@@ -158,7 +158,7 @@ const fmt=n=>!n?'':n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?Math.round(n/10
       const sub=c.pet_tipo?c.pet_tipo:(seg?seg+' seguidores':'Pet creator');
       return `<a class="card" href="/"><div class="av">${av}</div><div class="c-nom">${c.nombre}</div><div class="c-sub">${sub}${seg&&c.pet_tipo?' · '+seg:''}</div>${repsHtml}${rat}</a>`;
     }).join('');
-  }catch(e){ g.innerHTML='<div class="empty">No se pudieron cargar las mascotas creadoras. <a href="/" style="color:var(--green)">Ir a la bolsa →</a></div>'; }
+  }catch(e){ g.innerHTML='<div class="empty">No se pudieron cargar las mascotas creadoras. <a href="/app.html#bolsa" style="color:var(--green)">Ir a la bolsa →</a></div>'; }
 })();
 </script>
 </body>

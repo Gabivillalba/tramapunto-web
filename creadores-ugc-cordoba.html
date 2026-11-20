@@ -77,14 +77,14 @@ h1,h2,.h-title,.s-h2,.cta-h,.m-title,.sm-title,.gate-title,.sec-title,.hero-titl
 h1,h2{letter-spacing:-.01em}
 </style>
 </head><body>
-<nav><a class="logo" href="/">TRAMA.</a><div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:flex-end"><a href="/perfil.html" style="color:#eaeaea;text-decoration:none;font-weight:700;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap">Ingresar</a><a href="/perfil.html#crear" style="color:#C8FF1A;border:1px solid #C8FF1A;text-decoration:none;padding:.42rem .8rem;border-radius:2px;font-weight:800;font-size:.72rem;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap">Registrate</a><a class="nav-cta" href="/">🔍 Encontrá tu creator</a></div></nav>
+<nav><a class="logo" href="/">TRAMA.</a><div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:flex-end"><a href="/perfil.html" style="color:#eaeaea;text-decoration:none;font-weight:700;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap">Ingresar</a><a href="/perfil.html#crear" style="color:#C8FF1A;border:1px solid #C8FF1A;text-decoration:none;padding:.42rem .8rem;border-radius:2px;font-weight:800;font-size:.72rem;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap">Registrate</a><a class="nav-cta" href="/app.html#bolsa">🔍 Encontrá tu creator</a></div></nav>
 <header class="hero">
   <div class="crumb"><a href="/">Inicio</a> › Creadores en Córdoba</div>
   <h1>Creadores UGC en Córdoba</h1>
   <p class="intro">Creadores cordobeses que producen contenido auténtico con la impronta del interior. Una escena en crecimiento, ideal para marcas que quieren llegar al centro del país con caras locales.</p>
   <div class="hero-visual" style="background-image:url('/img/ciudad-cordoba.webp')" role="img" aria-label="Creadores de contenido UGC en Córdoba — TRAMA."></div>
   <div class="cta-row">
-    <a class="btn btn-g" href="/">Ver la bolsa completa →</a>
+    <a class="btn btn-g" href="/app.html#bolsa">Ver la bolsa completa →</a>
     <a class="btn btn-o" href="/marcas.html">Soy una marca</a>
     <a class="btn btn-o" href="/registro.html">Soy creador/a</a>
   </div>
@@ -96,7 +96,7 @@ h1,h2{letter-spacing:-.01em}
   <div class="seo-copy">
     <h2>Creadores de contenido UGC en Córdoba</h2>
     <p>En TRAMA. conectás tu marca con creadores de Córdoba <strong>verificados uno por uno</strong>. Trabajar con creadores locales te da contenido con la estética y el acento de la zona, ideal para campañas que buscan cercanía con el público de Córdoba y toda la Argentina.</p>
-    <p><a href="/" style="color:var(--green)">Explorá todos los creadores en la bolsa →</a></p>
+    <p><a href="/app.html#bolsa" style="color:var(--green)">Explorá todos los creadores en la bolsa →</a></p>
   </div>
 
   <section class="faq"><h2>Preguntas frecuentes</h2><details class="faq-q"><summary>¿Hay creadores de contenido UGC en Córdoba?</summary><p>Sí. En TRAMA. vas a encontrar creadores de Córdoba verificados uno por uno, de distintos nichos (belleza, gastronomía, fitness y más), listos para producir contenido para tu marca.</p></details><details class="faq-q"><summary>¿Cómo contacto a un creador de Córdoba?</summary><p>Elegís el creador en la bolsa, desbloqueás su contacto pagando una sola vez (el acceso dura 60 días) y coordinás la colaboración directo, sin comisiones sobre la campaña.</p></details><details class="faq-q"><summary>¿Los creadores de Córdoba están verificados?</summary><p>Sí. El equipo de TRAMA. revisa cada perfil antes de publicarlo: datos reales y métricas verificadas, sin perfiles falsos.</p></details></section>
@@ -124,7 +124,7 @@ const norm=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,
     const r=await fetch(`${SB_URL}/rest/v1/creators?select=nombre,ciudad,ig_seg,tt_seg,yt_seg,avatar_url,rating_prom,rating_count,es_campeon,campeon_label,indice&status=eq.aprobado&order=indice.desc`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});
     const all=await r.json();
     const list=(all||[]).filter(c=>{const cc=norm(c.ciudad);return ALIASES.some(a=>cc.includes(a));}).slice(0,30);
-    if(!list.length){ g.innerHTML='<div class="empty">Pronto vas a ver creadores de '+CIUDAD+' acá. <a href="/" style="color:var(--green)">Ver toda la bolsa →</a></div>'; return; }
+    if(!list.length){ g.innerHTML='<div class="empty">Pronto vas a ver creadores de '+CIUDAD+' acá. <a href="/app.html#bolsa" style="color:var(--green)">Ver toda la bolsa →</a></div>'; return; }
     g.innerHTML=list.map(c=>{
       const seg=fmt(c.ig_seg||c.tt_seg||c.yt_seg);
       const ini=((c.nombre||'?').trim()[0]||'?').toUpperCase();
@@ -136,7 +136,7 @@ const norm=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,
       const repsHtml=reps.length?('<div class="c-reps">'+reps.join('')+'</div>'):'';
       return `<a class="card" href="/"><div class="av">${av}</div><div class="c-nom">${c.nombre}</div><div class="c-sub">${seg?seg+' seguidores':'Creador/a'}</div>${repsHtml}${rat}</a>`;
     }).join('');
-  }catch(e){ g.innerHTML='<div class="empty">No se pudieron cargar los creadores. <a href="/" style="color:var(--green)">Ir a la bolsa →</a></div>'; }
+  }catch(e){ g.innerHTML='<div class="empty">No se pudieron cargar los creadores. <a href="/app.html#bolsa" style="color:var(--green)">Ir a la bolsa →</a></div>'; }
 })();
 </script>
 </body></html>

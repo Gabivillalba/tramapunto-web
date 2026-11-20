@@ -383,6 +383,7 @@ h1,h2{letter-spacing:-.01em}
 <nav>
   <a class="logo" href="/">TRAMA.</a>
   <div class="nav-r">
+    <a class="nav-back" href="/app.html#bolsa">🔍 Bolsa</a>
     <a class="nav-back" href="/">← Inicio</a>
     <button class="btn-logout" id="btnLogout" style="display:none" onclick="doLogout()">Cerrar sesión</button>
   </div>
@@ -862,7 +863,7 @@ function renderWelcomeBanner(){
     titulo=`¡Bienvenida/o a TRAMA, ${nombre}! 🏢`;
     texto='Publicá tu primera campaña y recibí postulaciones de creadores verificados, o explorá la bolsa para contactarlos directo.';
     ctas=`<a class="wb-cta" style="background:${acc}" href="/campanas.html">Publicar campaña →</a>
-          <a class="wb-cta ghost" style="border-color:${bd};color:${acc}" href="/#bolsa">Explorar la bolsa</a>`;
+          <a class="wb-cta ghost" style="border-color:${bd};color:${acc}" href="/app.html#bolsa">Explorar la bolsa</a>`;
   }
   box.innerHTML=`<div class="welcome-banner" style="background:${bg};border-color:${bd}">
     <button class="wb-x" onclick="cerrarWelcome('${key}')" aria-label="Cerrar">✕</button>
@@ -1116,7 +1117,7 @@ function renderCreatorTab(i,el){
         <div style="font-size:1.75rem">${e.icon}</div>
         <div><div class="estado-title" style="color:${e.color}">${e.title}</div><div class="estado-desc">${e.desc}</div></div>
       </div>
-      ${st==='aprobado'?`<div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem"><div style="font-size:.82rem;color:var(--muted2)">Tu perfil está visible para todas las marcas registradas en TRAMA.</div><a href="/" style="background:var(--green);color:var(--black);padding:.6rem 1.25rem;font-weight:900;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;border-radius:2px;text-decoration:none">Ver bolsa →</a></div>`:''}
+      ${st==='aprobado'?`<div style="background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem"><div style="font-size:.82rem;color:var(--muted2)">Tu perfil está visible para todas las marcas registradas en TRAMA.</div><a href="/app.html#bolsa" style="background:var(--green);color:var(--black);padding:.6rem 1.25rem;font-weight:900;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;border-radius:2px;text-decoration:none">Ver bolsa →</a></div>`:''}
     </div>`;
   }
   else if(i===4){
@@ -1425,7 +1426,7 @@ function renderMarcaTab(i,el){
           <div style="font-size:.9rem;font-weight:800;color:var(--green)">📋 Publicá una campaña</div>
           <div style="font-size:.76rem;color:var(--muted2);margin-top:.25rem;line-height:1.5">Dejá tu brief y recibí postulaciones de creadores que encajan.</div>
         </a>
-        <a href="/#bolsa" style="flex:1;min-width:200px;background:#0a1020;border:1px solid #1a2a40;border-radius:4px;padding:1.1rem 1.25rem;text-decoration:none">
+        <a href="/app.html#bolsa" style="flex:1;min-width:200px;background:#0a1020;border:1px solid #1a2a40;border-radius:4px;padding:1.1rem 1.25rem;text-decoration:none">
           <div style="font-size:.9rem;font-weight:800;color:var(--white)">🔍 Encontrá tu creador</div>
           <div style="font-size:.76rem;color:var(--muted2);margin-top:.25rem;line-height:1.5">Buscá y conectá con creadores verificados por nicho.</div>
         </a>
@@ -2286,7 +2287,7 @@ async function loadComprados(wrapId){
   const cxs=await sbGet('conexiones',`marca_email=eq.${encodeURIComponent(email)}&estado=eq.pagado&select=id,creator_id,origen,created_at,monto,metodo,voucher_id&order=created_at.desc`,getToken());
   compradosData={};
   if(!cxs.length){
-    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Contactos que compraste</div><div class="empty-state"><div>📭</div>Todavía no desbloqueaste ningún contacto.<br><a href="/" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
+    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Contactos que compraste</div><div class="empty-state"><div>📭</div>Todavía no desbloqueaste ningún contacto.<br><a href="/app.html#bolsa" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
     return;
   }
   const ids=[...new Set(cxs.map(c=>c.creator_id).filter(Boolean))];
@@ -2418,7 +2419,7 @@ async function loadGuardados(wrapId){
   const email=currentUser.email;
   const favs=await sbGet('favoritos',`marca_email=eq.${encodeURIComponent(email)}&select=creator_id,created_at&order=created_at.desc`,getToken());
   if(!favs||!favs.length){
-    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Creators guardados</div><div class="empty-state"><div>🔖</div>Todavía no guardaste ningún creator.<br><a href="/" style="color:var(--purple);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
+    wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Creators guardados</div><div class="empty-state"><div>🔖</div>Todavía no guardaste ningún creator.<br><a href="/app.html#bolsa" style="color:var(--purple);font-size:.8rem;display:inline-block;margin-top:.5rem">Explorar bolsa →</a></div></div>`;
     return;
   }
   const ids=[...new Set(favs.map(f=>f.creator_id).filter(Boolean))];

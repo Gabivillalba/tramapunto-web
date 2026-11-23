@@ -234,6 +234,24 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .camp-postu-bar strong{color:var(--purple);font-size:1rem}
 .cpb-empty{color:var(--muted);font-size:.72rem}
 
+/* MARCAS — tarjeta tipo perfil */
+.mk-card{background:var(--g1);border:1px solid #1e1e1e;border-radius:4px;padding:1.1rem;margin-bottom:.8rem;transition:border-color .2s}
+.mk-card:hover{border-color:#2a2a2a}
+.mk-top{display:flex;gap:.9rem;align-items:flex-start}
+.mk-av{width:48px;height:48px;min-width:48px;border-radius:50%;border:2px solid #2a4000;background:#0f1a00;color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;text-transform:uppercase}
+.mk-av.corp{border-color:#3a1a5a;background:#1a0a2a;color:var(--purple)}
+.mk-id{flex:1;min-width:0}
+.mk-name{font-weight:900;color:var(--white);font-size:1rem;line-height:1.2;word-break:break-word}
+.mk-sub{font-size:.72rem;color:var(--muted);margin-top:.15rem;line-height:1.5}
+.mk-badges{display:flex;flex-direction:column;align-items:flex-end;gap:.35rem;flex-shrink:0}
+.mk-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:.85rem;padding-top:.85rem;border-top:1px solid #1a1a1a}
+.mk-stat{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:3px;padding:.55rem .5rem;text-align:center}
+.mk-stat.act{cursor:pointer}.mk-stat.act:hover{border-color:#2a4000}
+.mk-stat b{display:block;font-size:1.25rem;font-weight:900;line-height:1;color:var(--white)}
+.mk-stat.on b{color:var(--green)}.mk-stat.pu b{color:var(--purple)}
+.mk-stat span{font-size:.56rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;display:block;margin-top:.3rem;line-height:1.3}
+.mk-actions{margin-top:.75rem;display:flex;gap:.4rem;flex-wrap:wrap}
+
 /* CONFIG */
 .cfg-card{background:var(--g1);border:1px solid #1e1e1e;border-radius:3px;overflow:hidden}
 .cfg-row{display:flex;align-items:center;justify-content:space-between;gap:1.25rem;padding:1.15rem;border-bottom:1px solid #1a1a1a;flex-wrap:wrap}
@@ -1364,21 +1382,26 @@ async function loadMarcas(){
         const comprasTxt=m.compras&&m.compras.n>0?`<span style="color:var(--green);font-weight:800">${m.compras.n} compra${m.compras.n===1?'':'s'} · ${money(m.compras.monto)}</span>`:'<span style="color:var(--muted)">Sin compras</span>';
         const datos=[m.rubro&&('Rubro: '+escR(m.rubro)), m.presupuesto&&('Presupuesto: '+escR(m.presupuesto)), m.pais&&escR(m.pais), m.fuente&&('vía '+escR(m.fuente))].filter(Boolean).join(' · ');
         const brief=m.brief?`<div style="margin-top:.5rem;font-size:.78rem;color:#bbb;line-height:1.5;background:var(--g1);border:1px solid #1a1a1a;border-radius:3px;padding:.6rem .8rem"><strong style="color:var(--muted2)">Brief:</strong> ${escR(m.brief)}</div>`:'';
-        return `<div style="border:1px solid #1a1a1a;border-radius:3px;padding:1rem;margin-bottom:.8rem">
-          <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:flex-start">
-            <div>
-              <div style="font-weight:900;color:var(--white);font-size:.95rem">${nombreMarca||persona||escR(m.email)}</div>
-              ${nombreMarca&&persona?`<div style="font-size:.74rem;color:var(--muted)">Contacto: ${persona}</div>`:''}
-              <div style="font-size:.74rem;color:var(--muted);margin-top:.15rem">${escR(m.email)}${m.tel?' · '+escR(m.tel):''} · ${f}</div>
-              ${datos?`<div style="font-size:.74rem;color:var(--muted2);margin-top:.25rem">${datos}</div>`:''}
+        const camp=m.campanias||{total:0,activas:0,postulaciones:0};
+        const base=(nombreMarca||persona||m.email||'?').trim();
+        const ini=(base.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('')||'?').toUpperCase();
+        const campSub=camp.total>0?`${camp.activas} activa${camp.activas===1?'':'s'}`:'campañas';
+        return `<div class="mk-card">
+          <div class="mk-top">
+            <div class="mk-av${esCorp?' corp':''}">${escR(ini)}</div>
+            <div class="mk-id">
+              <div class="mk-name">${nombreMarca||persona||escR(m.email)}</div>
+              <div class="mk-sub">${nombreMarca&&persona?`Contacto: ${persona}<br>`:''}${escR(m.email)}${m.tel?' · '+escR(m.tel):''} · ${f}${datos?`<br>${datos}`:''}</div>
             </div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">
-              <div style="display:flex;gap:.35rem;flex-wrap:wrap;justify-content:flex-end">${tipoBadge}${reunionBadge}</div>
-              <div style="font-size:.76rem">${comprasTxt}</div>
-            </div>
+            <div class="mk-badges">${tipoBadge}${reunionBadge}</div>
+          </div>
+          <div class="mk-stats">
+            <div class="mk-stat${camp.total>0?' act on':''}" ${camp.total>0?`onclick="switchTab('campanias')" title="Ver en la pestaña Campañas"`:''}><b>${camp.total}</b><span>${campSub}</span></div>
+            <div class="mk-stat${camp.postulaciones>0?' pu':''}"><b>${camp.postulaciones}</b><span>postulados</span></div>
+            <div class="mk-stat${m.compras&&m.compras.n>0?' on':''}"><b>${m.compras?m.compras.n:0}</b><span>${m.compras&&m.compras.n>0?money(m.compras.monto):'compras'}</span></div>
           </div>
           ${brief}
-          <div style="margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap">
+          <div class="mk-actions">
             <button class="btn-sm" onclick="crearCampaniaDesdeMarca('${m.id}',${m.brief?'true':'false'})">📋 ${m.brief?'Crear campaña con este brief':'Crear campaña'}</button>
             <button class="btn-sm" onclick="darAccesoMarca('${m.id}','${nombreMarca||persona||escR(m.email)}')">🔑 Dar acceso</button>
             <button class="btn-sm" onclick="abrirEmailMarca('${m.id}','${nombreMarca||persona||escR(m.email)}','${escR(m.email)}')">✉️ Email</button>

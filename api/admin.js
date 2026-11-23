@@ -161,11 +161,21 @@ export default async function handler(req, res) {
 
       // — Listar marcas (+ stats de compra) y separar a los creadores que compran —
       case 'list_marcas': {
-        const [marcas, conexiones, creators] = await Promise.all([
+        const [marcas, conexiones, creators, camps] = await Promise.all([
           sb('marcas?select=*&order=created_at.desc'),
           sb('conexiones?select=marca_email,estado,monto').catch(() => []),
           sb('creators?select=id,email,nombre,apellido').catch(() => []),
+          sb('campanias_con_conteo?select=marca_email,estado,total_postulaciones').catch(() => []),
         ]);
+        // Campañas por email de marca (total, activas, postulaciones acumuladas).
+        const campsPorEmail = {};
+        (camps || []).forEach(c => {
+          const e = String(c.marca_email || '').toLowerCase(); if (!e) return;
+          const o = (campsPorEmail[e] = campsPorEmail[e] || { total: 0, activas: 0, postulaciones: 0 });
+          o.total++;
+          if (c.estado === 'activa') o.activas++;
+          o.postulaciones += Number(c.total_postulaciones || 0);
+        });
         const pagadas = (conexiones || []).filter(c => (c.estado || 'pagado') === 'pagado');
         const comprasPorEmail = {};
         pagadas.forEach(c => {
@@ -183,7 +193,14 @@ export default async function handler(req, res) {
           compradores_no_marca.push({ email: e, nombre: cr ? `${cr.nombre || ''} ${cr.apellido || ''}`.trim() : null, esCreador: !!cr, ...comprasPorEmail[e] });
         });
         compradores_no_marca.sort((a, b) => b.n - a.n);
-        const data = (marcas || []).map(m => ({ ...m, compras: comprasPorEmail[String(m.email || '').toLowerCase()] || { n: 0, monto: 0 } }));
+        const data = (marcas || []).map(m => {
+          const e = String(m.email || '').toLowerCase();
+          return {
+            ...m,
+            compras: comprasPorEmail[e] || { n: 0, monto: 0 },
+            campanias: campsPorEmail[e] || { total: 0, activas: 0, postulaciones: 0 },
+          };
+        });
         return res.status(200).json({ ok: true, data, compradores_no_marca });
       }
 

@@ -321,6 +321,9 @@ function renderBanner(estado){
 async function cargarCampanias(){
   // Policy pública: solo devuelve estado='activa'
   campanias=await sbGet('campanias','estado=eq.activa&select=*&order=created_at.desc');
+  // Ocultar las vencidas por si el auto-cierre diario todavía no corrió.
+  const hoy=new Date(Date.now()-3*3600*1000).toISOString().slice(0,10);
+  campanias=(campanias||[]).filter(c=>!(c.fecha_limite && c.fecha_limite < hoy));
   render();
 }
 
@@ -531,6 +534,12 @@ async function enviarPostulacion(){
   }
 
   if(!creator||creator.status!=='aprobado'){ showToast('Tu perfil tiene que estar aprobado','err'); return }
+
+  // Por si la búsqueda ya cerró entre que abrió el modal y envió.
+  const hoy=new Date(Date.now()-3*3600*1000).toISOString().slice(0,10);
+  if(campActual.fecha_limite && campActual.fecha_limite < hoy){
+    showToast('Esta campaña ya cerró su búsqueda','err'); closeModal(); return;
+  }
 
   const btn=document.getElementById('btnSend');
   btn.disabled=true; btn.textContent='Enviando...';

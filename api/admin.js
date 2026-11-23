@@ -119,6 +119,9 @@ function escapeHtml(s) {
 // Whitelist: devuelve solo las claves permitidas que vinieron definidas.
 function pick(o, keys) { const r = {}; for (const k of keys) if (o && o[k] !== undefined) r[k] = o[k]; return r; }
 
+// Fecha de hoy en ART (UTC-3) como 'YYYY-MM-DD', para marcar inicio/cierre por día.
+function hoyART() { return new Date(Date.now() - 3 * 3600 * 1000).toISOString().slice(0, 10); }
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
@@ -158,11 +161,21 @@ export default async function handler(req, res) {
 
       // — Listar marcas (+ stats de compra) y separar a los creadores que compran —
       case 'list_marcas': {
-        const [marcas, conexiones, creators] = await Promise.all([
+        const [marcas, conexiones, creators, camps] = await Promise.all([
           sb('marcas?select=*&order=created_at.desc'),
           sb('conexiones?select=marca_email,estado,monto').catch(() => []),
           sb('creators?select=id,email,nombre,apellido').catch(() => []),
+          sb('campanias_con_conteo?select=marca_email,estado,total_postulaciones').catch(() => []),
         ]);
+        // Campañas por email de marca (total, activas, postulaciones acumuladas).
+        const campsPorEmail = {};
+        (camps || []).forEach(c => {
+          const e = String(c.marca_email || '').toLowerCase(); if (!e) return;
+          const o = (campsPorEmail[e] = campsPorEmail[e] || { total: 0, activas: 0, postulaciones: 0 });
+          o.total++;
+          if (c.estado === 'activa') o.activas++;
+          o.postulaciones += Number(c.total_postulaciones || 0);
+        });
         const pagadas = (conexiones || []).filter(c => (c.estado || 'pagado') === 'pagado');
         const comprasPorEmail = {};
         pagadas.forEach(c => {
@@ -180,7 +193,14 @@ export default async function handler(req, res) {
           compradores_no_marca.push({ email: e, nombre: cr ? `${cr.nombre || ''} ${cr.apellido || ''}`.trim() : null, esCreador: !!cr, ...comprasPorEmail[e] });
         });
         compradores_no_marca.sort((a, b) => b.n - a.n);
-        const data = (marcas || []).map(m => ({ ...m, compras: comprasPorEmail[String(m.email || '').toLowerCase()] || { n: 0, monto: 0 } }));
+        const data = (marcas || []).map(m => {
+          const e = String(m.email || '').toLowerCase();
+          return {
+            ...m,
+            compras: comprasPorEmail[e] || { n: 0, monto: 0 },
+            campanias: campsPorEmail[e] || { total: 0, activas: 0, postulaciones: 0 },
+          };
+        });
         return res.status(200).json({ ok: true, data, compradores_no_marca });
       }
 
@@ -261,6 +281,11 @@ export default async function handler(req, res) {
         if (!id || !estado) return res.status(400).json({ error: 'Faltan id/estado' });
         const body = { estado };
         if (nota !== undefined) body.nota_admin = nota;
+        // Al publicar por primera vez se marca el inicio de la búsqueda = hoy.
+        if (estado === 'activa') {
+          const cur = await sb(`campanias?id=eq.${id}&select=fecha_inicio`);
+          if (cur?.[0] && !cur[0].fecha_inicio) body.fecha_inicio = hoyART();
+        }
         await sb(`campanias?id=eq.${id}`, 'PATCH', body);
 
         // Email a la marca cuando se activa
@@ -272,6 +297,17 @@ export default async function handler(req, res) {
           });
         }
         return res.status(200).json({ ok: true });
+      }
+
+      // — Fijar / quitar la fecha de cierre de la búsqueda (desde el admin) —
+      case 'set_campania_fecha_limite': {
+        const { id, fecha_limite } = payload;
+        if (!id) return res.status(400).json({ error: 'Falta id' });
+        const f = (fecha_limite && String(fecha_limite).trim())
+          ? String(fecha_limite).trim().slice(0, 10)
+          : null;
+        await sb(`campanias?id=eq.${id}`, 'PATCH', { fecha_limite: f });
+        return res.status(200).json({ ok: true, fecha_limite: f });
       }
 
       case 'delete_campania': {

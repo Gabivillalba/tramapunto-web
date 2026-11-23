@@ -10,6 +10,9 @@
 <!-- TRAMA. — captura de fuente de registro (first-touch). NO BORRAR -->
 <script>(function(){try{if(localStorage.getItem('trama_fuente'))return;var p=new URLSearchParams(location.search);var f=p.get('utm_source')||p.get('ref')||'';var camp=p.get('utm_campaign')||'';if(!f){var r=document.referrer||'';if(r){try{var h=new URL(r).hostname.replace(/^www\./,'');if(h&&location.hostname.indexOf(h)===-1)f=h;}catch(e){}}}if(!f)f='directo';localStorage.setItem('trama_fuente',(camp?f+' / '+camp:f).slice(0,120));}catch(e){}})();</script>
 
+<!-- TRAMA. — estado de sesión temprano (evita parpadeo del inicio logueado) -->
+<script>try{if(localStorage.getItem('sb_token'))document.documentElement.classList.add('logged');}catch(e){}</script>
+
 <!-- ═══ SEO ═══ -->
 <title>TRAMA. — Creadores de contenido UGC verificados en Argentina</title>
 <meta name="description" content="Conectá tu marca con creadores de contenido UGC e influencers verificados uno por uno. Marketplace argentino de creator marketing. Publicá tu campaña gratis.">
@@ -97,8 +100,22 @@
   .nav-login{font-size:.8rem;font-weight:700;color:#e8e8e2;border:1px solid rgba(255,255,255,.18);padding:.55rem .95rem;border-radius:4px;white-space:nowrap}
   .nav-login:hover{border-color:var(--acid);color:var(--acid)}
   .right-in{display:none;align-items:center;gap:.7rem}
-  body.logged .right-out{display:none}
-  body.logged .right-in{display:inline-flex}
+  .logged .right-out{display:none}
+  .logged .right-in{display:inline-flex}
+  /* acciones de cuenta dentro del menú mobile */
+  .m-auth{display:none}
+  /* inicio logueado */
+  .ctas.ctas-in{display:none}
+  .logged .ctas-out{display:none}
+  .logged .ctas.ctas-in{display:flex}
+  .welcome{display:none;flex-direction:column;gap:.6rem;align-items:flex-start;background:rgba(200,255,26,.06);border:1px solid rgba(200,255,26,.22);border-radius:10px;padding:.85rem 1rem;margin-bottom:1.4rem;max-width:520px}
+  .logged .welcome{display:flex}
+  .welcome .w-txt{font-size:.82rem;font-weight:700;color:var(--acid);display:inline-flex;align-items:center;gap:.45rem}
+  .welcome .w-dot{width:7px;height:7px;border-radius:50%;background:var(--acid);box-shadow:0 0 8px var(--acid)}
+  .welcome .w-links{display:flex;gap:1.1rem;flex-wrap:wrap}
+  .welcome .w-links a{font-size:.8rem;font-weight:600;color:#e8e8e2}
+  .welcome .w-links a:hover{color:var(--acid)}
+  .logged .split{display:none}
   .nav-account .dot{background:var(--creator)} /* lila = creator; lima para marca */
   .nav-logout{font-size:.76rem;color:var(--muted)}
   .nav-logout:hover{color:#e8e8e2}
@@ -106,11 +123,19 @@
   .preview-toggle b{color:var(--acid)}
   .nav-ghost{font-size:.8rem;font-weight:600;color:#b9b9b2;white-space:nowrap}
   .nav-ghost:hover{color:var(--acid)}
-  @media(max-width:860px){.nav ul,.nav-ghost,.right-out,.right-in,body.logged .right-in{display:none}.ham{display:flex}}
+  @media(max-width:860px){.nav ul,.nav-ghost,.right-out,.right-in,.logged .right-in{display:none}.ham{display:flex}}
   .sec-wrap,.ia,.final{scroll-margin-top:72px}
   @media(max-width:860px){
     body.mnav .nav ul{display:flex!important;flex-direction:column;position:fixed;top:55px;left:0;right:0;background:#0d0d0d;border-bottom:1px solid var(--line);padding:1.1rem 1.5rem;gap:1.1rem;z-index:49}
     body.mnav .nav ul a{font-size:.95rem}
+    body.mnav .nav ul .m-sep{display:block;height:1px;background:var(--line);margin:.2rem 0;padding:0}
+    body.mnav .nav ul .m-both{display:block}
+    body.mnav .nav ul .m-out{display:block}
+    body.mnav .nav ul .m-in{display:none}
+    .logged body.mnav .nav ul .m-out{display:none}
+    .logged body.mnav .nav ul .m-in{display:block}
+    body.mnav .nav ul .nav-login,body.mnav .nav ul .nav-cta{display:inline-block}
+    body.mnav .nav ul .nav-logout{color:var(--muted)}
   }
 
   /* ===== HERO ===== */
@@ -310,6 +335,12 @@
       <li><a href="#liga">Liga 🔥</a></li>
       <li><a href="#ia" style="color:#63d6ff">Avatares IA</a></li>
       <li><a href="./tramalabs.html" style="color:var(--acid)">LABS ✨</a></li>
+      <li class="m-auth m-sep"></li>
+      <li class="m-auth m-both"><a href="./app.html#bolsa">🔍 Encontrá tu creator</a></li>
+      <li class="m-auth m-out"><a class="nav-login" href="./perfil.html">Ingresar</a></li>
+      <li class="m-auth m-out"><a class="nav-cta" href="./registro.html">Registrate</a></li>
+      <li class="m-auth m-in"><a href="./perfil.html">👤 Mi panel</a></li>
+      <li class="m-auth m-in"><a class="nav-logout" href="#" onclick="try{localStorage.removeItem('sb_token');localStorage.removeItem('sb_refresh')}catch(e){};location.reload();return false">Salir</a></li>
     </ul>
     <div class="right">
       <a class="nav-ghost" href="./app.html#bolsa">🔍 Encontrá tu creator</a>
@@ -345,12 +376,20 @@
     <div class="veil"></div>
 
     <div class="hero-in">
+      <div class="welcome">
+        <span class="w-txt"><span class="w-dot"></span> Ya estás dentro de TRAMA.</span>
+        <span class="w-links"><a href="./perfil.html">Mi panel</a><a href="./oportunidades.html">Campañas</a><a href="./tramalabs.html">LABS ✨</a></span>
+      </div>
       <span class="eyebrow"><span class="dot"></span> La red UGC real de Argentina</span>
       <h1>El contenido conecta.<br><span class="acid">TRAMA.</span> lo transforma.</h1>
       <p class="sub">+130 creadores verificados <strong>uno por uno, a mano</strong>. Las marcas encuentran contenido real; los creadores ponen su precio. Nosotros conectamos — sin intermediarios ni cuentas infladas.</p>
-      <div class="ctas">
-        <a class="btn btn-marca" href="#">Soy marca →</a>
-        <a class="btn btn-creator" href="#">Soy creator →</a>
+      <div class="ctas ctas-out">
+        <a class="btn btn-marca" href="./marcas.html">Soy marca →</a>
+        <a class="btn btn-creator" href="./registro.html">Soy creator →</a>
+      </div>
+      <div class="ctas ctas-in">
+        <a class="btn btn-marca" href="./perfil.html">Ir a mi panel →</a>
+        <a class="btn btn-creator" href="./oportunidades.html">Ver campañas →</a>
       </div>
       <div class="proof">
         <div><div class="n">+130</div><div class="l">Verificados a mano</div></div>
@@ -367,7 +406,7 @@
         <div class="tag">Para marcas</div>
         <h3>Encontrá el creator que tu marca necesita.</h3>
         <p>Red verificada con datos reales. Vos elegís, nosotros conectamos. Hablás directo, sin intermediarios.</p>
-        <a class="btn btn-marca" href="#">Soy marca →</a>
+        <a class="btn btn-marca" href="./marcas.html">Soy marca →</a>
         <div class="mini">
           <div><div class="n">+130</div><div class="l">Creators</div></div>
           <div><div class="n">Directo</div><div class="l">Sin intermediarios</div></div>
@@ -378,7 +417,7 @@
         <div class="tag">Para creators</div>
         <h3>Convertí tu audiencia en tu trabajo.</h3>
         <p>Cargá tu perfil y accedé a marcas que buscan exactamente lo que vos tenés. Gratis, y vos ponés tu precio.</p>
-        <a class="btn btn-creator" href="#">Soy creator →</a>
+        <a class="btn btn-creator" href="./registro.html">Soy creator →</a>
         <div class="mini">
           <div><div class="n">$0</div><div class="l">Registrarte</div></div>
           <div><div class="n">0%</div><div class="l">Comisión</div></div>
@@ -615,6 +654,6 @@
   })();
 </script>
 
-  <script>try{if(localStorage.getItem('sb_token'))document.body.classList.add('logged');}catch(e){}</script>
+  <script>try{if(localStorage.getItem('sb_token'))document.documentElement.classList.add('logged');}catch(e){}</script>
 </body>
 </html>

@@ -1108,6 +1108,12 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, cursos: cursos || [], categorias: categorias || [], anuncios: anuncios || [] });
       }
 
+      // — Lista de espera / interesados de LABS (para el reporte) —
+      case 'labs_interesados': {
+        const data = await sb('labs_interesados?select=email,fuente,created_at&order=created_at.desc');
+        return res.status(200).json({ ok: true, data: data || [] });
+      }
+
       case 'labs_save_curso': {
         const d = pick(payload, ['slug', 'titulo', 'subtitulo', 'descripcion', 'nivel', 'instructor', 'categoria_id', 'portada_url', 'duracion_min', 'orden', 'gratis', 'proteger_contenido', 'publicado']);
         if (!d.slug || !d.titulo) return res.status(400).json({ error: 'Faltan slug y título' });

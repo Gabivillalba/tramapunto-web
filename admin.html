@@ -100,22 +100,42 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 
 .cards-wrap{padding:1.5rem}
 @media(min-width:768px){.cards-wrap{padding:2rem 4rem}}
-.cards-list{display:flex;flex-direction:column;gap:1px;background:#161616}
+.cards-list{display:flex;flex-direction:column;gap:.6rem;background:transparent;padding:.75rem 0}
 
-.ac{background:var(--black);padding:1.1rem;display:flex;flex-direction:column;gap:.875rem;transition:background .2s}
-@media(min-width:700px){.ac{flex-direction:row;align-items:flex-start}}
+.ac{position:relative;background:var(--black);border:1px solid #1e1e1e;border-radius:10px;display:flex;transition:background .2s}
 .ac:hover{background:#0d0d0d}
-.ac-left{display:flex;align-items:flex-start;gap:.875rem;flex:1;min-width:0}
-.ac-av{width:44px;height:44px;min-width:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem;flex-shrink:0;overflow:hidden;position:relative}
+.ac:has(details[open]){z-index:20}
+.ac-bar{width:4px;flex:none;border-radius:10px 0 0 10px;background:#333}
+.ac-bar.pendiente{background:var(--amber)}
+.ac-bar.aprobado{background:var(--green)}
+.ac-bar.rechazado{background:var(--red)}
+.ac-body{flex:1;min-width:0;padding:.85rem 1rem}
+.ac-top{display:flex;align-items:center;gap:.7rem}
+.ac-av{width:40px;height:40px;min-width:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.82rem;flex-shrink:0;overflow:hidden;position:relative;cursor:pointer}
 .ac-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.ac-info{flex:1;min-width:0}
-.ac-name{font-size:.88rem;font-weight:900;text-transform:uppercase;letter-spacing:.03em}
-.ac-niche{font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:.12rem 0}
-.ac-meta{font-size:.7rem;color:var(--muted);margin-top:.2rem}
-.ac-stats{display:flex;gap:1rem;margin-top:.5rem;flex-wrap:wrap}
-.acs{font-size:.7rem;color:var(--muted2)}
-.acs strong{display:block;font-size:.8rem;font-weight:900;color:var(--white)}
-.ac-right{display:flex;align-items:flex-start;gap:.5rem;flex-wrap:wrap;flex-shrink:0}
+.ac-id{flex:1;min-width:0;cursor:pointer}
+.ac-name{font-size:1rem;font-weight:900;letter-spacing:-.01em;display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;line-height:1.1}
+.ac-st{font-size:.56rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.ac-st.pendiente{color:var(--amber)}
+.ac-st.aprobado{color:var(--green)}
+.ac-st.rechazado{color:var(--red)}
+.ac-warn{display:inline-flex;align-items:center;gap:.2rem;background:#2a0f00;color:#ff6b4a;border:1px solid #4a1a00;font-size:.52rem;font-weight:800;letter-spacing:.03em;text-transform:uppercase;padding:.1rem .35rem;border-radius:999px}
+.ac-sub{font-size:.72rem;color:var(--muted);margin-top:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac-stats{display:flex;gap:.9rem;margin-top:.6rem;font-size:.72rem;color:var(--muted)}
+.ac-stats b{color:var(--white);font-weight:800}
+.ac-stats b.er{color:var(--green)}
+.ac-menu{margin-left:auto;flex:none;position:relative}
+.ac-menu>summary{list-style:none;cursor:pointer;width:32px;height:32px;border:1px solid #2a2a2a;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:1.1rem;line-height:1}
+.ac-menu>summary::-webkit-details-marker{display:none}
+.ac-menu[open]>summary{border-color:var(--purple);color:var(--purple)}
+.ac-pop{position:absolute;right:0;top:38px;z-index:60;background:#141414;border:1px solid #2a2a2a;border-radius:10px;padding:.35rem;min-width:180px;display:flex;flex-direction:column;box-shadow:0 10px 28px rgba(0,0,0,.55)}
+.ac-pop button{background:transparent;border:none;color:var(--white);text-align:left;padding:.55rem .6rem;font-size:.75rem;font-weight:600;border-radius:6px;cursor:pointer;white-space:nowrap}
+.ac-pop button:hover{background:#222}
+.ac-pop button.danger{color:#ff6666}
+.ac-pop button.danger:hover{background:#2a0000}
+.ac-pop .sep{height:1px;background:#262626;margin:.3rem .3rem}
+.ac-acts{display:flex;gap:.5rem;margin-top:.7rem}
+.ac-acts .btn-apro,.ac-acts .btn-rech{flex:1;text-align:center;padding:.6rem;font-size:.7rem}
 
 .badge{font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
 .b-pend{background:#1a1200;color:var(--amber);border:1px solid #2a2000}
@@ -1731,37 +1751,38 @@ function renderCards(){
   g.innerHTML=list.map(c=>{
     const col=getColor(c),bg=getBg(c),init=getInit(c);
     const seg=fmtSeg(c.ig_seg||c.tt_seg||c.yt_seg);
-    const er=c.ig_er?c.ig_er+'%':'—';
-    const plats=(c.plats||[]).join(', ')||'—';
+    const erNum=parseFloat(c.ig_er);
+    const er=(isFinite(erNum)&&erNum>0&&erNum<=100)?(Math.round(erNum*10)/10)+'%':'—';
+    const plats=(c.plats||[]).join('·')||'—';
     const avHtml=c.avatar_url
       ?`<img src="${c.avatar_url}" alt="${c.nombre}" onerror="this.onerror=null;var n=(this.alt||'').trim().split(' ').filter(Boolean);var s=document.createElement('span');s.textContent=(n.length?(n[0][0]+(n.length>1?n[n.length-1][0]:'')):'?').toUpperCase();s.className='av-ini';s.setAttribute('style','display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-weight:800;line-height:1');this.replaceWith(s)">`
       :`<span>${init}</span>`;
     const leak=detectarContacto(c);
+    const btns=[];
+    if(c.status!=='aprobado')btns.push(`<button class="btn-apro" onclick="setStatus('${c.id}','aprobado')">Aprobar</button>`);
+    if(c.status!=='rechazado')btns.push(`<button class="btn-rech" onclick="setStatus('${c.id}','rechazado')">Rechazar</button>`);
     return `<div class="ac" id="ac-${c.id}">
-      <div class="ac-left">
-        <div class="ac-av" style="background:${bg};border:2px solid ${col}44;color:${col}">${avHtml}</div>
-        <div class="ac-info">
-          <div class="ac-name">${c.nombre} ${c.apellido}</div>
-          <div class="ac-niche" style="color:${col}">${(c.niches||[]).join(' · ')||'—'}</div>
-          ${leak.length?`<div style="margin-top:.35rem"><span title="${leak.join(' · ')}" style="display:inline-block;background:#2a0f00;color:#ff6b4a;border:1px solid #4a1a00;font-size:.6rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:.2rem .45rem;border-radius:2px">⚠️ Posible contacto público (${leak.length})</span></div>`:''}
-          <div class="ac-meta">${c.email} · ${c.ciudad||'—'} · ${fmtFecha(c.created_at)}</div>
-          <div class="ac-stats">
-            <div class="acs"><strong>${seg}</strong>Seguidores</div>
-            <div class="acs"><strong>${er}</strong>Eng.Rate</div>
-            <div class="acs"><strong>${plats}</strong>Redes</div>
+      <div class="ac-bar ${c.status}"></div>
+      <div class="ac-body">
+        <div class="ac-top">
+          <div class="ac-av" style="background:${bg};border:2px solid ${col}66;color:${col}" onclick="openModal('${c.id}')">${avHtml}</div>
+          <div class="ac-id" onclick="openModal('${c.id}')">
+            <div class="ac-name">${c.nombre||''} ${c.apellido||''}<span class="ac-st ${c.status}">${c.status}</span>${leak.length?`<span class="ac-warn" title="${leak.join(' · ')}">⚠️ contacto</span>`:''}</div>
+            <div class="ac-sub">${(c.niches||[]).join(' · ')||'—'}${c.ciudad?' · '+c.ciudad:''}</div>
           </div>
+          <details class="ac-menu">
+            <summary aria-label="Más acciones">⋯</summary>
+            <div class="ac-pop">
+              <button onclick="openModal('${c.id}')">Ver detalle</button>
+              <button onclick="toggleReelBoost('${c.id}',${c.reel_boost?'false':'true'})">${c.reel_boost?'⭐ Quitar destacado':'☆ Destacar reel'}</button>
+              ${leak.length?`<button class="danger" onclick="avisarContacto('${c.id}')">⚠️ Avisar contacto</button>`:''}
+              <div class="sep"></div>
+              <button class="danger" onclick="deleteCreator('${c.id}')">Eliminar</button>
+            </div>
+          </details>
         </div>
-      </div>
-      <div class="ac-right">
-        <span class="badge ${c.status==='pendiente'?'b-pend':c.status==='aprobado'?'b-apro':'b-rech'}">${c.status}</span>
-        <div style="display:flex;gap:.35rem;flex-wrap:wrap">
-          <button class="btn-ver" onclick="openModal('${c.id}')">Ver detalle</button>
-          ${c.status!=='aprobado'?`<button class="btn-apro" onclick="setStatus('${c.id}','aprobado')">Aprobar</button>`:''}
-          ${c.status!=='rechazado'?`<button class="btn-rech" onclick="setStatus('${c.id}','rechazado')">Rechazar</button>`:''}
-          ${leak.length?`<button class="btn-rech" style="border-color:#4a1a00;color:#ff6b4a" onclick="avisarContacto('${c.id}')">⚠️ Avisar contacto</button>`:''}
-          <button class="btn-ver" style="${c.reel_boost?'background:#1a0a2a;border-color:#3a1a5a;color:#c084fc':''}" onclick="toggleReelBoost('${c.id}',${c.reel_boost?'false':'true'})" title="Destacar por reel con etiqueta a TRAMA">${c.reel_boost?'⭐ Destacado':'☆ Destacar reel'}</button>
-          <button class="btn-del" onclick="deleteCreator('${c.id}')">Eliminar</button>
-        </div>
+        <div class="ac-stats"><span><b>${seg}</b> seg</span><span><b class="er">${er}</b> eng</span><span><b>${plats}</b></span></div>
+        ${btns.length?`<div class="ac-acts">${btns.join('')}</div>`:''}
       </div>
     </div>`;
   }).join('');

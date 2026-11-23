@@ -1158,7 +1158,7 @@ function renderCreatorTab(i,el){
       <div class="edit-grid" style="margin-bottom:1.75rem">
         <div class="fg-edit"><label>Usuario Instagram</label><input type="text" id="e-ig" value="${p.ig_user||''}" placeholder="@tuusuario"></div>
         <div class="fg-edit"><label>Seguidores IG</label><input type="number" id="e-ig-seg" value="${p.ig_seg||''}" placeholder="0"></div>
-        <div class="fg-edit"><label>Engagement Rate IG %</label><input type="number" id="e-ig-er" step="0.1" value="${p.ig_er||''}" placeholder="0.0"></div>
+        <div class="fg-edit"><label>Engagement Rate IG %</label><input type="number" id="e-ig-er" step="0.1" min="0" max="100" value="${p.ig_er||''}" placeholder="0.0"></div>
         <div class="fg-edit"><label>Alcance promedio IG</label><input type="number" id="e-ig-alc" value="${p.ig_alc||''}" placeholder="por post"></div>
         <div class="fg-edit"><label>Usuario TikTok</label><input type="text" id="e-tt" value="${p.tt_user||''}" placeholder="@tuusuario"></div>
         <div class="fg-edit"><label>Seguidores TikTok</label><input type="number" id="e-tt-seg" value="${p.tt_seg||''}" placeholder="0"></div>
@@ -1834,7 +1834,7 @@ async function saveCreator(){
     disponibilidad:document.getElementById('e-disp')?.value?[document.getElementById('e-disp').value]:null,
     ig_user:document.getElementById('e-ig')?.value.trim()||null,
     ig_seg:parseInt(document.getElementById('e-ig-seg')?.value)||null,
-    ig_er:parseFloat(document.getElementById('e-ig-er')?.value)||null,
+    ig_er:(function(){const v=parseFloat(document.getElementById('e-ig-er')?.value);return(isFinite(v)&&v>0)?Math.min(v,100):null;})(),
     ig_alc:parseInt(document.getElementById('e-ig-alc')?.value)||null,
     tt_user:document.getElementById('e-tt')?.value.trim()||null,
     tt_seg:parseInt(document.getElementById('e-tt-seg')?.value)||null,

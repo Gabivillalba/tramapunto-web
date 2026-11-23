@@ -152,13 +152,14 @@ body.t-creator .notif-item .nt-cta{color:var(--purple);border-color:#3a1a5a;back
 /* ── Menú de secciones (hamburguesa) — solo mobile; en desktop se usan las pestañas de arriba ── */
 .tab-menu{display:none;position:sticky;top:0;z-index:21;background:var(--black)}
 @media(max-width:767px){.tab-menu{display:block}.dash-tabs{display:none}}
-.tab-menu-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:.75rem;background:#0f0f0f;border:none;border-bottom:1px solid #161616;color:var(--white);padding:.95rem 1.25rem;font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
-.tmb-icon{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
-.tmb-icon span{display:block;width:20px;height:2px;background:var(--muted);border-radius:2px;transition:transform .2s,opacity .2s}
-.tab-menu.open .tmb-icon span:nth-child(1){transform:translateY(6px) rotate(45deg)}
-.tab-menu.open .tmb-icon span:nth-child(2){opacity:0}
-.tab-menu.open .tmb-icon span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
-body.t-creator .tab-menu.open .tmb-icon span{background:var(--purple)}
+.tab-menu-btn{width:calc(100% - 2rem);display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin:.65rem 1rem;background:#161616;border:1px solid #333;border-left:3px solid var(--green);border-radius:5px;color:var(--white);padding:.7rem 1rem;font-size:.82rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:border-color .2s,background .2s}
+body.t-creator .tab-menu-btn{border-left-color:var(--purple)}
+.tab-menu.open .tab-menu-btn{background:#1c1c1c;border-color:#444}
+.tmb-text{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:3px;min-width:0}
+.tmb-eyebrow{font-size:.52rem;font-weight:700;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.tmb-chev{flex-shrink:0;font-size:1rem;line-height:1;color:var(--green);transition:transform .2s}
+body.t-creator .tmb-chev{color:var(--purple)}
+.tab-menu.open .tmb-chev{transform:rotate(180deg)}
 .tab-menu-list{display:none;flex-direction:column;background:var(--black);border-bottom:1px solid #161616;max-height:72vh;overflow-y:auto}
 .tab-menu.open .tab-menu-list{display:flex}
 .tab-menu-item{text-align:left;background:none;border:none;border-bottom:1px solid #161616;color:var(--muted);padding:.9rem 1.25rem;font-size:.78rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
@@ -456,8 +457,8 @@ h1,h2{letter-spacing:-.01em}
   <!-- Navegación de secciones: menú desplegable en mobile, pestañas en desktop -->
   <div class="tab-menu" id="tabMenu">
     <button class="tab-menu-btn" id="tabMenuBtn" type="button" onclick="toggleTabMenu()" aria-haspopup="true" aria-expanded="false">
-      <span id="tabMenuLabel">Secciones</span>
-      <span class="tmb-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span class="tmb-text"><span class="tmb-eyebrow">Sección — tocá para cambiar</span><span id="tabMenuLabel">Secciones</span></span>
+      <span class="tmb-chev" aria-hidden="true">▾</span>
     </button>
     <div class="tab-menu-list" id="tabMenuList" role="menu"></div>
   </div>

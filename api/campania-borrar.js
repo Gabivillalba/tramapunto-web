@@ -152,6 +152,42 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, estado: 'entregada' });
     }
 
+    // ── Editar la propia postulación (creador, solo mientras está en revisión) ──
+    if (op === 'editar_postulacion') {
+      const { postulacion_id, mensaje, tarifa_propuesta } = b;
+      if (!postulacion_id) return res.status(400).json({ error: 'Falta la postulación' });
+      const msg = String(mensaje || '').trim();
+      if (!msg) return res.status(400).json({ error: 'El mensaje no puede quedar vacío' });
+      const ps = await sb(`postulaciones?id=eq.${encodeURIComponent(postulacion_id)}&select=id,creador_id,estado`);
+      const p = ps && ps[0];
+      if (!p) return res.status(404).json({ error: 'Postulación no encontrada' });
+      const cres = await sb(`creators?id=eq.${encodeURIComponent(p.creador_id)}&select=email`);
+      const cre = cres && cres[0];
+      if (!cre || String(cre.email || '').toLowerCase() !== marcaEmail) return res.status(403).json({ error: 'Esta postulación no es tuya' });
+      if (p.estado !== 'pendiente' && p.estado !== 'preseleccionada') return res.status(409).json({ error: 'Esta postulación ya no se puede editar' });
+      const tnum = Number(tarifa_propuesta);
+      const tarifa = (tarifa_propuesta === '' || tarifa_propuesta == null || Number.isNaN(tnum)) ? null : Math.max(0, Math.round(tnum));
+      await sb(`postulaciones?id=eq.${encodeURIComponent(postulacion_id)}`, 'PATCH', { mensaje: msg.slice(0, 2000), tarifa_propuesta: tarifa });
+      return res.status(200).json({ ok: true });
+    }
+
+    // ── Darse de baja de la propia postulación (creador, solo en revisión) ──
+    if (op === 'retirar_postulacion') {
+      const { postulacion_id } = b;
+      if (!postulacion_id) return res.status(400).json({ error: 'Falta la postulación' });
+      const ps = await sb(`postulaciones?id=eq.${encodeURIComponent(postulacion_id)}&select=id,creador_id,estado`);
+      const p = ps && ps[0];
+      if (!p) return res.status(404).json({ error: 'Postulación no encontrada' });
+      const cres = await sb(`creators?id=eq.${encodeURIComponent(p.creador_id)}&select=email`);
+      const cre = cres && cres[0];
+      if (!cre || String(cre.email || '').toLowerCase() !== marcaEmail) return res.status(403).json({ error: 'Esta postulación no es tuya' });
+      if (p.estado !== 'pendiente' && p.estado !== 'preseleccionada') return res.status(409).json({ error: 'Esta postulación ya no se puede retirar' });
+      // Se elimina la fila (hay un único (campania_id, creador_id)): así el creador
+      // puede volver a postularse más adelante sin chocar con el índice único.
+      await sb(`postulaciones?id=eq.${encodeURIComponent(postulacion_id)}`, 'DELETE');
+      return res.status(200).json({ ok: true, retirada: true });
+    }
+
     // ── Borrar campaña (default) ──
     const campania_id = b.campania_id;
     if (!campania_id) return res.status(400).json({ error: 'Falta campania_id' });

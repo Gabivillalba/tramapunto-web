@@ -12,7 +12,7 @@
 // en el servidor con una comparación de tiempo constante propia (sin
 // depender del módulo 'crypto', para que funcione en cualquier runtime).
 
-import { presignPutUrl, buildMediaTarget } from '../lib/r2-presign.js';
+import { presignPutUrl, presignGetUrl, buildMediaTarget } from '../lib/r2-presign.js';
 
 const SB_URL      = process.env.SUPABASE_URL;
 const SB_SERVICE  = process.env.SUPABASE_SERVICE_KEY;
@@ -1112,6 +1112,66 @@ export default async function handler(req, res) {
       case 'labs_interesados': {
         const data = await sb('labs_interesados?select=email,fuente,created_at&order=created_at.desc');
         return res.status(200).json({ ok: true, data: data || [] });
+      }
+
+      // — Importación (una vez) de los interesados viejos que quedaron en R2 —
+      case 'labs_importar_waitlist': {
+        const need = ['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET'];
+        if (need.some((k) => !process.env[k])) return res.status(503).json({ error: 'R2 no configurado' });
+        const creds = {
+          accountId: process.env.R2_ACCOUNT_ID,
+          accessKeyId: process.env.R2_ACCESS_KEY_ID,
+          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+          bucket: process.env.R2_BUCKET,
+        };
+        // 1) Listar todas las keys bajo waitlist/ (con paginación)
+        const keys = [];
+        let tok;
+        do {
+          const q = { 'list-type': '2', prefix: 'waitlist/' };
+          if (tok) q['continuation-token'] = tok;
+          const url = presignGetUrl({ ...creds, key: '', query: q, expiresIn: 120 });
+          const r = await fetch(url);
+          if (!r.ok) { const t = await r.text().catch(() => ''); return res.status(502).json({ error: 'R2 list ' + r.status, detalle: t.slice(0, 160) }); }
+          const xml = await r.text();
+          for (const m of xml.matchAll(/<Key>([^<]+)<\/Key>/g)) { if (m[1].endsWith('.json')) keys.push(m[1]); }
+          const trunc = /<IsTruncated>true<\/IsTruncated>/.test(xml);
+          const nt = xml.match(/<NextContinuationToken>([^<]+)<\/NextContinuationToken>/);
+          tok = trunc && nt ? nt[1].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'") : null;
+        } while (tok);
+
+        // 2) Leer cada objeto (en lotes paralelos) y juntar emails únicos
+        const porEmail = new Map();
+        for (let i = 0; i < keys.length; i += 20) {
+          const textos = await Promise.all(keys.slice(i, i + 20).map(async (k) => {
+            try { const u = presignGetUrl({ ...creds, key: k, expiresIn: 120 }); const r = await fetch(u); return r.ok ? await r.text() : null; }
+            catch { return null; }
+          }));
+          for (const txt of textos) {
+            if (!txt) continue;
+            try {
+              const j = JSON.parse(txt);
+              const email = String(j.email || '').trim().toLowerCase();
+              if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) continue;
+              if (!porEmail.has(email)) porEmail.set(email, { email, fuente: j.fuente || 'labs-hub', ...(j.ts ? { created_at: j.ts } : {}) });
+            } catch { /* objeto no-JSON: se ignora */ }
+          }
+        }
+        const rows = [...porEmail.values()];
+
+        // 3) Upsert en labs_interesados (ignora duplicados por email)
+        let importados = 0;
+        for (let i = 0; i < rows.length; i += 500) {
+          const lote = rows.slice(i, i + 500);
+          const r = await fetch(`${process.env.SUPABASE_URL}/rest/v1/labs_interesados?on_conflict=email`, {
+            method: 'POST',
+            headers: { apikey: process.env.SUPABASE_SERVICE_KEY, Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json', Prefer: 'resolution=ignore-duplicates,return=minimal' },
+            body: JSON.stringify(lote),
+          });
+          if (!r.ok) { const t = await r.text().catch(() => ''); return res.status(502).json({ error: 'DB ' + r.status, detalle: t.slice(0, 160) }); }
+          importados += lote.length;
+        }
+        return res.status(200).json({ ok: true, encontrados: keys.length, emails: rows.length, importados });
       }
 
       case 'labs_save_curso': {

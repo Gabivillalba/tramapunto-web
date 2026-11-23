@@ -78,6 +78,7 @@ h1,h2{letter-spacing:-.01em}
       <button class="tab" data-tab="avisos">Avisos</button>
       <button class="tab" data-tab="precio">Precio</button>
       <button class="tab" data-tab="biblio">Biblioteca</button>
+      <button class="tab" data-tab="interesados">Lista de espera</button>
       <span style="flex:1"></span>
       <button class="tab" id="btn-logout">Salir</button>
     </div>
@@ -196,6 +197,22 @@ h1,h2{letter-spacing:-.01em}
         <p class="muted">La biblioteca no se edita desde acá: es un documento que se mantiene desde Claude (el artifact) y se publica con un deploy. Hay una tarea mensual que propone mejoras. Pedíselo a Claude cuando quieras sumar o cambiar prompts.</p>
       </div>
     </section>
+
+    <!-- LISTA DE ESPERA / INTERESADOS -->
+    <section id="tab-interesados" class="hide">
+      <div class="card">
+        <h2>Lista de espera de LABS</h2>
+        <p class="muted">Gente que dejó su email en "Avisame cuando abra" (hub de LABS). Sin duplicados.</p>
+        <div class="bar" style="align-items:center;gap:1rem">
+          <div style="font-size:1.6rem;font-weight:900" id="int-count">—</div>
+          <span class="muted">interesados</span>
+          <span style="flex:1"></span>
+          <button class="btn ghost sm" id="int-reload">↻ Actualizar</button>
+          <button class="btn sm" id="int-csv">⬇ Descargar CSV</button>
+        </div>
+        <div id="int-list"><p class="muted">Cargando…</p></div>
+      </div>
+    </section>
   </div>
 </div>
 <div id="msg"></div>
@@ -230,10 +247,38 @@ h1,h2{letter-spacing:-.01em}
   // ── Tabs ──
   document.querySelectorAll('.tab[data-tab]').forEach(t=>t.onclick=()=>{
     document.querySelectorAll('.tab[data-tab]').forEach(x=>x.classList.remove('on')); t.classList.add('on');
-    ['cursos','recursos','avisos','precio','biblio'].forEach(n=>$('tab-'+n).classList.toggle('hide',n!==t.dataset.tab));
+    ['cursos','recursos','avisos','precio','biblio','interesados'].forEach(n=>$('tab-'+n).classList.toggle('hide',n!==t.dataset.tab));
+    if(t.dataset.tab==='interesados') loadInteresados();
   });
 
   async function loadAll(){ await loadCursos(); loadRecursos(); loadPrecio(); }
+
+  // ── LISTA DE ESPERA / INTERESADOS ──
+  let INTERESADOS=[];
+  async function loadInteresados(){
+    const el=$('int-list'); el.innerHTML='<p class="muted">Cargando…</p>';
+    try{
+      const d=await api('labs_interesados'); INTERESADOS=d.data||[];
+      $('int-count').textContent=INTERESADOS.length;
+      if(!INTERESADOS.length){ el.innerHTML='<p class="muted">Todavía nadie se anotó.</p>'; return; }
+      el.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:.85rem">'
+        +'<tr style="text-align:left;color:#888"><th style="padding:.4rem 0">Email</th><th>Fuente</th><th>Fecha</th></tr>'
+        +INTERESADOS.map(x=>{
+          const f=x.created_at?new Date(x.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}):'';
+          return `<tr style="border-top:1px solid #1a1a1a"><td style="padding:.4rem 0">${esc(x.email)}</td><td>${esc(x.fuente||'')}</td><td>${f}</td></tr>`;
+        }).join('')+'</table>';
+    }catch(e){ el.innerHTML='<p class="muted">Error: '+esc(e.message)+'</p>'; }
+  }
+  $('int-reload').onclick=loadInteresados;
+  $('int-csv').onclick=()=>{
+    if(!INTERESADOS.length){ toast('No hay interesados para exportar',true); return; }
+    const rows=[['email','fuente','fecha']].concat(INTERESADOS.map(x=>[x.email||'', x.fuente||'', x.created_at||'']));
+    const csv=rows.map(r=>r.map(v=>{ v=String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }).join(',')).join('\n');
+    const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download='trama_labs_interesados_'+new Date().toISOString().slice(0,10)+'.csv';
+    a.click(); URL.revokeObjectURL(a.href);
+  };
 
   // ── CURSOS ──
   async function loadCursos(){

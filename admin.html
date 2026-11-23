@@ -713,9 +713,10 @@ h1,h2{letter-spacing:-.01em}
         </div>
         <span style="flex:1"></span>
         <button class="btn-sm" onclick="loadInteresados()">↻ Actualizar</button>
+        <button class="btn-sm" onclick="importarWaitlistR2(this)">⤵ Importar viejos (R2)</button>
         <button class="btn-sm" onclick="exportInteresadosCSV()">⬇ Descargar CSV</button>
       </div>
-      <div style="font-size:.8rem;color:var(--muted2);margin-bottom:1rem;line-height:1.5">Gente que dejó su email en "Avisame cuando abra" (hub de TRAMA. LABS). Sin duplicados. Se llena sola a medida que se anotan.</div>
+      <div style="font-size:.8rem;color:var(--muted2);margin-bottom:1rem;line-height:1.5">Gente que dejó su email en "Avisame cuando abra" (hub de TRAMA. LABS). Sin duplicados. Se llena sola a medida que se anotan. El botón <strong>Importar viejos (R2)</strong> trae por única vez los que se habían guardado antes en R2 (podés tocarlo las veces que quieras, no duplica).</div>
       <div id="interesadosList" style="font-size:.85rem;color:var(--muted)">Cargando…</div>
     </div>
   </div>
@@ -1095,6 +1096,15 @@ function exportInteresadosCSV(){
   const cols=[{label:'Email',key:'email'},{label:'Fuente',key:'fuente'},{label:'Fecha',key:'created_at'}];
   descargarCSV('trama_labs_interesados_'+hoyISO()+'.csv', toCSV(INTERESADOS, cols));
   showToast('✓ CSV descargado','ok');
+}
+async function importarWaitlistR2(btn){
+  const prev=btn.textContent; btn.disabled=true; btn.textContent='Importando…';
+  try{
+    const r=await adminCall('labs_importar_waitlist');
+    showToast(`✓ R2: ${r.encontrados} archivos · ${r.emails} emails · importados ${r.importados}`,'ok');
+    await loadInteresados();
+  }catch(e){ showToast('Error: '+e.message,'err'); }
+  finally{ btn.disabled=false; btn.textContent=prev; }
 }
 function exportCreatorsCSV(){
   if(!allCreators.length){ showToast('No hay creadores cargados','err'); return; }

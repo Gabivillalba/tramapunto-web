@@ -793,7 +793,8 @@ function showNoPerfil(){
 function showForgot(){
   const email = document.getElementById('l-email').value.trim();
   if(!email){ showToast('Ingresá tu email primero','err'); return; }
-  sbFetch('/auth/v1/recover','POST',{email}).then(({ok})=>{
+  const redirectTo = encodeURIComponent(location.origin + '/reset.html');
+  sbFetch('/auth/v1/recover?redirect_to='+redirectTo,'POST',{email}).then(({ok})=>{
     if(ok) showToast('✓ Revisá tu email para resetear la contraseña','ok');
     else showToast('Error al enviar el email','err');
   });

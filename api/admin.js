@@ -567,7 +567,7 @@ export default async function handler(req, res) {
             });
             if (!cr.ok) { const e = await cr.json().catch(() => ({})); throw new Error(e.msg || e.message || `HTTP ${cr.status}`); }
             creadas++;
-            const rec = await fetch(`${SB_URL}/auth/v1/recover`, {
+            const rec = await fetch(`${SB_URL}/auth/v1/recover?redirect_to=${encodeURIComponent(`${SITE_URL}/reset.html`)}`, {
               method: 'POST',
               headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}`, 'Content-Type': 'application/json' },
               body: JSON.stringify({ email }),
@@ -610,7 +610,7 @@ export default async function handler(req, res) {
       case 'send_reset': {
         const { email } = payload;
         if (!email) return res.status(400).json({ error: 'Falta email' });
-        const rr = await fetch(`${SB_URL}/auth/v1/recover`, {
+        const rr = await fetch(`${SB_URL}/auth/v1/recover?redirect_to=${encodeURIComponent(`${SITE_URL}/reset.html`)}`, {
           method: 'POST',
           headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),

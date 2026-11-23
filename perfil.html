@@ -29,6 +29,7 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .nav-back:hover{color:var(--white)}
 .btn-logout{background:none;border:1px solid #2a2a2a;color:var(--muted);padding:.38rem .875rem;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s}
 .btn-logout:hover{border-color:var(--red);color:var(--red)}
+@media(max-width:767px){nav{padding:0 .85rem}.nav-r{gap:.5rem;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}.nav-r::-webkit-scrollbar{display:none}.nav-r>*{flex-shrink:0;white-space:nowrap}.nav-inicio{display:none}}
 
 .view{display:none;padding-top:56px;min-height:100vh}
 .view.active{display:block}
@@ -383,8 +384,9 @@ h1,h2{letter-spacing:-.01em}
 <nav>
   <a class="logo" href="/">TRAMA.</a>
   <div class="nav-r">
+    <a class="nav-back" id="navCampanas" href="/oportunidades.html" style="display:none">📋 Campañas</a>
     <a class="nav-back" href="/app.html#bolsa">🔍 Bolsa</a>
-    <a class="nav-back" href="/">← Inicio</a>
+    <a class="nav-back nav-inicio" href="/">← Inicio</a>
     <button class="btn-logout" id="btnLogout" style="display:none" onclick="doLogout()">Cerrar sesión</button>
   </div>
 </nav>
@@ -806,6 +808,14 @@ function showDash(){
   document.getElementById('vDash').style.display='block';
   document.getElementById('vDash').classList.add('active');
   document.getElementById('btnLogout').style.display='inline-block';
+
+  // Acceso directo a campañas desde el nav, según el rol:
+  // creador → listado de oportunidades (para postularse); marca → sus campañas.
+  const navCamp = document.getElementById('navCampanas');
+  if(navCamp){
+    navCamp.href = userType==='marca' ? '/campanas.html' : '/oportunidades.html';
+    navCamp.style.display='inline-block';
+  }
 
   const p = userProfile;
   const av = document.getElementById('dashAv');

@@ -233,6 +233,9 @@ nav{position:fixed;top:0;width:100%;z-index:300;height:56px;padding:0 1.5rem;dis
 .camp-postu-bar.has{background:#120a1f;border-color:#3a1a5a;color:#e9d5ff}
 .camp-postu-bar strong{color:var(--purple);font-size:1rem}
 .cpb-empty{color:var(--muted);font-size:.72rem}
+.camp-marca-filtro{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;background:#0f1a00;border:1px solid #2a4000;border-radius:3px;padding:.55rem .8rem;margin-bottom:.8rem;font-size:.78rem;color:var(--muted2)}
+.camp-marca-filtro strong{color:var(--green)}
+.camp-marca-filtro button{background:transparent;border:1px solid #2a4000;color:var(--green);padding:.25rem .6rem;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;border-radius:2px;cursor:pointer}
 
 /* MARCAS — tarjeta tipo perfil */
 .mk-card{background:var(--g1);border:1px solid #1e1e1e;border-radius:4px;padding:1.1rem;margin-bottom:.8rem;transition:border-color .2s}
@@ -510,6 +513,8 @@ h1,h2{letter-spacing:-.01em}
       <div class="stat"><div class="stat-n" id="cst-act" style="color:var(--green)">—</div><div class="stat-l">Activas</div></div>
       <div class="stat"><div class="stat-n" id="cst-postu" style="color:var(--purple)">—</div><div class="stat-l">Postulaciones</div></div>
     </div>
+
+    <div id="campMarcaBanner" style="padding:0 1.5rem"></div>
 
     <div class="filters">
       <span class="filters-label">Filtrar:</span>
@@ -1009,6 +1014,8 @@ document.addEventListener('click',e=>{
 // ══════════ TABS ══════════
 let allCampanias = [];
 let campFilter = 'todas';
+let campMarcaFiltro = null;   // email de marca para filtrar la pestaña Campañas
+let campMarcaNombre = '';
 let currentTab = 'dashboard';
 
 // Manda el mail "cargá tu portfolio" a los creadores que todavía no lo cargaron
@@ -1396,7 +1403,7 @@ async function loadMarcas(){
             <div class="mk-badges">${tipoBadge}${reunionBadge}</div>
           </div>
           <div class="mk-stats">
-            <div class="mk-stat${camp.total>0?' act on':''}" ${camp.total>0?`onclick="switchTab('campanias')" title="Ver en la pestaña Campañas"`:''}><b>${camp.total}</b><span>${campSub}</span></div>
+            <div class="mk-stat${camp.total>0?' act on':''}" ${camp.total>0?`onclick="verCampaniasDeMarca('${escR(m.email)}')" title="Ver las campañas de esta marca"`:''}><b>${camp.total}</b><span>${campSub}</span></div>
             <div class="mk-stat${camp.postulaciones>0?' pu':''}"><b>${camp.postulaciones}</b><span>postulados</span></div>
             <div class="mk-stat${m.compras&&m.compras.n>0?' on':''}"><b>${m.compras?m.compras.n:0}</b><span>${m.compras&&m.compras.n>0?money(m.compras.monto):'compras'}</span></div>
           </div>
@@ -1576,6 +1583,22 @@ function setCampFilter(f, btn){
   renderCampanias();
 }
 
+// Desde una tarjeta de marca: ver la pestaña Campañas filtrada por esa marca.
+function verCampaniasDeMarca(email){
+  const e=String(email||'');
+  const m=(marcasData||[]).find(x=>String(x.email||'').toLowerCase()===e.toLowerCase());
+  campMarcaNombre = m ? (m.nombre_marca||m.razon_social||`${m.nombre||''} ${m.apellido||''}`.trim()||e) : e;
+  campMarcaFiltro = e;
+  campFilter = 'todas';
+  switchTab('campanias');
+  document.querySelectorAll('#viewCampanias .filters .f-btn').forEach((b,i)=>b.classList.toggle('on', i===0));
+  if(allCampanias.length) renderCampanias();   // si está vacío, switchTab disparó loadCampanias y renderiza con el filtro ya puesto
+}
+function limpiarFiltroMarca(){
+  campMarcaFiltro=null; campMarcaNombre='';
+  renderCampanias();
+}
+
 const TIPO_LBL={ugc:'UGC',influencer:'Influencer',combo:'Combo',activacion:'Activación'};
 const EST_LBL={en_revision:'En revisión',activa:'Activa',cerrada:'Cerrada',rechazada:'Rechazada',cancelada:'Cancelada'};
 
@@ -1590,7 +1613,14 @@ function presupuestoTxt(c){
 }
 
 function renderCampanias(){
-  const list = campFilter==='todas' ? allCampanias : allCampanias.filter(c=>c.estado===campFilter);
+  // Cartel de filtro por marca (se muestra aunque no haya resultados).
+  const bEl=document.getElementById('campMarcaBanner');
+  if(bEl){ bEl.innerHTML = campMarcaFiltro
+    ? `<div class="camp-marca-filtro">Mostrando campañas de <strong>${escR(campMarcaNombre||campMarcaFiltro)}</strong><button onclick="limpiarFiltroMarca()">✕ Ver todas</button></div>`
+    : ''; }
+
+  let list = campFilter==='todas' ? allCampanias : allCampanias.filter(c=>c.estado===campFilter);
+  if(campMarcaFiltro){ const fe=campMarcaFiltro.toLowerCase(); list=list.filter(c=>String(c.marca_email||'').toLowerCase()===fe); }
   const el = document.getElementById('campList');
   if(!list.length){ el.innerHTML='<div class="empty">No hay campañas en esta categoría.</div>'; return; }
 

@@ -107,9 +107,22 @@ export default async function handler(req, res) {
   if (auth !== `Bearer ${CRON_SECRET}` && secret !== CRON_SECRET) return res.status(401).json({ error: 'No autorizado' });
 
   try {
+    // 1) Auto-cierre: campañas activas cuya fecha de cierre ya pasó. Las que no
+    //    tienen fecha_limite no se tocan (el filtro lt excluye los NULL).
+    let campanias_cerradas = 0;
+    try {
+      const hoy = new Date(Date.now() - 3 * 3600 * 1000).toISOString().slice(0, 10);
+      const vencidas = await sb(`campanias?estado=eq.activa&fecha_limite=lt.${hoy}&select=id`);
+      if (vencidas && vencidas.length) {
+        await sb(`campanias?estado=eq.activa&fecha_limite=lt.${hoy}`, 'PATCH', { estado: 'cerrada' });
+        campanias_cerradas = vencidas.length;
+      }
+    } catch (e) { console.error('auto-cierre campañas error:', e); }
+
+    // 2) Emails programados que ya vencieron.
     const ahora = new Date().toISOString();
     const due = await sb(`emails_programados?estado=eq.pendiente&enviar_at=lte.${ahora}&select=*&order=enviar_at.asc&limit=20`);
-    if (!due || !due.length) return res.status(200).json({ ok: true, procesados: 0 });
+    if (!due || !due.length) return res.status(200).json({ ok: true, procesados: 0, campanias_cerradas });
 
     const resultados = [];
     for (const job of due) {
@@ -130,7 +143,7 @@ export default async function handler(req, res) {
         resultados.push({ id: job.id, error: String(e.message || e) });
       }
     }
-    return res.status(200).json({ ok: true, procesados: due.length, resultados });
+    return res.status(200).json({ ok: true, procesados: due.length, resultados, campanias_cerradas });
   } catch (err) {
     console.error('emails-cron error:', err);
     return res.status(500).json({ error: err.message });

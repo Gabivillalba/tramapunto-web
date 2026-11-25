@@ -1598,7 +1598,7 @@ function matchScoreMarca(cr, c){
 async function loadCampanasMarca(wrapId){
   const wrap=document.getElementById(wrapId); if(!wrap)return;
   const token=getToken();
-  const camps=await sbGet('campanias',`marca_email=eq.${encodeURIComponent(currentUser.email)}&select=id,titulo,estado,created_at,cupos,fecha_limite,tipo,descripcion,presupuesto_min,presupuesto_max,moneda,formatos,es_canje,es_presencial,entregables,ubicacion,requisitos&order=created_at.desc`,token);
+  const camps=await sbGet('campanias',`marca_email=eq.${encodeURIComponent(currentUser.email)}&select=id,titulo,estado,created_at,cupos,fecha_inicio,fecha_limite,tipo,descripcion,presupuesto_min,presupuesto_max,moneda,formatos,es_canje,es_presencial,entregables,ubicacion,requisitos&order=created_at.desc`,token);
   if(!camps||!camps.length){
     wrap.innerHTML=`<div class="tab-content active"><div class="sec-title">Mis campañas</div><div class="empty-state"><div>📋</div>Todavía no publicaste ninguna campaña.<br><a href="/campanas.html" style="color:var(--green);font-size:.8rem;display:inline-block;margin-top:.5rem">Publicar una campaña →</a></div></div>`;
     return;
@@ -1720,6 +1720,7 @@ async function loadCampanasMarca(wrapId){
       </div>`;
     }).join('');
     const f=c.fecha_limite?new Date(c.fecha_limite+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):null;
+    const fi=c.fecha_inicio?new Date(c.fecha_inicio+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}):null;
     const alta=c.created_at?new Date(c.created_at).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}):'';
     const activa=c.estado==='activa';
     const chips=[
@@ -1729,7 +1730,7 @@ async function loadCampanasMarca(wrapId){
       (c.formatos&&c.formatos.length)?`🎞 ${c.formatos.join(', ')}`:'',
       c.es_canje?'🎁 Canje':'',
       c.es_presencial?'📍 Presencial':'',
-      f?`📅 Cierra ${f}`:'',
+      (fi||f)?`📅 Búsqueda ${fi||'—'} → ${f||'—'}`:'',
     ].filter(Boolean);
     const estadoNota = c.estado==='en_revision'
       ? `<div style="font-size:.72rem;color:var(--amber);margin-top:.5rem">⏳ En revisión por el equipo TRAMA. Cuando la aprueben, los creadores la ven y se pueden postular.</div>`

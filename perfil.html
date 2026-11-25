@@ -537,6 +537,7 @@ async function subirMediaR2(f, scope){
 let currentUser = null;
 let userProfile = null;
 let userType    = null;
+let userOtro    = null;
 let regTipo     = 'creator';
 let ligaData    = null;
 
@@ -779,16 +780,19 @@ async function loadProfile(token, knownType){
   const email = currentUser.email;
   let data=null;
   try{
-    const r=await fetch('/api/mi-perfil',{method:'POST',headers:{'Authorization':'Bearer '+token}});
+    // Si venimos con ?como=creator|marca (switch de modo), lo pasamos al server.
+    const como = new URLSearchParams(location.search).get('como');
+    const url = '/api/mi-perfil' + (como ? ('?como='+encodeURIComponent(como)) : '');
+    const r=await fetch(url,{method:'POST',headers:{'Authorization':'Bearer '+token}});
     if(r.ok) data=await r.json();
   }catch(_){}
   if(data && data.type==='creator'){
-    userProfile=data.profile; userType='creator';
+    userProfile=data.profile; userType='creator'; userOtro=data.otro||null;
     localStorage.setItem('trama_creator', JSON.stringify({nombre:userProfile.nombre, email}));
     showDash(); return;
   }
   if(data && data.type==='marca'){
-    userProfile=data.profile; userType='marca';
+    userProfile=data.profile; userType='marca'; userOtro=data.otro||null;
     localStorage.setItem('trama_marca', JSON.stringify({nombre:userProfile.nombre, email}));
     showDash(); return;
   }
@@ -800,6 +804,15 @@ async function loadProfile(token, knownType){
   }
   // Sin perfil — recuperación (cuenta huérfana)
   showNoPerfil();
+}
+
+// Cambiar de modo (solo si el mismo email tiene perfil en las dos tablas):
+// recarga con ?como= para que el server devuelva el otro perfil.
+function switchModo(destino){
+  if(destino!=='creator' && destino!=='marca') return;
+  const u=new URL(location.href);
+  u.searchParams.set('como', destino);
+  location.href=u.pathname+u.search;
 }
 
 function showLogin(){
@@ -869,13 +882,15 @@ function showDash(){
   document.getElementById('dashEmail').textContent=currentUser.email;
 
   const badge = document.getElementById('dashBadge');
+  // Si el mismo email tiene perfil en la otra tabla, botón para cambiar de modo.
+  const swBtn = userOtro ? ` <button type="button" onclick="switchModo('${userOtro}')" class="dash-badge" style="background:transparent;cursor:pointer;border:1px solid var(--${userOtro==='marca'?'green':'purple'});color:var(--${userOtro==='marca'?'green':'purple'})">Cambiar a modo ${userOtro==='marca'?'marca':'creador'} →</button>` : '';
   if(userType==='creator'){
     const st=p.status;
     const petB=p.es_pet?` <span class="dash-badge" style="background:#1a0a2a;color:var(--purple);border:1px solid #3a1a5a">🐾 Pet${p.pet_nombre?' · '+p.pet_nombre:''}</span>`:'';
-    badge.innerHTML=`<span class="dash-badge badge-creator">Creator</span>${petB} <span class="${st==='aprobado'?'s-apro':st==='rechazado'?'s-rech':'s-pend'}">${st||'pendiente'}</span>`;
+    badge.innerHTML=`<span class="dash-badge" style="background:var(--purple);color:var(--black);font-weight:800">Modo creador</span>${petB} <span class="${st==='aprobado'?'s-apro':st==='rechazado'?'s-rech':'s-pend'}">${st||'pendiente'}</span>${swBtn}`;
   } else {
     const tipo=p.tipo;
-    badge.innerHTML=`<span class="dash-badge ${tipo==='corporativa'?'badge-corp':'badge-marca'}">${tipo==='corporativa'?'Empresa corporativa':'Marca'}</span>`;
+    badge.innerHTML=`<span class="dash-badge" style="background:var(--green);color:var(--black);font-weight:800">Modo marca${tipo==='corporativa'?' · empresa':''}</span>${swBtn}`;
   }
   // Identidad visual lila para creadores, verde lima para marcas
   document.body.classList.toggle('t-creator', userType==='creator');

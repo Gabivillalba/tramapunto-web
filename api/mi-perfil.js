@@ -368,16 +368,21 @@ export default async function handler(req, res) {
   }
 
   try {
+    const como = String((req.query && req.query.como) || '').toLowerCase();
     const cre = await sbGet(`creators?email=ilike.${enc}&limit=1&select=*`);
     const mar = await sbGet(`marcas?email=ilike.${enc}&limit=1&select=*`);
     const hasC = cre && cre[0], hasM = mar && mar[0];
-    // El rol elegido en el registro (raw_user_meta_data.rol) manda, si existe la
-    // tabla correspondiente. Sin rol (cuentas viejas) → creator primero (compat).
+    // Prioridad: override explícito del switch de modo (?como=) > rol del registro
+    // (metadata.rol) > creator primero (compat para cuentas viejas sin rol).
     let pick = null;
-    if (rol === 'marca' && hasM) pick = 'marca';
+    if (como === 'marca' && hasM) pick = 'marca';
+    else if (como === 'creator' && hasC) pick = 'creator';
+    else if (rol === 'marca' && hasM) pick = 'marca';
     else if (rol === 'creator' && hasC) pick = 'creator';
     else if (hasC) pick = 'creator';
     else if (hasM) pick = 'marca';
+    // Si el mismo email tiene perfil en la otra tabla, avisamos para el switch de modo.
+    const otro = (pick === 'creator' && hasM) ? 'marca' : (pick === 'marca' && hasC) ? 'creator' : null;
 
     if (pick === 'creator') {
       const prof = cre[0];
@@ -385,9 +390,9 @@ export default async function handler(req, res) {
       delete prof.mp_access_token;
       delete prof.mp_refresh_token;
       delete prof.mp_oauth_state;
-      return res.status(200).json({ type: 'creator', profile: prof });
+      return res.status(200).json({ type: 'creator', profile: prof, otro });
     }
-    if (pick === 'marca') return res.status(200).json({ type: 'marca', profile: mar[0] });
+    if (pick === 'marca') return res.status(200).json({ type: 'marca', profile: mar[0], otro });
 
     return res.status(200).json({ type: null });
   } catch (err) {

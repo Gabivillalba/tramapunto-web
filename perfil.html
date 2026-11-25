@@ -639,8 +639,10 @@ async function doRegister(){
   const btn = document.getElementById('btnReg');
   btn.disabled=true; btn.textContent='Creando cuenta...';
 
-  // Crear usuario en Supabase Auth
-  const {ok, data} = await sbFetch('/auth/v1/signup','POST',{email, password:pass});
+  // Crear usuario en Supabase Auth — guardamos el rol elegido en el metadata
+  // del usuario (raw_user_meta_data.rol) para no tener que inferirlo después
+  // por "en qué tabla quedó la fila". Fuente de verdad del rol a nivel Auth.
+  const {ok, data} = await sbFetch('/auth/v1/signup','POST',{email, password:pass, data:{ rol: tipo }});
   if(!ok){
     err.textContent = data.msg||data.message||'Error al crear la cuenta. El email puede estar en uso.';
     err.classList.add('show');
@@ -807,7 +809,10 @@ function showLogin(){
 }
 
 function showNoPerfil(){
-  const pref = (function(){ try{ return localStorage.getItem('trama_rol_pref'); }catch(_){ return null; } })() || regTipo || 'creator';
+  // Preferimos el rol guardado en el registro (metadata de Auth); si no está
+  // (cuentas viejas), caemos al preferido local o al toggle.
+  const metaRol = (currentUser && currentUser.user_metadata && currentUser.user_metadata.rol) || null;
+  const pref = metaRol || (function(){ try{ return localStorage.getItem('trama_rol_pref'); }catch(_){ return null; } })() || regTipo || 'creator';
   const btnCreator = `<a href="./registro.html" class="np-btn ${pref==='creator'?'np-primary np-purple':'np-ghost'}">Completar perfil creator →</a>`;
   const btnMarca   = `<a href="./marcas.html" class="np-btn ${pref==='marca'?'np-primary np-green':'np-ghost'}">Completar perfil marca →</a>`;
   document.getElementById('vLogin').innerHTML=`

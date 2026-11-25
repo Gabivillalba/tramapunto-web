@@ -249,7 +249,8 @@ h1,h2{letter-spacing:-.01em}
 
       <div class="fg-row">
         <div class="fg"><label>Cupos (cuántos creators)</label><input type="number" id="c-cupos" value="1" min="1" max="50"></div>
-        <div class="fg"><label>Fecha límite de postulación</label><input type="date" id="c-fecha"></div>
+        <div class="fg" id="fg-inicio"><label>Inicio de la búsqueda *</label><input type="date" id="c-fecha-inicio"></div>
+        <div class="fg" id="fg-fin"><label>Fin de la búsqueda *</label><input type="date" id="c-fecha"></div>
       </div>
     </div>
 
@@ -373,6 +374,13 @@ function validate(s){
     bad = markErr('fg-titulo', !document.getElementById('c-titulo').value.trim()) || bad;
     bad = markErr('fg-desc', !document.getElementById('c-desc').value.trim()) || bad;
   }
+  if(s===2){
+    const fi=document.getElementById('c-fecha-inicio').value;
+    const ff=document.getElementById('c-fecha').value;
+    bad = markErr('fg-inicio', !fi) || bad;
+    bad = markErr('fg-fin', !ff) || bad;
+    if(fi && ff && ff < fi){ markErr('fg-fin', true); showToast('El fin de la búsqueda no puede ser anterior al inicio','err'); return false; }
+  }
   if(bad)showToast('Completá los campos requeridos','err');
   return !bad;
 }
@@ -395,7 +403,8 @@ function buildResumen(){
     ['Canje',document.getElementById('c-canje').checked?'Sí':'No'],
     ['Presencial',document.getElementById('c-presencial').checked?(g('c-ubicacion')||'Sí'):'No'],
     ['Cupos',g('c-cupos')||'1'],
-    ['Cierre',g('c-fecha')||'Sin fecha límite'],
+    ['Inicio búsqueda',g('c-fecha-inicio')||'—'],
+    ['Fin búsqueda',g('c-fecha')||'—'],
   ];
   document.getElementById('resumen').innerHTML=rows.map(([k,v])=>
     `<div class="res-row"><span class="res-key">${k}</span><span class="res-val">${v||'—'}</span></div>`
@@ -465,6 +474,7 @@ async function submitCampania(){
       es_canje:document.getElementById('c-canje').checked,
       es_presencial:document.getElementById('c-presencial').checked,
       ubicacion:document.getElementById('c-presencial').checked?(g('c-ubicacion')||null):null,
+      fecha_inicio:g('c-fecha-inicio')||null,
       fecha_limite:g('c-fecha')||null,
       cupos:Number(g('c-cupos'))||1,
       estado:'en_revision',

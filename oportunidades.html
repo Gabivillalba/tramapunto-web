@@ -321,9 +321,10 @@ function renderBanner(estado){
 async function cargarCampanias(){
   // Policy pública: solo devuelve estado='activa'
   campanias=await sbGet('campanias','estado=eq.activa&select=*&order=created_at.desc');
-  // Ocultar las vencidas por si el auto-cierre diario todavía no corrió.
+  // Solo dentro de la ventana de búsqueda: ocultar las vencidas por fin y las
+  // que todavía no abrieron por inicio (fechas nulas = sin restricción).
   const hoy=new Date(Date.now()-3*3600*1000).toISOString().slice(0,10);
-  campanias=(campanias||[]).filter(c=>!(c.fecha_limite && c.fecha_limite < hoy));
+  campanias=(campanias||[]).filter(c=>!(c.fecha_limite && c.fecha_limite < hoy) && !(c.fecha_inicio && c.fecha_inicio > hoy));
   render();
 }
 
@@ -335,6 +336,7 @@ function setFilter(f,btn){
 }
 
 function fmtMoney(n){ return n==null?null:'$'+Number(n).toLocaleString('es-AR') }
+function fmtFecha(f){ if(!f) return '—'; const s=String(f).slice(0,10).split('-'); return s.length===3?`${s[2]}/${s[1]}`:'—'; }
 function presupuesto(c){
   const min=fmtMoney(c.presupuesto_min),max=fmtMoney(c.presupuesto_max);
   if(min&&max) return `${min} – ${max}`;
@@ -411,6 +413,7 @@ function verDetalle(id){
       ${row('Requisitos',c.requisitos)}
       ${c.es_presencial?row('Dónde',c.ubicacion):''}
       <div class="m-row"><span class="m-k">Cupos</span><span class="m-v">${c.cupos||1}</span></div>
+      ${(c.fecha_inicio||c.fecha_limite)?`<div class="m-row"><span class="m-k">Búsqueda</span><span class="m-v">${fmtFecha(c.fecha_inicio)} → ${fmtFecha(c.fecha_limite)}</span></div>`:''}
       <div class="m-row"><span class="m-k">Cierre</span><span class="m-v">${cierreTxt}</span></div>
     </div>
     ${btn}`;
@@ -537,6 +540,9 @@ async function enviarPostulacion(){
 
   // Por si la búsqueda ya cerró entre que abrió el modal y envió.
   const hoy=new Date(Date.now()-3*3600*1000).toISOString().slice(0,10);
+  if(campActual.fecha_inicio && campActual.fecha_inicio > hoy){
+    showToast('La búsqueda de esta campaña todavía no empezó','err'); closeModal(); return;
+  }
   if(campActual.fecha_limite && campActual.fecha_limite < hoy){
     showToast('Esta campaña ya cerró su búsqueda','err'); closeModal(); return;
   }

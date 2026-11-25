@@ -29,6 +29,22 @@ async function emailDelToken(token) {
   } catch { return null; }
 }
 
+// Igual que emailDelToken pero devuelve también el rol guardado en el registro
+// (raw_user_meta_data.rol). Una sola llamada a /auth/v1/user.
+async function userDelToken(token) {
+  if (!token) return { email: null, rol: null };
+  try {
+    const r = await fetch(`${SB_URL}/auth/v1/user`, {
+      headers: { apikey: SB_ANON, Authorization: `Bearer ${token}` },
+    });
+    if (!r.ok) return { email: null, rol: null };
+    const u = await r.json();
+    const email = (u && u.email) ? String(u.email) : null;
+    const rol = (u && u.user_metadata && u.user_metadata.rol) ? String(u.user_metadata.rol) : null;
+    return { email, rol };
+  } catch { return { email: null, rol: null }; }
+}
+
 async function sbGet(path) {
   const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
     headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}` },
@@ -147,7 +163,7 @@ export default async function handler(req, res) {
 
   const auth = req.headers.authorization || '';
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
-  const email = await emailDelToken(token);
+  const { email, rol } = await userDelToken(token);
   if (!email) return res.status(401).json({ error: 'Sesión no válida' });
 
   const enc = encodeURIComponent(email);
@@ -353,7 +369,17 @@ export default async function handler(req, res) {
 
   try {
     const cre = await sbGet(`creators?email=ilike.${enc}&limit=1&select=*`);
-    if (cre && cre[0]) {
+    const mar = await sbGet(`marcas?email=ilike.${enc}&limit=1&select=*`);
+    const hasC = cre && cre[0], hasM = mar && mar[0];
+    // El rol elegido en el registro (raw_user_meta_data.rol) manda, si existe la
+    // tabla correspondiente. Sin rol (cuentas viejas) → creator primero (compat).
+    let pick = null;
+    if (rol === 'marca' && hasM) pick = 'marca';
+    else if (rol === 'creator' && hasC) pick = 'creator';
+    else if (hasC) pick = 'creator';
+    else if (hasM) pick = 'marca';
+
+    if (pick === 'creator') {
       const prof = cre[0];
       // Nunca mandar los tokens de MercadoPago al navegador (solo si está conectado)
       delete prof.mp_access_token;
@@ -361,9 +387,7 @@ export default async function handler(req, res) {
       delete prof.mp_oauth_state;
       return res.status(200).json({ type: 'creator', profile: prof });
     }
-
-    const mar = await sbGet(`marcas?email=ilike.${enc}&limit=1&select=*`);
-    if (mar && mar[0]) return res.status(200).json({ type: 'marca', profile: mar[0] });
+    if (pick === 'marca') return res.status(200).json({ type: 'marca', profile: mar[0] });
 
     return res.status(200).json({ type: null });
   } catch (err) {

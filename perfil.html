@@ -619,6 +619,7 @@ function setRole(t){
 async function doRegister(){
   const err = document.getElementById('regErr');
   err.classList.remove('show');
+  err.style.color='';
 
   const tipo  = regTipo || 'creator';
   const full  = document.getElementById('r-nombre').value.trim();
@@ -650,7 +651,21 @@ async function doRegister(){
   const token   = data.access_token;
   const refresh = data.refresh_token;
   const authId  = data.user?.id;
-  saveSession(token, refresh);
+
+  // Supabase puede devolver 200 SIN sesión: (a) el email ya tenía cuenta
+  // (re-signup "ofuscado": identities vacío) o (b) con confirmación de email
+  // activada. Antes seguíamos igual y el insert salía con "Bearer undefined"
+  // → 401 → cuenta huérfana + el cartel "no pudimos guardar el perfil".
+  const uObj = data.user || data;               // con sesión: {user,...}; sin sesión: user plano
+  const emailYaExiste = !token && uObj && Array.isArray(uObj.identities) && uObj.identities.length===0;
+  if(emailYaExiste){
+    err.textContent='Ese email ya tiene una cuenta. Iniciá sesión desde "Ingresar" (o usá "¿Olvidaste tu contraseña?").';
+    err.classList.add('show');
+    btn.disabled=false; btn.textContent='Crear cuenta →';
+    return;
+  }
+
+  if(token) saveSession(token, refresh);
 
   // Insertar perfil en la tabla correspondiente — verificando que no falle
   // (si el auth se crea pero la fila no, queda una cuenta huérfana que luego
@@ -661,27 +676,42 @@ async function doRegister(){
   const tabla  = tipo==='creator' ? 'creators' : 'marcas';
   const body   = tipo==='creator' ? perfil : {...perfil, tipo:'fisica'};
 
-  let insOk=false;
+  // Si el signup no devolvió sesión, insertamos con la anon key: la RLS permite
+  // el alta (marcas_insert / creators_insert_registro) y así nunca va "Bearer undefined".
+  const authz = token || SB_ANON;
+
+  let insOk=false, insStatus=0;
   try{
     const ri = await fetch(`${SB_URL}/rest/v1/${tabla}`,{
       method:'POST',
-      headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      headers:{'apikey':SB_ANON,'Authorization':`Bearer ${authz}`,'Content-Type':'application/json','Prefer':'return=minimal'},
       body: JSON.stringify(body)
     });
-    insOk = ri.ok;
-    if(!insOk) console.warn('insert perfil fallo', ri.status, await ri.text().catch(()=>''));
+    insOk = ri.ok; insStatus = ri.status;
+    if(!insOk) console.warn('insert perfil fallo', insStatus, await ri.text().catch(()=>''));
   }catch(e){ console.warn('insert perfil error', e); }
 
   if(!insOk){
-    err.textContent='Tu cuenta se creó pero no pudimos guardar el perfil. Reintentá en unos segundos.';
+    err.textContent = insStatus===409
+      ? 'Ya hay un perfil con ese email. Probá iniciar sesión desde "Ingresar".'
+      : 'Tu cuenta se creó pero no pudimos guardar el perfil. Reintentá en unos segundos.';
     err.classList.add('show');
     btn.disabled=false; btn.textContent='Crear cuenta →';
     return;
   }
 
   localStorage.setItem(tipo==='creator'?'trama_creator':'trama_marca', JSON.stringify({nombre, email}));
-  currentUser = data.user;
-  await loadProfile(token, tipo);
+  currentUser = data.user || data;
+  if(token){
+    await loadProfile(token, tipo);
+  }else{
+    // Sin sesión (confirmación de email pendiente): el perfil quedó guardado;
+    // pedimos iniciar sesión en vez de romper loadProfile con token nulo.
+    err.style.color='#16a34a';
+    err.textContent='¡Listo! Tu cuenta quedó creada. Iniciá sesión desde "Ingresar" para entrar.';
+    err.classList.add('show');
+    btn.disabled=false; btn.textContent='Crear cuenta →';
+  }
 }
 
 // ── LOGIN ──
